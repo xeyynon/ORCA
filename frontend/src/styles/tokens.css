@@ -8,7 +8,9 @@
  * Measured ratios live in contrast.md-style comments below (see scripts/contrast.mjs).
  */
 :root,
-:root[data-theme="dark"] {
+:root[data-theme="dark"],
+/* the sign-in page sits on an always-dark scene, so it stays dark in the light theme too */
+.login-view {
   color-scheme: dark;
 
   /* surfaces */
