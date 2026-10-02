@@ -47,3 +47,38 @@ export function classifyRegime(perigeeAltKm: number, apogeeAltKm: number, e: num
   if (apogeeAltKm < 2000) return 'LEO'
   return 'MEO'
 }
+
+// ---- classes used to colour charts and the globe -------------------------------------------------
+
+export type InclinationClassId = 'equatorial' | 'low' | 'mid' | 'polar' | 'retrograde'
+
+export interface InclinationClass { id: InclinationClassId; label: string; /** exclusive upper bound, degrees */ below: number }
+
+/** Ordered bands. Labels name the typical occupants so the colours mean something. */
+export const INCLINATION_CLASSES: readonly InclinationClass[] = [
+  { id: 'equatorial', label: 'Equatorial (<10°, GEO)', below: 10 },
+  { id: 'low', label: 'Low (10–45°)', below: 45 },
+  { id: 'mid', label: 'Mid (45–65°, ISS, Starlink)', below: 65 },
+  { id: 'polar', label: 'Polar (65–90°)', below: 90 },
+  { id: 'retrograde', label: 'Retrograde (>90°, sun-synchronous)', below: Infinity },
+]
+
+export function inclinationClass(deg: number): InclinationClassId {
+  for (const c of INCLINATION_CLASSES) if (deg < c.below) return c.id
+  return 'retrograde'
+}
+
+export type AltitudeBand = 'LEO' | 'MEO' | 'GEO' | 'BEYOND'
+export const ALTITUDE_BANDS: readonly AltitudeBand[] = ['LEO', 'MEO', 'GEO', 'BEYOND']
+const GEO_ALT_KM = 35786
+
+/**
+ * Band by CURRENT altitude only (it ignores eccentricity), which is all a position snapshot carries.
+ * The catalog tables classify by perigee/apogee instead; the globe legend says "by current altitude".
+ */
+export function altitudeBand(altKm: number): AltitudeBand {
+  if (altKm < 2000) return 'LEO'
+  if (altKm < GEO_ALT_KM - 500) return 'MEO'
+  if (altKm <= GEO_ALT_KM + 500) return 'GEO'
+  return 'BEYOND'
+}

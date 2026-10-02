@@ -1,6 +1,6 @@
 import './Icon.css'
 
-export type IconName = 'sun' | 'moon' | 'keyboard' | 'search' | 'close' | 'info' | 'download' | 'globe' | 'refresh' | 'arrow-left' | 'play' | 'pause'
+export type IconName = 'sun' | 'moon' | 'keyboard' | 'search' | 'close' | 'info' | 'download' | 'globe' | 'refresh' | 'arrow-left' | 'play' | 'pause' | 'logout'
 
 // 16x16 stroke icons. Single-path or small-group definitions keep this file readable.
 const PATHS: Record<IconName, string> = {
@@ -16,6 +16,7 @@ const PATHS: Record<IconName, string> = {
   'arrow-left': 'M13 8H3M7 4 3 8l4 4',
   play: 'M4.5 3v10l8-5Z',
   pause: 'M5 3v10M11 3v10',
+  logout: 'M6.5 2.5h-3v11h3M10 5l3 3-3 3M13 8H6',
 }
 
 type Props = { name: IconName; size?: number }

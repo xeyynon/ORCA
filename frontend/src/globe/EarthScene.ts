@@ -1,6 +1,9 @@
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
-import { readToken } from '@/lib/tokens'
+import { readColorRef, readToken } from '@/lib/tokens'
+import { ALTITUDE_BAND_COLOR } from '@/lib/chartColors'
+import { ALTITUDE_BANDS, altitudeBand } from '@/lib/orbit'
+import type { AltitudeBand } from '@/lib/orbit'
 import {
   EARTH_RADIUS_KM, EARTH_ROTATION_RAD_S, SCENE_UNIT_KM,
   eciToScene, extrapolate, nearestScreenPoint, occludedBySphere,
@@ -58,6 +61,9 @@ export class EarthScene {
   private screenPts: ScreenPoint[] = []
   private textureToken = 0
   private downAt: { x: number; y: number } | null = null
+  private readonly bandColors = new Map<AltitudeBand, THREE.Color>()
+  private colors: Float32Array | null = null
+  private colorsDirty = false
 
   constructor(private readonly container: HTMLElement, private readonly cb: SceneCallbacks) {
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
@@ -86,7 +92,8 @@ export class EarthScene {
 
     this.points = new THREE.Points(
       new THREE.BufferGeometry(),
-      new THREE.PointsMaterial({ size: 3, sizeAttenuation: false, color: 0xcbd5e1 }),
+      // vertexColors: each object is coloured by its altitude band (see rebuildColors)
+      new THREE.PointsMaterial({ size: 3.5, sizeAttenuation: false, vertexColors: true }),
     )
     this.points.frustumCulled = false
     this.scene.add(this.points)
@@ -113,7 +120,7 @@ export class EarthScene {
 
   // ---- public interface -------------------------------------------------------------------
 
-  setSnapshot(s: Snapshot): void { this.snapshot = s }
+  setSnapshot(s: Snapshot): void { this.snapshot = s; this.rebuildColors() }
 
   setSelection(ids: readonly string[]): void { this.selectedIds = [...ids] }
 
@@ -126,9 +133,10 @@ export class EarthScene {
 
   /** Re-read every colour token. Called on theme change; rebuilds the Earth texture for the new ocean/land colours. */
   setTheme(): void {
-    const obj = readToken('--globe-object', '#cbd5e1')
-    const accent = readToken('--accent', '#7aa2f7')
-    ;(this.points.material as THREE.PointsMaterial).color.set(obj)
+    // Selection is the theme's primary text colour (white on dark): an accent blue would blend into the LEO band colour.
+    const accent = readToken('--text-primary', '#ffffff')
+    for (const band of ALTITUDE_BANDS) this.bandColors.set(band, new THREE.Color(readColorRef(ALTITUDE_BAND_COLOR[band], '#cbd5e1')))
+    this.rebuildColors()
     ;(this.selectedPoints.material as THREE.PointsMaterial).color.set(accent)
     ;(this.graticule.material as THREE.LineBasicMaterial).color.set(readToken('--globe-grid', '#2a3442'))
     this.rebuildOrbitLines()
@@ -220,6 +228,21 @@ export class EarthScene {
     }
   }
 
+  /** Per-object colour by altitude band at the snapshot time. Altitude is all a position snapshot carries, so eccentricity is ignored. */
+  private rebuildColors(): void {
+    const s = this.snapshot
+    if (!s) return
+    const out = new Float32Array(s.objects.length * 3)
+    s.objects.forEach((o, i) => {
+      const c = this.bandColors.get(altitudeBand(Math.hypot(o.r[0], o.r[1], o.r[2]) - EARTH_RADIUS_KM))
+      out[i * 3] = c?.r ?? 0.8
+      out[i * 3 + 1] = c?.g ?? 0.8
+      out[i * 3 + 2] = c?.b ?? 0.8
+    })
+    this.colors = out
+    this.colorsDirty = true
+  }
+
   private dt(): number {
     const s = this.snapshot
     if (!s || !s.live) return 0
@@ -293,6 +316,10 @@ export class EarthScene {
     const g = this.points.geometry
     g.setAttribute('position', new THREE.BufferAttribute(all, 3))
     g.attributes.position.needsUpdate = true
+    if (this.colorsDirty && this.colors && this.colors.length === n * 3) {
+      g.setAttribute('color', new THREE.BufferAttribute(this.colors, 3))
+      this.colorsDirty = false
+    }
     const sg = this.selectedPoints.geometry
     sg.setAttribute('position', new THREE.Float32BufferAttribute(sel, 3))
     sg.attributes.position.needsUpdate = true

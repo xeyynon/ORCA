@@ -1,8 +1,8 @@
 # ORCA frontend
 
-React + TypeScript + Vite + three.js. It replaces the Streamlit dashboard (`dashboard.py`, still in the repo) and talks to the same FastAPI backend.
+React + TypeScript + Vite + three.js. It is the only front end (the Streamlit dashboard was removed) and talks to the FastAPI backend.
 
-Read [../rules.md](../rules.md) before adding UI: every piece of the interface is its own component, from atom to view.
+Read [../MD/rules.md](../MD/rules.md) before adding UI: every piece of the interface is its own component, from atom to view.
 
 ## Run
 
@@ -48,6 +48,6 @@ src/
 ## What the UI is honest about
 
 - TLE age is shown wherever a position or object is: old element sets propagate poorly.
-- Positions come from `orbit_mech_engine`'s simplified Kepler + drag propagator, not full SGP4. The label is read from the API response.
-- The conjunction search window starts at the first object's TLE epoch, not at the current time. With old TLEs the results can all be in the past, and the UI says so.
+- The globe and positions use the `sgp4` package (the label is read from the API response). The conjunction search still uses `orbit_mech_engine`'s simpler propagator, which drifts from SGP4 by hundreds of km within a day (see MD/DECISIONS.md), so miss distances beyond the first day are not reliable.
+- The conjunction search starts at the current time. An event whose closest approach is already behind us (up to ~6 h before now is normal, from TCA refinement) is flagged, because it is not a forecast.
 - Pc uses an assumed covariance. It ranks events; it is not an operational collision probability.

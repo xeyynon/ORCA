@@ -3,13 +3,13 @@ import { ApiError } from '@/api/client'
 import { getHealth, postUpdateTles } from '@/api/endpoints'
 import { UPDATE_GIVE_UP_MS, UPDATE_POLL_MS } from '@/lib/updatePolicy'
 
-export type UpdatePhase = 'idle' | 'starting' | 'waiting' | 'changed' | 'unchanged' | 'failed'
+export type UpdatePhase = 'idle' | 'starting' | 'waiting' | 'changed' | 'unchanged' | 'refused' | 'failed'
 
 /**
  * POST /api/update-tles returns immediately ("update started"); ingestion continues in a server
  * background task with no completion event. So: start it, then poll /health for the count or
- * last_update to move. If neither moves we say so honestly: the API cannot tell us whether
- * Celestrak rate-limited us (403 -> silently empty), so "unchanged" is all we can claim.
+ * last_update to move. The API also records the outcome of each Celestrak fetch (health.last_fetch), so a
+ * refused or failed fetch is reported as such ("refused"). "unchanged" is left for when nothing at all moved.
  */
 export function useCatalogUpdate() {
   const [phase, setPhase] = useState<UpdatePhase>('idle')
@@ -33,6 +33,8 @@ export function useCatalogUpdate() {
         if (!alive.current) return
         try {
           const h = await getHealth()
+          const fetch = h.database.last_fetch
+          if (fetch && fetch.status !== 'ok' && fetch.at !== h0.database.last_fetch?.at) { setError(fetch.detail); setAfter(h.database.tles_count); setPhase('refused'); return }
           const moved = h.database.tles_count !== h0.database.tles_count || h.database.last_update !== h0.database.last_update
           if (moved) { setAfter(h.database.tles_count); setPhase('changed'); return }
         } catch { /* a missed poll is not a verdict; keep waiting until the deadline */ }

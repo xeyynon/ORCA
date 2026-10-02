@@ -13,8 +13,16 @@ export const getTles = (limit: number, o: Opt = {}) =>
 
 export const getStatistics = (o: Opt = {}) => apiFetch<StatisticsResponse>('/api/statistics', o)
 
-export const getPositions = (limit: number, hoursOffset: number, o: Opt = {}) =>
-  apiFetch<PositionsResponse>(`/api/positions?limit=${limit}&hours_offset=${hoursOffset}`, o)
+/** `ids` are always included, even when they fall outside the first `limit` rows. */
+export const getPositions = (limit: number, hoursOffset: number, ids: readonly string[] = [], o: Opt = {}) =>
+  apiFetch<PositionsResponse>(
+    `/api/positions?limit=${limit}&hours_offset=${hoursOffset}${ids.length ? `&ids=${ids.map(encodeURIComponent).join(',')}` : ''}`, o)
+
+/** Search the WHOLE stored catalog by NORAD id or name (the loaded subset is only the first 5,000). */
+export const searchTles = (q: string, limit = 20, o: Opt = {}) =>
+  apiFetch<TleRecord[]>(`/api/search?q=${encodeURIComponent(q)}&limit=${limit}`, o)
+
+export const getTle = (id: string, o: Opt = {}) => apiFetch<TleRecord>(`/api/tle/${encodeURIComponent(id)}`, o)
 
 export const getOrbitPath = (id: string, hoursOffset: number, o: Opt = {}) =>
   apiFetch<OrbitPathResponse>(`/api/orbit-path/${encodeURIComponent(id)}?hours_offset=${hoursOffset}`, o)

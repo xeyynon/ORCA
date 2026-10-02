@@ -60,6 +60,18 @@
   --chart-3: #5fa8a0;
   --chart-grid: #232b38;
 
+  /* categorical palette for chart categories (regimes, inclination classes, constellations).
+     Independent of the risk/status colours; every category is also named in a legend. */
+  --cat-1: #4ea8ff;
+  --cat-2: #a78bfa;
+  --cat-3: #f472b6;
+  --cat-4: #22d3ee;
+  --cat-5: #fb923c;
+  /* sequential ramp for density (heatmap): low -> mid -> high, dark to bright on the dark canvas */
+  --heat-0: #312e81;
+  --heat-1: #c026d3;
+  --heat-2: #fde047;
+
   /* globe */
   --globe-ocean: #0a0e14;
   --globe-land: #3a4350;
@@ -68,6 +80,10 @@
   --globe-object: #cbd5e1;
 
   /* focus + scrim */
+  /* The logo is transparent with silver lettering, made for dark surfaces. On dark it sits directly; on light it sits on a dark chip. */
+  --logo-backdrop: transparent;
+  --logo-pad: 0;
+
   --focus-ring: #9db9fa;
   --scrim: rgba(3, 6, 10, 0.62);
   --shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
@@ -118,11 +134,24 @@
   --chart-3: #3f8a82;
   --chart-grid: #e1e7ee;
 
+  --cat-1: #2563eb;
+  --cat-2: #7c3aed;
+  --cat-3: #db2777;
+  --cat-4: #0891b2;
+  --cat-5: #ea580c;
+  /* light canvas: low density is pale, high density is deep */
+  --heat-0: #c7d2fe;
+  --heat-1: #d946ef;
+  --heat-2: #7e22ce;
+
   --globe-ocean: #c9d6e4;
   --globe-land: #8fa0b3;
   --globe-grid: #b0bfd0;
   --globe-orbit: #3b5bdb;
   --globe-object: #1e293b;
+
+  --logo-backdrop: #070a0e;
+  --logo-pad: 4px 10px;
 
   --focus-ring: #3b5bdb;
   --scrim: rgba(15, 23, 42, 0.35);

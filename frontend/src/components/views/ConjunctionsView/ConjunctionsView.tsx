@@ -15,8 +15,10 @@ import { Icon } from '../../atoms/Icon/Icon'
 import { Callout } from '../../molecules/Callout/Callout'
 import { EmptyState } from '../../molecules/EmptyState/EmptyState'
 import { SectionHeader } from '../../molecules/SectionHeader/SectionHeader'
+import { ChartCard } from '../../organisms/ChartCard/ChartCard'
 import { ConjunctionControls } from '../../organisms/ConjunctionControls/ConjunctionControls'
 import { ConjunctionTable } from '../../organisms/ConjunctionTable/ConjunctionTable'
+import { EventTimeline } from '../../organisms/EventTimeline/EventTimeline'
 import { JobProgress } from '../../organisms/JobProgress/JobProgress'
 import { PageLayout } from '../../organisms/PageLayout/PageLayout'
 import { PairCard } from '../../organisms/PairCard/PairCard'
@@ -72,12 +74,16 @@ export function ConjunctionsView({ catalogSize, now, onShowOnGlobe }: Props) {
     results = (
       <>
         {pastCount > 0 ? (
-          <Callout tone="warn" title={pastCount === search.events.length ? 'Every event below is in the past' : `${pastCount} of ${search.events.length} events are in the past`}>
-            The API starts its search window at the first object's TLE epoch, not at the current time, so with old TLEs a "{search.query?.horizonDays}-day horizon" can lie
-            entirely behind us. These are not forecasts. Refresh the catalog on the Data view for a window that reaches into the future.
+          <Callout tone="warn" title={pastCount === search.events.length ? 'Every event below is already in the past' : `${pastCount} of ${search.events.length} events are already in the past`}>
+            A closest approach before now is not a forecast. A few hours before now is normal near the start of the window, because each
+            time of closest approach is refined up to 6 h around its search step. If they are days old, the search ran on an older
+            API that started from the TLE epoch instead of the current time: restart the API.
           </Callout>
         ) : null}
         <RiskSummaryBar counts={counts} />
+        <ChartCard title="When, and how risky" note="Time on x, probability of collision on a log y axis, colour by risk tier. The dashed line is now; hover a dot for the pair.">
+          <EventTimeline events={search.events} now={now} />
+        </ChartCard>
         <div className="conj-view__bar">
           <span className="conj-view__meta">
             {integer(search.events.length)} events · {search.query?.horizonDays} d horizon · {search.query?.stepHours} h step · run {search.finishedAt ? formatUtc(search.finishedAt.toISOString()) : '—'}

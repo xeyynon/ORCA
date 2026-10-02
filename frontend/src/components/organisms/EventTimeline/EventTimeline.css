@@ -1,0 +1,15 @@
+.timeline__svg { display: block; width: 100%; height: auto; }
+.timeline__plot { fill: var(--bg-input); stroke: var(--border-strong); stroke-width: 1; }
+.timeline__grid { stroke: var(--chart-grid); stroke-width: 1; }
+.timeline__tick { fill: var(--text-tertiary); font: 10px var(--font-mono); }
+.timeline__unit { fill: var(--text-tertiary); font: 10px var(--font-ui); }
+.timeline__now { stroke: var(--text-secondary); stroke-width: 1; stroke-dasharray: 4 3; }
+.timeline__now-label { fill: var(--text-secondary); font: 10px var(--font-ui); }
+.timeline__dot { stroke: var(--bg-input); stroke-width: 1; fill-opacity: 0.9; }
+.timeline__dot:hover { stroke: var(--text-primary); stroke-width: 1.5; }
+.timeline__dot--critical   { fill: var(--risk-critical); }
+.timeline__dot--high       { fill: var(--risk-high); }
+.timeline__dot--medium     { fill: var(--risk-medium); }
+.timeline__dot--low        { fill: var(--risk-low); }
+.timeline__dot--negligible { fill: var(--risk-negligible); }
+.timeline__note { margin-top: var(--gap-2); color: var(--text-tertiary); font-size: 11px; }
