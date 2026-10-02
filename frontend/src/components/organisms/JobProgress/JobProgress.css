@@ -1,0 +1,4 @@
+.job-progress { display: flex; align-items: center; gap: var(--gap-3); padding: var(--gap-3) var(--gap-4); border: 1px solid var(--border-strong); border-radius: var(--radius); background: var(--bg-card); }
+.job-progress__text { flex: 1; min-width: 0; }
+.job-progress__title { font-weight: 600; }
+.job-progress__detail { color: var(--text-tertiary); font-size: 12px; }

@@ -1,0 +1,2 @@
+.fact-row { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.fact-row__value { color: var(--text-primary); overflow-wrap: anywhere; }

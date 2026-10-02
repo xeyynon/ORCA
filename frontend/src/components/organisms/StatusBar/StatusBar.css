@@ -1,0 +1,12 @@
+.statusbar {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-5);
+  height: var(--statusbar-h);
+  padding: 0 var(--gap-4);
+  overflow-x: auto;
+  white-space: nowrap;
+  background: var(--bg-panel);
+  border-top: 1px solid var(--border);
+}
+.statusbar::-webkit-scrollbar { display: none; }

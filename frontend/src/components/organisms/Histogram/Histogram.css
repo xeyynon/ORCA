@@ -1,0 +1,6 @@
+.histogram { display: block; width: 100%; height: auto; }
+.histogram__axis { stroke: var(--border-strong); stroke-width: 1; }
+.histogram__bar { fill: var(--chart-1); }
+.histogram__bar:hover { fill: var(--accent); }
+.histogram__tick { fill: var(--text-tertiary); font: 10px var(--font-mono); }
+.histogram__unit { fill: var(--text-tertiary); font: 10px var(--font-ui); }

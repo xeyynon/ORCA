@@ -1,0 +1,14 @@
+.modal__scrim { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; padding: 16px; background: var(--scrim); }
+.modal {
+  width: min(520px, 100%);
+  max-height: 86vh;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  background: var(--bg-panel);
+  box-shadow: var(--shadow);
+}
+.modal__head { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px 10px 16px; border-bottom: 1px solid var(--border); }
+.modal__title { margin: 0; font-size: 14px; font-weight: 600; }
+.modal__body { padding: 14px 16px 16px; overflow-y: auto; }

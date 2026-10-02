@@ -1,0 +1,8 @@
+.spinner {
+  display: inline-block;
+  border: 2px solid var(--border-strong);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spinner-turn 0.8s linear infinite;
+}
+@keyframes spinner-turn { to { transform: rotate(360deg); } }

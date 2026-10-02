@@ -1,0 +1,6 @@
+.scatter { display: block; width: 100%; height: auto; }
+.scatter__axis { stroke: var(--border-strong); stroke-width: 1; }
+.scatter__pt { fill: var(--chart-1); fill-opacity: 0.55; }
+.scatter__pt:hover { fill: var(--accent); fill-opacity: 1; }
+.scatter__tick { fill: var(--text-tertiary); font: 10px var(--font-mono); }
+.scatter__unit { fill: var(--text-tertiary); font: 10px var(--font-ui); }

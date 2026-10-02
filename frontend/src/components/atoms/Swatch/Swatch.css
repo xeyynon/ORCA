@@ -1,0 +1,2 @@
+.swatch { display: inline-block; flex: none; width: 10px; height: 10px; border-radius: 2px; }
+.swatch--circle { border-radius: 50%; }

@@ -1,0 +1,5 @@
+.object-card { display: flex; flex-direction: column; gap: var(--gap-3); padding: var(--gap-4); border: 1px solid var(--border-strong); border-radius: var(--radius); background: var(--bg-panel); }
+.object-card__head { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--gap-3); }
+.object-card__title { margin: 0 0 2px; font-size: 15px; font-weight: 600; }
+.object-card__badges { display: flex; flex-wrap: wrap; gap: var(--gap-2); }
+.object-card__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: var(--gap-3) var(--gap-4); }
