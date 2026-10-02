@@ -32,10 +32,11 @@ export function DebrisBackdrop() {
     const ctx = canvas?.getContext('2d')
     if (!canvas || !ctx) return
     const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    const dpr = Math.min(window.devicePixelRatio || 1, 2)
+    const dpr = Math.min(window.devicePixelRatio || 1, 1.5)
     let w = 0, h = 0, k = 1, raf = 0, last = performance.now(), clock = still ? 4.2 : 0
     let ex = 0, ey = 0, er = 0, ix = 0, iy = 0
     let bg: HTMLCanvasElement | null = null
+    let lights: HTMLCanvasElement | null = null
     let cities: City[] = []
     let drift: Piece[] = []
     let burst: Piece[] = []
@@ -77,6 +78,25 @@ export function DebrisBackdrop() {
       g.shadowColor = '#6aa8ff'; g.shadowBlur = 10
       g.beginPath(); g.ellipse(w * 0.5, h * 0.52, w * 0.62, h * 0.52, -0.13, Math.PI * 1.05, Math.PI * 1.95); g.stroke()
       g.shadowBlur = 0
+      // vignette keeps the card area readable; baked in so it costs nothing per frame
+      const v = g.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.3, w / 2, h / 2, Math.max(w, h) * 0.75)
+      v.addColorStop(0, 'rgba(3,6,12,0)'); v.addColorStop(1, 'rgba(3,6,12,0.55)')
+      g.fillStyle = v; g.fillRect(0, 0, w, h)
+    }
+
+    /** City lights are drawn once; each frame only sways this layer a few degrees about the planet's centre. */
+    const buildLights = () => {
+      lights = document.createElement('canvas')
+      lights.width = w * dpr; lights.height = h * dpr
+      const g = lights.getContext('2d')!
+      g.setTransform(dpr, 0, 0, dpr, 0, 0)
+      g.fillStyle = '#ffb45a'
+      for (const c of cities) {
+        const x = ex + Math.cos(c.a) * c.r, y = ey + Math.sin(c.a) * c.r
+        if (x < -4 || x > w + 4 || y < 0 || y > h) continue
+        g.globalAlpha = c.o
+        g.fillRect(x, y, c.s, c.s)
+      }
     }
 
     const makeDebris = () => {
@@ -98,13 +118,12 @@ export function DebrisBackdrop() {
         const ca = -Math.PI / 2 + rand(-0.55, 0.55), cr = er * rand(0.8, 0.97), n = Math.floor(rand(14, 46))
         for (let i = 0; i < n; i++) cities.push({ a: ca + rand(-0.03, 0.03), r: cr + rand(-0.03, 0.03) * er, s: rand(1, 2.4) * k, o: rand(0.6, 1) })
       }
-      buildStatic(); makeDebris()
+      buildStatic(); buildLights(); makeDebris()
     }
 
     const poly = (p: Piece, fill: string, edge: string) => {
       ctx.save()
       ctx.translate(p.x, p.y); ctx.rotate(p.rot)
-      if (p.blur) ctx.filter = `blur(${p.blur}px)`
       ctx.beginPath()
       p.pts.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)))
       ctx.closePath()
@@ -142,7 +161,7 @@ export function DebrisBackdrop() {
         const a = rand(0, TAU), v = rand(30, 190) * k, size = rand(5, 22) * k
         return { x: ix, y: iy, vx: Math.cos(a) * v, vy: Math.sin(a) * v, rot: rand(0, TAU), spin: rand(-3, 3), pts: shard(size), size, blur: 0, alpha: 1, drag: rand(0.25, 0.5), born: clock }
       })
-      sparks = Array.from({ length: 170 }, () => {
+      sparks = Array.from({ length: 110 }, () => {
         const a = rand(0, TAU), v = rand(20, 420) * k
         return { x: ix, y: iy, vx: Math.cos(a) * v, vy: Math.sin(a) * v, life: 0, max: rand(0.8, 2.8), size: rand(0.6, 2.2) * k }
       })
@@ -159,17 +178,11 @@ export function DebrisBackdrop() {
       ctx.globalAlpha = 1
       ctx.drawImage(bg!, 0, 0, w, h)
 
-      // city lights turn slowly with the planet
-      const turn = clock * 0.006
-      ctx.fillStyle = '#ffb45a'
-      for (const c of cities) {
-        const a = c.a + turn
-        const x = ex + Math.cos(a) * c.r, y = ey + Math.sin(a) * c.r
-        if (x < -4 || x > w + 4 || y < 0 || y > h) continue
-        ctx.globalAlpha = c.o * (0.6 + 0.4 * Math.sin(clock * 2 + c.a * 90))
-        ctx.fillRect(x, y, c.s, c.s)
-      }
-      ctx.globalAlpha = 1
+      // city lights sway slowly with the planet
+      ctx.save()
+      ctx.translate(ex, ey); ctx.rotate(0.03 * Math.sin(clock * 0.12)); ctx.translate(-ex, -ey)
+      ctx.drawImage(lights!, 0, 0, w, h)
+      ctx.restore()
 
       // ambient debris, far to near
       for (const p of drift) {
@@ -216,26 +229,23 @@ export function DebrisBackdrop() {
           poly(p, `rgb(${60 + heat * 190},${64 + heat * 80},${72})`, `rgba(255,${190 + heat * 40},${120},${0.5 + heat * 0.5})`)
         }
         ctx.globalCompositeOperation = 'lighter'
-        for (const s of sparks) {
-          s.life += dt
-          const f = 1 - s.life / s.max
-          if (f <= 0) continue
-          const d = Math.exp(-1.4 * dt)
-          s.vx *= d; s.vy *= d
-          s.x += s.vx * dt; s.y += s.vy * dt
-          ctx.globalAlpha = f * fadeOut
-          ctx.strokeStyle = f > 0.55 ? '#ffd9a0' : '#ff8a1f'
-          ctx.lineWidth = s.size
-          ctx.beginPath(); ctx.moveTo(s.x, s.y); ctx.lineTo(s.x - s.vx * 0.045, s.y - s.vy * 0.045); ctx.stroke()
+        ctx.globalAlpha = fadeOut * 0.85
+        ctx.lineWidth = 1.4 * k
+        const drag = Math.exp(-1.4 * dt)
+        for (const s of sparks) { s.life += dt; s.vx *= drag; s.vy *= drag; s.x += s.vx * dt; s.y += s.vy * dt }
+        for (const hot of [true, false]) {
+          ctx.strokeStyle = hot ? '#ffd9a0' : '#ff8a1f'
+          ctx.beginPath()
+          for (const s of sparks) {
+            const f = 1 - s.life / s.max
+            if (f <= 0 || f > 0.55 !== hot) continue
+            ctx.moveTo(s.x, s.y); ctx.lineTo(s.x - s.vx * 0.045, s.y - s.vy * 0.045)
+          }
+          ctx.stroke()
         }
         ctx.globalCompositeOperation = 'source-over'
         ctx.globalAlpha = 1
       }
-
-      // gentle vignette keeps the card area readable
-      const v = ctx.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.3, w / 2, h / 2, Math.max(w, h) * 0.75)
-      v.addColorStop(0, 'rgba(3,6,12,0)'); v.addColorStop(1, 'rgba(3,6,12,0.55)')
-      ctx.fillStyle = v; ctx.fillRect(0, 0, w, h)
 
       if (!still) raf = requestAnimationFrame(frame)
     }
