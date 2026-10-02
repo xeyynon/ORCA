@@ -3,6 +3,7 @@ import type { LoginFailure } from '@/lib/authErrors'
 import { Brand } from '../../molecules/Brand/Brand'
 import { Callout } from '../../molecules/Callout/Callout'
 import { FieldNote } from '../../molecules/FieldNote/FieldNote'
+import { DebrisBackdrop } from '../../organisms/DebrisBackdrop/DebrisBackdrop'
 import { LoginForm } from '../../organisms/LoginForm/LoginForm'
 import './LoginView.css'
 
@@ -21,6 +22,7 @@ type Props = {
 export function LoginView({ configured, notice, busy, failure, onSubmit, corner }: Props) {
   return (
     <main className="login-view">
+      <DebrisBackdrop />
       {corner ? <div className="login-view__corner">{corner}</div> : null}
       <div className="login-view__card">
         <div className="login-view__brand"><Brand size="card" /></div>
