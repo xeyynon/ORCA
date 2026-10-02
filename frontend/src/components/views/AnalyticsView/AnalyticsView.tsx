@@ -96,17 +96,17 @@ export function AnalyticsView({ catalog, stats, totalCount, now }: Props) {
       <SectionHeader
         title="Analytics"
         subtitle={partial
-          ? `Charts cover the ${integer(rows.length)} loaded objects of ${integer(totalCount)} stored (the API returns at most 5,000 per request). The KPIs below are computed by the server over all of them.`
-          : `Distributions over ${integer(rows.length)} stored objects.`}
+          ? `Charts: ${integer(rows.length)} of ${integer(totalCount)} objects (API cap). Figures at the top: all ${integer(totalCount)}.`
+          : `${integer(rows.length)} objects.`}
       />
 
       {hasStats ? (
         <KpiRow
           items={[
-            { label: 'Mean apogee', value: fixed(s.apogee?.mean, 0), unit: 'km', hint: 'server, /api/statistics' },
-            { label: 'Median perigee', value: fixed(s.perigee?.median, 0), unit: 'km', hint: 'server, /api/statistics' },
-            { label: 'Mean period', value: fixed(s.period_hours?.mean, 2), unit: 'h', hint: 'server, /api/statistics' },
-            { label: 'Mean inclination', value: fixed(s.inclination?.mean, 1), unit: '°', hint: 'server, /api/statistics' },
+            { label: 'Mean apogee', value: fixed(s.apogee?.mean, 0), unit: 'km' },
+            { label: 'Median perigee', value: fixed(s.perigee?.median, 0), unit: 'km' },
+            { label: 'Mean period', value: fixed(s.period_hours?.mean, 2), unit: 'h' },
+            { label: 'Mean inclination', value: fixed(s.inclination?.mean, 1), unit: '°' },
           ]}
         />
       ) : stats.status === 'error' ? (

@@ -1,0 +1,13 @@
+.playback { box-sizing: border-box; width: 100%; display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-areas: 'track track' 'buttons tools'; align-items: center; justify-content: stretch; column-gap: var(--gap-2); row-gap: var(--gap-2); padding: var(--gap-2) var(--gap-3); }
+.playback__track { grid-area: track; }
+.playback__buttons { grid-area: buttons; }
+.playback__tools { grid-area: tools; justify-self: end; }
+.playback__buttons, .playback__tools { display: flex; align-items: center; gap: var(--gap-1); }
+.playback__track { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.playback__time { display: flex; align-items: center; justify-content: center; gap: var(--gap-2); font-size: 11px; }
+.playback__slider { position: relative; display: flex; align-items: center; }
+.playback__range { width: 100%; margin: 0; accent-color: var(--accent); }
+.playback__tca { position: absolute; top: -3px; bottom: -3px; width: 2px; margin-left: -1px; border-radius: 1px; background: var(--risk-high); pointer-events: none; }
+.playback__ticks { display: flex; justify-content: space-between; color: var(--text-tertiary); font-size: 10px; line-height: 1; }
+/* only the two ends are labelled: the in-between days were noise */
+.playback__ticks span:not(:first-child):not(:last-child) { display: none; }

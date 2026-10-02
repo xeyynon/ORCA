@@ -38,3 +38,13 @@ export function compact(v: number): string {
 export function days(v: number): string {
   return `${v.toFixed(1)} d`
 }
+
+/** 20.3 -> "20.3° N", -33.9 -> "33.9° S". The sign is never left to the reader to interpret. */
+export function formatLat(deg: number): string {
+  return Number.isFinite(deg) ? `${Math.abs(deg).toFixed(1)}° ${deg < 0 ? 'S' : 'N'}` : NO_DATA
+}
+
+/** 78.6 -> "78.6° E", -122.4 -> "122.4° W". */
+export function formatLon(deg: number): string {
+  return Number.isFinite(deg) ? `${Math.abs(deg).toFixed(1)}° ${deg < 0 ? 'W' : 'E'}` : NO_DATA
+}

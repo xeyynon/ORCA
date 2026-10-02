@@ -1,0 +1,4 @@
+.range-marker { display: flex; flex-direction: column; gap: 6px; }
+.range-marker__head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--gap-3); }
+.range-marker__track { position: relative; height: 6px; border-radius: 3px; background: var(--bg-input); }
+.range-marker__dot { position: absolute; top: 50%; width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 2px var(--bg-card); }
