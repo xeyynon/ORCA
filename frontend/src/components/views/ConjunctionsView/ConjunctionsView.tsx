@@ -27,7 +27,7 @@ import './ConjunctionsView.css'
 
 type Props = { catalogSize: number | null; now: Date; onShowOnGlobe: (ids: string[], event: ConjunctionEvent) => void }
 
-const DEFAULT_QUERY: ConjunctionQuery = { horizonDays: 7, stepHours: 2, limit: 100 }
+const DEFAULT_QUERY: ConjunctionQuery = { horizonDays: 1, stepHours: 2, limit: 100 }
 
 export function ConjunctionsView({ catalogSize, now, onShowOnGlobe }: Props) {
   const [query, setQuery] = useState<ConjunctionQuery>(DEFAULT_QUERY)
