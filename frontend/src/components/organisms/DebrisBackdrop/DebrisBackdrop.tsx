@@ -1,15 +1,28 @@
 import { useEffect, useRef } from 'react'
 import './DebrisBackdrop.css'
 
-type Body = { x: number; y: number; vx: number; vy: number; life: number; max: number; size: number; hot: boolean; tx?: number; ty?: number }
-type Flash = { x: number; y: number; age: number }
-
 const rand = (a: number, b: number) => a + Math.random() * (b - a)
-const token = (name: string, fallback: string) => getComputedStyle(document.documentElement).getPropertyValue(name).trim() || fallback
+const TAU = Math.PI * 2
+
+type Piece = { x: number; y: number; vx: number; vy: number; rot: number; spin: number; pts: [number, number][]; size: number; blur: number; alpha: number; drag: number; born: number }
+type Spark = { x: number; y: number; vx: number; vy: number; life: number; max: number; size: number }
+type City = { a: number; r: number; s: number; o: number }
+
+const LOOP = 11
+const APPROACH = 3.2
+
+function shard(size: number): [number, number][] {
+  const n = Math.floor(rand(4, 7))
+  return Array.from({ length: n }, (_, i) => {
+    const a = (i / n) * TAU + rand(-0.3, 0.3), r = size * rand(0.45, 1)
+    return [Math.cos(a) * r, Math.sin(a) * r * rand(0.5, 1)] as [number, number]
+  })
+}
 
 /**
- * Decorative login backdrop: faint drifting satellites, and every few seconds two objects
- * collide and burst into debris. Purely visual; hidden from assistive tech and still under reduced motion.
+ * Decorative login scene, drawn procedurally: Earth's limb with city lights, a glowing orbit,
+ * tumbling debris and two satellites that collide on a loop. Purely visual; hidden from assistive tech.
+ * It draws its own opaque background, so it looks the same in both themes.
  */
 export function DebrisBackdrop() {
   const ref = useRef<HTMLCanvasElement>(null)
@@ -19,113 +32,217 @@ export function DebrisBackdrop() {
     const ctx = canvas?.getContext('2d')
     if (!canvas || !ctx) return
     const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    let w = 0, h = 0, raf = 0, last = performance.now(), nextHit = 800
     const dpr = Math.min(window.devicePixelRatio || 1, 2)
-    const drifters: Body[] = []
-    const incoming: Body[] = []
-    const debris: Body[] = []
-    const flashes: Flash[] = []
-    let ink = token('--text-primary', '#f2f5f9'), accent = token('--accent', '#7aa2f7'), hot = token('--risk-critical', '#ef4444')
+    let w = 0, h = 0, k = 1, raf = 0, last = performance.now(), clock = still ? 4.2 : 0
+    let ex = 0, ey = 0, er = 0, ix = 0, iy = 0
+    let bg: HTMLCanvasElement | null = null
+    let cities: City[] = []
+    let drift: Piece[] = []
+    let burst: Piece[] = []
+    let sparks: Spark[] = []
+    let exploded = false
 
-    const spawnDrifter = (): Body => {
-      const a = rand(0, Math.PI * 2), s = rand(6, 22)
-      return { x: rand(0, w), y: rand(0, h), vx: Math.cos(a) * s, vy: Math.sin(a) * s, life: 0, max: 0, size: rand(0.6, 1.6), hot: false }
+    const buildStatic = () => {
+      bg = document.createElement('canvas')
+      bg.width = w * dpr; bg.height = h * dpr
+      const g = bg.getContext('2d')!
+      g.setTransform(dpr, 0, 0, dpr, 0, 0)
+      const sky = g.createLinearGradient(0, 0, 0, h)
+      sky.addColorStop(0, '#03060d'); sky.addColorStop(1, '#070d1a')
+      g.fillStyle = sky; g.fillRect(0, 0, w, h)
+      for (let i = 0; i < (w * h) / 2600; i++) {
+        g.globalAlpha = rand(0.15, 0.85)
+        g.fillStyle = Math.random() < 0.12 ? '#bcd2ff' : '#ffffff'
+        g.fillRect(rand(0, w), rand(0, h), rand(0.5, 1.5), rand(0.5, 1.5))
+      }
+      g.globalAlpha = 1
+      // Earth body with a dark night side
+      const body = g.createRadialGradient(ex, ey - er * 0.2, er * 0.2, ex, ey, er)
+      body.addColorStop(0, '#04070d'); body.addColorStop(0.8, '#071120'); body.addColorStop(1, '#10264a')
+      g.fillStyle = body
+      g.beginPath(); g.arc(ex, ey, er, 0, TAU); g.fill()
+      // atmosphere rim
+      for (const [lw, a, c] of [[34, 0.07, '#3b82f6'], [14, 0.16, '#4f9bff'], [4, 0.75, '#9cc8ff'], [1.5, 1, '#e6f1ff']] as const) {
+        g.strokeStyle = c; g.globalAlpha = a; g.lineWidth = lw
+        g.beginPath(); g.arc(ex, ey, er + lw * 0.1, 0, TAU); g.stroke()
+      }
+      g.globalAlpha = 1
+      // soft haze above the limb
+      const haze = g.createRadialGradient(ex, ey, er * 0.9, ex, ey, er * 1.1)
+      haze.addColorStop(0, 'rgba(80,150,255,0)'); haze.addColorStop(0.5, 'rgba(80,150,255,0.2)'); haze.addColorStop(1, 'rgba(80,150,255,0)')
+      g.fillStyle = haze
+      g.beginPath(); g.arc(ex, ey, er * 1.1, 0, TAU); g.fill()
+      // orbit ring
+      g.strokeStyle = 'rgba(140,190,255,0.55)'; g.lineWidth = 1.3
+      g.shadowColor = '#6aa8ff'; g.shadowBlur = 10
+      g.beginPath(); g.ellipse(w * 0.5, h * 0.52, w * 0.62, h * 0.52, -0.13, Math.PI * 1.05, Math.PI * 1.95); g.stroke()
+      g.shadowBlur = 0
     }
+
+    const makeDebris = () => {
+      drift = Array.from({ length: Math.round(Math.min(46, (w * h) / 26000)) }, () => {
+        const z = Math.random()
+        const size = (4 + z * z * 26) * k
+        return { x: rand(0, w), y: rand(0, h), vx: rand(-12, 12) * (0.4 + z), vy: rand(-8, 8) * (0.4 + z), rot: rand(0, TAU), spin: rand(-0.6, 0.6), pts: shard(size), size, blur: z > 0.82 ? (z - 0.8) * 22 : 0, alpha: 0.35 + z * 0.55, drag: 0, born: 0 }
+      })
+    }
+
     const resize = () => {
       w = canvas.clientWidth; h = canvas.clientHeight
       canvas.width = w * dpr; canvas.height = h * dpr
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
-      ink = token('--text-primary', '#f2f5f9'); accent = token('--accent', '#7aa2f7'); hot = token('--risk-critical', '#ef4444')
-      drifters.length = 0
-      for (let i = 0; i < Math.round((w * h) / 9000); i++) drifters.push(spawnDrifter())
+      k = Math.max(0.6, Math.min(w, h) / 900)
+      ex = w * 0.42; ey = h * 1.78; er = h * 1.4
+      ix = w * 0.76; iy = h * 0.36
+      cities = []
+      for (let c = 0; c < 44; c++) {
+        const ca = -Math.PI / 2 + rand(-0.55, 0.55), cr = er * rand(0.8, 0.97), n = Math.floor(rand(14, 46))
+        for (let i = 0; i < n; i++) cities.push({ a: ca + rand(-0.03, 0.03), r: cr + rand(-0.03, 0.03) * er, s: rand(1, 2.4) * k, o: rand(0.6, 1) })
+      }
+      buildStatic(); makeDebris()
     }
 
-    const collide = () => {
-      const x = rand(w * 0.12, w * 0.88), y = rand(h * 0.12, h * 0.88)
-      const a = rand(0, Math.PI * 2), d = Math.max(w, h) * 0.45, speed = rand(120, 170)
-      for (const k of [0, 1]) {
-        const ang = a + k * Math.PI + rand(-0.3, 0.3)
-        const sx = x + Math.cos(ang) * d, sy = y + Math.sin(ang) * d
-        const t = d / speed
-        incoming.push({ x: sx, y: sy, vx: (x - sx) / t, vy: (y - sy) / t, life: 0, max: t, size: 2.2, hot: false, tx: x, ty: y })
-      }
-    }
-    const burst = (x: number, y: number) => {
-      flashes.push({ x, y, age: 0 })
-      for (let i = 0; i < 46; i++) {
-        const ang = rand(0, Math.PI * 2), s = rand(20, 190)
-        debris.push({ x, y, vx: Math.cos(ang) * s, vy: Math.sin(ang) * s, life: 0, max: rand(1.4, 3.2), size: rand(0.6, 2), hot: Math.random() < 0.4 })
-      }
+    const poly = (p: Piece, fill: string, edge: string) => {
+      ctx.save()
+      ctx.translate(p.x, p.y); ctx.rotate(p.rot)
+      if (p.blur) ctx.filter = `blur(${p.blur}px)`
+      ctx.beginPath()
+      p.pts.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)))
+      ctx.closePath()
+      ctx.fillStyle = fill; ctx.fill()
+      ctx.strokeStyle = edge; ctx.lineWidth = 1; ctx.stroke()
+      ctx.restore()
     }
 
-    const dot = (b: Body, color: string, alpha: number, trail = 0) => {
+    const satellite = (x: number, y: number, rot: number, alpha: number) => {
+      const s = k * 1.15
+      ctx.save()
+      ctx.translate(x, y); ctx.rotate(rot); ctx.scale(s, s)
       ctx.globalAlpha = alpha
-      ctx.fillStyle = color
-      if (trail) {
-        ctx.strokeStyle = color
-        ctx.lineWidth = b.size * 0.8
-        ctx.beginPath(); ctx.moveTo(b.x, b.y); ctx.lineTo(b.x - b.vx * trail, b.y - b.vy * trail); ctx.stroke()
+      for (const side of [-1, 1]) {
+        ctx.save(); ctx.scale(side, 1)
+        ctx.fillStyle = '#13244a'; ctx.fillRect(22, -16, 78, 32)
+        ctx.strokeStyle = 'rgba(120,170,255,0.6)'; ctx.lineWidth = 0.8
+        ctx.strokeRect(22, -16, 78, 32)
+        for (let i = 1; i < 6; i++) { ctx.beginPath(); ctx.moveTo(22 + i * 13, -16); ctx.lineTo(22 + i * 13, 16); ctx.stroke() }
+        ctx.beginPath(); ctx.moveTo(22, 0); ctx.lineTo(100, 0); ctx.stroke()
+        ctx.fillStyle = '#7b8594'; ctx.fillRect(14, -2, 10, 4)
+        ctx.restore()
       }
-      ctx.beginPath(); ctx.arc(b.x, b.y, b.size, 0, Math.PI * 2); ctx.fill()
+      const body = ctx.createLinearGradient(-16, -14, 16, 14)
+      body.addColorStop(0, '#d8dde6'); body.addColorStop(0.5, '#8d96a6'); body.addColorStop(1, '#4d5564')
+      ctx.fillStyle = body; ctx.fillRect(-16, -14, 32, 28)
+      ctx.fillStyle = '#c9a24a'; ctx.fillRect(-16, -14, 32, 6)
+      ctx.strokeStyle = 'rgba(255,255,255,0.5)'; ctx.lineWidth = 1; ctx.strokeRect(-16, -14, 32, 28)
+      ctx.restore()
+    }
+
+    const explode = () => {
+      exploded = true
+      burst = Array.from({ length: 22 }, () => {
+        const a = rand(0, TAU), v = rand(30, 190) * k, size = rand(5, 22) * k
+        return { x: ix, y: iy, vx: Math.cos(a) * v, vy: Math.sin(a) * v, rot: rand(0, TAU), spin: rand(-3, 3), pts: shard(size), size, blur: 0, alpha: 1, drag: rand(0.25, 0.5), born: clock }
+      })
+      sparks = Array.from({ length: 170 }, () => {
+        const a = rand(0, TAU), v = rand(20, 420) * k
+        return { x: ix, y: iy, vx: Math.cos(a) * v, vy: Math.sin(a) * v, life: 0, max: rand(0.8, 2.8), size: rand(0.6, 2.2) * k }
+      })
     }
 
     const frame = (now: number) => {
-      const dt = Math.min((now - last) / 1000, 0.05)
+      const dt = still ? 0 : Math.min((now - last) / 1000, 0.05)
       last = now
-      ctx.clearRect(0, 0, w, h)
+      clock += dt
+      const t = clock % LOOP
+      if (t < dt + 0.001 && exploded) { exploded = false; burst = []; sparks = [] }
 
-      for (const b of drifters) {
-        b.x += b.vx * dt; b.y += b.vy * dt
-        if (b.x < -4) b.x = w + 4; else if (b.x > w + 4) b.x = -4
-        if (b.y < -4) b.y = h + 4; else if (b.y > h + 4) b.y = -4
-        dot(b, ink, 0.28)
-      }
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+      ctx.globalAlpha = 1
+      ctx.drawImage(bg!, 0, 0, w, h)
 
-      nextHit -= dt * 1000
-      if (nextHit <= 0) { collide(); nextHit = rand(3200, 5200) }
-
-      for (let i = incoming.length - 1; i >= 0; i--) {
-        const b = incoming[i]
-        b.x += b.vx * dt; b.y += b.vy * dt; b.life += dt
-        dot(b, accent, 0.95, 0.12)
-        if (b.life >= b.max) {
-          incoming.splice(i, 1)
-          // the pair meets once: only the first arrival triggers the burst
-          if (!incoming.some((o) => o.tx === b.tx && o.ty === b.ty)) burst(b.tx ?? b.x, b.ty ?? b.y)
-        }
-      }
-
-      for (let i = debris.length - 1; i >= 0; i--) {
-        const b = debris[i]
-        b.x += b.vx * dt; b.y += b.vy * dt; b.life += dt
-        b.vx *= 1 - 0.6 * dt; b.vy *= 1 - 0.6 * dt
-        const f = 1 - b.life / b.max
-        if (f <= 0) { debris.splice(i, 1); continue }
-        dot(b, b.hot ? hot : accent, f * 0.9, 0.08)
-      }
-
-      for (let i = flashes.length - 1; i >= 0; i--) {
-        const f = flashes[i]
-        f.age += dt
-        const p = f.age / 0.9
-        if (p >= 1) { flashes.splice(i, 1); continue }
-        const r = 8 + p * 90
-        const g = ctx.createRadialGradient(f.x, f.y, 0, f.x, f.y, r)
-        g.addColorStop(0, hot); g.addColorStop(1, 'transparent')
-        ctx.globalAlpha = (1 - p) * 0.55
-        ctx.fillStyle = g
-        ctx.beginPath(); ctx.arc(f.x, f.y, r, 0, Math.PI * 2); ctx.fill()
-        ctx.globalAlpha = (1 - p) * 0.7
-        ctx.strokeStyle = ink; ctx.lineWidth = 1
-        ctx.beginPath(); ctx.arc(f.x, f.y, r * 1.2, 0, Math.PI * 2); ctx.stroke()
+      // city lights turn slowly with the planet
+      const turn = clock * 0.006
+      ctx.fillStyle = '#ffb45a'
+      for (const c of cities) {
+        const a = c.a + turn
+        const x = ex + Math.cos(a) * c.r, y = ey + Math.sin(a) * c.r
+        if (x < -4 || x > w + 4 || y < 0 || y > h) continue
+        ctx.globalAlpha = c.o * (0.6 + 0.4 * Math.sin(clock * 2 + c.a * 90))
+        ctx.fillRect(x, y, c.s, c.s)
       }
       ctx.globalAlpha = 1
+
+      // ambient debris, far to near
+      for (const p of drift) {
+        p.x += p.vx * dt; p.y += p.vy * dt; p.rot += p.spin * dt
+        const m = p.size + 30
+        if (p.x < -m) p.x = w + m; else if (p.x > w + m) p.x = -m
+        if (p.y < -m) p.y = h + m; else if (p.y > h + m) p.y = -m
+        ctx.globalAlpha = p.alpha
+        poly(p, '#2c3340', 'rgba(220,200,170,0.55)')
+      }
+      ctx.globalAlpha = 1
+
+      // the two satellites close on each other, then burst
+      const D = 330 * k
+      if (t < APPROACH) {
+        const e = t / APPROACH
+        const dist = D * (1 - e * e)
+        const fade = Math.min(1, t / 0.8)
+        satellite(ix - dist * 0.86, iy - dist * 0.5, -0.5 + t * 0.1, fade)
+        satellite(ix + dist * 0.9, iy + dist * 0.42, 0.45 - t * 0.12, fade)
+      } else if (!exploded) explode()
+
+      if (exploded) {
+        const since = t - APPROACH
+        const fadeOut = t > LOOP - 2 ? Math.max(0, (LOOP - t) / 2) : 1
+        // blast glow
+        if (since < 2.2) {
+          const f = Math.max(0, 1 - since / 2.2)
+          ctx.globalCompositeOperation = 'lighter'
+          const r = (60 + since * 150) * k
+          const g = ctx.createRadialGradient(ix, iy, 0, ix, iy, r)
+          g.addColorStop(0, `rgba(255,236,190,${0.95 * f})`); g.addColorStop(0.25, `rgba(255,150,40,${0.6 * f})`); g.addColorStop(1, 'rgba(255,90,0,0)')
+          ctx.fillStyle = g
+          ctx.beginPath(); ctx.arc(ix, iy, r, 0, TAU); ctx.fill()
+          ctx.globalCompositeOperation = 'source-over'
+        }
+        for (const p of burst) {
+          const f = Math.exp(-p.drag * dt)
+          p.vx *= f; p.vy *= f
+          p.x += p.vx * dt; p.y += p.vy * dt; p.rot += p.spin * dt * Math.max(0.15, f)
+          ctx.globalAlpha = fadeOut
+          // pieces glow orange just after the blast and cool to grey
+          const heat = Math.max(0, 1 - (clock - p.born) / 2.5)
+          poly(p, `rgb(${60 + heat * 190},${64 + heat * 80},${72})`, `rgba(255,${190 + heat * 40},${120},${0.5 + heat * 0.5})`)
+        }
+        ctx.globalCompositeOperation = 'lighter'
+        for (const s of sparks) {
+          s.life += dt
+          const f = 1 - s.life / s.max
+          if (f <= 0) continue
+          const d = Math.exp(-1.4 * dt)
+          s.vx *= d; s.vy *= d
+          s.x += s.vx * dt; s.y += s.vy * dt
+          ctx.globalAlpha = f * fadeOut
+          ctx.strokeStyle = f > 0.55 ? '#ffd9a0' : '#ff8a1f'
+          ctx.lineWidth = s.size
+          ctx.beginPath(); ctx.moveTo(s.x, s.y); ctx.lineTo(s.x - s.vx * 0.045, s.y - s.vy * 0.045); ctx.stroke()
+        }
+        ctx.globalCompositeOperation = 'source-over'
+        ctx.globalAlpha = 1
+      }
+
+      // gentle vignette keeps the card area readable
+      const v = ctx.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.3, w / 2, h / 2, Math.max(w, h) * 0.75)
+      v.addColorStop(0, 'rgba(3,6,12,0)'); v.addColorStop(1, 'rgba(3,6,12,0.55)')
+      ctx.fillStyle = v; ctx.fillRect(0, 0, w, h)
+
       if (!still) raf = requestAnimationFrame(frame)
     }
 
     resize()
     window.addEventListener('resize', resize)
-    if (still) { for (let i = 0; i < 3; i++) burst(rand(w * 0.2, w * 0.8), rand(h * 0.2, h * 0.8)); for (const d of debris) d.life = d.max * 0.3; frame(last + 16) }
+    if (still) { explode(); for (const p of burst) { p.x += p.vx * 0.9; p.y += p.vy * 0.9 } for (const s of sparks) { s.x += s.vx * 0.2; s.y += s.vy * 0.2; s.life = 0.4 } frame(last) }
     else raf = requestAnimationFrame(frame)
     return () => { cancelAnimationFrame(raf); window.removeEventListener('resize', resize) }
   }, [])
