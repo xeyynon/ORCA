@@ -1,6 +1,9 @@
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { CSS2DObject, CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer.js'
+import { Line2 } from 'three/examples/jsm/lines/Line2.js'
+import { LineGeometry } from 'three/examples/jsm/lines/LineGeometry.js'
+import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial.js'
 import type { ObjectType } from '@/api/types'
 import { ALTITUDE_BAND_COLOR, OBJECT_TYPE_COLOR } from '@/lib/chartColors'
 import {
@@ -396,16 +399,26 @@ export class EarthScene {
   private rebuildOrbitLines(): void {
     for (const child of [...this.orbitGroup.children]) {
       this.orbitGroup.remove(child)
-      ;(child as THREE.Line).geometry.dispose()
-      ;((child as THREE.Line).material as THREE.Material).dispose()
+      ;(child as Line2).geometry.dispose()
+      ;((child as Line2).material as THREE.Material).dispose()
     }
-    const color = readToken('--globe-orbit', '#7aa2f7')
+    const color = readToken('--globe-orbit', '#ffb020')
+    const res = new THREE.Vector2(Math.max(1, this.container.clientWidth), Math.max(1, this.container.clientHeight))
     for (const path of this.orbitPaths.values()) {
       const flat = path.flatMap((r) => eciToScene(r))
-      const g = new THREE.BufferGeometry()
-      g.setAttribute('position', new THREE.Float32BufferAttribute(flat, 3))
-      this.orbitGroup.add(new THREE.Line(g, new THREE.LineBasicMaterial({ color, transparent: true, opacity: 0.85 })))
+      // A wide faint line under a narrow solid one: a glow that reads against the dots at any zoom. Fat lines are
+      // needed because a WebGL line is always one pixel wide, which is the width of a satellite.
+      for (const [width, opacity] of [[7, 0.22], [2.5, 1]] as const) {
+        const g = new LineGeometry()
+        g.setPositions(flat)
+        const m = new LineMaterial({ color: new THREE.Color(color).getHex(), linewidth: width, transparent: true, opacity, depthWrite: false, resolution: res })
+        const line = new Line2(g, m)
+        line.renderOrder = 5
+        this.orbitGroup.add(line)
+      }
     }
+    // with an orbit on screen the rest of the catalog steps back, so the path and its object are what the eye lands on
+    ;(this.points.material as THREE.PointsMaterial).opacity = this.orbitPaths.size > 0 ? 0.35 : 1
   }
 
   /** Per-object colour: by altitude band (current altitude; a snapshot carries no eccentricity) or by object type. */
@@ -460,6 +473,7 @@ export class EarthScene {
     this.renderer.domElement.style.width = `${w}px`
     this.renderer.domElement.style.height = `${h}px`
     this.labelRenderer.setSize(w, h)
+    for (const child of this.orbitGroup.children) ((child as Line2).material as LineMaterial).resolution.set(w, h)
     this.camera.aspect = w / h
     this.camera.updateProjectionMatrix()
   }
