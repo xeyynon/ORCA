@@ -1,0 +1,3 @@
+.search-result { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 6px 10px; cursor: pointer; list-style: none; }
+.search-result__name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.search-result--active { background: var(--bg-hover); }

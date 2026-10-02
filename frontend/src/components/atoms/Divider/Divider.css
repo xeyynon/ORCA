@@ -1,0 +1,2 @@
+.divider { display: block; flex: none; background: var(--border); height: 1px; width: 100%; }
+.divider--v { width: 1px; height: 16px; }

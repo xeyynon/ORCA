@@ -1,0 +1,3 @@
+.time-scrubber { display: flex; flex-direction: column; gap: var(--gap-2); }
+.time-scrubber__head, .time-scrubber__foot { display: flex; align-items: center; justify-content: space-between; gap: var(--gap-2); }
+.time-scrubber__range { width: 100%; accent-color: var(--accent); }

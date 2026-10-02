@@ -1,0 +1,18 @@
+.object-search { position: relative; width: min(360px, 100%); }
+.object-search__list {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 40;
+  margin: 0;
+  padding: 4px 0;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--bg-elevated);
+  box-shadow: var(--shadow);
+}
+.object-search__none { padding: 8px 10px; list-style: none; color: var(--text-tertiary); }
+
+/* Hidden on narrow screens to make room for the nav. Known gap: "/" cannot focus a hidden field. */
+@media (max-width: 1100px) { .object-search { display: none; } }

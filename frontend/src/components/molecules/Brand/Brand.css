@@ -1,0 +1,2 @@
+.brand { display: inline-flex; align-items: center; gap: 8px; }
+.brand__name { font-weight: 700; letter-spacing: 0.16em; font-size: 13px; color: var(--text-primary); }

@@ -1,0 +1,4 @@
+.segmented { display: inline-flex; padding: 2px; gap: 2px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg-input); }
+.segmented__btn { height: 24px; padding: 0 10px; border: 0; border-radius: 3px; background: transparent; color: var(--text-secondary); font-size: 12px; font-weight: 500; }
+.segmented__btn:hover { color: var(--text-primary); }
+.segmented__btn--on { background: var(--bg-elevated); color: var(--text-primary); box-shadow: 0 0 0 1px var(--border-strong); }

@@ -1,0 +1,5 @@
+.pair-card { display: flex; flex-direction: column; gap: var(--gap-4); padding: var(--gap-4); border: 1px solid var(--border-strong); border-radius: var(--radius); background: var(--bg-panel); }
+.pair-card__head { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--gap-3); }
+.pair-card__title { margin: 6px 0 2px; font-size: 15px; font-weight: 600; }
+.pair-card__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: var(--gap-3) var(--gap-4); }
+.pair-card__state { display: flex; align-items: center; gap: var(--gap-2); color: var(--text-secondary); }

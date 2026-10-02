@@ -1,0 +1,12 @@
+.globe-tooltip {
+  position: fixed;
+  z-index: 60;
+  pointer-events: none;
+  padding: 4px 8px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  box-shadow: var(--shadow);
+  white-space: nowrap;
+}

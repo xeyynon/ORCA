@@ -1,0 +1,145 @@
+/*
+ * Design tokens. Every colour in the app comes from here (rules.md §4).
+ * Dark is the default; [data-theme="light"] redefines the SAME names so no
+ * component ever branches on theme.
+ *
+ * Marks (--risk-*) are for graphics on a canvas: dots, bars, globe points.
+ * Ink   (--risk-*-ink) are for TEXT on a panel and must reach 4.5:1.
+ * Measured ratios live in contrast.md-style comments below (see scripts/contrast.mjs).
+ */
+:root,
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  /* surfaces */
+  --bg-abyss: #070a0e;      /* globe / void */
+  --bg-canvas: #0b0f14;
+  --bg-panel: #11161d;
+  --bg-card: #161c25;
+  --bg-elevated: #1c2330;
+  --bg-input: #0e1319;
+  --bg-hover: #1a2230;
+  --border: #262f3d;
+  --border-strong: #344052;
+
+  /* text */
+  --text-primary: #f2f5f9;
+  --text-secondary: #b4bfcd;
+  --text-tertiary: #8795a7;
+  --text-faint: #5e6b7c;
+
+  /* interactive accent (never a status colour) */
+  --accent: #7aa2f7;
+  --accent-ink: #9db9fa;
+  --accent-bg: rgba(122, 162, 247, 0.14);
+
+  /* risk marks (graphics) */
+  --risk-critical: #ef4444;
+  --risk-high: #f97316;
+  --risk-medium: #eab308;
+  --risk-low: #2dd4bf;
+  --risk-negligible: #64748b;
+  /* risk ink (text) */
+  --risk-critical-ink: #f87171;
+  --risk-high-ink: #fb923c;
+  --risk-medium-ink: #facc15;
+  --risk-low-ink: #5eead4;
+  --risk-negligible-ink: #94a3b8;
+
+  /* service state */
+  --ok: #34d399;
+  --ok-ink: #6ee7b7;
+  --warn: #fbbf24;
+  --warn-ink: #fcd34d;
+  --bad: #f87171;
+  --bad-ink: #fca5a5;
+
+  /* neutral chart series (not a status hue) */
+  --chart-1: #6f97b0;
+  --chart-2: #8b83c9;
+  --chart-3: #5fa8a0;
+  --chart-grid: #232b38;
+
+  /* globe */
+  --globe-ocean: #0a0e14;
+  --globe-land: #3a4350;
+  --globe-grid: #2a3442;
+  --globe-orbit: #7aa2f7;
+  --globe-object: #cbd5e1;
+
+  /* focus + scrim */
+  --focus-ring: #9db9fa;
+  --scrim: rgba(3, 6, 10, 0.62);
+  --shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  --bg-abyss: #dde5ee;
+  --bg-canvas: #eef1f5;
+  --bg-panel: #ffffff;
+  --bg-card: #f6f8fa;
+  --bg-elevated: #ffffff;
+  --bg-input: #f1f4f8;
+  --bg-hover: #e8edf3;
+  --border: #d5dce5;
+  --border-strong: #b9c4d1;
+
+  --text-primary: #0f172a;
+  --text-secondary: #334155;
+  --text-tertiary: #526074;
+  --text-faint: #8392a5;
+
+  --accent: #3b5bdb;
+  --accent-ink: #2f4ac0;
+  --accent-bg: rgba(59, 91, 219, 0.1);
+
+  --risk-critical: #dc2626;
+  --risk-high: #ea580c;
+  --risk-medium: #ca8a04;
+  --risk-low: #0d9488;
+  --risk-negligible: #64748b;
+  --risk-critical-ink: #b91c1c;
+  --risk-high-ink: #c2410c;
+  --risk-medium-ink: #854d0e;
+  --risk-low-ink: #0f766e;
+  --risk-negligible-ink: #475569;
+
+  --ok: #059669;
+  --ok-ink: #047857;
+  --warn: #d97706;
+  --warn-ink: #92400e;
+  --bad: #dc2626;
+  --bad-ink: #b91c1c;
+
+  --chart-1: #4f7a94;
+  --chart-2: #6d63b3;
+  --chart-3: #3f8a82;
+  --chart-grid: #e1e7ee;
+
+  --globe-ocean: #c9d6e4;
+  --globe-land: #8fa0b3;
+  --globe-grid: #b0bfd0;
+  --globe-orbit: #3b5bdb;
+  --globe-object: #1e293b;
+
+  --focus-ring: #3b5bdb;
+  --scrim: rgba(15, 23, 42, 0.35);
+  --shadow: 0 8px 28px rgba(15, 23, 42, 0.18);
+}
+
+/* layout + type tokens (theme independent) */
+:root {
+  --font-ui: Inter, "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --radius: 4px;            /* a precision tool, not a friendly app */
+  --radius-lg: 8px;
+  --appbar-h: 48px;
+  --statusbar-h: 28px;
+  --gap-1: 4px;
+  --gap-2: 8px;
+  --gap-3: 12px;
+  --gap-4: 16px;
+  --gap-5: 24px;
+}

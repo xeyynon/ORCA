@@ -1,0 +1,3 @@
+.shortcut-row { display: flex; align-items: center; gap: 12px; padding: 4px 0; }
+.shortcut-row__keys { display: inline-flex; gap: 4px; min-width: 64px; }
+.shortcut-row__desc { color: var(--text-secondary); }
