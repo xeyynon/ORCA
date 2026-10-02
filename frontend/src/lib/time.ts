@@ -36,3 +36,13 @@ export function formatRelative(iso: string, now: Date = new Date()): string {
 export function ageDays(epochIso: string, now: Date = new Date()): number {
   return (now.getTime() - parseUtc(epochIso).getTime()) / 86_400_000
 }
+
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
+/** "03 Oct 2026 · 12:00:00 UTC": the simulated time shown above the playback slider. */
+export function formatSimTime(ms: number): string {
+  const d = new Date(ms)
+  if (Number.isNaN(d.getTime())) return NO_DATA
+  const p = (n: number) => String(n).padStart(2, '0')
+  return `${p(d.getUTCDate())} ${MONTHS[d.getUTCMonth()]} ${d.getUTCFullYear()} · ${p(d.getUTCHours())}:${p(d.getUTCMinutes())}:${p(d.getUTCSeconds())} UTC`
+}

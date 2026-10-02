@@ -1,0 +1,4 @@
+.select-field { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.select-field__control { height: 30px; padding: 0 8px; border: 1px solid var(--border-strong); border-radius: var(--radius); background: var(--bg-input); color: var(--text-primary); }
+.select-field__control:hover { border-color: var(--text-faint); }
+.select-field--compact .select-field__control { height: 28px; font-size: 12px; }

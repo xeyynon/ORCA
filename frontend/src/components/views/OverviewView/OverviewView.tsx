@@ -1,5 +1,7 @@
+import { useMemo } from 'react'
 import type { TleRecord } from '@/api/types'
 import type { AsyncResult } from '@/hooks/useAsync'
+import { deriveSeries } from '@/lib/catalog'
 import type { CatalogSummary } from '@/lib/catalog'
 import { days, fixed, integer } from '@/lib/format'
 import { Button } from '../../atoms/Button/Button'
@@ -9,6 +11,8 @@ import { CatalogTable } from '../../organisms/CatalogTable/CatalogTable'
 import { ChartCard } from '../../organisms/ChartCard/ChartCard'
 import { KpiRow } from '../../organisms/KpiRow/KpiRow'
 import { ObjectCard } from '../../organisms/ObjectCard/ObjectCard'
+import { ObjectStanding } from '../../organisms/ObjectStanding/ObjectStanding'
+import type { CatalogRanks } from '../../organisms/ObjectStanding/ObjectStanding'
 import { PageLayout } from '../../organisms/PageLayout/PageLayout'
 import { RegimeBreakdown } from '../../organisms/RegimeBreakdown/RegimeBreakdown'
 import './OverviewView.css'
@@ -33,6 +37,12 @@ function loadedHint(summary: CatalogSummary, totalCount: number | null): string 
 export function OverviewView({ catalog, summary, totalCount, selectedId, onSelect, onOpenGlobe, onGoData, now }: Props) {
   const rows = catalog.data
   const selected = rows?.find((t) => t.norad_cat_id === selectedId) ?? null
+  const ranks = useMemo<CatalogRanks | null>(() => {
+    if (!rows || rows.length === 0) return null
+    const s = deriveSeries(rows, now)
+    const asc = (xs: readonly number[]) => [...xs].sort((a, b) => a - b)
+    return { altKm: asc(s.altKm), inclDeg: asc(s.inclDeg), ecc: asc(s.ecc), ageDays: asc(s.ageDays) }
+  }, [rows, now])
 
   let body
   if (!rows && catalog.status === 'error') {
@@ -68,10 +78,11 @@ export function OverviewView({ catalog, summary, totalCount, selectedId, onSelec
               <>
                 <ObjectCard tle={selected} position={null} now={now} onClose={() => onSelect(null)} />
                 <Button variant="primary" onClick={() => onOpenGlobe(selected.norad_cat_id)}>Show on globe</Button>
+                {ranks ? <ObjectStanding tle={selected} ranks={ranks} now={now} /> : null}
               </>
             ) : null}
             {summary ? (
-              <ChartCard title="Objects by regime" note={`Classified from perigee/apogee altitude and eccentricity. Derived, not stored.${totalCount !== null && totalCount > rows.length ? ` Counts cover the ${integer(rows.length)} loaded objects.` : ''}`}>
+              <ChartCard title="Whole catalog by regime" note={`Classified from perigee/apogee altitude and eccentricity. Derived, not stored.${totalCount !== null && totalCount > rows.length ? ` Counts cover the ${integer(rows.length)} loaded objects.` : ''}`}>
                 <RegimeBreakdown counts={summary.regimes} />
               </ChartCard>
             ) : null}

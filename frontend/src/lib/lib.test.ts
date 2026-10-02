@@ -1,7 +1,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { parseUtc, formatUtc, formatRelative, NO_DATA } from './time.ts'
-import { pc, fixed, integer } from './format.ts'
+import { parseUtc, formatUtc, formatRelative, formatSimTime, NO_DATA } from './time.ts'
+import { pc, fixed, integer, formatLat, formatLon } from './format.ts'
 import { riskRank, countByRisk, RISK_ORDER } from './risk.ts'
 import { deriveOrbit, classifyRegime } from './orbit.ts'
 import { toCsv } from './csv.ts'
@@ -68,4 +68,26 @@ test('regimes: GEO, MEO, HEO', () => {
 test('toCsv quotes commas, quotes and newlines', () => {
   const out = toCsv(['a', 'b'], [['x,y', 'say "hi"'], [1, 'line\nbreak']])
   assert.equal(out, 'a,b\r\n"x,y","say ""hi"""\r\n1,"line\nbreak"\r\n')
+})
+
+test('latitude and longitude always carry their hemisphere letter', () => {
+  assert.equal(formatLat(20.34), '20.3° N'); assert.equal(formatLat(-33.9), '33.9° S')
+  assert.equal(formatLon(78.6), '78.6° E'); assert.equal(formatLon(-122.44), '122.4° W')
+  assert.equal(formatLat(NaN), NO_DATA)
+})
+
+test('formatSimTime is UTC, zero-padded, and includes the seconds', () => {
+  assert.equal(formatSimTime(Date.UTC(2026, 9, 3, 12, 0, 0)), '03 Oct 2026 · 12:00:00 UTC')
+  assert.equal(formatSimTime(Date.UTC(2026, 0, 5, 7, 8, 9)), '05 Jan 2026 · 07:08:09 UTC')
+  assert.equal(formatSimTime(NaN), NO_DATA)
+})
+
+import { percentileRank } from './percentile'
+test('percentileRank: below/above/tie/empty', () => {
+  const v = [1, 2, 3, 4]
+  assert.equal(percentileRank(v, 0), 0)
+  assert.equal(percentileRank(v, 5), 100)
+  assert.equal(percentileRank(v, 3), 62.5) // 2 below + half of 1 tie = 2.5 of 4
+  assert.equal(percentileRank([], 1), null)
+  assert.equal(percentileRank(v, NaN), null)
 })

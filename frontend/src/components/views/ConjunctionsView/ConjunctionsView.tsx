@@ -25,7 +25,7 @@ import { PairCard } from '../../organisms/PairCard/PairCard'
 import { RiskSummaryBar } from '../../organisms/RiskSummaryBar/RiskSummaryBar'
 import './ConjunctionsView.css'
 
-type Props = { catalogSize: number | null; now: Date; onShowOnGlobe: (ids: string[]) => void }
+type Props = { catalogSize: number | null; now: Date; onShowOnGlobe: (ids: string[], event: ConjunctionEvent) => void }
 
 const DEFAULT_QUERY: ConjunctionQuery = { horizonDays: 7, stepHours: 2, limit: 100 }
 
@@ -101,7 +101,7 @@ export function ConjunctionsView({ catalogSize, now, onShowOnGlobe }: Props) {
               assessment={pair.assessment}
               assessing={pair.loading}
               assessError={pair.error}
-              onShowOnGlobe={() => onShowOnGlobe([selected.sat1_id, selected.sat2_id])}
+              onShowOnGlobe={() => onShowOnGlobe([selected.sat1_id, selected.sat2_id], selected)}
               onClose={() => setSelectedKey(null)}
             />
           ) : null}

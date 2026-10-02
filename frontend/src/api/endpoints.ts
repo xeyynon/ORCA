@@ -1,6 +1,6 @@
 import { apiFetch } from './client'
 import type {
-  ConjunctionEvent, Health, OrbitPathResponse, PairAssessment,
+  CatalogSummaryResponse, ConjunctionEvent, Health, OrbitPathResponse, PairAssessment,
   PositionsResponse, StatisticsResponse, TleRecord, UpdateTlesResponse,
 } from './types'
 
@@ -10,6 +10,9 @@ export const getHealth = (o: Opt = {}) => apiFetch<Health>('/health', o)
 
 export const getTles = (limit: number, o: Opt = {}) =>
   apiFetch<TleRecord[]>(`/api/tles?limit=${limit}`, o)
+
+/** Counts over the WHOLE stored catalog (the browser only holds the first 5,000 objects). */
+export const getCatalogSummary = (o: Opt = {}) => apiFetch<CatalogSummaryResponse>('/api/catalog-summary', o)
 
 export const getStatistics = (o: Opt = {}) => apiFetch<StatisticsResponse>('/api/statistics', o)
 

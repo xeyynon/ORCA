@@ -1,6 +1,7 @@
 import type { PositionedObject, TleRecord } from '@/api/types'
 import { ageDays, formatUtc } from '@/lib/time'
 import { fixed } from '@/lib/format'
+import { OBJECT_TYPE_SINGULAR } from '@/lib/objectTypes'
 import { deriveOrbit } from '@/lib/orbit'
 import { Badge } from '../../atoms/Badge/Badge'
 import { Icon } from '../../atoms/Icon/Icon'
@@ -33,6 +34,7 @@ export function ObjectCard({ tle, position, now, onClose }: Props) {
       </div>
       <div className="object-card__badges">
         {orbit ? <Badge>{orbit.regime}</Badge> : null}
+        {position ? <Badge title="Inferred from the object name: the catalog stores no type or status">{OBJECT_TYPE_SINGULAR[position.type]}</Badge> : null}
         <TleAgeChip ageDays={ageDays(tle.epoch, now)} />
       </div>
       <div className="object-card__grid">
@@ -47,6 +49,7 @@ export function ObjectCard({ tle, position, now, onClose }: Props) {
             <FactRow label="Latitude"><ValueUnit value={fixed(position.lat, 2)} unit="°" /></FactRow>
             <FactRow label="Longitude"><ValueUnit value={fixed(position.lon, 2)} unit="°" /></FactRow>
             <FactRow label="Altitude now"><ValueUnit value={fixed(position.alt_km, 0)} unit="km" /></FactRow>
+            <FactRow label="Velocity"><ValueUnit value={fixed(Math.hypot(position.v[0], position.v[1], position.v[2]), 2)} unit="km/s" /></FactRow>
           </>
         ) : null}
       </div>

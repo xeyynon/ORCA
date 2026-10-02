@@ -41,6 +41,17 @@ export interface StatisticsResponse {
   statistics: Partial<CatalogStatistics>
 }
 
+/** Inferred from the object NAME by the API (the catalog stores no type or status): see Analytics.classify_object_type. */
+export type ObjectType = 'payload' | 'rocket_body' | 'debris'
+
+export interface CatalogSummaryResponse {
+  total: number
+  by_type: Record<ObjectType, number>
+  by_regime: Record<'LEO' | 'MEO' | 'GEO' | 'HEO', number>
+  regime_unclassified: number
+  type_basis: string
+}
+
 export type RiskLevel = 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW' | 'NEGLIGIBLE'
 
 export interface ConjunctionEvent {
@@ -52,6 +63,8 @@ export interface ConjunctionEvent {
   min_distance_km: number
   probability_of_collision: number
   risk_level: RiskLevel
+  /** |v1 - v2| at the time of closest approach, km/s. Near zero means two objects flying in formation, not crossing paths. */
+  relative_velocity_kms: number
 }
 
 /** /api/conjunction-pair returns the full event, or {status:'no_risk'}. */
@@ -65,6 +78,7 @@ export type PairAssessment = PairAssessmentEvent | PairNoRisk
 export interface PositionedObject {
   id: string
   name: string
+  type: ObjectType
   r: [number, number, number] // km, ECI
   v: [number, number, number] // km/s, ECI
   lat: number // degrees
