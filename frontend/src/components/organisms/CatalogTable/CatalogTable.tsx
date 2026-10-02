@@ -18,6 +18,8 @@ type Props = {
   selectedId: string | null
   onSelect: (id: string) => void
   now: Date
+  /** Objects stored by the API, when more than `rows` were loaded. */
+  totalCount?: number | null
   /** Render cap. Rows are sorted first, so the cap shows the top of the chosen order, and the cap is stated. */
   maxRows?: number
 }
@@ -31,7 +33,7 @@ const SORT_KEYS: Record<string, (t: TleRecord) => number | string> = {
   age: (t) => -Date.parse(t.epoch),
 }
 
-export function CatalogTable({ rows, selectedId, onSelect, now, maxRows = 250 }: Props) {
+export function CatalogTable({ rows, selectedId, onSelect, now, totalCount = null, maxRows = 250 }: Props) {
   const [sortId, setSortId] = useState('name')
   const [sortDir, setSortDir] = useState<SortDir>('asc')
 
@@ -68,7 +70,7 @@ export function CatalogTable({ rows, selectedId, onSelect, now, maxRows = 250 }:
         onSort={onSort}
       />
       {rows.length > maxRows ? (
-        <div className="catalog-table__cap">Showing the first {integer(maxRows)} of {integer(rows.length)} objects in this order. Use the search box to find any object.</div>
+        <div className="catalog-table__cap">Showing the first {integer(maxRows)} of {integer(rows.length)} loaded objects in this order{totalCount !== null && totalCount > rows.length ? ` (${integer(totalCount)} are stored; the API returns at most 5,000 per request, and search covers only the loaded ones)` : ''}.</div>
       ) : null}
     </div>
   )

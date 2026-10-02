@@ -13,6 +13,13 @@ export function formatUtc(iso: string | null | undefined): string {
   return `${d.toISOString().slice(0, 16).replace('T', ' ')} UTC`
 }
 
+/** "10-02 19:00" for chart axes (UTC, no year: the axis spans days, and the full time is in the hover text). */
+export function formatShortUtc(ms: number): string {
+  const d = new Date(ms)
+  if (Number.isNaN(d.getTime())) return NO_DATA
+  return `${d.toISOString().slice(5, 10)} ${d.toISOString().slice(11, 16)}`
+}
+
 /** Coarse relative time: "in 3d 4h", "2h 05m ago". */
 export function formatRelative(iso: string, now: Date = new Date()): string {
   const ms = parseUtc(iso).getTime() - now.getTime()

@@ -19,8 +19,8 @@ type Props = {
 
 /**
  * Trigger a Celestrak refresh and report what we can actually observe. The API returns "started"
- * immediately and has no completion signal, and it cannot tell us if Celestrak rate-limited the fetch
- * (that failure is swallowed to an empty list server-side). So "unchanged" is stated as exactly that.
+ * immediately and has no completion signal, so the page polls. A refused or failed Celestrak fetch is
+ * reported by the API in health.last_fetch and shown as "refused"; "unchanged" means nothing at all moved.
  */
 export function UpdateCatalogPanel({ phase, before, after, error, apiOnline, onStart }: Props) {
   const busy = phase === 'starting' || phase === 'waiting'
@@ -42,7 +42,12 @@ export function UpdateCatalogPanel({ phase, before, after, error, apiOnline, onS
       ) : null}
       {phase === 'unchanged' ? (
         <EmptyState kind="error" title={`No change observed after ${UPDATE_GIVE_UP_MS / 1000} s`}>
-          The stored count stayed at {integer(after)}. Celestrak may have refused the request (it returns 403 if hit repeatedly, and the API reports that as an empty fetch), or it is still working. Check the API log.
+          The stored count stayed at {integer(after)}. The API reported no fetch outcome either, so the fetch may still be running. Check the API log.
+        </EmptyState>
+      ) : null}
+      {phase === 'refused' ? (
+        <EmptyState kind="error" title="Celestrak did not provide new data">
+          {error} The stored catalog was left as it was ({integer(after)} objects).
         </EmptyState>
       ) : null}
       {phase === 'failed' ? <EmptyState kind="error" title="Could not start the refresh">{error}</EmptyState> : null}

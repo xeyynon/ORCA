@@ -1,3 +1,4 @@
+import type { FetchOutcome } from '@/api/types'
 import { formatUtc } from '@/lib/time'
 import { integer, days } from '@/lib/format'
 import { Label } from '../../atoms/Label/Label'
@@ -11,11 +12,13 @@ type Props = {
   count: number | null
   /** From the API's own cache table; null = the catalog was never refreshed through the API. */
   lastUpdate: string | null
+  /** The API's most recent Celestrak fetch outcome; null if none is recorded yet. */
+  lastFetch: FetchOutcome | null
   newestAgeDays: number | null
   oldestAgeDays: number | null
 }
 
-export function DataStatusCard({ count, lastUpdate, newestAgeDays, oldestAgeDays }: Props) {
+export function DataStatusCard({ count, lastUpdate, lastFetch, newestAgeDays, oldestAgeDays }: Props) {
   return (
     <section className="data-status">
       <Label>Catalog status</Label>
@@ -23,6 +26,9 @@ export function DataStatusCard({ count, lastUpdate, newestAgeDays, oldestAgeDays
         <FactRow label="Objects stored"><Mono>{integer(count)}</Mono></FactRow>
         <FactRow label="Last refresh via API">
           {lastUpdate ? <Mono>{formatUtc(lastUpdate)}</Mono> : <Mono muted>never (seeded outside the API)</Mono>}
+        </FactRow>
+        <FactRow label="Last Celestrak fetch">
+          {lastFetch ? <Mono>{lastFetch.status === 'ok' ? 'ok' : lastFetch.detail} ({formatUtc(lastFetch.at)})</Mono> : <Mono muted>none recorded</Mono>}
         </FactRow>
         <FactRow label="Newest element set">
           {newestAgeDays !== null ? <TleAgeChip ageDays={newestAgeDays} /> : <Mono muted>—</Mono>}

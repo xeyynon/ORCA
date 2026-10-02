@@ -5,7 +5,7 @@
 ORCA is a
 free-and-open-source Space Situational Awareness (SSA) platform. It ingests live
 satellite tracking data, propagates orbits, screens the catalog for collision risk,
-and presents results through a REST API and an interactive dashboard — using only
+and presents results through a REST API and an interactive web frontend — using only
 open-source components (no STK, no paid Cesium tier).
 
 ## 2. Problem
@@ -25,7 +25,7 @@ implementation that takes a learner or small team from "raw TLE text" to
   in better-than-quadratic time, and rank them by collision probability using a
   standards-calibrated method (NASA CARA / ESA thresholds).
 - **G4 — Expose**: Serve all of the above over a documented REST API (FastAPI/Swagger).
-- **G5 — Visualize**: Provide a non-technical-friendly dashboard (ground tracks,
+- **G5 — Visualize**: Provide a non-technical-friendly web frontend (3D globe,
   3D globe, risk tables, catalog analytics).
 - **G6 — Portfolio/education**: Be readable end-to-end by a single engineer; every
   module should be explainable in an interview or a capstone defense.
@@ -39,7 +39,7 @@ implementation that takes a learner or small team from "raw TLE text" to
   precise atmospheric density models).
 - No user authentication/multi-tenancy — single-operator/local or trusted-network
   deployment only, as built today.
-- No mobile app; dashboard is desktop-browser oriented.
+- No mobile app; the frontend is desktop-browser oriented.
 
 ## 5. Users / Personas
 
@@ -64,9 +64,9 @@ implementation that takes a learner or small team from "raw TLE text" to
 6. System **must** expose catalog statistics (apogee/perigee/period/inclination
    min/max/mean/median).
 7. System **must** allow exporting conjunction results as CSV or JSON.
-8. Dashboard **must** visualize ground tracks (2D) and orbits (3D) for a
+8. Frontend **must** visualize orbits on a 3D globe (with orbit paths and a time scrub) for a
    user-selected subset of the catalog.
-9. Dashboard **must** allow triggering a live Celestrak refresh from the UI.
+9. Frontend **must** allow triggering a live Celestrak refresh from the UI.
 
 ## 7. Non-Functional Requirements
 
@@ -83,7 +83,7 @@ implementation that takes a learner or small team from "raw TLE text" to
 
 ## 8. Success Metrics
 
-- Fresh clone → running API + dashboard with live data in under 10 minutes,
+- Fresh clone → running API + frontend with live data in under 10 minutes,
   following only the README.
 - `POST /api/update-tles` against Celestrak's `active` group succeeds and the
   catalog count matches the fetched record count (currently blocked by Celestrak
@@ -91,7 +91,7 @@ implementation that takes a learner or small team from "raw TLE text" to
 - Conjunction search over the seeded catalog returns at least one plausible,
   non-error result end-to-end (verified manually — ISS/`stations` catalog,
   see DECISIONS.md).
-- Dashboard loads all four pages without an unhandled exception (previously
+- Frontend loads all five views without an unhandled exception (the old Streamlit dashboard, since removed, was previously
   failing on every page load due to a hardcoded local path — fixed, see
   DECISIONS.md).
 

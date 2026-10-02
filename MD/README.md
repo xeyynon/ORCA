@@ -2,7 +2,7 @@
 
 **Open-source space situational awareness: from raw TLEs to ranked collision risk.**
 
-ORCA ingests public satellite tracking data, propagates orbits, screens the catalog for close approaches (conjunctions), and ranks them by collision probability. Results are served through a REST API and two front ends: a React + three.js app and the original Streamlit dashboard. It runs entirely on free, open-source parts: no STK, no paid API keys.
+ORCA ingests public satellite tracking data, propagates orbits, screens the catalog for close approaches (conjunctions), and ranks them by collision probability. Results are served through a REST API and a React + three.js app. It runs entirely on free, open-source parts: no STK, no paid API keys.
 
 > **Not an operational system.** ORCA is an educational and research tool built on public TLEs. Its outputs must not be used for real manoeuvre decisions. See [Limitations](#limitations).
 
@@ -10,11 +10,7 @@ ORCA ingests public satellite tracking data, propagates orbits, screens the cata
 
 | Overview | Globe | Conjunctions |
 |---|---|---|
-| ![Overview](docs/screenshots/overview.png) | ![Globe](docs/screenshots/globe.png) | ![Conjunctions](docs/screenshots/conjunctions.png) |
-
-The original Streamlit dashboard is still included (`dashboard.py`):
-
-![Streamlit dashboard](pre.png)
+| ![Overview](../docs/screenshots/overview.png) | ![Globe](../docs/screenshots/globe.png) | ![Conjunctions](../docs/screenshots/conjunctions.png) |
 
 ## What it does
 
@@ -49,8 +45,6 @@ curl -X POST http://127.0.0.1:8000/api/update-tles
 
 `PYTHONIOENCODING=utf-8` is **required on Windows**: the parser prints a Unicode check mark per TLE, which crashes on the default `cp1252` console and silently truncates ingestion.
 
-The legacy Streamlit dashboard runs separately: `PYTHONIOENCODING=utf-8 streamlit run dashboard.py --server.port 8501`.
-
 Celestrak returns `403` if the large `active` group is requested repeatedly in a short time. The refresh then looks like an empty fetch. Wait a while, or seed from the small `stations` group.
 
 ## Architecture
@@ -60,10 +54,8 @@ Celestrak TLEs ──► parser_pipeline.py ──► orbit_mech_engine.py ─�
                    (SQLite: ssa_data.db)   (propagation, frames)    (KD-tree, TCA, Pc)        │
                                                   │                                            ▼
                                                   └────────────► Analytics.py ───────► api_server.py (FastAPI :8000)
-                                                                                              │
-                                                              ┌───────────────────────────────┴──────────┐
-                                                              ▼                                          ▼
-                                                   frontend/ (React + three.js :5173)         dashboard.py (Streamlit :8501)
+                                                                                              ▼
+                                                                                   frontend/ (React + three.js :5173)
 ```
 
 | Module | Role |
@@ -73,10 +65,9 @@ Celestrak TLEs ──► parser_pipeline.py ──► orbit_mech_engine.py ─�
 | `conjunction_detection.py` | Two-phase screening, TCA refinement, Pc and risk tiers |
 | `Analytics.py` | Catalog statistics, Plotly figures, export helpers |
 | `api_server.py` | REST API |
-| `frontend/` | React + TypeScript + Vite + three.js app, one component per UI piece ([frontend/README.md](frontend/README.md)) |
-| `dashboard.py` | Legacy Streamlit dashboard |
+| `frontend/` | React + TypeScript + Vite + three.js app, one component per UI piece ([frontend/README.md](../frontend/README.md)) |
 
-The front ends do not call each other. Both read the same SQLite file through the same modules or API. More detail is in [ARCHITECTURE.md](ARCHITECTURE.md).
+The frontend reads the SQLite file only through the API. More detail is in [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ## The frontend
 
@@ -109,7 +100,7 @@ Interactive docs at `/docs` (Swagger) and `/redoc`.
 | GET | `/api/conjunctions` | Catalog-wide search (`time_horizon_days` 1 to 30, `search_step_hours`, `limit`) |
 | GET | `/api/conjunction-pair/{id1}/{id2}` | Assess one pair |
 | GET | `/api/statistics` | Apogee, perigee, period and inclination summary |
-| GET | `/api/export/conjunctions` | Server-side export (writes to `/tmp`, so it fails on Windows; the frontend exports in the browser instead) |
+| GET | `/api/export/conjunctions` | Server-side export (`format=json` or `csv`, 3-day horizon from now). The frontend exports in the browser instead |
 
 CORS defaults to the Vite dev origins. Set `ORCA_CORS_ORIGINS="https://a.example,https://b.example"` to allow others.
 
@@ -135,9 +126,9 @@ Hard-body radius is looked up by name keyword: Starlink 5.65 m, OneWeb 4.0 m, Ir
 
 These are real, current behaviours, not boilerplate:
 
-- **Simplified propagation.** `orbit_mech_engine.SGP4Propagator` is a Kepler solver with an exponential drag-decay term, not full SGP4. The `sgp4` package is used to parse TLEs.
+- **Simplified propagation in the conjunction search.** `orbit_mech_engine.SGP4Propagator` is two-body motion with an exponential drag term and no J2, not full SGP4. Against the `sgp4` package its position error has a median of about 300 km at 24 h and over 1,000 km at 72 h, which is larger than the 100 km screening threshold. The globe and `/api/positions` use the real `sgp4` package. See `tests/measure_propagator_error.py` and DECISIONS.md.
 - **Stale data degrades everything.** Orbit prediction accuracy falls quickly with TLE age. Refresh the catalog before reading anything into a result.
-- **The conjunction search window starts at the first object's TLE epoch, not at the current time** (`conjunction_detection.py`). With old TLEs, a "7-day horizon" can lie entirely in the past. The frontend warns when results are in the past.
+- **Conjunction times of closest approach can fall a few hours before now.** The search window starts at the current time, but each TCA is refined within ±6 h of its search step, so an event near the start of the window can land slightly in the past. The frontend flags any event already behind us.
 - **Pc uses an assumed covariance**, so it is a ranking aid, not a validated collision probability.
 - **A failed Celestrak fetch looks like an empty catalog.** The API swallows the failure into an empty list.
 - **No authentication and a single SQLite file.** Suitable for local or trusted-network use only.
@@ -160,4 +151,4 @@ Suggestions and feedback are welcome: **suryapratik12@gmail.com**
 
 ## License
 
-Apache License 2.0. See [LICENSE](LICENSE).
+Apache License 2.0. See [LICENSE](../LICENSE).

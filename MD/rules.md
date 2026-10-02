@@ -132,7 +132,26 @@ Follow ARCHITECTURE.md §7. In the UI:
    must reach 4.5:1 contrast. JavaScript consumers (three.js) that cannot use
    `var()` read the same tokens at runtime with `readToken()` in
    `lib/tokens.ts`, so there is never a second copy of a colour.
-4. **Status colour means status only.** Risk colours mean conjunction risk and
+4. **Charts are colourful, with a rule behind the colour.** Categories use the
+   categorical palette `--cat-1..5` (`lib/chartColors.ts`); density uses the
+   sequential ramp `--heat-0..2`. Status colours (green/amber/red, the risk
+   tiers) appear only where the thing really is a status: TLE freshness and
+   conjunction risk. Every colour used in a chart is named in a `ChartLegend`, so
+   colour is never the only carrier of identity.
+5. **Choose the chart from the data, not from habit:**
+
+   | Data | Chart | Why |
+   |---|---|---|
+   | Share of a whole, up to ~5 parts (orbit regime) | Donut | Few parts that add up to one total |
+   | Compare many categories (constellation sizes) | Bar | Length is the easiest thing to compare |
+   | Distribution of one number (age, inclination) | Histogram | Touching bars show the shape |
+   | Distribution spanning orders of magnitude (altitude, eccentricity) | Histogram on a **log axis** | A linear axis crushes it into one bar; clipping would hide data |
+   | Two numbers over thousands of objects (inclination × altitude) | **Heatmap** | A scatter overplots into a blob |
+   | Events in time with a magnitude and a class (conjunctions) | Time scatter, log y, coloured by tier | Shows when, how risky, and what is already past |
+
+   Anything that cannot be placed on an axis (a zero on a log axis, a value out
+   of range) is counted and stated beside the chart, never dropped silently.
+6. **Status colour means status only.** Risk colours mean conjunction risk and
    nothing else. Chart series use the neutral `--chart-*` tokens.
 5. **Never colour alone.** Pair every status colour with a word or a shape.
 6. **Record the measured contrast ratio** in a comment next to each text/surface

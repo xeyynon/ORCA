@@ -7,9 +7,10 @@ export function pairKey(e: Pick<ConjunctionEvent, 'sat1_id' | 'sat2_id' | 'tca'>
 }
 
 /**
- * How many events have their time of closest approach already behind us. The backend starts its
- * search window at the first object's TLE epoch, not at "now" (conjunction_detection.py), so with
- * old TLEs the whole "horizon" can lie in the past. The UI must say so rather than imply a forecast.
+ * How many events have their time of closest approach already behind us. The search starts at "now",
+ * but each TCA is refined within +-6 h of its step, so a few can land slightly before now (and an
+ * older API that started from the TLE epoch would put them all in the past). The UI must flag these
+ * rather than imply a forecast.
  */
 export function countPast(events: ReadonlyArray<Pick<ConjunctionEvent, 'tca'>>, now: Date): number {
   const t = now.getTime()

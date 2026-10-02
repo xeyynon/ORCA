@@ -37,13 +37,12 @@ as the authoritative module reference and is not duplicated here.
            │                                          │
            └──────────────────┬──────────────────────┘
                               │
-               ┌──────────────┴──────────────┐
-               ▼                              ▼
-     ┌──────────────────┐         ┌────────────────────┐
-     │  api_server.py    │         │   dashboard.py       │
-     │  FastAPI/Uvicorn   │         │   Streamlit           │
-     │  :8000, /docs       │         │   :8501, 4 pages       │
-     └──────────────────┘         └────────────────────┘
+                              ▼
+                    ┌──────────────────┐        ┌────────────────────┐
+                    │  api_server.py    │ ◄───── │ frontend/ (React)   │
+                    │  FastAPI/Uvicorn   │  HTTP  │ Vite, :5173         │
+                    │  :8000, /docs       │        └────────────────────┘
+                    └──────────────────┘
 ```
 
 ## 2. Import / Dependency Direction
@@ -54,7 +53,7 @@ parser_pipeline.py          → orbit_mech_engine
 conjunction_detection.py    → orbit_mech_engine
 Analytics.py                → orbit_mech_engine, parser_pipeline, conjunction_detection
 api_server.py                → parser_pipeline, orbit_mech_engine, conjunction_detection, Analytics
-dashboard.py                 → Analytics (which pulls in everything else)
+frontend/                   → api_server over HTTP only
 ```
 
 **Invariant:** `orbit_mech_engine.py` must never import another project module.
@@ -63,22 +62,17 @@ dependency graph.
 
 ## 3. Runtime Topology
 
-Two independent, separately-launched processes share one SQLite file
-(`ssa_data.db`) and have no other coupling:
+One backend process owns the SQLite file (`ssa_data.db`); the React frontend
+talks to it over HTTP only:
 
 | Process | Command | Port | State |
 |---|---|---|---|
-| API server | `uvicorn api_server:app --port 8000` | 8000 | Reads/writes `ssa_data.db` directly |
-| Dashboard | `streamlit run dashboard.py --server.port 8501` | 8501 | Reads/writes `ssa_data.db` directly (own `TLEDatabase` instance, not via the API) |
+| API server | `uvicorn api_server:app --port 8000` | 8000 | Reads/writes `ssa_data.db` |
+| Frontend (dev) | `cd frontend && npm run dev` | 5173 | Proxies `/api` and `/health` to :8000; no database access |
 
-There is no message queue, no shared cache, no lock coordination between the
-two processes beyond SQLite's own file-level locking. This is fine at
-demo/single-user scale; it will need a shared cache or a real DB engine if
-either process needs to run more than one worker/replica (see PRD §9, TASKS.md).
-
-The dashboard does **not** call the API over HTTP — it imports the same Python
-modules and talks to SQLite directly. The API and dashboard are two front ends
-over one library, not client/server of each other.
+There is no message queue and no shared cache. SQLite's file-level locking is
+fine at demo/single-user scale; it will need a shared cache or a real DB engine
+if the API ever runs more than one worker/replica (see PRD §9, TASKS.md).
 
 ## 4. Persistence
 
@@ -98,8 +92,7 @@ over one library, not client/server of each other.
 |---|---|---|
 | `https://celestrak.org/NORAD/elements/gp.php` | Live TLE catalog | `CelestrackClient.fetch_group` catches `requests.RequestException`, logs, returns `[]`. Callers must check for an empty list — an empty catalog is silent, not an exception. See DECISIONS.md for the rate-limiting behavior observed under repeated requests. |
 | `sgp4` (PyPI) | Authoritative orbit propagation | Hard dependency; `TLE.to_orbital_element()` has no fallback. |
-| Plotly.js (CDN, embedded in generated HTML) | 2D ground tracks | Dashboard visuals degrade without internet, but API/data endpoints are unaffected. |
-| Three.js r128 (inlined in `dashboard.py`) | 3D globe | Vendored/inlined, not fetched at runtime — no external dependency at request time. |
+| three.js (bundled by Vite) | 3D globe | Part of the built bundle; no runtime fetch. |
 
 ## 6. Concurrency Model
 
@@ -113,9 +106,8 @@ over one library, not client/server of each other.
   `ThreadPoolExecutor`. Process-pool workers require `_assess_pair_worker` to
   stay a top-level, picklable function — do not turn it into a closure or
   instance method.
-- **Dashboard**: Streamlit's normal per-session script-rerun model;
-  `@st.cache_data(ttl=300)` bounds how often `load_tles`/`load_orbital_elements`
-  hit SQLite.
+- **Frontend**: conjunction search is cancellable on the client; the catalog
+  refresh is polled through `/health` (there is no completion event).
 
 ## 7. Units Contract
 
@@ -139,14 +131,14 @@ crosses every module boundary in the system:
   silently truncating catalog ingestion). Any process launch on Windows must
   set `PYTHONIOENCODING=utf-8` (or the code must stop printing non-ASCII to
   stdout). See DECISIONS.md.
-- **Path portability**: `dashboard.py` must resolve `ssa_data.db` relative to
-  the script (`DB_PATH = Path(__file__).parent / "ssa_data.db"`), not via a
-  hardcoded absolute path — a previous hardcoded developer-machine path made
-  every dashboard page crash on any other machine. Fixed; see DECISIONS.md.
+- **Path portability**: never hardcode an absolute path; resolve files relative
+  to the module (`Path(__file__).parent / ...`). A hardcoded developer-machine
+  path in the old Streamlit dashboard once crashed every page on any other
+  machine; see DECISIONS.md.
 
 ## 9. Deployment Shape (current)
 
-Local-only, two foreground/background processes, one file-based database, no
+Local-only, one API process plus the frontend dev server, one file-based database, no
 containerization, no process manager, no reverse proxy. Suitable for a demo or
 single-operator use; see PRD.md §9 for open questions on whether a hosted
 multi-user deployment is ever in scope.

@@ -47,6 +47,7 @@ class ConjunctionEvent:
     sat1_hbr: float  # Hard-body radius (km)
     sat2_hbr: float  # Hard-body radius (km)
     combined_hbr: float  # Sum of hard-body radii
+    relative_velocity_kms: float = 0.0  # |v1 - v2| at TCA (km/s)
 
     def to_dict(self) -> Dict:
         return {
@@ -60,6 +61,7 @@ class ConjunctionEvent:
             'probability_of_collision': round(self.probability_of_collision, 6),
             'risk_level': self.risk_level,
             'combined_hbr_km': round(self.combined_hbr, 4),
+            'relative_velocity_kms': round(self.relative_velocity_kms, 3),
         }
 
 
@@ -224,7 +226,8 @@ class ConjunctionDetector:
             risk_level=risk_level,
             sat1_hbr=hbr1,
             sat2_hbr=hbr2,
-            combined_hbr=combined_hbr
+            combined_hbr=combined_hbr,
+            relative_velocity_kms=float(np.linalg.norm(s1_tca.v - s2_tca.v)),
         )
 
     def _risk_level(self, pc: float) -> str:
@@ -377,7 +380,19 @@ class ConjunctionSearch:
         self.use_processes = use_processes
         self.max_workers = max_workers or max(1, (os.cpu_count() or 2) - 1)
 
-    def search_catalog(self, orbital_elements: Dict[str, Tuple[OrbitalElement, str]]) -> List[ConjunctionEvent]:
+    def search_catalog(
+        self,
+        orbital_elements: Dict[str, Tuple[OrbitalElement, str]],
+        start_epoch: Optional[datetime] = None,
+    ) -> List[ConjunctionEvent]:
+        """
+        Search the catalog for conjunctions over [start_epoch, start_epoch + time_horizon_days].
+
+        start_epoch defaults to the current UTC time, so the horizon is a forecast. It used to
+        default to the first object's TLE epoch, which with a stale catalog put the whole
+        "horizon" in the past (and disagreed with assess_pair, which already defaulted to now).
+        Pass an explicit start_epoch to reproduce a historical window.
+        """
         conjunctions: List[ConjunctionEvent] = []
 
         ids = list(orbital_elements.keys())
@@ -385,8 +400,8 @@ class ConjunctionSearch:
         if n < 2:
             return conjunctions
 
-        # Same behavior as your original: use epoch of first object as search start
-        start_epoch = orbital_elements[ids[0]][0].epoch
+        if start_epoch is None:
+            start_epoch = datetime.utcnow()
 
         # Build arrays for speed
         oes = [orbital_elements[_id][0] for _id in ids]
@@ -500,8 +515,10 @@ if __name__ == "__main__":
     db = TLEDatabase()
     if db.count_tles() == 0:
         print("Fetching TLEs from Celestrak...")
-        tles = CelestrackClient.fetch_group(group="last-30-days")
-        db.insert_batch(tles)
+        result = CelestrackClient.fetch_group_checked(group="active")
+        if result.status != "ok":
+            raise SystemExit(f"Could not load TLEs from Celestrak: {result.detail}")
+        db.insert_batch(result.tles)
 
     all_tles = db.get_all_tles()
 

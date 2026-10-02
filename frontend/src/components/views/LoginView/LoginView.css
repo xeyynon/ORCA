@@ -1,0 +1,7 @@
+.login-view { position: relative; min-height: 100%; display: grid; place-items: center; padding: var(--gap-5) var(--gap-4); background: var(--bg-abyss); overflow-y: auto; }
+.login-view__corner { position: absolute; top: var(--gap-3); right: var(--gap-3); }
+.login-view__card { width: min(400px, 100%); display: flex; flex-direction: column; gap: var(--gap-4); padding: var(--gap-5); border: 1px solid var(--border-strong); border-radius: var(--radius-lg); background: var(--bg-panel); box-shadow: var(--shadow); }
+.login-view__brand { display: flex; }
+.login-view__title { margin: 0; font-size: 22px; font-weight: 600; }
+.login-view__sub { margin: -8px 0 0; color: var(--text-tertiary); }
+.login-view__code { padding: 1px 6px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg-input); font-family: var(--font-mono); font-size: 12px; color: var(--text-primary); }

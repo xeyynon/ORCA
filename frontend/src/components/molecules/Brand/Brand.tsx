@@ -1,14 +1,26 @@
+import { cx } from '@/lib/cx'
 import './Brand.css'
 
-export function Brand() {
+type Props = {
+  /** bar = the app header; card = the larger mark on the sign-in card. */
+  size?: 'bar' | 'card'
+}
+
+// BASE_URL keeps the path right if the app is ever served from a sub-folder instead of the site root.
+const BASE = import.meta.env.BASE_URL
+
+/**
+ * The ORCA logo: one transparent PNG made for dark surfaces. It sits directly on the dark theme and on a dark chip on the
+ * light one (--logo-backdrop / --logo-pad), because silver lettering on white is not legible.
+ * Pre-sized copies (320 and 640 px wide) are used instead of the multi-megabyte source in frontend/branding/.
+ */
+export function Brand({ size = 'bar' }: Props) {
   return (
-    <div className="brand">
-      <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true">
-        <circle cx="10" cy="10" r="8.5" fill="none" stroke="var(--accent)" strokeWidth="1.4" />
-        <ellipse cx="10" cy="10" rx="8.5" ry="3.2" fill="none" stroke="var(--accent)" strokeWidth="1" transform="rotate(-28 10 10)" />
-        <circle cx="16.2" cy="6.4" r="1.6" fill="var(--text-primary)" />
-      </svg>
-      <span className="brand__name">ORCA</span>
-    </div>
+    <img
+      className={cx('brand', `brand--${size}`)}
+      src={`${BASE}${size === 'card' ? 'logo-640.png' : 'logo-320.png'}`}
+      alt="ORCA"
+      draggable={false}
+    />
   )
 }

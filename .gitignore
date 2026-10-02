@@ -68,3 +68,6 @@ frontend/dist/
 frontend/*.tsbuildinfo
 # the blanket *.html rule above must not swallow the Vite entry page
 !frontend/index.html
+
+# Operator credential (hash + signing secret): never commit
+auth.json

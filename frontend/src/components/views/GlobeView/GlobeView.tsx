@@ -3,7 +3,11 @@ import type { TleRecord } from '@/api/types'
 import type { Snapshot } from '@/globe/EarthScene'
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { useOrbitPaths } from '@/hooks/useOrbitPaths'
+import { useTleById } from '@/hooks/useTleById'
 import { usePositions } from '@/hooks/usePositions'
+import { countBy } from '@/lib/countBy'
+import { EARTH_RADIUS_KM } from '@/lib/coords'
+import { ALTITUDE_BANDS, altitudeBand } from '@/lib/orbit'
 import { parseUtc } from '@/lib/time'
 import type { Theme } from '@/lib/theme'
 import { Button } from '../../atoms/Button/Button'
@@ -45,7 +49,8 @@ export function GlobeView({ catalog, totalCount, selection, focus, theme, now, o
 
   useKeyboardShortcuts({ ' ': () => setAutoRotate((v) => !v) })
 
-  const positions = usePositions(POSITION_LIMIT, offset)
+  // Selected ids are always requested, so a selected object is drawn even when it is outside the first POSITION_LIMIT rows.
+  const positions = usePositions(POSITION_LIMIT, offset, selection)
   const { paths, failed } = useOrbitPaths(selection, offset)
 
   const snapshot: Snapshot | null = useMemo(() => {
@@ -59,19 +64,25 @@ export function GlobeView({ catalog, totalCount, selection, focus, theme, now, o
     }
   }, [positions.data, offset])
 
+  const bandCounts = useMemo(
+    () => countBy((positions.data?.objects ?? []).map((o) => Math.hypot(o.r[0], o.r[1], o.r[2]) - EARTH_RADIUS_KM), ALTITUDE_BANDS, altitudeBand),
+    [positions.data],
+  )
+
   const byId = useMemo(() => new Map(catalog?.map((t) => [t.norad_cat_id, t]) ?? []), [catalog])
   const posById = useMemo(() => new Map(positions.data?.objects.map((o) => [o.id, o]) ?? []), [positions.data])
   const nameOf = (id: string) => posById.get(id)?.name ?? byId.get(id)?.object_name ?? id
 
-  const primary = selection[0] ? byId.get(selection[0]) ?? null : null
-  const missingFromSubset = selection.filter((id) => positions.data && !posById.has(id))
+  // The browser holds only the first 5,000 element sets, yet any stored object can be selected.
+  const primary = useTleById(selection[0] ?? null, byId)
+  const notDrawn = selection.filter((id) => positions.data && !posById.has(id))
 
   return (
     <div className="globe-view">
       <aside className="globe-view__panel" aria-label="Globe controls">
         <TimeScrubber offsetHours={offsetInput} atIso={positions.data?.at ?? null} onChange={setOffsetInput} />
         <div className="globe-view__rule" />
-        <GlobeLegend shown={positions.data?.objects.length ?? 0} total={totalCount} />
+        <GlobeLegend shown={positions.data?.objects.length ?? 0} total={totalCount} bandCounts={bandCounts} />
         <Button size="sm" variant="ghost" onClick={() => setAutoRotate((v) => !v)}>{autoRotate ? 'Pause rotation (Space)' : 'Resume rotation (Space)'}</Button>
 
         {positions.status === 'error' && !positions.data ? (
@@ -84,7 +95,7 @@ export function GlobeView({ catalog, totalCount, selection, focus, theme, now, o
 
         {primary ? <ObjectCard tle={primary} position={posById.get(primary.norad_cat_id) ?? null} now={now} onClose={() => onSelect([])} /> : null}
         {selection.length > 1 ? <FieldNote>{selection.length} objects selected: {selection.map(nameOf).join(' and ')}.</FieldNote> : null}
-        {missingFromSubset.length > 0 ? <FieldNote>{missingFromSubset.map(nameOf).join(', ')} is outside the {POSITION_LIMIT.toLocaleString('en-US')}-object position subset, so it is not drawn.</FieldNote> : null}
+        {notDrawn.length > 0 ? <FieldNote>{notDrawn.map(nameOf).join(', ')} could not be drawn: it is not in the catalog, or SGP4 cannot propagate it (decayed or invalid elements).</FieldNote> : null}
         {failed.length > 0 ? <FieldNote>Orbit path unavailable for {failed.map(nameOf).join(', ')}.</FieldNote> : null}
 
         <MethodNote propagator={positions.data?.propagator ?? null} oldestTleAgeDays={oldestTleAgeDays} />

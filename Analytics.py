@@ -23,6 +23,53 @@ from parser_pipeline import TLE
 from conjunction_detection import ConjunctionEvent
 
 # ============================================================================
+# OBJECT CLASSIFICATION (from what the catalog actually carries)
+# ============================================================================
+OBJECT_TYPES = ("payload", "rocket_body", "debris")
+
+
+def classify_object_type(name: str) -> str:
+    """
+    Object type inferred from the NAME only. The stored data has no status or type field, so this is a naming
+    heuristic (Celestrak names debris "... DEB" and rocket bodies "... R/B"), not an authoritative record.
+    It cannot say whether a payload is still active.
+    """
+    n = f" {name.upper()} "
+    if " DEB " in n or n.rstrip().endswith(" DEB") or "DEBRIS" in n:
+        return "debris"
+    if " R/B " in n or "ROCKET BODY" in n:
+        return "rocket_body"
+    return "payload"
+
+
+_MU_KM3_S2 = 398600.4418
+_RE_KM = 6371.0
+_GEO_ALT_KM = 35786.0
+REGIMES = ("LEO", "MEO", "GEO", "HEO")
+
+
+def classify_regime(mean_motion_rev_per_day: float, eccentricity: float) -> Optional[str]:
+    """
+    LEO / MEO / GEO / HEO from mean motion (rev/day) and eccentricity, or None if mean motion is not physical.
+    Mirrors frontend/src/lib/orbit.ts (deriveOrbit + classifyRegime); tests/test_catalog.py pins the shared cases.
+    TLE mean motion is rev/day: convert to rad/s before Kepler's third law (ARCHITECTURE.md section 7).
+    """
+    if not mean_motion_rev_per_day or not math.isfinite(mean_motion_rev_per_day) or mean_motion_rev_per_day <= 0:
+        return None
+    n_rad_s = mean_motion_rev_per_day * 2.0 * math.pi / 86400.0
+    a = (_MU_KM3_S2 / (n_rad_s ** 2)) ** (1.0 / 3.0)
+    perigee = a * (1.0 - eccentricity) - _RE_KM
+    apogee = a * (1.0 + eccentricity) - _RE_KM
+    if eccentricity > 0.25:
+        return "HEO"
+    if perigee >= _GEO_ALT_KM - 400 and apogee <= _GEO_ALT_KM + 400:
+        return "GEO"
+    if apogee < 2000:
+        return "LEO"
+    return "MEO"
+
+
+# ============================================================================
 # ORBITAL ANALYTICS
 # =========================================================================
 class OrbitalAnalytics:
@@ -322,7 +369,7 @@ class ExportUtils:
         """Export conjunctions to CSV"""
         import csv
         
-        with open(filepath, 'w', newline='') as f:
+        with open(filepath, 'w', newline='', encoding='utf-8') as f:
             writer = csv.DictWriter(f, fieldnames=[
                 'sat1_id', 'sat1_name', 'sat2_id', 'sat2_name',
                 'tca', 'min_distance_km', 'mahalanobis_distance',
@@ -337,7 +384,7 @@ class ExportUtils:
     def export_conjunctions_json(conjunctions: List[ConjunctionEvent], filepath: str):
         """Export conjunctions to JSON"""
         data = [c.to_dict() for c in conjunctions]
-        with open(filepath, 'w') as f:
+        with open(filepath, 'w', encoding='utf-8') as f:
             json.dump(data, f, indent=2)
     
     @staticmethod
@@ -356,8 +403,10 @@ if __name__ == "__main__":
     db = TLEDatabase()
     if db.count_tles() == 0:
         print("Fetching TLEs from Celestrak...")
-        tles = CelestrackClient.fetch_group(group="last-30-days")
-        db.insert_batch(tles)
+        result = CelestrackClient.fetch_group_checked(group="active")
+        if result.status != "ok":
+            raise SystemExit(f"Could not load TLEs from Celestrak: {result.detail}")
+        db.insert_batch(result.tles)
     
     all_tles = db.get_all_tles()
     
