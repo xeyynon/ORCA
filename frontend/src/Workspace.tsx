@@ -1,5 +1,7 @@
 import { lazy, Suspense, useCallback, useMemo, useRef, useState } from 'react'
 import { getStatistics, getTles } from '@/api/endpoints'
+import type { ConjunctionEvent } from '@/api/types'
+import type { CameraGeo } from '@/lib/coords'
 import { useAsync } from '@/hooks/useAsync'
 import { useCatalogUpdate } from '@/hooks/useCatalogUpdate'
 import { useHashView } from '@/hooks/useHashView'
@@ -8,7 +10,7 @@ import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { useNow } from '@/hooks/useNow'
 import { useObjectSearch } from '@/hooks/useObjectSearch'
 import { summarizeCatalog } from '@/lib/catalog'
-import { days, integer } from '@/lib/format'
+import { days, formatLat, formatLon, integer } from '@/lib/format'
 import { formatUtc } from '@/lib/time'
 import { VIEWS } from '@/lib/views'
 import { Icon } from '@/components/atoms/Icon/Icon'
@@ -55,6 +57,8 @@ export function Workspace({ username, onSignOut, theme, onToggleTheme: toggleThe
 
   const [selection, setSelection] = useState<string[]>([])
   const [focus, setFocus] = useState<FocusRequest | null>(null)
+  const [conjunction, setConjunction] = useState<ConjunctionEvent | null>(null)
+  const [camera, setCamera] = useState<CameraGeo | null>(null)
   const [helpOpen, setHelpOpen] = useState(false)
   const [query, setQuery] = useState('')
   const search = useObjectSearch(query, catalog.data ?? [])
@@ -62,7 +66,9 @@ export function Workspace({ username, onSignOut, theme, onToggleTheme: toggleThe
 
   const summary = useMemo(() => (catalog.data ? summarizeCatalog(catalog.data, now) : null), [catalog.data, now])
 
-  const showOnGlobe = useCallback((ids: string[]) => {
+  // `event` is the conjunction being shown (its dashed closest-approach line and card); a plain object pick has none.
+  const showOnGlobe = useCallback((ids: string[], event?: ConjunctionEvent) => {
+    setConjunction(event ?? null)
     setSelection(ids)
     if (ids[0]) setFocus({ id: ids[0], nonce: ++focusNonce.current })
     go('globe')
@@ -82,10 +88,15 @@ export function Workspace({ username, onSignOut, theme, onToggleTheme: toggleThe
   }, !helpOpen)
 
   const status: StatusItem[] = [
-    { label: 'API', value: apiStatus === 'online' ? 'online' : apiStatus === 'offline' ? 'unreachable' : 'checking', tone: apiStatus === 'online' ? 'ok' : apiStatus === 'offline' ? 'bad' : 'warn' },
+    { label: 'API', value: apiStatus === 'online' ? 'online' : apiStatus === 'offline' ? 'unreachable' : 'checking', tone: apiStatus === 'online' ? 'ok' : apiStatus === 'offline' ? 'bad' : 'warn', dotOnly: apiStatus === 'online' },
     { label: 'Objects', value: health ? integer(health.database.tles_count) : null },
     { label: 'Oldest TLE', value: summary?.oldestAgeDays != null ? days(summary.oldestAgeDays) : null, title: 'Age of the oldest element set in the catalog' },
     { label: 'Last API refresh', value: health?.database.last_update ? formatUtc(health.database.last_update) : null, title: 'When the API last stored a Celestrak fetch' },
+    ...(view === 'globe' ? [
+      { label: 'Camera lat', value: camera ? formatLat(camera.latDeg) : null },
+      { label: 'Lon', value: camera ? formatLon(camera.lonDeg) : null },
+      { label: 'Alt', value: camera ? `${integer(camera.altKm)} km` : null },
+    ] : []),
     { label: 'UTC', value: formatUtc(now.toISOString()).replace(' UTC', '') },
   ]
 
@@ -120,10 +131,13 @@ export function Workspace({ username, onSignOut, theme, onToggleTheme: toggleThe
           totalCount={health?.database.tles_count ?? catalog.data?.length ?? null}
           selection={selection}
           focus={focus}
+          conjunction={conjunction}
           theme={theme}
           now={now}
-          oldestTleAgeDays={summary?.oldestAgeDays ?? null}
           onSelect={setSelection}
+          onCamera={setCamera}
+          onClearConjunction={() => setConjunction(null)}
+          onViewConjunctions={() => go('conjunctions')}
         />
         </Suspense>
       ) : null}

@@ -1,3 +1,4 @@
+import type { ObjectType } from '@/api/types'
 import type { AltitudeBand, InclinationClassId, Regime } from './orbit'
 import type { TleAgeTone } from './tleAge'
 
@@ -18,6 +19,12 @@ export const ALTITUDE_BAND_COLOR: Record<AltitudeBand, string> = {
   MEO: 'var(--cat-2)',
   GEO: 'var(--cat-3)',
   BEYOND: 'var(--cat-4)',
+}
+
+export const OBJECT_TYPE_COLOR: Record<ObjectType, string> = {
+  payload: 'var(--cat-1)',
+  rocket_body: 'var(--cat-5)',
+  debris: 'var(--cat-3)',
 }
 
 export const INCLINATION_COLOR: Record<InclinationClassId, string> = {

@@ -1,4 +1,6 @@
-.analytics__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: var(--gap-4); align-items: start; }
-/* The heatmap takes two columns so it fills the end of the last row; on narrower screens it takes the full row. */
-.analytics__wide { grid-column: span 2; }
-@media (max-width: 1100px) { .analytics__wide { grid-column: 1 / -1; } }
+/* Three equal columns, cards in a row stretch to one height; the heatmap closes the page across the full width. */
+.analytics__grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--gap-3); align-items: stretch; }
+.analytics__wide { grid-column: 1 / -1; display: flex; }
+.analytics__wide > * { flex: 1; }
+@media (max-width: 1200px) { .analytics__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 760px) { .analytics__grid { grid-template-columns: 1fr; } }

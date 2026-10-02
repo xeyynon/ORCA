@@ -2,7 +2,7 @@ import type { BadgeTone } from '../../atoms/Badge/Badge'
 import { StatusField } from '../../molecules/StatusField/StatusField'
 import './StatusBar.css'
 
-export interface StatusItem { label: string; value: string | null; tone?: BadgeTone; title?: string }
+export interface StatusItem { label: string; value: string | null; tone?: BadgeTone; title?: string; dotOnly?: boolean }
 type Props = { items: readonly StatusItem[] }
 
 /**

@@ -1,0 +1,2 @@
+.filters__group { display: flex; flex-direction: column; gap: 2px; margin-top: var(--gap-2); }
+.filters__title { margin-bottom: 4px; }

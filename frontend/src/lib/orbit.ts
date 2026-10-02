@@ -82,3 +82,10 @@ export function altitudeBand(altKm: number): AltitudeBand {
   if (altKm <= GEO_ALT_KM + 500) return 'GEO'
   return 'BEYOND'
 }
+
+export const ALTITUDE_BAND_LABEL: Record<AltitudeBand, string> = {
+  LEO: 'LEO (<2,000 km)',
+  MEO: 'MEO (2,000–35,300 km)',
+  GEO: 'GEO (≈35,786 km)',
+  BEYOND: 'Beyond GEO',
+}

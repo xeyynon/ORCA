@@ -1,0 +1,6 @@
+.conjunction-card__head { display: flex; align-items: center; justify-content: space-between; gap: var(--gap-2); }
+.conjunction-card__title { display: flex; align-items: center; gap: var(--gap-2); font-weight: 600; }
+.conjunction-card__pair { display: grid; grid-template-columns: 1fr auto 1fr; align-items: start; gap: var(--gap-2); }
+.conjunction-card__name { font-weight: 600; overflow-wrap: anywhere; }
+.conjunction-card__grid { display: grid; grid-template-columns: 1fr; gap: var(--gap-2); }
+.conjunction-card__actions { display: flex; flex-direction: column; gap: var(--gap-2); margin-top: var(--gap-1); }

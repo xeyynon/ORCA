@@ -1,0 +1,1 @@
+.camera-card__grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--gap-2) var(--gap-4); }

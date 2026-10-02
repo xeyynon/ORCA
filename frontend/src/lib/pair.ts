@@ -16,3 +16,10 @@ export function countPast(events: ReadonlyArray<Pick<ConjunctionEvent, 'tca'>>, 
   const t = now.getTime()
   return events.filter((e) => parseUtc(e.tca).getTime() < t).length
 }
+
+/** Below this relative speed at closest approach two objects are flying together (a formation or a shared launch), not crossing paths. */
+export const CO_MOVING_KMS = 0.05
+
+export function isCoMoving(relativeVelocityKms: number): boolean {
+  return Number.isFinite(relativeVelocityKms) && relativeVelocityKms < CO_MOVING_KMS
+}
