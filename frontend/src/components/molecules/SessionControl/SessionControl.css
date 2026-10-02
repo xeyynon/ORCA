@@ -1,0 +1,3 @@
+.session-control { display: inline-flex; align-items: center; gap: var(--gap-2); }
+.session-control__who { max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
+@media (max-width: 640px) { .session-control__who { display: none; } }

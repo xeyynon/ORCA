@@ -1,0 +1,7 @@
+.loading-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--gap-4); background: var(--bg-abyss); }
+.loading-screen--screen { height: 100%; min-height: 100vh; }
+.loading-screen--area { flex: 1; min-height: 0; }
+.loading-screen__message { color: var(--text-secondary); font-size: 13px; letter-spacing: 0.02em; }
+.loading-screen__bar { position: relative; width: 148px; height: 2px; overflow: hidden; border-radius: 2px; background: var(--border); }
+.loading-screen__bar-fill { position: absolute; top: 0; bottom: 0; width: 40%; border-radius: 2px; background: var(--accent); animation: loading-screen-slide 1.5s ease-in-out infinite; }
+@keyframes loading-screen-slide { 0% { left: -40%; } 100% { left: 100%; } }

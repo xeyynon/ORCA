@@ -8,8 +8,8 @@ design and [README.md](README.md) for module-level API detail.
 
 ORCA — a Python SSA (space situational awareness) platform: TLE ingestion →
 SGP4 orbit propagation → conjunction (collision-risk) detection → FastAPI REST
-API + Streamlit dashboard. Single SQLite file (`ssa_data.db`) is the only
-persistence layer, shared by both front ends.
+API + React (Vite) frontend. Single SQLite file (`ssa_data.db`) is the only
+persistence layer, read through the API.
 
 ## Setup
 
@@ -30,8 +30,8 @@ optional; ingestion silently truncates without it.
 # API — http://127.0.0.1:8000, docs at /docs
 PYTHONIOENCODING=utf-8 uvicorn api_server:app --port 8000
 
-# Dashboard — http://127.0.0.1:8501
-PYTHONIOENCODING=utf-8 streamlit run dashboard.py --server.port 8501
+# Frontend — http://127.0.0.1:5173 (proxies /api and /health to :8000)
+cd frontend && npm install && npm run dev
 ```
 
 Populate the database after first launch:
@@ -54,10 +54,9 @@ type-check alone — actually launch the affected process and hit it:
 
 - **API change** → launch uvicorn, `curl` the affected endpoint, read the
   JSON body.
-- **Dashboard change** → launch Streamlit, check `curl -s
-  http://127.0.0.1:8501/_stcore/health` returns `ok`, and read
-  `/tmp/dashboard.log`-equivalent output for tracebacks — Streamlit failures
-  happen per-page at render time and won't show up as a nonzero exit code.
+- **Frontend change** → run `cd frontend && npm run typecheck && npm test`,
+  then launch the API and `npm run dev`, load the affected view in a browser
+  and check the console. Type-checks do not catch render-time failures.
 - **Orbit mechanics / conjunction change** → run against real seeded data
   (`stations` group is enough) and sanity-check output units against the
   Units Contract in ARCHITECTURE.md §7, not just "it didn't throw."
@@ -72,7 +71,7 @@ type-check alone — actually launch the affected process and hit it:
   deliberate and documented in README.md; new functionality almost always
   belongs inside one of the existing six.
 - Paths: never hardcode an absolute filesystem path (a prior hardcoded
-  developer path in `dashboard.py` broke the app on every other machine — see
+  developer path in the old Streamlit dashboard broke the app on every other machine — see
   DECISIONS.md). Use `Path(__file__).parent / "..."` or an existing constant
   like `DB_PATH`.
 - `ConjunctionSearch`'s pairwise worker (`_assess_pair_worker`) must stay a

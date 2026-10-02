@@ -31,6 +31,7 @@ export function DataView({ health, apiStatus, summary, update }: Props) {
         <DataStatusCard
           count={health?.database.tles_count ?? summary?.count ?? null}
           lastUpdate={health?.database.last_update ?? null}
+          lastFetch={health?.database.last_fetch ?? null}
           newestAgeDays={summary?.newestAgeDays ?? null}
           oldestAgeDays={summary?.oldestAgeDays ?? null}
         />

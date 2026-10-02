@@ -1,4 +1,5 @@
 // The ONE point of contact with the backend (rules.md §8). Components never call fetch.
+import { clearToken, getToken } from './session'
 
 /** Empty string = same origin (the Vite dev proxy). Set VITE_API_BASE to target a remote API. */
 export const API_BASE: string = (import.meta.env.VITE_API_BASE as string | undefined) ?? ''
@@ -30,10 +31,20 @@ function detailOf(body: unknown, fallback: string): string {
   return fallback
 }
 
-export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
+type Init = RequestInit & {
+  /** Do not attach the token and do not treat a 401 as an ended session (the sign-in call itself). */
+  skipAuth?: boolean
+}
+
+export async function apiFetch<T>(path: string, init: Init = {}): Promise<T> {
+  const { skipAuth = false, ...rest } = init
+  const headers = new Headers(rest.headers)
+  const token = skipAuth ? null : getToken()
+  if (token) headers.set('Authorization', `Bearer ${token}`)
+
   let res: Response
   try {
-    res = await fetch(`${API_BASE}${path}`, init)
+    res = await fetch(`${API_BASE}${path}`, { ...rest, headers })
   } catch (err) {
     if (err instanceof DOMException && err.name === 'AbortError') throw new ApiError('aborted', 'Cancelled')
     throw new ApiError('network', 'Cannot reach the ORCA API. Is uvicorn running on port 8000?')
@@ -41,6 +52,9 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise
   if (!res.ok) {
     let body: unknown = null
     try { body = await res.json() } catch { /* non-JSON error body */ }
+    // A 401 on a call that carried a token means the session ended (expired, or the password was rotated):
+    // forget it and tell the app, so it returns to the login screen instead of showing panels that quietly stop updating.
+    if (res.status === 401 && token) clearToken()
     throw new ApiError('http', detailOf(body, `Request failed (${res.status})`), res.status)
   }
   return (await res.json()) as T

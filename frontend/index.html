@@ -5,14 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="color-scheme" content="dark light" />
     <title>ORCA</title>
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='3' fill='%2338bdf8'/%3E%3Ccircle cx='8' cy='8' r='6.5' fill='none' stroke='%2338bdf8' stroke-width='1'/%3E%3C/svg%3E" />
+    <link rel="icon" type="image/png" href="/favicon-64.png" />
     <script>
       // Apply the saved theme before first paint so there is no flash.
       try { var t = localStorage.getItem('orca:theme'); if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t } catch (e) {}
     </script>
+    <style>
+      #boot { position: fixed; inset: 0; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; background: #070a0e; color: #b4bfcd; font: 13px/1.4 system-ui, sans-serif; }
+      :root[data-theme="light"] #boot { background: #dde5ee; color: #334155; }
+      .boot__bar { position: relative; width: 148px; height: 2px; overflow: hidden; border-radius: 2px; background: rgba(128, 144, 168, 0.3); }
+      .boot__bar span { position: absolute; top: 0; bottom: 0; width: 40%; border-radius: 2px; background: #7aa2f7; animation: boot-slide 1.5s ease-in-out infinite; }
+            @keyframes boot-slide { 0% { left: -40%; } 100% { left: 100%; } }
+      @media (prefers-reduced-motion: reduce) { .boot__bar span { animation: none; } }
+    </style>
   </head>
   <body>
+    <!-- Static splash: visible before JavaScript runs, removed by App once React has mounted. Colours mirror the
+         --bg-abyss / text tokens (this runs before tokens.css exists). -->
+    <div id="boot" role="status" aria-label="Loading ORCA">
+      <canvas id="boot-canvas" width="240" height="240"></canvas>
+      <div class="boot__msg">Loading ORCA</div>
+      <span class="boot__bar"><span></span></span>
+    </div>
     <div id="root"></div>
+    <script type="module">
+      // Runs ahead of the app bundle so the splash is already animating while the bundle downloads.
+      import { startOrbitAnimation } from '/src/lib/orbitAnimation.ts'
+      const canvas = document.getElementById('boot-canvas')
+      if (canvas) startOrbitAnimation(canvas, { size: 240 })
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

@@ -9,8 +9,9 @@ const LIVE_REFRESH_MS = 20_000
  * with velocity in between, so the globe moves smoothly without a request per frame. A scrubbed
  * (future) snapshot is frozen and never auto-refreshes.
  */
-export function usePositions(limit: number, offsetHours: number) {
-  const state = useAsync((signal) => getPositions(limit, offsetHours, { signal }), [limit, offsetHours])
+export function usePositions(limit: number, offsetHours: number, ids: readonly string[] = []) {
+  // `ids.join` is the dependency, so a new array holding the same ids does not refetch.
+  const state = useAsync((signal) => getPositions(limit, offsetHours, ids, { signal }), [limit, offsetHours, ids.join(',')])
   const { reload } = state
   useEffect(() => {
     if (offsetHours !== 0) return

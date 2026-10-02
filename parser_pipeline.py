@@ -217,6 +217,15 @@ class TLEParser:
 # CELESTRAK CLIENT
 # ============================================================================
 
+@dataclass
+class FetchResult:
+    """Outcome of one Celestrak fetch. `status` is ok | empty | rate_limited | not_found | http_error | network_error."""
+    tles: List["TLE"]
+    status: str
+    http_status: Optional[int]
+    detail: str
+
+
 class CelestrackClient:
     """Fetch and parse TLEs from Celestrak"""
 
@@ -225,25 +234,45 @@ class CelestrackClient:
     
     @classmethod
     def fetch_group(cls, group: str = "active", format_type: str = "tle") -> List[TLE]:
-        """Fetch TLE group from Celestrak."""
+        """Fetch TLE group from Celestrak. Returns [] on failure; use fetch_group_checked to tell why."""
+        return cls.fetch_group_checked(group, format_type).tles
+
+    @classmethod
+    def fetch_group_checked(cls, group: str = "active", format_type: str = "tle") -> "FetchResult":
+        """
+        Fetch a TLE group and say what happened. An empty list alone cannot tell "Celestrak refused us"
+        from "nothing came back", so the outcome travels with it:
+        ok | empty | rate_limited | not_found | http_error | network_error.
+        """
         params = {"GROUP": group, "FORMAT": format_type}
-        
+
         try:
             response = requests.get(cls.BASE_URL, params=params, timeout=cls.TIMEOUT)
-            response.raise_for_status()
-            
-            print(f"[Celestrak] Status: {response.status_code}")
-            print(f"[Celestrak] Response Length: {len(response.text)} chars")
-            
-            if format_type == "json":
-                return cls._parse_json(response.json())
-            else:
-                return cls._parse_tle_text(response.text)
-                
         except requests.RequestException as e:
             print(f"[ERROR] Celestrak fetch failed: {e}")
-            return []
-    
+            return FetchResult([], "network_error", None, f"Could not reach Celestrak: {e}")
+
+        code = response.status_code
+        if code in (403, 429):
+            print(f"[ERROR] Celestrak refused the request: HTTP {code}")
+            return FetchResult([], "rate_limited", code, f"Celestrak refused the request (HTTP {code}). Wait a while, or try a smaller group.")
+        if code == 404:
+            print(f"[ERROR] Celestrak group not found: {group}")
+            return FetchResult([], "not_found", code, f"Celestrak has no group named '{group}' (HTTP 404).")
+        if not response.ok:
+            print(f"[ERROR] Celestrak returned HTTP {code}")
+            return FetchResult([], "http_error", code, f"Celestrak returned HTTP {code}.")
+
+        print(f"[Celestrak] Status: {code}")
+        print(f"[Celestrak] Response Length: {len(response.text)} chars")
+        try:
+            tles = cls._parse_json(response.json()) if format_type == "json" else cls._parse_tle_text(response.text)
+        except ValueError as e:
+            return FetchResult([], "http_error", code, f"Celestrak sent a response that could not be read: {e}")
+        if not tles:
+            return FetchResult([], "empty", code, "Celestrak answered but no TLEs could be parsed from it.")
+        return FetchResult(tles, "ok", code, f"Fetched {len(tles)} TLEs.")
+
     @staticmethod
     def _parse_tle_text(text: str) -> List[TLE]:
         """Parse TLE text format (3-line format: NAME, LINE1, LINE2)"""
@@ -269,9 +298,9 @@ class CelestrackClient:
             tle = TLEParser.parse_lines(name, line1, line2)
             if tle:
                 tles.append(tle)
-                print(f"      ✓ Success: {tle.norad_cat_id}")
+                print(f"      OK: {tle.norad_cat_id}")
             else:
-                print(f"      ✗ Failed")
+                print(f"      FAILED")
             
             i += 3
         
@@ -532,6 +561,63 @@ class TLEDatabase:
         finally:
             conn.close()
 
+    def search_tles(self, query: str, limit: int = 20) -> List[TLE]:
+        """
+        Find objects by NORAD id or name over the WHOLE stored catalog (not just a loaded subset).
+        Ranked: exact NORAD id, then names starting with the query, then names containing it.
+        LIKE wildcards in the query are escaped so "50%" or "a_b" are matched literally.
+
+        Returns LIGHTWEIGHT records for listing: line1/line2/bstar and the derivative terms are NOT
+        populated (they are not selected). Use get_tle() when the full element set is needed.
+        """
+        q = query.strip()
+        if not q:
+            return []
+        escaped = q.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        try:
+            cursor.execute(
+                """
+                SELECT norad_cat_id, object_name, epoch, inclination, raan, eccentricity,
+                       arg_of_perigee, mean_anomaly, mean_motion
+                FROM tle
+                WHERE norad_cat_id = ?
+                   OR object_name LIKE ? ESCAPE '\\'
+                   OR norad_cat_id LIKE ? ESCAPE '\\'
+                ORDER BY CASE
+                           WHEN norad_cat_id = ? THEN 0
+                           WHEN object_name LIKE ? ESCAPE '\\' THEN 1
+                           WHEN norad_cat_id LIKE ? ESCAPE '\\' THEN 1
+                           ELSE 2
+                         END,
+                         object_name
+                LIMIT ?
+                """,
+                (q, f"%{escaped}%", f"{escaped}%", q, f"{escaped}%", f"{escaped}%", int(limit)),
+            )
+            out: List[TLE] = []
+            for (nid, name, epoch_val, incl, raan, ecc, argp, ma, mm) in cursor.fetchall():
+                if isinstance(epoch_val, str):
+                    epoch_dt = datetime.fromisoformat(epoch_val.replace('Z', '+00:00'))
+                elif isinstance(epoch_val, datetime):
+                    epoch_dt = epoch_val
+                else:
+                    continue
+                out.append(TLE(
+                    object_name=name, norad_cat_id=nid,
+                    epoch_year=epoch_dt.year % 100,
+                    epoch_day=epoch_dt.timetuple().tm_yday
+                    + (epoch_dt.hour * 3600 + epoch_dt.minute * 60 + epoch_dt.second) / 86400.0,
+                    bstar=0.0, mean_motion_dot=0.0, mean_motion_ddot=0.0, element_number=0,
+                    line1="", line2="",
+                    inclination=incl, raan=raan, eccentricity=ecc,
+                    arg_of_perigee=argp, mean_anomaly=ma, mean_motion=mm,
+                ))
+            return out
+        finally:
+            conn.close()
+
     def set_cache(self, key: str, value: str):
         """Set cache value"""
         conn = sqlite3.connect(self.db_path)
@@ -604,7 +690,7 @@ if __name__ == "__main__":
     
     # Fetch live TLEs from Celestrak
     print("\n[Main] Fetching TLEs from Celestrak...")
-    tles = CelestrackClient.fetch_group(group="last-30-days")
+    tles = CelestrackClient.fetch_group(group="active")
     print(f"[Main] Fetched {len(tles)} TLE records")
     
     if tles:
@@ -621,7 +707,7 @@ if __name__ == "__main__":
         for tle in all_tles:
             print(f"\n  {tle.object_name} ({tle.norad_cat_id})")
             print(f"    Epoch: {tle.epoch}")
-            print(f"    Inclination: {tle.inclination:.2f}°")
+            print(f"    Inclination: {tle.inclination:.2f} deg")
             print(f"    Mean Motion: {tle.mean_motion:.5f} rev/day")
             print(f"    Eccentricity: {tle.eccentricity:.6f}")
             print(f"    Mean Motion DDOT: {tle.mean_motion_ddot}")

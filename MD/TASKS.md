@@ -22,16 +22,29 @@ Backlog and status tracking. Not a changelog — see `git log` for history and
 - [x] Verify dashboard boots clean (`/_stcore/health` → `ok`) after the DB-path fix.
 - [x] Author PRD.md, ARCHITECTURE.md, AGENTS.md, DECISIONS.md, TASKS.md.
 
+- [x] Conjunction search starts at the current time instead of the first TLE epoch
+      (DECISIONS.md, 2026-10-03). Regression test in `tests/test_search_start.py`
+      (`python -m unittest discover -s tests`).
+
+- [x] A failed Celestrak fetch is reported (`last_fetch` in `/health`, Data view) and no
+      longer stamps `last_update`. Non-ASCII prints removed from the parser.
+      Streamlit binds to 127.0.0.1. (DECISIONS.md, 2026-10-03)
+
+## Open — accuracy
+
+- [ ] **Decide how to fix the engine propagator error** (measured 2026-10-03, DECISIONS.md):
+      median 297 km at 24 h and 1,277 km at 72 h versus the `sgp4` package, which is more
+      than the 100 km screening threshold. Recommended: run `ConjunctionSearch` and
+      `ConjunctionDetector` on `SatrecArray` (as `/api/positions` already does) and either
+      fix or retire `SGP4Propagator`. Needs a decision, because every conjunction number changes.
+- [ ] Split the error measurement by altitude band and eccentricity, and by TLE age.
+- [ ] `GET /api/propagate/{id}` still uses the engine propagator and is not labelled as such.
+
 ## Open — reliability
 
-- [ ] Handle Celestrak rate-limiting on the large `active` group gracefully
-      (currently: silent `403` → empty list, logged only server-side, not
-      surfaced to the caller of `POST /api/update-tles`). Consider: backoff,
-      a smaller/paginated default, or surfacing fetch failures via the
-      `/api/statistics` or a dedicated status field.
-- [ ] `CelestrackClient.fetch_group` failures are swallowed to `[]` — an empty
-      catalog looks identical to "network fine, zero results" from every
-      downstream caller. Add a distinguishable failure signal.
+- [x] `/api/export/conjunctions` no longer writes to `/tmp` (per-request temp dir, cleaned up, runs off the event loop, UTF-8 files). `tests/test_export.py`.
+- [x] Fetch cooldown on `POST /api/update-tles` (429, `ORCA_FETCH_COOLDOWN_S`, default 300 s).
+- [x] Leftover `last-30-days` callers moved to `active`; the Streamlit Fetch button used the checked fetch (Streamlit later removed).
 - [ ] Decide whether the in-memory `_conjunction_cache` / `_analytics_cache`
       referenced in `api_server.py` (per README.md) should be wired up or
       removed — currently declared but unused.
@@ -46,8 +59,8 @@ Backlog and status tracking. Not a changelog — see `git log` for history and
 - [ ] No CI configured. Even a minimal "install deps, import every module"
       smoke workflow would have caught the dead Celestrak group and the
       hardcoded path before they shipped.
-- [ ] Manually click through all four dashboard pages (Dashboard, Three.js
-      Globe, Conjunction Analysis, Analytics, Data Management) in a real
+- [ ] Manually click through all five frontend views (Overview, Globe,
+      Conjunctions, Analytics, Data) in a real
       browser — verification so far has been server/log-level (health check,
       absence of tracebacks), not visual/interactive.
 

@@ -7,3 +7,9 @@ export function readToken(name: string, fallback = '#888888'): string {
   const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim()
   return v || fallback
 }
+
+/** Resolve a token reference like "var(--cat-1)" to its current value; any other string is returned unchanged. */
+export function readColorRef(ref: string, fallback = '#888888'): string {
+  const m = /^var\((--[a-z0-9-]+)\)$/i.exec(ref.trim())
+  return m ? readToken(m[1], fallback) : ref
+}

@@ -1,0 +1,13 @@
+.text-field { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.text-field__input {
+  width: 100%;
+  min-width: 0;
+  height: 34px;
+  padding: 0 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--bg-input);
+  color: var(--text-primary);
+}
+.text-field__input:hover:not(:disabled) { border-color: var(--text-faint); }
+.text-field__input:disabled { opacity: 0.6; }
