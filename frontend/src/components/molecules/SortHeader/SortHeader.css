@@ -1,0 +1,19 @@
+.sort-header {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 6px 12px;
+  background: var(--bg-panel);
+  border-bottom: 1px solid var(--border-strong);
+  color: var(--text-tertiary);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.sort-header--left { text-align: left; }
+.sort-header--right { text-align: right; }
+.sort-header__btn { display: inline-flex; align-items: center; gap: 4px; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; letter-spacing: inherit; text-transform: inherit; }
+.sort-header__btn:hover { color: var(--text-primary); }
+.sort-header__arrow { display: inline-block; width: 8px; font-size: 8px; }

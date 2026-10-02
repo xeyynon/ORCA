@@ -1,0 +1,15 @@
+.number-field { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.number-field__box { display: flex; align-items: center; }
+.number-field__input {
+  width: 100%;
+  min-width: 0;
+  height: 30px;
+  padding: 0 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-input);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+.number-field__input:hover { border-color: var(--border-strong); }

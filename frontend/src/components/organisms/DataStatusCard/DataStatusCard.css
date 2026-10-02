@@ -1,0 +1,2 @@
+.data-status { display: flex; flex-direction: column; gap: var(--gap-3); padding: var(--gap-4); border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg-card); }
+.data-status__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: var(--gap-3) var(--gap-4); }

@@ -1,0 +1,10 @@
+.dot { display: inline-block; flex: none; border-radius: 50%; background: var(--text-faint); }
+.dot--accent     { background: var(--accent); }
+.dot--ok         { background: var(--ok); }
+.dot--warn       { background: var(--warn); }
+.dot--bad        { background: var(--bad); }
+.dot--critical   { background: var(--risk-critical); }
+.dot--high       { background: var(--risk-high); }
+.dot--medium     { background: var(--risk-medium); }
+.dot--low        { background: var(--risk-low); }
+.dot--negligible { background: var(--risk-negligible); }

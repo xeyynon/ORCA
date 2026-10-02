@@ -1,0 +1,27 @@
+.badge {
+  --badge-fg: var(--text-secondary);
+  --badge-bg: var(--bg-elevated);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 7px;
+  border-radius: var(--radius);
+  border: 1px solid color-mix(in srgb, var(--badge-fg) 28%, transparent);
+  background: color-mix(in srgb, var(--badge-bg) 100%, transparent);
+  color: var(--badge-fg);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+.badge--accent     { --badge-fg: var(--accent-ink);          --badge-bg: var(--accent-bg); }
+.badge--ok         { --badge-fg: var(--ok-ink);              --badge-bg: color-mix(in srgb, var(--ok) 14%, transparent); }
+.badge--warn       { --badge-fg: var(--warn-ink);            --badge-bg: color-mix(in srgb, var(--warn) 14%, transparent); }
+.badge--bad        { --badge-fg: var(--bad-ink);             --badge-bg: color-mix(in srgb, var(--bad) 14%, transparent); }
+.badge--critical   { --badge-fg: var(--risk-critical-ink);   --badge-bg: color-mix(in srgb, var(--risk-critical) 14%, transparent); }
+.badge--high       { --badge-fg: var(--risk-high-ink);       --badge-bg: color-mix(in srgb, var(--risk-high) 14%, transparent); }
+.badge--medium     { --badge-fg: var(--risk-medium-ink);     --badge-bg: color-mix(in srgb, var(--risk-medium) 14%, transparent); }
+.badge--low        { --badge-fg: var(--risk-low-ink);        --badge-bg: color-mix(in srgb, var(--risk-low) 14%, transparent); }
+.badge--negligible { --badge-fg: var(--risk-negligible-ink); --badge-bg: color-mix(in srgb, var(--risk-negligible) 14%, transparent); }

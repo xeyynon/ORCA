@@ -1,0 +1,3 @@
+.kpi { display: flex; flex-direction: column; gap: 4px; min-width: 0; padding: 12px 14px; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); }
+.kpi__value { font-size: 24px; font-weight: 600; line-height: 1.1; color: var(--text-primary); }
+.kpi__hint { color: var(--text-tertiary); font-size: 11px; }

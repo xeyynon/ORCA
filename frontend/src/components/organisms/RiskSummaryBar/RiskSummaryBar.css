@@ -1,0 +1,9 @@
+.risk-summary { display: flex; flex-direction: column; gap: var(--gap-3); padding: var(--gap-3) var(--gap-4); border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg-card); }
+.risk-summary__bar { display: flex; height: 10px; gap: 2px; overflow: hidden; border-radius: 3px; background: var(--bg-input); }
+.risk-summary__seg { flex-basis: 0; min-width: 4px; }
+.risk-summary__seg--critical   { background: var(--risk-critical); }
+.risk-summary__seg--high       { background: var(--risk-high); }
+.risk-summary__seg--medium     { background: var(--risk-medium); }
+.risk-summary__seg--low        { background: var(--risk-low); }
+.risk-summary__seg--negligible { background: var(--risk-negligible); }
+.risk-summary__legend { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 6px var(--gap-5); }
