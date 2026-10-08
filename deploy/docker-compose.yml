@@ -1,0 +1,35 @@
+# Oracle VM stack: Caddy (HTTPS, ports 80/443) in front of ORCA. Only Caddy is reachable from outside.
+# Run from this folder:  docker compose up -d --build
+services:
+  orca:
+    build:
+      context: ..
+      # "api" skips the frontend build when the frontend is hosted elsewhere (Vercel).
+      target: ${ORCA_BUILD_TARGET:-full}
+    restart: unless-stopped
+    environment:
+      ORCA_TLE_GROUP: ${ORCA_TLE_GROUP:-active}
+      ORCA_FETCH_COOLDOWN_S: ${ORCA_FETCH_COOLDOWN_S:-300}
+      # Sites allowed to call this API from a browser, e.g. the Vercel frontend.
+      ORCA_CORS_ORIGINS: ${ORCA_CORS_ORIGINS:-}
+    volumes:
+      - orca-data:/data
+    shm_size: 256m   # the conjunction search's process pool
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      ORCA_DOMAIN: ${ORCA_DOMAIN:?set ORCA_DOMAIN in deploy/.env}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+    depends_on:
+      - orca
+
+volumes:
+  orca-data:
+  caddy-data:
