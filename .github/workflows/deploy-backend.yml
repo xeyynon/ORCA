@@ -1,0 +1,63 @@
+# Push to main -> run the Python tests -> ship the backend to the Oracle VM over SSH -> rebuild the containers.
+# The frontend is deployed separately by Vercel's GitHub integration (root directory: frontend/).
+#
+# Repository secrets:
+#   ORCA_SSH_KEY          private key whose public half is in ubuntu@VM:~/.ssh/authorized_keys
+#   ORCA_SSH_KNOWN_HOSTS  the VM's host key line (ssh-keyscan output), so the connection is pinned
+#   ORCA_HOST             the VM's public IP
+#   ORCA_API_URL          https://<ip-with-dashes>.sslip.io, checked after the deploy
+name: Deploy backend
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "*.py"
+      - requirements.txt
+      - Dockerfile
+      - .dockerignore
+      - deploy/**
+      - tests/**
+      - .github/workflows/deploy-backend.yml
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-backend
+  cancel-in-progress: false
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - run: python -m unittest discover -s tests
+        env:
+          PYTHONIOENCODING: utf-8
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up SSH
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "${{ secrets.ORCA_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          printf '%s\n' "${{ secrets.ORCA_SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+
+      # deploy/.env (domain, CORS origins, TLE group) lives only on the VM and is never overwritten.
+      - name: Ship code and rebuild
+        run: |
+          tar czf - Dockerfile .dockerignore requirements.txt *.py deploy/docker-compose.yml deploy/Caddyfile deploy/env.example \
+            | ssh ubuntu@${{ secrets.ORCA_HOST }} \
+              'mkdir -p ORCA && rm -f ORCA/*.py && tar xzf - -C ORCA && cd ORCA/deploy && sudo docker compose up -d --build --remove-orphans && sudo docker image prune -f'
+
+      - name: Health check
+        run: curl -fsS --retry 10 --retry-delay 6 --retry-all-errors "${{ secrets.ORCA_API_URL }}/health"

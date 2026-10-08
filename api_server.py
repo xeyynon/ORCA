@@ -7,6 +7,7 @@ from fastapi import Depends, FastAPI, HTTPException, BackgroundTasks, Query, Req
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import HTMLResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
 from starlette.background import BackgroundTask
 from pydantic import BaseModel, Field
 from typing import List, Optional, Dict
@@ -42,6 +43,10 @@ logger = logging.getLogger(__name__)
 PUBLIC_PATHS = {"/", "/health", "/api/auth/login", "/api/auth/status"}
 _login_throttle = auth.LoginThrottle()
 FETCH_COOLDOWN_S = int(os.environ.get("ORCA_FETCH_COOLDOWN_S", "300"))
+# Celestrak group fetched on refresh. A hosted box may want a smaller one than "active" (see MD/deployment.md).
+TLE_GROUP = os.environ.get("ORCA_TLE_GROUP", "active")
+# A built frontend (frontend/dist) to serve from this same origin. Unset in development, where Vite serves it.
+STATIC_DIR = os.environ.get("ORCA_STATIC_DIR")
 
 
 def require_auth(request: Request):
@@ -88,7 +93,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-db = TLEDatabase()
+db = TLEDatabase(os.environ.get("ORCA_DB_PATH", "ssa_data.db"))
 
 # In-memory cache for expensive computations
 _conjunction_cache = {}
@@ -209,7 +214,9 @@ class CatalogStatsResponse(BaseModel):
  
 @app.get("/", response_class=HTMLResponse)
 async def root():
-    """Root endpoint with API documentation"""
+    """Root endpoint: the built frontend when ORCA_STATIC_DIR is set, otherwise an API overview"""
+    if STATIC_DIR:
+        return FileResponse(Path(STATIC_DIR) / "index.html")
     return """
     <html>
         <head>
@@ -372,7 +379,7 @@ async def update_tles(background_tasks: BackgroundTasks):
 
     def fetch_and_store():
         logger.info("Fetching TLEs from Celestrak...")
-        result = CelestrackClient.fetch_group_checked(group="active")
+        result = CelestrackClient.fetch_group_checked(group=TLE_GROUP)
         logger.info(f"Celestrak fetch: {result.status} ({len(result.tles)} TLE records)")
         # Record the outcome either way, so a refused fetch is visible in /health instead of looking like "nothing new".
         db.set_cache("tle_fetch_status", json.dumps({
@@ -820,6 +827,12 @@ def export_conjunctions(format: str = Query("json", regex="^(json|csv)$")):
     )
  
  
+# Mounted last so every API route above wins. Static files are public: they are the sign-in page itself, and
+# the app-level auth dependency covers routes, not mounts.
+if STATIC_DIR:
+    app.mount("/", StaticFiles(directory=STATIC_DIR, html=True), name="frontend")
+
+
 # ============================================================================
 # EXAMPLE USAGE
 # ============================================================================
@@ -830,7 +843,7 @@ if __name__ == "__main__":
     # Initialize database with sample data if empty
     if db.count_tles() == 0:
         print("Database empty. Fetching initial TLE data...")
-        tles = CelestrackClient.fetch_group(group="active")
+        tles = CelestrackClient.fetch_group(group=TLE_GROUP)
         db.insert_batch(tles)
         print(f"Loaded {len(tles)} TLEs")
     
