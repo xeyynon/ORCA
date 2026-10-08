@@ -1,0 +1,5 @@
+# Caddy fetches and renews a Let's Encrypt certificate for this name on its own.
+{$ORCA_DOMAIN} {
+	encode gzip
+	reverse_proxy orca:8000
+}
