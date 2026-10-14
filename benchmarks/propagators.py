@@ -16,7 +16,7 @@ from datetime import datetime
 import numpy as np
 from sgp4.api import jday
 
-from orbit_mech_engine import SGP4Propagator
+from benchmarks.legacy.orbit_mech_engine_as_built import SGP4Propagator  # ORCA as built (tag orca-as-built-2026-10-14)
 from parser_pipeline import TLEParser
 
 MU = 398600.8         # km^3/s^2, WGS-72

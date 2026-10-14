@@ -49,7 +49,7 @@ from benchmarks.covariance import MeasuredCovariance  # noqa: E402
 from benchmarks.pc import encounter_plane, pc_foster, ric_covariance  # noqa: E402
 from benchmarks.screening_recall import close_pair_rows, grid_local_minima  # noqa: E402
 from benchmarks.tca import PropagationError, SGP4Pair, all_minima_root, brent_root  # noqa: E402
-from conjunction_detection import (  # noqa: E402
+from benchmarks.legacy.conjunction_detection_as_built import (  # noqa: E402
     ConjunctionDetector,
     ConjunctionSearch,
     CovarianceModel,

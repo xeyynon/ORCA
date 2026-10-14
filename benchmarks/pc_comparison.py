@@ -49,7 +49,7 @@ from benchmarks.pc import (  # noqa: E402
     pc_monte_carlo,
     ric_covariance,
 )
-from conjunction_detection import (  # noqa: E402
+from benchmarks.legacy.conjunction_detection_as_built import (  # noqa: E402
     ConjunctionDetector,
     CovarianceModel,
     HardBodyRadiusModel,

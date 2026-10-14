@@ -12,7 +12,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from benchmarks.pc import pc_isotropic_exact  # noqa: E402
-from conjunction_detection import ConjunctionDetector  # noqa: E402
+from benchmarks.legacy.conjunction_detection_as_built import ConjunctionDetector  # noqa: E402
 
 SIGMA_KM = 1.0
 HBR_KM = 0.01  # 10 m combined, inside ORCA's range (two 5.65 m Starlinks = 11.3 m)
