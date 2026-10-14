@@ -170,3 +170,51 @@ No covariance in TLEs (assumed or estimated uncertainty only). Every reference u
 - `benchmarks/pc.py`: encounter-plane projection, Foster 2D Pc, isotropic closed form, 2D Monte Carlo with Clopper-Pearson CI, MC sample-size helper.
 - `benchmarks/legacy_pc_check.py`: reproduces Section 1, row 10 (legacy Pc vs exact).
 - `tests/test_benchmark_pc.py`: checks Foster against the closed form and MC against Foster.
+- `benchmarks/catalog.py`, `benchmarks/snapshot_catalog.py`: frozen TLE snapshots. The `.tle` files are git-ignored (live data); the `.json` manifest with sha256 and epoch range is committed.
+- `benchmarks/screening_recall.py`: Exp 2b. `tests/test_screening_recall.py` covers local minima, passes and screen evaluation.
+
+## 10. Results so far [MEASURED]
+
+### Exp 2b: snapshot screening recall (preliminary)
+
+**Setup:**
+- Snapshot `catalog_20261014T064759Z` (15,970 records; sha256 in its manifest).
+- LEO only (apogee ≤ 2000 km); TLEs ≤ 7 days old at the start.
+- 2,000 random objects; seeds 1, 2, 3.
+- 24 h window from 2026-10-10 02:10 UTC.
+- SGP4 (`sgp4` package) for both the reference and the screens, so only sampling differs.
+- Reference: 10 s grid, KD-tree at 200 km, grid minima refined with bounded Brent over ±10 s. The capture bound of 10 + 16 × 5 = 90 km guarantees every encounter below 10 km is found.
+- **Event recall:** the screen flags a sample during the encounter's own pass. **Pair recall:** the pair is flagged at any time.
+- Outputs: `benchmarks/results/screening_recall_n2000_h24_ref10s_seed{1,2,3}/`.
+
+Reference encounters below 10 km: 6,576 / 6,803 / 6,244 (seeds 1/2/3). Persistent pairs, i.e. docked or formation flying (8 / 17 / 30 events), are excluded from the numbers below.
+
+Event recall, miss < 10 km (range over the three seeds):
+
+| step \ radius | 10 km | 25 km | 50 km | 100 km | 200 km |
+|---|---|---|---|---|---|
+| 3600 s (ORCA) | 0.1 % | 0.2–0.3 % | 0.4–0.8 % | **1.0–1.2 %** | 2.0 % |
+| 600 s | 0.4–0.6 % | 1.3–1.6 % | 2.6–3.2 % | 5.6–5.7 % | 10.1–10.7 % |
+| 60 s | 3.8–4.0 % | 11.6–12.3 % | 21.5–23.7 % | 40.2–41.9 % | 69.7–71.2 % |
+| 20 s | 10.2–11.0 % | 30.9–32.4 % | 55.8–58.1 % | 88.0–89.8 % | 100 % |
+
+**ORCA's configuration (3600 s, 100 km) by relative velocity:**
+
+| Relative velocity | Event recall | Pair recall |
+|---|---|---|
+| < 0.1 km/s | 100 % (n = 4–10) | 100 % |
+| 0.1–1 km/s | 16–22 % | 84–91 % |
+| 1–5 km/s | 1–3 % | 37–41 % |
+| 5–10 km/s | 0.5–1.0 % | 13–16 % |
+| ≥ 10 km/s | 0.4–0.7 % | 6–8 % |
+
+**Cross-check:** a straight pass stays inside radius r for about 2r/v, so a step Δs catches it with probability ≈ 2r/(v·Δs). For 100 km, 3600 s and 10 km/s that is 0.56 %, consistent with the fast bands. At 20 s / 200 km the sufficient condition r ≥ d + v·Δs/2 = 170 km holds, and recall is 100 % as it must be.
+
+**Reading:**
+- ORCA's screen sees about 1 in 100 encounters below 10 km during the encounter itself. It sees almost every slow, co-orbital one, which explains why its output is dominated by low-velocity Starlink pairs (Section 1, row 9).
+- Pair recall (14–15 %) is an upper bound on what ORCA's ±6 h refinement could recover. Whether the refinement actually lands on the right pass is Exp 3.
+
+**Caveats:**
+- One snapshot, one 24 h window.
+- 2,000-object subsets, not the full catalog. Encounter counts scale with N², but recall by velocity band should not depend strongly on N; this is unverified.
+- The KD-tree screen here takes the same samples as ORCA but uses the `sgp4` propagator, not ORCA's engine.
