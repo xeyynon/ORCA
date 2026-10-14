@@ -3,7 +3,7 @@
 > Draft 1, 2026-10-14. Written from `MD/research_paper_brief.md` (Section 10) and the committed files in `benchmarks/results/`. Every number below is traceable to one of those files.
 >
 > **Placeholders:**
-> - **[VERIFY: …]** marks a citation still to be checked at its source.
+> - Citations are keys in [references.bib](references.bib), written as [key]. The verification status of each is in [literature_verification.md](literature_verification.md); keys marked SECONDARY there must be re-checked before submission.
 > - **[Fig. n] / [Table n]** follow the brief's plan.
 > - All figures, including **F1** (`fig_pipeline`) and **F5** (`fig_mc_convergence`), are in `benchmarks/figures/`.
 >
@@ -74,7 +74,7 @@ Table 2 summarises the five experiments.
 Three propagators are compared:
 - **ORCA's engine:** two-body motion with an exponential drag term and no J2, built through ORCA's own TLE parser.
 - **Two-body + J2 secular:** first-order J2 secular rates of node, perigee and mean anomaly, applied to Brouwer mean elements.
-- **SGP4** (sgp4 package) [VERIFY: Vallado et al. 2006].
+- **SGP4** (sgp4 package [rhodes_sgp4], which wraps the reference code of [vallado2006revisiting]). TLEs are mean elements specific to SGP4 [hoots1980str3], so a two-body tier measures model mismatch as well as missing physics.
 
 The J2 tier deliberately uses the Brouwer semi-major axis that SGP4 uses internally. Applying J2 rates to the TLE's Kozai mean motion double-counts part of the J2 effect, which caused ~270 km of in-track drift per day in our first implementation. Its rates agree with SGP4's own secular mean-anomaly rate to within 1e-5 (unit-tested).
 
@@ -118,7 +118,7 @@ It is compared with root-finding every range-rate sign change on a 60 s grid ove
 
 #### Exp 4: collision probability
 
-At each reference TCA, the miss vector and the combined position covariance are projected onto the encounter plane, the plane normal to the relative velocity. Foster's method integrates the resulting 2D Gaussian over the hard-body disc [VERIFY: Foster & Estes 1992]. Our implementation rotates to the covariance principal axes and performs a one-dimensional quadrature.
+At each reference TCA, the miss vector and the combined position covariance are projected onto the encounter plane, the plane normal to the relative velocity. Foster's method integrates the resulting 2D Gaussian over the hard-body disc [foster1992; akella2000]. Our implementation rotates to the covariance principal axes and performs a one-dimensional quadrature.
 
 **Covariances.**
 - **ORCA's:** isotropic, σ = 0.5 km + 2 km/day × TLE age per object, summed over the two objects.
@@ -176,7 +176,7 @@ The largest single source of propagation error in ORCA is therefore the missing 
 
 Two findings matter downstream:
 1. **Real TLE error is strongly anisotropic.** For non-Starlink objects, the in-track spread is about 100 times the radial and 70 times the cross-track spread. ORCA's isotropic σ of about 12.5 km per object at this age matches the in-track spread, but overstates the other two axes by roughly two orders of magnitude.
-2. **For Starlink, SGP4 is worse than the J2-only tier, and its error grows with the drag term B\*.** Median errors rise from 15 km in the lowest B\* quartile to 383 km in the highest; for J2 they rise from 21 km to 87 km. For non-Starlink objects, SGP4 is better in every quartile. We hypothesise that Starlink TLE fits absorb low-thrust station-keeping into B\*, which SGP4 then extrapolates as drag. This has not been verified [VERIFY]. Starlink makes up 70 % of LEO objects in this catalog.
+2. **For Starlink, SGP4 is worse than the J2-only tier, and its error grows with the drag term B\*.** Median errors rise from 15 km in the lowest B\* quartile to 383 km in the highest; for J2 they rise from 21 km to 87 km. For non-Starlink objects, SGP4 is better in every quartile. We hypothesise that Starlink TLE fits absorb low-thrust station-keeping into B\*, which SGP4 then extrapolates as drag. This is consistent with published evidence that Starlink prediction errors stem mainly from continuous low-thrust propulsion and frequent manoeuvres [lang2025starlink; liu2024maneuver], and with CelesTrak's comparison of the public Starlink elements against operator-derived ones (median 6.8 km at a median TLE age of 0.6 d on 2026-10-14) [celestrak_supgp]. That B\* specifically absorbs the thrust is not established in the literature. Starlink makes up 70 % of LEO objects in this catalog.
 
 A single horizon bin does not allow error growth to be fitted. More snapshots are being collected.
 

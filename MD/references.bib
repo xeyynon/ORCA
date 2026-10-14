@@ -1,0 +1,247 @@
+% References for the TLE conjunction-assessment benchmark paper.
+% Verified 2026-10-14 by opening the source (publisher / Crossref DOI record / agency PDF / author page).
+% Entries marked SECONDARY-ONLY were seen only in other papers' reference lists: re-check before submission.
+% Entries marked TITLE-TODO were confirmed by DOI or arXiv id but the title was not recorded: copy it from the DOI page.
+% Details and what each source establishes: MD/literature_verification.md
+
+% ---------------------------------------------------------------- Propagation and TLEs
+@techreport{hoots1980str3,
+  author = {Hoots, Felix R. and Roehrich, Ronald L.},
+  title = {Models for Propagation of {NORAD} Element Sets},
+  institution = {Aerospace Defense Center, Peterson AFB, CO},
+  type = {Spacetrack Report}, number = {3}, year = {1980}, month = dec,
+  note = {Package compiled by T.S. Kelso, 1988. https://celestrak.org/NORAD/documentation/spacetrk.pdf}}
+
+@inproceedings{vallado2006revisiting,
+  author = {Vallado, David A. and Crawford, Paul and Hujsak, Richard and Kelso, T. S.},
+  title = {Revisiting Spacetrack Report \#3},
+  booktitle = {AIAA/AAS Astrodynamics Specialist Conference and Exhibit},
+  address = {Keystone, CO}, year = {2006}, month = aug, note = {AIAA 2006-6753},
+  doi = {10.2514/6.2006-6753}}
+
+@book{vallado2013fundamentals,
+  author = {Vallado, David A.}, title = {Fundamentals of Astrodynamics and Applications},
+  edition = {4th}, publisher = {Microcosm Press}, address = {Hawthorne, CA}, year = {2013},
+  series = {Space Technology Library}, isbn = {978-1-881883-19-7}}
+
+@article{levit2011improved,
+  author = {Levit, Creon and Marshall, William},
+  title = {Improved orbit predictions using two-line elements},
+  journal = {Advances in Space Research}, volume = {47}, number = {7},
+  pages = {1107--1115}, year = {2011}, doi = {10.1016/j.asr.2010.10.017}}
+
+@misc{rhodes_sgp4,
+  author = {Rhodes, Brandon},
+  title = {sgp4: {Python} package wrapping the official {SGP4} code of Revisiting Spacetrack Report \#3},
+  howpublished = {\url{https://pypi.org/project/sgp4/}}, note = {Version 2.27 used}}
+
+@inproceedings{kelso2007validation,
+  author = {Kelso, T. S.},
+  title = {Validation of {SGP4} and {IS-GPS-200D} Against {GPS} Precision Ephemerides},
+  booktitle = {17th AAS/AIAA Space Flight Mechanics Conference}, address = {Sedona, AZ},
+  year = {2007}, note = {AAS 07-127}}
+
+@inproceedings{flohrer2009improving,
+  author = {Flohrer, T. and Krag, H. and Klinkrad, H. and Bastida Virgili, B. and Fr{\"u}h, C.},
+  title = {Improving {ESA}'s Collision Risk Estimates by an Assessment of the {TLE} Orbit Errors of the {US SSN} Catalogue},
+  booktitle = {Proc. 5th European Conference on Space Debris}, address = {Darmstadt},
+  series = {ESA SP-672}, year = {2009}}
+
+% SECONDARY-ONLY (cited in flohrer2009improving; AMOS PDF not opened)
+@inproceedings{flohrer2008assessment,
+  author = {Flohrer, T. and Krag, H. and Klinkrad, H.},
+  title = {Assessment and Categorization of {TLE} Orbit Errors for the {US SSN} Catalogue},
+  booktitle = {Advanced Maui Optical and Space Surveillance Technologies Conference}, address = {Wailea, Maui}, year = {2008}}
+
+% ---------------------------------------------------------------- Starlink TLE accuracy
+@misc{celestrak_supgp,
+  author = {Kelso, T. S. and {CelesTrak}},
+  title = {Supplemental {GP} Element Sets},
+  howpublished = {\url{https://celestrak.org/NORAD/elements/supplemental/}},
+  note = {Operator-derived elements; GP-vs-SupGP comparison at /supplemental/table-rms.php. Accessed 2026-10-14}}
+
+@article{lang2025starlink,
+  author = {Lang and Jiang}, title = {TITLE-TODO},
+  journal = {Sensors}, volume = {25}, number = {13}, pages = {4079}, year = {2025}, doi = {10.3390/s25134079}}
+
+@article{ou2025starlink,
+  author = {Ou and others}, title = {TITLE-TODO},
+  journal = {Remote Sensing}, volume = {17}, number = {9}, year = {2025}, doi = {10.3390/rs17091549}}
+
+% Metadata via Crossref; content SECONDARY-ONLY (abstract blocked)
+@article{liu2024maneuver,
+  author = {Liu and others},
+  title = {Maneuver strategies of {Starlink} satellite based on {SpaceX}-released ephemeris},
+  journal = {Advances in Space Research}, volume = {74}, number = {7}, pages = {3157--3169}, year = {2024},
+  doi = {10.1016/j.asr.2024.06.038}}
+
+% Unrefereed preprint
+@misc{jankovic2026,
+  author = {Jankovic}, title = {TITLE-TODO}, howpublished = {arXiv:2605.19850}, year = {2026}}
+
+% ---------------------------------------------------------------- Screening and TCA
+@article{hoots1984,
+  author = {Hoots, Felix R. and Crawford, Linda L. and Roehrich, Ronald L.},
+  title = {An analytic method to determine future close approaches between satellites},
+  journal = {Celestial Mechanics}, volume = {33}, number = {2}, pages = {143--158}, year = {1984},
+  doi = {10.1007/BF01234152}}
+
+% SECONDARY-ONLY: index/search snippets. Fits cubic polynomials to the distance waveform (not range-rate roots).
+@article{alfano1993,
+  author = {Alfano, Salvatore and Negron, Jr., David},
+  title = {Determining satellite close approaches},
+  journal = {The Journal of the Astronautical Sciences}, volume = {41}, number = {2}, pages = {217--225}, year = {1993}}
+
+@article{healy1995,
+  author = {Healy, Liam M.}, title = {Close conjunction detection on parallel computer},
+  journal = {Journal of Guidance, Control, and Dynamics}, volume = {18}, number = {4},
+  pages = {824--829}, year = {1995}, doi = {10.2514/3.21465}}
+
+% SECONDARY-ONLY: cited in woodburn2009; ADS record not opened
+@inproceedings{alarcon2002,
+  author = {Alarc{\'o}n-Rodr{\'i}guez, J. R. and Mart{\'i}nez Fadrique, F. and Klinkrad, H.},
+  title = {Collision risk assessment with a ``smart sieve'' method},
+  booktitle = {Proc. Joint ESA-NASA Space-Flight Safety Conference}, series = {ESA SP-486},
+  pages = {159--164}, year = {2002}}
+
+@inproceedings{kelso2005socrates,
+  author = {Kelso, T. S. and Alfano, S.},
+  title = {Satellite Orbital Conjunction Reports Assessing Threatening Encounters in Space ({SOCRATES})},
+  booktitle = {AAS/AIAA Space Flight Mechanics Conference}, address = {Copper Mountain, CO},
+  year = {2005}, note = {AAS 05-124}}
+
+% Venue inferred from its sibling paper AAS 09-374
+@inproceedings{woodburn2009,
+  author = {Woodburn, James and Coppola, Vincent and Stoner, Frank},
+  title = {A description of filters for minimizing the time required for orbital conjunction computations},
+  booktitle = {AAS/AIAA Astrodynamics Specialist Conference}, year = {2009}, note = {AAS 09-372}}
+
+@article{bentley1975,
+  author = {Bentley, Jon Louis},
+  title = {Multidimensional binary search trees used for associative searching},
+  journal = {Communications of the ACM}, volume = {18}, number = {9}, pages = {509--517}, year = {1975},
+  doi = {10.1145/361002.361007}}
+
+@inproceedings{george2011,
+  author = {George, Eric R.},
+  title = {A High Performance Conjunction Analysis Technique for Cluster and Multi-Core Computers},
+  booktitle = {Advanced Maui Optical and Space Surveillance Technologies Conference}, year = {2011}}
+
+@inproceedings{budianto2014,
+  author = {Budianto-Ho, Irene A. and Alberty, Clay and Scarberry, Randall and Johnson, Stephen and Sivilli, Robert M.},
+  title = {Scalable Conjunction Processing using Spatiotemporally Indexed Ephemeris Data},
+  booktitle = {Advanced Maui Optical and Space Surveillance Technologies Conference}, year = {2014}}
+
+@article{mercurio2016,
+  author = {Mercurio, Michael and Singla, Puneet},
+  title = {A tree-based approach for efficient and accurate conjunction analysis},
+  journal = {CMES - Computer Modeling in Engineering and Sciences}, volume = {111}, number = {3},
+  pages = {229--256}, year = {2016}}
+
+@book{brent1973,
+  author = {Brent, Richard P.}, title = {Algorithms for Minimization without Derivatives},
+  publisher = {Prentice-Hall}, address = {Englewood Cliffs, NJ}, year = {1973}}
+
+% ---------------------------------------------------------------- Closest prior work (research gap)
+@inproceedings{georgeharvey2011,
+  author = {George, Eric R. and Harvey, Seth},
+  title = {A Comparison of Satellite Conjunction Analysis Screening Tools},
+  booktitle = {Advanced Maui Optical and Space Surveillance Technologies Conference}, year = {2011}}
+
+@inproceedings{auman2025,
+  author = {Auman, Kerstyn and Murphy, Timothy S. and George, Eric and Kelly, Patrick and Coursey, Carson and Goldstein, David and Ruh, Ian and Hymes, Kate},
+  title = {Validation Methodology for {TraCSS} Conjunction Assessment},
+  booktitle = {Advanced Maui Optical and Space Surveillance Technologies Conference}, year = {2025}}
+
+@article{stevenson2023,
+  author = {Stevenson, Emma and Rodriguez-Fernandez, Victor and Urrutxua, Hodei and Camacho, David},
+  title = {Benchmarking deep learning approaches for all-vs-all conjunction screening},
+  journal = {Advances in Space Research}, volume = {72}, number = {7}, pages = {2660--2675}, year = {2023},
+  doi = {10.1016/j.asr.2023.01.036}}
+
+@misc{medhin2026,
+  author = {Medhin and Servadio}, title = {TITLE-TODO}, howpublished = {arXiv:2607.09634}, year = {2026}}
+
+% Preprint, abstract only read: overlaps heavily (grid / k-d tree vs brute force on CelesTrak SGP4 data, TCA, Pc). Read in full.
+@misc{sonawane2026,
+  author = {Sonawane}, title = {TITLE-TODO}, howpublished = {Preprints.org}, year = {2026},
+  doi = {10.20944/preprints202610.0012.v1}}
+
+% SECONDARY-ONLY (cited by auman2025): covariance estimated from historical TLE series
+@misc{peterson2001covgen,
+  author = {Peterson and Gist and Oltrogge}, title = {TITLE-TODO ({COVGEN})}, year = {2001}}
+
+% ---------------------------------------------------------------- Collision probability
+% SECONDARY-ONLY: not on NTRS; citation as given in nasa_ca_handbook2020 ref. 19, alfano2009mc, coppola2012
+@techreport{foster1992,
+  author = {Foster, James L. and Estes, Herbert S.},
+  title = {A Parametric Analysis of Orbital Debris Collision Probability and Maneuver Rate for Space Vehicles},
+  institution = {NASA Johnson Space Center}, number = {JSC-25898}, month = aug, year = {1992}}
+
+@article{alfano2005numerical,
+  author = {Alfano, Salvatore},
+  title = {A Numerical Implementation of Spherical Object Collision Probability},
+  journal = {The Journal of the Astronautical Sciences}, volume = {53}, number = {1},
+  pages = {103--109}, year = {2005}, doi = {10.1007/BF03546397}}
+
+% Title, author, paper number confirmed from PDF; meeting/volume SECONDARY
+@inproceedings{alfano2009mc,
+  author = {Alfano, Salvatore}, title = {Satellite Conjunction Monte Carlo Analysis},
+  booktitle = {AAS/AIAA Spaceflight Mechanics Meeting}, address = {Pittsburgh, PA},
+  month = feb, year = {2009}, note = {AAS 09-233}}
+
+@book{chan2008,
+  author = {Chan, F. Kenneth}, title = {Spacecraft Collision Probability},
+  publisher = {The Aerospace Press / AIAA}, address = {El Segundo, CA}, year = {2008},
+  isbn = {978-1-884989-18-6}}
+
+@article{akella2000,
+  author = {Akella, Maruthi R. and Alfriend, Kyle T.},
+  title = {Probability of Collision Between Space Objects},
+  journal = {Journal of Guidance, Control, and Dynamics}, volume = {23}, number = {5},
+  pages = {769--772}, year = {2000}, doi = {10.2514/2.4611}}
+
+@article{patera2001,
+  author = {Patera, Russell P.},
+  title = {General Method for Calculating Satellite Collision Probability},
+  journal = {Journal of Guidance, Control, and Dynamics}, volume = {24}, number = {4},
+  pages = {716--722}, year = {2001}, doi = {10.2514/2.4771}}
+
+@article{li2022review,
+  author = {Li, Jia-Sheng and Yang, Zhen and Luo, Ya-Zhong},
+  title = {A review of space-object collision probability computation methods},
+  journal = {Astrodynamics}, volume = {6}, number = {2}, pages = {95--120}, year = {2022},
+  doi = {10.1007/s42064-021-0125-x}}
+
+@inproceedings{coppola2012,
+  author = {Coppola, Vincent T.},
+  title = {Including Velocity Uncertainty in the Probability of Collision between Space Objects},
+  booktitle = {AAS/AIAA Spaceflight Mechanics Meeting}, address = {Charleston, SC},
+  month = feb, year = {2012}, note = {AAS 12-247}}
+
+@misc{cara_tools,
+  author = {{NASA Conjunction Assessment Risk Analysis (CARA)}},
+  title = {{CARA} Analysis Tools Software Development Kit},
+  howpublished = {\url{https://github.com/nasa/CARA_Analysis_Tools}}, note = {Accessed 2026-10-14}}
+
+@techreport{nasa_ca_handbook2020,
+  author = {{NASA}},
+  title = {{NASA} Spacecraft Conjunction Assessment and Collision Avoidance Best Practices Handbook},
+  institution = {NASA}, number = {NASA/SP-20205011318}, month = dec, year = {2020}}
+
+@inproceedings{merz2019,
+  author = {Merz, Klaus and Bastida Virgili, Benjamin and Braun, Vitali},
+  title = {Risk reduction and collision risk thresholds for missions operated at {ESA}},
+  booktitle = {18th Australian Aerospace Congress (with ISSFD 2019)}, address = {Melbourne},
+  month = feb, year = {2019}}
+
+@misc{orekit12,
+  author = {{CS GROUP}}, title = {Orekit 12.0 release notes},
+  howpublished = {\url{https://github.com/CS-SI/Orekit/releases/tag/12.0}},
+  note = {SSA package: Laas, Alfano, Alfriend, Patera, Chan short-term encounter Pc methods}}
+
+@article{clopper1934,
+  author = {Clopper, C. J. and Pearson, E. S.},
+  title = {The Use of Confidence or Fiducial Limits Illustrated in the Case of the Binomial},
+  journal = {Biometrika}, volume = {26}, number = {4}, pages = {404--413}, year = {1934},
+  doi = {10.1093/biomet/26.4.404}}
