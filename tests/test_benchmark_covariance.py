@@ -56,6 +56,12 @@ class Measured(unittest.TestCase):
         np.testing.assert_allclose(self.m.sigmas("ISS", 30.0), (0.16, 6.4, 0.16))
         np.testing.assert_allclose(self.m.sigmas("ISS", -1.0), (0.04, 0.4, 0.04))  # age sign ignored
 
+    def test_floor_bounds_each_axis(self):
+        floored = MeasuredCovariance(self.path, floor=(0.102, 0.471, 0.126))
+        np.testing.assert_allclose(floored.sigmas("ISS", 0.01), (0.102, 0.471, 0.126))   # all below the floor
+        np.testing.assert_allclose(floored.sigmas("ISS", 30.0), (0.16, 6.4, 0.16))       # all above it
+        np.testing.assert_allclose(floored.sigmas("STARLINK-1", 6.0), (4.0, 160.0, 0.5))
+
     def test_cov3_is_ric(self):
         cov = self.m.cov3(np.array([7000.0, 0, 0]), np.array([0, 7.5, 0]), "STARLINK-1", 6.0)
         np.testing.assert_allclose(np.diag(cov), [16.0, 25600.0, 0.25])
