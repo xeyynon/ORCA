@@ -10,6 +10,7 @@ integrated over a disc of radius = combined hard-body radius. Units: km for posi
 - pc_foster            numerical 2D integration over the disc (Foster-style, any 2x2 covariance)
 - pc_isotropic_exact   closed form when the 2D covariance is sigma^2 * I (non-central chi-square)
 - pc_monte_carlo       2D sampling with a Clopper-Pearson interval
+- pc_line_integral     small-radius measure along a curved relative path (tests the straight-line assumption)
 - mc_samples_needed    samples for a target relative standard error at a given Pc
 """
 import math
@@ -150,6 +151,25 @@ def pc_monte_carlo(
     lo = 0.0 if hits == 0 else float(beta_dist.ppf(a / 2, hits, samples - hits + 1))
     hi = 1.0 if hits == samples else float(beta_dist.ppf(1 - a / 2, hits + 1, samples - hits))
     return MonteCarloResult(hits / samples, hits, samples, lo, hi, confidence)
+
+
+def pc_line_integral(path: np.ndarray, cov3: np.ndarray, hbr: float) -> float:
+    """
+    Small-radius collision measure along a curved relative path (no straight-line assumption):
+        pi * hbr^2 * integral over the path of N(r_rel; 0, cov3) |d r_rel|
+    `path` is an (M, 3) polyline of relative positions, sampled finely against sqrt(min eigenvalue of cov3).
+    The relative position uncertainty is a rigid offset with covariance cov3 during the encounter.
+    For a straight infinite path this equals the small-radius Foster result. Strictly it is the expected
+    number of crossings of the hard-body tube, so it bounds Pc from above where the path passes the same
+    region more than once, and it assumes hbr is small against the covariance.
+    """
+    path = np.asarray(path, dtype=float)
+    cov3 = np.asarray(cov3, dtype=float)
+    inv = np.linalg.inv(cov3)
+    norm_c = 1.0 / math.sqrt((2.0 * math.pi) ** 3 * np.linalg.det(cov3))
+    dens = norm_c * np.exp(-0.5 * np.einsum("ij,jk,ik->i", path, inv, path))
+    seg = np.linalg.norm(np.diff(path, axis=0), axis=1)
+    return float(math.pi * hbr * hbr * np.sum(0.5 * (dens[:-1] + dens[1:]) * seg))
 
 
 def mc_samples_needed(pc: float, rel_std_error: float) -> int:

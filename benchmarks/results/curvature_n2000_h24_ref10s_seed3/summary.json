@@ -1,0 +1,132 @@
+{
+  "events": 313,
+  "slow_events": 113,
+  "fast_control": 200,
+  "failed": 0,
+  "by_band": {
+    "0-0.1|iso": {
+      "n": 5,
+      "pass_ratio_median": 1.7920024966870796,
+      "pass_ratio_p5": 0.8655183289869829,
+      "pass_ratio_p95": 2.2001415603878844,
+      "window_ratio_median": 1.7920024966870796,
+      "window_ratio_p5": 0.8655183289869888,
+      "window_ratio_p95": 2.2001415603878844,
+      "share_pass_ratio_off_by_2x": 0.2,
+      "pass_truncated": 3
+    },
+    "0-0.1|a10": {
+      "n": 5,
+      "pass_ratio_median": 6.343774628160217,
+      "pass_ratio_p5": 4.538111068148406,
+      "pass_ratio_p95": 8.949979842630604,
+      "window_ratio_median": 6.343774628160217,
+      "window_ratio_p5": 4.538111068148406,
+      "window_ratio_p95": 8.949979842630604,
+      "share_pass_ratio_off_by_2x": 1.0,
+      "pass_truncated": 5
+    },
+    "0.1-1|iso": {
+      "n": 108,
+      "pass_ratio_median": 1.0000174610747532,
+      "pass_ratio_p5": 0.9978693176593302,
+      "pass_ratio_p95": 1.00027593244075,
+      "window_ratio_median": 6.246038423462281,
+      "window_ratio_p5": 0.9989126054865837,
+      "window_ratio_p95": 7.28857836294046,
+      "share_pass_ratio_off_by_2x": 0.0,
+      "pass_truncated": 0
+    },
+    "0.1-1|a10": {
+      "n": 108,
+      "pass_ratio_median": 1.0000006719382686,
+      "pass_ratio_p5": 0.9998385717345989,
+      "pass_ratio_p95": 3.59106453791703,
+      "window_ratio_median": 6.951093675681614,
+      "window_ratio_p5": 2.718437106950097,
+      "window_ratio_p95": 7.0505102021650226,
+      "share_pass_ratio_off_by_2x": 0.14814814814814814,
+      "pass_truncated": 16
+    },
+    "1-5|iso": {
+      "n": 25,
+      "pass_ratio_median": 1.0000008740849913,
+      "pass_ratio_p5": 0.9999952632502357,
+      "pass_ratio_p95": 1.000024807978199,
+      "window_ratio_median": 5.388708589315179,
+      "window_ratio_p5": 1.0012969052349503,
+      "window_ratio_p95": 7.535995029336204,
+      "share_pass_ratio_off_by_2x": 0.0,
+      "pass_truncated": 0
+    },
+    "1-5|a10": {
+      "n": 25,
+      "pass_ratio_median": 1.0000002907440035,
+      "pass_ratio_p5": 0.9999552986910683,
+      "pass_ratio_p95": 1.000000971700371,
+      "window_ratio_median": 6.818990209588509,
+      "window_ratio_p5": 1.9013720480664928,
+      "window_ratio_p95": 7.048308654302473,
+      "share_pass_ratio_off_by_2x": 0.0,
+      "pass_truncated": 0
+    },
+    "5-10|iso": {
+      "n": 69,
+      "pass_ratio_median": 1.0000004001612215,
+      "pass_ratio_p5": 0.9999988963387132,
+      "pass_ratio_p95": 1.0000010869042544,
+      "window_ratio_median": 3.238610654499461,
+      "window_ratio_p5": 1.0692447631766,
+      "window_ratio_p95": 6.09858075035549,
+      "share_pass_ratio_off_by_2x": 0.0,
+      "pass_truncated": 0
+    },
+    "5-10|a10": {
+      "n": 69,
+      "pass_ratio_median": 0.9999992915857258,
+      "pass_ratio_p5": 0.9999596580064423,
+      "pass_ratio_p95": 1.0000011721648687,
+      "window_ratio_median": 6.189698879214801,
+      "window_ratio_p5": 2.1195737804784054,
+      "window_ratio_p95": 7.613587099103572,
+      "share_pass_ratio_off_by_2x": 0.0,
+      "pass_truncated": 0
+    },
+    ">=10|iso": {
+      "n": 106,
+      "pass_ratio_median": 1.0000001968012042,
+      "pass_ratio_p5": 0.9999996576189825,
+      "pass_ratio_p95": 1.0000004648640481,
+      "window_ratio_median": 2.7797599019790544,
+      "window_ratio_p5": 1.4564375189818746,
+      "window_ratio_p95": 5.302504093994812,
+      "share_pass_ratio_off_by_2x": 0.0,
+      "pass_truncated": 0
+    },
+    ">=10|a10": {
+      "n": 106,
+      "pass_ratio_median": 0.9999882076856041,
+      "pass_ratio_p5": 0.9999642940242537,
+      "pass_ratio_p95": 1.0000008294664178,
+      "window_ratio_median": 4.671838529282017,
+      "window_ratio_p5": 2.073867086159056,
+      "window_ratio_p95": 6.641178575677689,
+      "share_pass_ratio_off_by_2x": 0.0,
+      "pass_truncated": 0
+    }
+  },
+  "run": {
+    "args": {
+      "recall_dir": "benchmarks/results/screening_recall_n2000_h24_ref10s_seed3",
+      "slow_kms": 1.0,
+      "fast_sample": 200,
+      "window_h": 3.0,
+      "aspect": 10.0,
+      "seed": 3,
+      "tag": null
+    },
+    "exp2b_run": "screening_recall_n2000_h24_ref10s_seed3",
+    "catalog": "catalog_20261014T064759Z.tle",
+    "seconds": 18.061951200001204
+  }
+}

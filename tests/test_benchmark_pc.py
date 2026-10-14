@@ -15,6 +15,7 @@ from benchmarks.pc import (  # noqa: E402
     mc_samples_needed,
     pc_foster,
     pc_isotropic_exact,
+    pc_line_integral,
     pc_monte_carlo,
     ric_covariance,
 )
@@ -61,6 +62,29 @@ class MonteCarloAgreesWithFoster(unittest.TestCase):
     def test_samples_needed(self):
         # Pc = 1e-6 at 10 % relative error needs about 1e8 draws.
         self.assertAlmostEqual(mc_samples_needed(1e-6, 0.1) / 1e8, 1.0, places=3)
+
+
+class LineIntegral(unittest.TestCase):
+    def setUp(self):
+        self.cov3 = np.diag([0.25, 4.0, 0.09])  # km^2, anisotropic
+        self.hbr = 0.005
+        v = np.array([0.6, 0.0, 0.8])
+        self.v = v
+        self.m = np.array([0.0, 0.3, 0.0])  # miss vector, perpendicular to v
+        s = np.linspace(-60.0, 60.0, 200001)  # arc length, km; far beyond the covariance
+        self.line = self.m + s[:, None] * v
+
+    def test_straight_line_matches_small_radius_foster(self):
+        li = pc_line_integral(self.line, self.cov3, self.hbr)
+        miss2d, cov2d = encounter_plane(self.m, self.v, self.cov3)
+        foster = pc_foster(miss2d, cov2d, self.hbr)
+        self.assertAlmostEqual(li / foster, 1.0, places=3)  # small-radius limit: differs at O((hbr/sigma)^2)
+
+    def test_two_passes_count_twice(self):
+        # Out along the line, then back along the same line: the tube is crossed twice.
+        back = np.vstack([self.line, self.line[::-1]])
+        self.assertAlmostEqual(pc_line_integral(back, self.cov3, self.hbr)
+                               / pc_line_integral(self.line, self.cov3, self.hbr), 2.0, places=9)
 
 
 class EncounterPlane(unittest.TestCase):
