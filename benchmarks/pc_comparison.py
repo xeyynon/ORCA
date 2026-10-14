@@ -76,6 +76,8 @@ def parse_args(argv: Optional[Sequence[str]] = None):
     ap.add_argument("--mc-samples", type=int, default=2_000_000)
     ap.add_argument("--seed", type=int, default=1)
     ap.add_argument("--top-k", type=int, default=100, help="top-k overlap between Pc and miss rankings")
+    ap.add_argument("--covariance-floor", type=float, nargs=3, metavar=("R", "I", "C"),
+                    help="lower bound per axis (km) on the measured sigmas, e.g. 0.102 0.471 0.126 (ESA at-epoch)")
     ap.add_argument("--covariance-model", help="Exp 1 covariance_model.json: adds Foster with the measured "
                                                "radial / in-track / cross-track sigmas (column pc_foster_measured)")
     ap.add_argument("--tag")
@@ -98,7 +100,7 @@ def main(argv: Optional[Sequence[str]] = None) -> str:
         events = [r for r in csv.DictReader(f) if r["persistent_pair"] == "0"]
 
     det = ConjunctionDetector()
-    measured = MeasuredCovariance(a.covariance_model) if a.covariance_model else None
+    measured = MeasuredCovariance(a.covariance_model, floor=a.covariance_floor) if a.covariance_model else None
     rows: List[Dict] = []
     skipped = 0
     for e in events:
@@ -146,7 +148,8 @@ def main(argv: Optional[Sequence[str]] = None) -> str:
         rows.append(row)
 
     tag = a.tag or (os.path.basename(os.path.normpath(a.recall_dir)).replace("screening_recall_", "")
-                    + ("_measured" if measured is not None else ""))
+                    + ("_measured" if measured is not None else "")
+                    + ("_floor" if measured is not None and a.covariance_floor else ""))
     out_dir = os.path.join(RESULTS, f"pc_{tag}")
     os.makedirs(out_dir, exist_ok=True)
     _write_csv(os.path.join(out_dir, "events_pc.csv"), rows)

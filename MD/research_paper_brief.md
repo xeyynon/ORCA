@@ -549,3 +549,21 @@ See `MD/literature_verification.md` for the full log and `MD/references.bib` for
 
   k-d tree screening, Pc from TLEs, and covariance estimated from TLE history (COVGEN) are prior art.
 - **External ground truth available:** the Auman/Aerospace screening answer key (CC0) could validate Exp 2b.
+
+### Exp 4/5 with the measured covariance floored at ESA's at-epoch values
+
+**Why:** Kelso 2007 says TLE-to-TLE comparison underestimates error near epoch. So each measured σ is bounded below by Flohrer et al. 2009's LEO at-epoch values of 0.102 / 0.471 / 0.126 km (`--covariance-floor 0.102 0.471 0.126`).
+
+**Outputs:** `pc_*_measured_floor/` and `end_to_end_*_measured_floor/`.
+
+| Seed | Exp 4 (Foster, measured + floor): HIGH / MEDIUM / LOW / NEGLIGIBLE | Kendall τ | Exp 5 B_measured+floor: HIGH / MEDIUM |
+|---|---|---|---|
+| 1 | 1 / 27 / 3,104 / 3,436 | 0.307 | 1 / 28 |
+| 2 | 0 / 49 / 2,898 / 3,839 | 0.310 | 4 / 61 |
+| 3 | 1 / 44 / 2,768 / 3,401 | 0.303 | 1 / 44 |
+
+**Reading:**
+- The result barely moves (0–4 HIGH; about half NEGLIGIBLE), because in this window most TLEs are 2–9 days old at TCA. At those ages the measured σ already exceeds the floor in-track, and the floor binds only some radial and cross-track values.
+- So the near-epoch underestimate does not drive the "almost nothing is HIGH" conclusion *for this window*.
+- With fresher TLEs, ages under 1 day, the floor would matter. The production engine (v2) applies it by default.
+- The conclusion stands as: under a measured, floored covariance, only a handful of the ~6,500 encounters per 2,000 objects per day reach HIGH. Under the assumed shapes the count ranges from 0 to ~500. **The covariance model, not the geometry, decides the tier.**

@@ -72,6 +72,8 @@ def parse_args(argv: Optional[Sequence[str]] = None):
     ap.add_argument("--vmax", type=float, default=16.0)
     ap.add_argument("--ric-ratio", type=float, default=100.0, help="in-track / radial (= cross-track) sigma")
     ap.add_argument("--ric-floor-km", type=float, default=0.1, help="lower bound on radial and cross-track sigma")
+    ap.add_argument("--covariance-floor", type=float, nargs=3, metavar=("R", "I", "C"),
+                    help="lower bound per axis (km) on the measured sigmas, e.g. 0.102 0.471 0.126 (ESA at-epoch)")
     ap.add_argument("--covariance-model", help="Exp 1 covariance_model.json: adds B_measured, Foster with the "
                                                "measured radial / in-track / cross-track sigmas")
     ap.add_argument("--tag")
@@ -87,7 +89,7 @@ def b_covariances(r1, v1, r2, v2, s1, s2, ratio, floor):
 
 def main(argv: Optional[Sequence[str]] = None) -> str:
     a = parse_args(argv)
-    measured = MeasuredCovariance(a.covariance_model) if a.covariance_model else None
+    measured = MeasuredCovariance(a.covariance_model, floor=a.covariance_floor) if a.covariance_model else None
     with open(os.path.join(a.recall_dir, "run.json"), encoding="utf-8") as f:
         run2b = json.load(f)
     args2b = run2b["args"]
@@ -200,7 +202,8 @@ def main(argv: Optional[Sequence[str]] = None) -> str:
         r["found_by_a"] = int(any(abs(t - r["tca_s"]) <= MATCH_S for t in a_by_pair.get(key, [])))
 
     tag = a.tag or (os.path.basename(os.path.normpath(a.recall_dir)).replace("screening_recall_", "")
-                    + ("_measured" if measured is not None else ""))
+                    + ("_measured" if measured is not None else "")
+                    + ("_floor" if measured is not None and a.covariance_floor else ""))
     out_dir = os.path.join(RESULTS, f"end_to_end_{tag}")
     os.makedirs(out_dir, exist_ok=True)
     _write_csv(os.path.join(out_dir, "events_a.csv"), rows_a)

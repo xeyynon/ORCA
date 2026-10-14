@@ -11,7 +11,7 @@ this raises, so nothing silently falls back to an assumed shape.
 """
 import json
 import math
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 
@@ -21,7 +21,7 @@ Point = Tuple[float, float, float, float]  # (horizon_days, sigma_R, sigma_I, si
 
 
 class MeasuredCovariance:
-    def __init__(self, path: str, min_n: int = 100):
+    def __init__(self, path: str, min_n: int = 100, floor: Optional[Tuple[float, float, float]] = None):
         with open(path, encoding="utf-8") as f:
             model = json.load(f)
         self.points: Dict[str, List[Point]] = {}
@@ -35,9 +35,16 @@ class MeasuredCovariance:
             raise ValueError(f"{path} has fewer than two LEO horizon bins with n >= {min_n}: take more snapshots "
                              "and rerun benchmarks/propagation_accuracy.py --snapshots ...")
         self.path = path
+        # Optional per-axis lower bound, e.g. ESA's at-epoch TLE uncertainty (Flohrer et al. 2009), because
+        # TLE-to-TLE comparison underestimates error near epoch (Kelso 2007)
+        self.floor = tuple(floor) if floor else None
 
     def sigmas(self, name: str, age_days: float) -> Tuple[float, float, float]:
         """(radial, in-track, cross-track) 1-sigma in km for one object at this TLE age."""
+        raw = self._measured(name, age_days)
+        return tuple(max(s, f) for s, f in zip(raw, self.floor)) if self.floor else tuple(raw)
+
+    def _measured(self, name: str, age_days: float) -> Tuple[float, float, float]:
         gp = "starlink" if "STARLINK" in (name or "").upper() else "other"
         pts = self.points.get(gp) or self.points.get("all") or next(iter(self.points.values()))
         h = abs(age_days)
