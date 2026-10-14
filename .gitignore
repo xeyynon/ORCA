@@ -71,3 +71,6 @@ frontend/*.tsbuildinfo
 
 # Operator credential (hash + signing secret): never commit
 auth.json
+
+# Benchmark TLE snapshots are live data; their .json manifests are committed
+benchmarks/data/*.tle
