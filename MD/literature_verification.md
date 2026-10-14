@@ -61,3 +61,32 @@
   - validate Exp 2b against the Auman/Aerospace screening answer key;
   - rerun Exp 1 for Starlink against CelesTrak SupGP;
   - add a covariance variant floored at the Flohrer epoch values.
+
+## 5. Full reading of the closest work (2026-10-15)
+
+**Sonawane 2026 [sonawane2026]: a speed / HPC paper.**
+- **Pipeline:** CelesTrak active TLEs (15,830 objects), SGP4, grid and k-d tree screening against brute force (about 61x fewer pair checks), a parabolic TCA, Foster Pc with assumed per-regime covariance, and tiers. Code: github.com/Aditya29072002/Satellite-Conjunction-Assessment.
+- **Not done:**
+  - no time-step sweep, recall or ground truth: only "a snapshot misses pairs", stated qualitatively;
+  - no relative-velocity conditioning;
+  - TCA and Pc accuracy are never evaluated;
+  - no measured covariance.
+- **Effect on our claims:** contributions 1-3 are not covered. It is the same kind of open pipeline our audit approach applies to.
+
+**Medhin & Servadio 2026 [medhin2026]: synthetic debris-evolution study (cube method and an overlapping "Double Cube").**
+- **What it shows:** snapshot sampling misses collisions: 7.09 % (cube) vs 0.55 % at a 0.5 s interval, split into temporal and spatial parts.
+- **Not done:** no TLEs, two step values only, no velocity conditioning, no TCA, no 2D Pc.
+- **Effect on our claims:** related evidence for contribution 1, not a duplicate.
+
+**Alfano 2007 [alfano2007review]: numerical comparison of Foster, Chan, Patera and Alfano 2D Pc.**
+- **Scope:** about 60,000 encounter-plane cases against a 1e-9-tolerance integral. All four are accurate to about 2+ significant figures; Foster is the slowest.
+- **Effect on our claims:** comparing Pc formulas is prior art; cite it, do not claim it. Our finding is different: an audit of a formula as implemented in a working tool, and its effect on tiers and rankings end to end.
+
+**Novelty, final wording:**
+1. A sweep of snapshot-screening recall against time step, by radius and relative velocity, on public TLEs.
+2. Stage-by-stage attribution of accuracy loss in one open pipeline, including an audit of a working tool (Pc off by 1/alpha^2, end-to-end recall ~0.1 %) and a validated correction.
+3. The swing in risk tiers between assumed and measured (TLE-to-TLE, ESA-floored) covariance.
+
+**Prior art to cite, not claim:** k-d tree / grid screening (budianto2014; sonawane2026), Pc formulas and their comparison (alfano2007review; li2022review), covariance from public TLE data (peterson2001covgen), and snapshot blindness in a synthetic setting (medhin2026).
+
+All TITLE-TODO entries in references.bib are now filled.
