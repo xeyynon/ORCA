@@ -5,6 +5,7 @@ import { fixed, pc } from '@/lib/format'
 import { riskRank } from '@/lib/risk'
 import { sortBy } from '@/lib/sort'
 import { pairKey } from '@/lib/pair'
+import { Badge } from '../../atoms/Badge/Badge'
 import { Mono } from '../../atoms/Mono/Mono'
 import { RiskBadge } from '../../molecules/RiskBadge/RiskBadge'
 import { ValueUnit } from '../../molecules/ValueUnit/ValueUnit'
@@ -18,6 +19,8 @@ const SORT_KEYS: Record<string, (e: ConjunctionEvent) => number | string> = {
   risk: (e) => riskRank(e.risk_level),
   pc: (e) => e.probability_of_collision,
   miss: (e) => e.min_distance_km,
+  unc: (e) => e.uncertainty_km,
+  age: (e) => e.tle_age_days,
   tca: (e) => Date.parse(e.tca),
 }
 
@@ -28,10 +31,20 @@ export function ConjunctionTable({ events, selectedKey, onSelect }: Props) {
   const sorted = useMemo(() => sortBy(events, SORT_KEYS[sortId] ?? SORT_KEYS.pc, sortDir), [events, sortId, sortDir])
 
   const columns: Column<ConjunctionEvent>[] = [
-    { id: 'risk', label: 'Risk', sortable: true, render: (e) => <RiskBadge level={e.risk_level} /> },
+    {
+      id: 'risk', label: 'Risk', sortable: true,
+      render: (e) => (
+        <span>
+          <RiskBadge level={e.risk_level} />
+          {e.long_encounter ? <> <Badge tone="warn" title="Long encounter: relative speed under 0.1 km/s. The probability can be several times too low.">Long</Badge></> : null}
+        </span>
+      ),
+    },
     { id: 'pair', label: 'Pair', render: (e) => <span>{e.sat1_name} <Mono muted>×</Mono> {e.sat2_name}</span> },
     { id: 'pc', label: 'Pc', sortable: true, align: 'right', render: (e) => <Mono>{pc(e.probability_of_collision)}</Mono> },
     { id: 'miss', label: 'Miss distance', sortable: true, align: 'right', render: (e) => <ValueUnit value={fixed(e.min_distance_km, 3)} unit="km" /> },
+    { id: 'unc', label: 'Uncertainty (1σ)', sortable: true, align: 'right', render: (e) => <ValueUnit value={fixed(e.uncertainty_km, 2)} unit="km" /> },
+    { id: 'age', label: 'TLE age', sortable: true, align: 'right', render: (e) => <ValueUnit value={fixed(e.tle_age_days, 1)} unit="d" /> },
     { id: 'tca', label: 'TCA', sortable: true, render: (e) => <span><Mono>{formatUtc(e.tca)}</Mono> <Mono muted>({formatRelative(e.tca)})</Mono></span> },
   ]
 
