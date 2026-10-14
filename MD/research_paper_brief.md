@@ -180,6 +180,7 @@ No covariance in TLEs (assumed or estimated uncertainty only). Every reference u
 - `benchmarks/encounter_curvature.py` + `pc_line_integral` in `benchmarks/pc.py`: Exp 4b, the short-term encounter test.
 - `benchmarks/end_to_end.py`: Exp 5.
 - `benchmarks/mc_convergence.py`: Monte Carlo convergence against Foster (figure F5).
+- `benchmarks/refresh_measured.ps1`: the daily routine in one command (snapshot, refit Exp 1, rerun Exp 4 and 5 for three seeds with the measured covariance), using the project `.venv`.
 - `benchmarks/covariance.py`: `--covariance-model` for `pc_comparison.py` and `end_to_end.py`, which applies the Exp 1 fit (σ per radial / in-track / cross-track axis vs TLE age, Starlink and non-Starlink). It refuses to run while `covariance_model.json` has no fit, so nothing falls back silently to an assumed shape. Smoke-tested with a synthetic model only.
 - `propagation_accuracy.py --snapshots a b c ...`: compares every earlier TLE of each object with every later one, so daily snapshots give 1-, 2-, ... day horizons. On the two existing snapshots it reproduces the committed results exactly.
 - `benchmarks/figures.py` now also draws F1 (pipeline, double column) and F5 (convergence, three small multiples).
@@ -489,3 +490,44 @@ Event recall, miss < 10 km (range over the three seeds):
 - Foster lies inside the 95 % interval in 22 of 24 runs, consistent with the 5 % expected miss rate.
 
 This confirms Section 1, row 8: at Pc ~ 10⁻⁶, Monte Carlo needs ~10⁸ samples, and v1's 10³–10⁵ would return zero.
+
+### Exp 1 with three snapshots, and Exp 4 and 5 with the measured covariance
+
+**Exp 1 setup:**
+- A third snapshot, `catalog_20261014T174434Z`: Celestrak `active`, fetched 8.6 h after S2, median epoch 2026-10-14 03:19.
+- `propagation_accuracy.py --snapshots` compares every earlier TLE of each object with every later one. Run in the project `.venv` (Python 3.12, numpy 2.5.2, scipy 1.18.0, sgp4 2.27, the same versions as all earlier results).
+- Output: `benchmarks/results/propagation_20261014T064759Z_to_20261014T174434Z_3snap/`.
+
+**Measured robust σ, LEO, SGP4 TLE-to-TLE** (radial / in-track / cross-track, km; bins with n ≥ 100):
+
+| Horizon (median) | Non-Starlink | n | Starlink | n |
+|---|---|---|---|---|
+| 0.33 d | 0.014 / 0.16 / 0.014 | 3,196 | 0.11 / 2.66 / 0.079 | 3,473 |
+| 0.7 d | 0.030 / 0.31 / 0.044 | 770 | 0.15 / 7.26 / 0.11 | 4,721 |
+| 1.05 d | (n = 39, not used) | | 0.28 / 20.3 / 0.13 | 183 |
+| 6.3 d | 0.14 / 14.6 / 0.21 | 8,350 | 3.92 / 172 / 0.49 | 17,961 |
+
+**Reading:**
+- The growth is strongly non-linear: non-Starlink in-track goes 0.16 → 0.31 → 14.6 km. The straight-line fit stored in the json is therefore *not* used. `benchmarks/covariance.py` interpolates the bins in log-log space and holds the end values outside the measured range.
+- ORCA's assumption (0.5 km + 2 km/day, every axis) is about **3× too wide in-track and ~35× too wide radially** for a fresh non-Starlink TLE. At 6 days it is about right in-track and ~90× too wide radially.
+- Starlink TLEs are ~15× worse in-track than other LEO objects at the same age.
+
+**Exp 4, Foster with the measured covariance** (seeds 1/2/3; outputs `pc_n2000_h24_ref10s_seed{1,2,3}_measured/`):
+
+| | HIGH | MEDIUM | LOW | NEGLIGIBLE | Kendall τ vs miss | Top-100 overlap |
+|---|---|---|---|---|---|---|
+| Foster, ORCA's isotropic σ | 0 | 15–37 | ~6,200–6,750 | 0–7 | 0.41–0.43 | 6–11 % |
+| Foster, assumed A = 10 | 0 | 25–61 | 5,400–5,940 | 725–784 | 0.22–0.23 | 0–1 % |
+| **Foster, measured** | **0–2** | **26–49** | **2,770–3,100** | **3,400–3,840** | **0.30–0.31** | **3–4 %** |
+
+**Exp 5, B_measured** (outputs `end_to_end_n2000_h24_ref10s_seed{1,2,3}_measured/`): HIGH 1–3, MEDIUM 27–62, NEGLIGIBLE 3,421–3,839 per seed.
+
+The **B_ric assumption** from Section 10, Exp 5 (in-track = ORCA's σ, radial = max(σ/100, 0.1 km)) had produced 471–576 HIGH. **The measurement does not support it.** Real TLE uncertainty is much smaller than ORCA's for young TLEs. That makes most km-scale misses confidently safe: about half of all encounters below 10 km become NEGLIGIBLE, and only 0–3 per seed stay HIGH.
+
+**Conclusion for the paper:** the tier distribution swings from "~500 HIGH" to "~2 HIGH" between two plausible covariance assumptions. The tier outcome is set by the covariance model. A measured model gives the defensible answer, which is that almost none of these encounters is high-risk.
+
+**Caveats:**
+- Three snapshots over one day.
+- Non-Starlink objects have no usable 1–5 day bin, so interpolation spans 0.7 → 6.3 days.
+- The TLE-to-TLE spread includes the newer TLE's own error.
+- Run `benchmarks/refresh_measured.ps1` daily to tighten this.
