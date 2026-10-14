@@ -164,6 +164,8 @@ No covariance in TLEs (assumed or estimated uncertainty only). Every reference u
 3. Whether to fetch debris / a fuller catalog.
 4. Verification of every [VERIFY] reference; the literature review (Pass B) should be the starting list.
 5. Whether R3 (precise ephemerides) is worth the effort.
+6. **Snapshot archiving:** the `.tle` snapshots are git-ignored (live-data policy), so others cannot regenerate the results from the repo alone. Before submission, archive them (e.g. a release asset or Zenodo) and cite the sha256 values from the manifests.
+7. More snapshots over several days, so Exp 1 can fit error growth with horizon (Section 10, Exp 1).
 
 ## 9. Work started on this branch
 
@@ -176,6 +178,7 @@ No covariance in TLEs (assumed or estimated uncertainty only). Every reference u
 - `benchmarks/pc_comparison.py`: Exp 4 on real encounters; `ric_covariance` added to `benchmarks/pc.py`.
 - `benchmarks/screening_runtime.py`: Exp 2a.
 - `benchmarks/encounter_curvature.py` + `pc_line_integral` in `benchmarks/pc.py`: Exp 4b, the short-term encounter test.
+- `benchmarks/propagators.py`, `benchmarks/propagation_accuracy.py`: Exp 1. `tests/test_benchmark_propagators.py` checks the J2 rates against SGP4's own secular rates. `snapshot_catalog.py --celestrak GROUP` takes a snapshot straight from Celestrak without touching the app database.
 
 ## 10. Results so far [MEASURED]
 
@@ -368,3 +371,56 @@ Event recall, miss < 10 km (range over the three seeds):
 - The covariance is frozen during the encounter.
 - The small-radius approximation (R ≪ σ holds here: about 10 m against ≥ 0.7 km).
 - No 3D Monte Carlo cross-check on real encounters yet: their Pc of ~1e-6 would need ~1e8 samples (Section 1, row 8).
+
+### Exp 1: propagation fidelity (preliminary)
+
+**Setup:**
+- Two snapshots: `catalog_20261014T064759Z` (from the app database; median epoch 2026-10-07) and `catalog_20261014T090520Z` (one Celestrak GET of `active` on 2026-10-14; median epoch 2026-10-13).
+- 15,932 objects in both. 15,893 used: 35 had no later TLE, and 4 had gaps under 1 h or over 14 days.
+- Methods:
+  - ORCA's engine (two-body + drag, built through ORCA's own parser)
+  - two-body + first-order J2 secular rates, using Brouwer mean elements; unit-tested against SGP4's own secular rates (mean-anomaly rate agrees to 1e-5)
+  - SGP4
+- Output: `benchmarks/results/propagation_20261014T064759Z_to_20261014T090520Z/`. `errors.csv` is git-ignored; regenerate it with the script.
+- The J2 tier first used the TLE's Kozai mean motion. That double-counts J2 and produced ~270 km per day of in-track error. It was corrected before the numbers below.
+
+**R1, model consistency** (LEO, 15,157–15,168 objects; the same TLE propagated by each model and differenced against SGP4, median):
+
+| Hours after TLE epoch | 0 | 1 | 6 | 24 | 72 | 168 |
+|---|---|---|---|---|---|---|
+| ORCA engine vs SGP4 (km) | 12 | 15 | 83 | 303 | 1,280 | 2,920 |
+| J2 secular vs SGP4 (km) | 12 | 9 | 8 | 11 | 20 | 83 |
+
+- Both start at ~12 km because they treat mean elements as osculating (mostly in-track short-period terms).
+- J2 holds the orbit plane: cross-track ~2 km at all horizons. ORCA's engine drifts by 100 km cross-track within a day.
+- **Adding J2 to ORCA's engine is the single biggest propagation fix:** ~300 km → ~11 km at 24 h.
+- Per-state cost including setup (scalar calls): SGP4 2 µs, J2 8 µs, ORCA engine 38 µs.
+
+**R2, TLE-to-TLE: old TLE propagated to the new TLE's epoch, against SGP4 of the new TLE.** LEO, horizon 5–7 days (15,041 objects; nearly all objects fall in this one bin, because both snapshots are single fetches).
+
+| Group | Method | Median error | p90 | Robust σ R / I / C (km) |
+|---|---|---|---|---|
+| non-Starlink (4,432) | ORCA engine | 2,531 km | 2,818 km | 99 / 324 / 1,108 |
+| | J2 secular | 24.7 km | 271 km | 0.82 / 35.3 / 1.45 |
+| | **SGP4** | **12.0 km** | 89 km | **0.13 / 14.2 / 0.20** |
+| Starlink (10,609) | ORCA engine | 2,806 km | 3,224 km | 117 / 1,972 / 175 |
+| | **J2 secular** | **38.2 km** | 159 km | 2.53 / 33.3 / 2.47 |
+| | SGP4 | 147.5 km | 475 km | 3.46 / 160 / 0.44 |
+
+**Reading:**
+- **The error shape is extremely anisotropic.** For non-Starlink LEO objects at about 6 days, SGP4's in-track spread is ~100× its radial spread and ~70× its cross-track spread.
+- ORCA assumes an isotropic σ = 0.5 + 2 × 6 ≈ 12.5 km per object at this horizon. That roughly matches the real in-track spread, but overstates radial and cross-track by ~100×. The A = 10 variant in Exp 4 is therefore *conservative*. Real TLE error is more elongated still, which pushes the Pc ranking even further from the miss-distance ranking.
+- **Starlink anomaly:** SGP4 is *worse* than plain J2 for Starlink, and its error grows with B*:
+
+  | Starlink \|B*\| quartile | lowest | 2nd | 3rd | highest |
+  |---|---|---|---|---|
+  | SGP4 median error | 15 km | 49 km | 223 km | 383 km |
+  | J2 median error | 21 km | 29 km | 45 km | 87 km |
+
+  For non-Starlink objects SGP4 beats J2 in every B* quartile. **Hypothesis, unverified:** Starlink TLE fits absorb low-thrust station-keeping or manoeuvres into B*, and SGP4 then extrapolates that as drag. Starlink is 70 % of LEO in this catalog, so the result matters for any catalog-wide claim. Check the literature before stating it [VERIFY].
+- The horizon dependence cannot be fitted from one 5–7 day bin. `covariance_model.json` therefore records "no fit". Taking snapshots daily for about a week would give horizons from 1 to 7 days.
+
+**Caveats:**
+- The newer TLE has its own error, and manoeuvres between the epochs count as propagation error.
+- One pair of snapshots.
+- Some epochs in the Celestrak snapshot are dated up to a day after the fetch. Those objects have later epochs and are used as normal; the cause is not investigated.

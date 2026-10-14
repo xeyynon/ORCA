@@ -1,0 +1,139 @@
+{
+  "form": "sigma_km = s0_km + s1_km_per_day * horizon_days, per RIC axis, robust spread of SGP4 TLE-to-TLE errors; fitted on LEO horizon bins with n >= 5",
+  "orca_assumed": {
+    "R": [
+      0.5,
+      2.0
+    ],
+    "I": [
+      0.5,
+      2.0
+    ],
+    "C": [
+      0.5,
+      2.0
+    ]
+  },
+  "LEO_all": {
+    "fit": null,
+    "reason": "fewer than 3 horizon bins with n >= 100; take more snapshots over several days",
+    "bins": [
+      {
+        "bin": "1-2d",
+        "horizon_days_median": 1.84838496,
+        "n": 7,
+        "R_sigma_km": 0.4374030668616183,
+        "I_sigma_km": 75.6117423190447,
+        "C_sigma_km": 0.17178336129290692
+      },
+      {
+        "bin": "2-3d",
+        "horizon_days_median": 2.36958153,
+        "n": 13,
+        "R_sigma_km": 1.550749255228176,
+        "I_sigma_km": 105.47091651306168,
+        "C_sigma_km": 0.6528596500440473
+      },
+      {
+        "bin": "3-5d",
+        "horizon_days_median": 3.90578791,
+        "n": 28,
+        "R_sigma_km": 0.6302454748235695,
+        "I_sigma_km": 7.013128173870293,
+        "C_sigma_km": 0.522854511611426
+      },
+      {
+        "bin": "5-7d",
+        "horizon_days_median": 6.01594107,
+        "n": 15041,
+        "R_sigma_km": 1.1768734602939237,
+        "I_sigma_km": 78.62862652752173,
+        "C_sigma_km": 0.8158716280746771
+      },
+      {
+        "bin": "7-14d",
+        "horizon_days_median": 7.248475969999999,
+        "n": 35,
+        "R_sigma_km": 7.193556788306723,
+        "I_sigma_km": 280.6599267404122,
+        "C_sigma_km": 0.650686513832395
+      }
+    ]
+  },
+  "LEO_starlink": {
+    "fit": null,
+    "reason": "fewer than 3 horizon bins with n >= 100; take more snapshots over several days",
+    "bins": [
+      {
+        "bin": "2-3d",
+        "horizon_days_median": 2.60354885,
+        "n": 7,
+        "R_sigma_km": 0.785521980608182,
+        "I_sigma_km": 64.45852496029859,
+        "C_sigma_km": 0.4580534127549033
+      },
+      {
+        "bin": "3-5d",
+        "horizon_days_median": 3.87558632,
+        "n": 6,
+        "R_sigma_km": 1.8657377688734325,
+        "I_sigma_km": 135.18967073546594,
+        "C_sigma_km": 0.8560596638222803
+      },
+      {
+        "bin": "5-7d",
+        "horizon_days_median": 6.00351167,
+        "n": 10609,
+        "R_sigma_km": 3.4601703208718035,
+        "I_sigma_km": 160.3194603289148,
+        "C_sigma_km": 0.4425241876968561
+      },
+      {
+        "bin": "7-14d",
+        "horizon_days_median": 7.248467,
+        "n": 25,
+        "R_sigma_km": 10.495011550213958,
+        "I_sigma_km": 261.22816559603285,
+        "C_sigma_km": 0.3836145177832992
+      }
+    ]
+  },
+  "LEO_other": {
+    "fit": null,
+    "reason": "fewer than 3 horizon bins with n >= 100; take more snapshots over several days",
+    "bins": [
+      {
+        "bin": "2-3d",
+        "horizon_days_median": 2.2019705849999998,
+        "n": 6,
+        "R_sigma_km": 76.38043644677562,
+        "I_sigma_km": 718.5894803817848,
+        "C_sigma_km": 0.9203112014295387
+      },
+      {
+        "bin": "3-5d",
+        "horizon_days_median": 3.914978475,
+        "n": 22,
+        "R_sigma_km": 0.22212254304817106,
+        "I_sigma_km": 5.428178650371967,
+        "C_sigma_km": 0.23682397279752707
+      },
+      {
+        "bin": "5-7d",
+        "horizon_days_median": 6.021502065,
+        "n": 4432,
+        "R_sigma_km": 0.13342965090883935,
+        "I_sigma_km": 14.218581421554426,
+        "C_sigma_km": 0.20309840384174666
+      },
+      {
+        "bin": "7-14d",
+        "horizon_days_median": 7.73166198,
+        "n": 10,
+        "R_sigma_km": 1.9697473438057818,
+        "I_sigma_km": 112.25054723221803,
+        "C_sigma_km": 2.066028046200198
+      }
+    ]
+  }
+}
