@@ -1,4 +1,4 @@
-# Paper draft: Sections II, IV and V (I, III and VI to follow)
+# Paper draft: Sections I–V (VI to follow)
 
 > Draft 2, 2026-10-15. Written from `MD/research_paper_brief.md` (Section 10) and the committed files in `benchmarks/results/`. Every number below is traceable to one of those files.
 >
@@ -7,9 +7,62 @@
 > - **[Fig. n] / [Table n]** follow the brief's plan.
 > - All figures, including **F1** (`fig_pipeline`) and **F5** (`fig_mc_convergence`), are in `benchmarks/figures/`.
 >
-> Sections I, III and VI are not drafted yet: their research-gap wording waits on a full reading of the two closest prior works.
+> Section VI is not drafted yet. Sections I and III use the gap verified in `MD/literature_verification.md` §5.
 >
 > **Length:** IV + V are about 3,500 words including tables, well over their ~4.1-page budget. II is about 650 words against ~0.6 page. Trim after the template is fixed.
+
+---
+
+## I. INTRODUCTION
+
+### A. Background and motivation
+
+Close approaches between catalogued objects in low Earth orbit (LEO) are routine. Operators screen their satellites against the catalog daily and act when the probability of collision P_c crosses a threshold, usually 10⁻⁴ [nasa_ca_handbook2020; merz2019].
+
+The only orbit data freely available for the whole public catalog are two-line element sets (TLEs). Public services and open tools therefore build conjunction pipelines on TLEs, from CelesTrak's SOCRATES [kelso2005socrates] to recent open-source screeners [sonawane2026]. NASA's conjunction-assessment handbook does not recommend TLE-based assessment for operations, "because the TLE accuracy is not sufficient" [nasa_ca_handbook2020]. How much accuracy is lost, and at which stage of a typical pipeline, is rarely measured.
+
+### B. Problem statement
+
+A TLE pipeline has four stages: propagation, screening, refinement of the time of closest approach (TCA), and collision probability with a risk tier. Each stage rests on a choice the user does not see:
+- the propagator;
+- the screening time step and radius;
+- the refinement method;
+- the P_c formula;
+- the position covariance that TLEs do not carry.
+
+Errors compound. An encounter missed by screening never reaches the P_c stage. A P_c computed with a wrong formula or an unsupported covariance produces a confident tier with no physical meaning. In a working tool, none of this is visible in the output.
+
+### C. Research gap
+
+**What existing work measures:**
+- completeness and agreement of commercial and government screening tools on the public TLE catalog [georgeharvey2011];
+- accuracy requirements for screening, with a public answer key [auman2025];
+- conjunctions missed by orbit filters [woodburn2009];
+- P_c formulas compared in isolation [alfano2007review; li2022review];
+- collisions missed by snapshot screening, in a synthetic debris-evolution setting [medhin2026].
+
+Open TLE pipelines report speed but not accuracy [sonawane2026].
+
+**What we did not find:**
+- a measurement of how much snapshot screening misses on public TLEs as a function of time step, radius and relative velocity;
+- an end-to-end, stage-by-stage attribution of accuracy loss in one open pipeline;
+- a measurement of how far the choice between an assumed and a measured covariance moves the risk tiers.
+
+### D. Contributions
+
+We benchmark each stage of an open TLE pipeline, ORCA, against a dense reference built from the same public data:
+
+1. **Screening recall.** On public TLEs, a 1 h / 100 km snapshot screen sees only 1.0–1.2 % of the encounters closer than 10 km during their pass. Recall follows the sampling law 2r/(vΔt) and depends strongly on relative velocity.
+2. **Stage-by-stage audit of a working tool.** ORCA's propagator drifts ~300 km from SGP4 in a day. Its TCA refinement finds the closest approach for 5–6 % of the pairs it flags. Its P_c formula is off by exactly 1/α², which makes every one of its CRITICAL and HIGH labels an artefact. End to end, it reports about 0.1 % of the encounters closer than 10 km. A corrected pipeline, validated against the reference, recovers them at about 9 times the cost and is now ORCA's production engine.
+3. **Covariance decides the tier.** We measure TLE position error from successive public TLEs:
+   - along-track is ~100 times radial;
+   - Starlink is ~15 times worse in-track than other LEO objects.
+
+   On the same encounters, assumed covariances give between 0 and ~500 HIGH-tier events per 2,000 objects per day. The measured, ESA-floored covariance gives 0–4. The P_c ranking also departs sharply from the miss-distance ranking (Kendall τ 0.30–0.43).
+
+Code, result files and snapshot manifests accompany the paper.
+
+**Organisation.** Section II gives the background, Section III reviews related work, Section IV describes the method and experiments, Section V reports the results, and Section VI concludes.
 
 ---
 
@@ -66,6 +119,60 @@ Here C is the combined 2×2 position covariance in that plane.
 ### E. Risk tiers
 
 Operators act on P_c thresholds. NASA's handbook recommends mitigation above 10⁻⁴ [nasa_ca_handbook2020], and the same 1/10,000 is a "quasi-standard" at ESA [merz2019]. ORCA reports five tiers with boundaries at 10⁻⁴, 10⁻⁵, 10⁻⁶ and 10⁻⁷. Every tier inherits the covariance assumption behind P_c (§II-A).
+
+---
+
+## III. LITERATURE REVIEW
+
+### A. TLE-based orbit prediction
+
+SGP4 and its element sets were published in Spacetrack Report #3 [hoots1980str3]. The reference implementation, which is the one used here, was revisited by Vallado et al. [vallado2006revisiting], who put TLE prediction accuracy "generally in the kilometer-level range". Flohrer et al. derived TLE uncertainties per orbit class for ESA's collision-risk tool [flohrer2009improving]: LEO averages of 0.10, 0.47 and 0.13 km radial, along-track and cross-track at epoch. Kelso compared SGP4 with GPS precise ephemerides and found that TLE-to-TLE consistency approximates the true error but underestimates it near epoch [kelso2007validation]. Against precise laser-ranging orbits, Levit and Marshall reported SGP4 error growth of about 1.5 km per day, and showed that fitting to TLE histories reduces it [levit2011improved].
+
+**Starlink.** Megaconstellations add a specific problem. Starlink satellites manoeuvre continuously with low-thrust propulsion [lang2025starlink; liu2024maneuver]. SpaceX publishes operator ephemerides [ou2025starlink], from which CelesTrak derives supplemental element sets and publishes a comparison against the regular TLEs [celestrak_supgp]. An unrefereed study measured how quickly Starlink TLEs lose accuracy against operator-updated truth [jankovic2026].
+
+### B. Conjunction screening
+
+**Filters and parallel screening.** Hoots et al. introduced the classic apogee–perigee, orbit-path and time filters [hoots1984]. Woodburn et al. showed that these filters need pads to avoid missed conjunctions: 4 of 5,338 conjunctions were lost without them [woodburn2009]. Parallel and sieve methods followed [healy1995; alarcon2002]. George's sort-and-sweep screener [george2011] and Budianto-Ho et al.'s k-d tree and spatial-hash screener [budianto2014] avoid sampling misses by screening *swept* volumes between time steps.
+
+**Comparisons and benchmarks.**
+- George and Harvey compared six screening tools on the public TLE catalog. Tools missed between 33 and 326 conjunctions, which they traced to filter pads [georgeharvey2011].
+- Stevenson et al. benchmarked machine-learning screening against classical filters on simulated ephemerides [stevenson2023].
+- Medhin and Servadio quantified the "boundary blindness" of snapshot grid methods in a synthetic debris-evolution setting [medhin2026].
+- Sonawane screened the CelesTrak catalog with grid and k-d tree methods, reporting speed-ups but no recall [sonawane2026].
+
+### C. Time of closest approach
+
+Alfano and Negron located close approaches by fitting cubic polynomials to the separation history and finding their roots [alfano1993]. Brent's method [brent1973] is the standard bracketed root-finder and minimiser. Open pipelines commonly fit a parabola through grid samples [sonawane2026], but the accuracy of these refinements, and how often a long-window minimiser settles on the wrong approach, is seldom reported.
+
+### D. Collision probability
+
+**Short-term encounters.**
+- Foster's 2D integral [foster1992] and its refinements [akella2000; patera2001; alfano2005numerical; chan2008] are the standard methods; Li et al. review them [li2022review].
+- Alfano compared Foster, Chan, Patera and Alfano numerically over about 60,000 cases and found all of them accurate to two or more significant figures [alfano2007review].
+- Monte Carlo test cases [alfano2009mc] and NASA's open CARA tools [cara_tools] support validation.
+
+**Long encounters.** For slow encounters, Coppola extended P_c to 3D with velocity uncertainty [coppola2012].
+
+**Covariance.** Because TLEs carry no covariance, it must be supplied: from look-up tables [flohrer2009improving], or estimated from public TLE histories, as COVGEN did [peterson2001covgen].
+
+**Thresholds.** NASA recommends mitigation above 10⁻⁴ [nasa_ca_handbook2020]. ESA notes that 1/10,000 has become a quasi-standard, "presumably often applied without being scrutinized" [merz2019].
+
+### E. Public services and open tools
+
+- SOCRATES screens payloads against the public catalog daily [kelso2005socrates].
+- Orekit ships short-term P_c methods [orekit12], and NASA's CARA SDK provides P_c tools with test cases [cara_tools].
+- The TraCSS validation work defines screening accuracy requirements and a public answer key [auman2025].
+
+### F. Gap
+
+**Covered elsewhere:** screening speed, filter design, tool agreement, and P_c formulas in isolation.
+
+**Not measured:**
+- recall of snapshot screening on public TLEs as a function of step, radius and relative velocity;
+- the accuracy of each stage inside one working TLE pipeline, end to end;
+- the effect of a measured rather than assumed covariance on the risk tiers that users see.
+
+These are the three contributions of this paper (§I-D).
 
 ---
 

@@ -1,7 +1,6 @@
 % References for the TLE conjunction-assessment benchmark paper.
 % Verified 2026-10-14 by opening the source (publisher / Crossref DOI record / agency PDF / author page).
 % Entries marked SECONDARY-ONLY were seen only in other papers' reference lists: re-check before submission.
-% Entries marked TITLE-TODO were confirmed by DOI or arXiv id but the title was not recorded: copy it from the DOI page.
 % Details and what each source establishes: MD/literature_verification.md
 
 % ---------------------------------------------------------------- Propagation and TLEs
@@ -61,23 +60,32 @@
   note = {Operator-derived elements; GP-vs-SupGP comparison at /supplemental/table-rms.php. Accessed 2026-10-14}}
 
 @article{lang2025starlink,
-  author = {Lang and Jiang}, title = {TITLE-TODO},
+  author = {Lang, Anqi and Jiang, Yu},
+  title = {Orbit Determination for Continuously Maneuvering {Starlink} Satellites Based on an Unscented Batch Filtering Method},
   journal = {Sensors}, volume = {25}, number = {13}, pages = {4079}, year = {2025}, doi = {10.3390/s25134079}}
 
 @article{ou2025starlink,
-  author = {Ou and others}, title = {TITLE-TODO},
-  journal = {Remote Sensing}, volume = {17}, number = {9}, year = {2025}, doi = {10.3390/rs17091549}}
+  author = {Ou, Zhuoliang and Zhong, Jiahao and Hao, Yongqiang and Li, Ruoxi and Wan, Xin and Wang, Kang and Chen, Jiawen and Han, Hao and Song, Xingyan and Du, Wenyu and Tang, Yanyan},
+  title = {Near-Real-Time Global Thermospheric Density Variations Unveiled by {Starlink} Ephemeris},
+  journal = {Remote Sensing}, volume = {17}, number = {9}, pages = {1549}, year = {2025}, doi = {10.3390/rs17091549}}
 
 % Metadata via Crossref; content SECONDARY-ONLY (abstract blocked)
 @article{liu2024maneuver,
-  author = {Liu and others},
+  author = {Liu, Airong and Xu, Xiaoli and Xiong, Yongqing and Yu, Shengxian},
   title = {Maneuver strategies of {Starlink} satellite based on {SpaceX}-released ephemeris},
   journal = {Advances in Space Research}, volume = {74}, number = {7}, pages = {3157--3169}, year = {2024},
   doi = {10.1016/j.asr.2024.06.038}}
 
 % Unrefereed preprint
 @misc{jankovic2026,
-  author = {Jankovic}, title = {TITLE-TODO}, howpublished = {arXiv:2605.19850}, year = {2026}}
+  author = {Jankovic, Dimitrije},
+  title = {How long can you trust a {Starlink} {TLE}? {An} empirical comparison of {SGP4} and high-fidelity propagation against operator-updated truth across a megaconstellation},
+  howpublished = {arXiv:2605.19850}, year = {2026}}
+
+@misc{dyreby2025analyzing,
+  author = {Dyreby, Katarina and Caldas, Francisco and Soares, Cl{\'a}udia},
+  title = {Analyzing Data Quality and Decay in Mega-Constellations: A Physics-Informed Machine Learning Approach},
+  howpublished = {arXiv:2510.11242}, year = {2025}, note = {76th International Astronautical Congress}}
 
 % ---------------------------------------------------------------- Screening and TCA
 @article{hoots1984,
@@ -160,16 +168,29 @@
   doi = {10.1016/j.asr.2023.01.036}}
 
 @misc{medhin2026,
-  author = {Medhin and Servadio}, title = {TITLE-TODO}, howpublished = {arXiv:2607.09634}, year = {2026}}
+  author = {Medhin, Yacob and Servadio, Simone},
+  title = {Beyond the Cube: Overlapping Grid Methods for Debris Collision Risk Assessment},
+  howpublished = {arXiv:2607.09634}, year = {2026},
+  note = {AAS 26-881, AAS/AIAA Astrodynamics Specialist Conference, Whistler, BC}}
 
-% Preprint, abstract only read: overlaps heavily (grid / k-d tree vs brute force on CelesTrak SGP4 data, TCA, Pc). Read in full.
+% Preprint, read in full (through a reader proxy; preprints.org blocks direct fetches)
 @misc{sonawane2026,
-  author = {Sonawane}, title = {TITLE-TODO}, howpublished = {Preprints.org}, year = {2026},
-  doi = {10.20944/preprints202610.0012.v1}}
+  author = {Sonawane, Aditya Rajendra},
+  title = {Accelerating Satellite Conjunction Assessment: Spatial Partitioning and Parallel Computing for Full-Catalog Collision Screening},
+  howpublished = {Preprints.org}, year = {2026}, month = oct, doi = {10.20944/preprints202610.0012.v1}}
 
-% SECONDARY-ONLY (cited by auman2025): covariance estimated from historical TLE series
-@misc{peterson2001covgen,
-  author = {Peterson and Gist and Oltrogge}, title = {TITLE-TODO ({COVGEN})}, year = {2001}}
+% Title, authors, paper number from the 2001 AAS program; proceedings volume and pages not verified
+@inproceedings{peterson2001covgen,
+  author = {Peterson, G. E. and Gist, R. G. and Oltrogge, D. L.},
+  title = {Covariance Generation for Space Objects Using Public Data},
+  booktitle = {AAS/AIAA Space Flight Mechanics Meeting}, address = {Santa Barbara, CA}, year = {2001}, month = feb,
+  note = {AAS 01-113}}
+
+% AAS number and venue confirmed via alfano2009mc ref. 8; Adv. Astronaut. Sci. volume/pages not verified
+@inproceedings{alfano2007review,
+  author = {Alfano, Salvatore},
+  title = {Review of Conjunction Probability Methods for Short-term Encounters},
+  booktitle = {AAS/AIAA Space Flight Mechanics Meeting}, address = {Sedona, AZ}, year = {2007}, note = {AAS 07-148}}
 
 % ---------------------------------------------------------------- Collision probability
 % SECONDARY-ONLY: not on NTRS; citation as given in nasa_ca_handbook2020 ref. 19, alfano2009mc, coppola2012
