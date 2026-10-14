@@ -5,19 +5,21 @@ All methods share the short-term encounter model: straight-line relative motion 
 problem reduces to a 2D Gaussian in the encounter plane (perpendicular to the relative velocity)
 integrated over a disc of radius = combined hard-body radius. Units: km for positions and radii.
 
+- ric_covariance       3x3 covariance from radial / in-track / cross-track sigmas of one object
 - encounter_plane      project a 3D miss vector and 3x3 covariance into the encounter plane
 - pc_foster            numerical 2D integration over the disc (Foster-style, any 2x2 covariance)
 - pc_isotropic_exact   closed form when the 2D covariance is sigma^2 * I (non-central chi-square)
 - pc_monte_carlo       2D sampling with a Clopper-Pearson interval
 - mc_samples_needed    samples for a target relative standard error at a given Pc
 """
+import math
 from dataclasses import dataclass
 from typing import Optional, Tuple
 
 import numpy as np
 from scipy import integrate
 from scipy.stats import beta as beta_dist
-from scipy.stats import ncx2, norm
+from scipy.stats import ncx2
 
 
 def encounter_plane(
@@ -49,6 +51,21 @@ def encounter_plane(
     return B @ r_rel, B @ np.asarray(cov3, dtype=float) @ B.T
 
 
+def ric_covariance(r: np.ndarray, v: np.ndarray, sigma_r: float, sigma_i: float, sigma_c: float) -> np.ndarray:
+    """
+    3x3 position covariance in the inertial frame from 1-sigma values along radial (r_hat), cross-track
+    (orbit normal, r x v) and in-track (completes the right-handed set) directions of one object.
+    """
+    r = np.asarray(r, dtype=float)
+    v = np.asarray(v, dtype=float)
+    R = r / np.linalg.norm(r)
+    C = np.cross(r, v)
+    C /= np.linalg.norm(C)
+    I = np.cross(C, R)
+    Q = np.column_stack([R, I, C])
+    return Q @ np.diag([sigma_r ** 2, sigma_i ** 2, sigma_c ** 2]) @ Q.T
+
+
 def pc_foster(miss_2d: np.ndarray, cov_2d: np.ndarray, hbr: float) -> float:
     """
     Integrate the 2D Gaussian N(miss_2d, cov_2d) over the disc |x| <= hbr centred at the origin.
@@ -62,12 +79,22 @@ def pc_foster(miss_2d: np.ndarray, cov_2d: np.ndarray, hbr: float) -> float:
     eigval, eigvec = np.linalg.eigh(np.asarray(cov_2d, dtype=float))
     if np.any(eigval <= 0.0):
         raise ValueError("2D covariance must be positive definite")
-    mx, my = eigvec.T @ np.asarray(miss_2d, dtype=float)
-    sx, sy = np.sqrt(eigval)
+    mx, my = (float(c) for c in eigvec.T @ np.asarray(miss_2d, dtype=float))
+    sx, sy = (float(c) for c in np.sqrt(eigval))
+    k_pdf = 1.0 / (sx * math.sqrt(2.0 * math.pi))
+    r2 = 1.0 / math.sqrt(2.0)
 
     def integrand(x: float) -> float:
-        h = np.sqrt(max(hbr * hbr - x * x, 0.0))
-        return norm.pdf(x, mx, sx) * (norm.cdf((h - my) / sy) - norm.cdf((-h - my) / sy))
+        # Plain math functions: scipy.stats per scalar call costs ~100x more.
+        h = math.sqrt(max(hbr * hbr - x * x, 0.0))
+        lo, hi = (-h - my) / sy, (h - my) / sy
+        # Phi(hi) - Phi(lo) through erfc on whichever tail keeps both terms small (no cancellation)
+        if lo + hi <= 0.0:
+            mass = 0.5 * (math.erfc(-hi * r2) - math.erfc(-lo * r2))
+        else:
+            mass = 0.5 * (math.erfc(lo * r2) - math.erfc(hi * r2))
+        z = (x - mx) / sx
+        return k_pdf * math.exp(-0.5 * z * z) * mass
 
     pc, _ = integrate.quad(integrand, -hbr, hbr, epsabs=0.0, epsrel=1e-10, limit=200)
     return float(min(max(pc, 0.0), 1.0))
