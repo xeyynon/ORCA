@@ -75,9 +75,9 @@ The benchmark study measured ORCA as built and found four faults. Together they 
 - The uncertainty was measured from one day of snapshots and only for LEO. TLE-to-TLE comparison underestimates error near epoch, which is why the ESA floor is there.
 - Runtime is minutes, not seconds: about 1.5–2 min per day of horizon for the full catalog.
 
-## 6. Owner's documents that are now stale
+## 6. Documents updated
 
-These have uncommitted edits, so I left them unchanged. They should be updated:
+Resolved 2026-10-15: every MD document was reconciled with engine v2 (see ORCA_MASTER.md §4). The items originally listed here were:
 - **ORCA_MASTER.md §3:** "SGP4Propagator … is two-body motion …"; "Pc uses an assumed covariance: sigma = 0.5 km + 2.0 km/day".
 - **README / ARCHITECTURE:** the risk model and screening description (1 h / 100 km, ±6 h refinement).
 - **DECISIONS.md:** a decision entry for this change. Suggested text: Section 1–3 of this file.

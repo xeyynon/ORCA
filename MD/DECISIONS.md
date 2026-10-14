@@ -5,7 +5,99 @@ decided, why, and what alternatives were considered. Newest first.
 
 ---
 
+## 2026-10-15 - Conjunction engine v2: SGP4, gap-free screening, exact TCA, Foster Pc, measured uncertainty, honest UI
+
+**Context:** The benchmark study (entry of 2026-10-14) measured the original engine on public TLEs against a dense SGP4 reference:
+
+| Stage | Measured fault |
+|---|---|
+| Screening (1 h / 100 km) | Saw ~1 % of encounters under 10 km during their pass |
+| TCA (single ±6 h Brent search) | Found the closest approach for 5–6 % of flagged pairs |
+| Propagator (two-body + drag) | Drifted ~300 km a day |
+| Pc formula | Off by exactly 1/α², so every CRITICAL/HIGH label was an artefact |
+| End to end | Reported ~0.1 % of the close approaches |
+
+**Decision:**
+- **Engine.** Rebuild `conjunction_detection.py`:
+  - SGP4 for every object every 20 s;
+  - KD-tree radius = 10 km + v_max × 10 s (gap-free by r ≥ d + vΔt/2);
+  - a parabola on d² at each grid minimum, then exact SGP4 states plus one range-rate step;
+  - vectorised Foster 2D Pc;
+  - per-object RIC uncertainty measured from successive TLEs (Starlink separate), floored at ESA's at-epoch values;
+  - long encounters (< 0.1 km/s) flagged and deduplicated per pair.
+- **Propagator.** `orbit_mech_engine.SGP4Propagator` becomes real SGP4. The old model is kept as `TwoBodyDragPropagator`.
+- **API.**
+  - `/api/conjunctions` returns counts over everything found plus the top `limit` events; the horizon is 1–7 days and `search_step_hours` is ignored.
+  - New `/api/conjunctions/method`.
+  - The pair, propagate and export endpoints use the new engine.
+- **UI.**
+  - No step control.
+  - A method-and-limits panel written by the server.
+  - Counts over all approaches ("Top N of M").
+  - Uncertainty, TLE age and "Long" markers.
+  - A probability note saying tiers depend on the uncertainty model.
+
+**Verified:**
+- Against the reference on three seeds, every encounter under 10 km was found, except slow pairs deduplicated by design and one at the first grid step. Miss distances agree to a median of 0.5 mm.
+- Full catalog: ~426,000 approaches per day in ~1.5–2 min.
+- 89 Python and 89 frontend tests pass.
+- The UI was driven in headless Chrome, and its screenshots led to three fixes.
+
+**Consequence:**
+- Searches take minutes instead of ~20 s.
+- The response shape changed, so the backend and frontend must deploy together.
+- Tiers are now explicitly conditional on the uncertainty model.
+
+**Alternatives considered:**
+- Keep the hourly screen and raise the radius: radius would have to be ~29,000 km to be gap-free at 1 h.
+- Swept-volume screening (George 2011; Budianto-Ho 2014): more code for the same guarantee.
+- Monte Carlo Pc: needs ~10⁸ samples at Pc ≈ 10⁻⁶.
+
+## 2026-10-15 - Evaluator access panel on the sign-in page
+
+**Decision:** When `VITE_EVALUATOR_USERNAME` and `VITE_EVALUATOR_PASSWORD` are both set at build time, the sign-in page shows a shared demo login. It includes copy buttons, a masked password with show/hide, and a button that fills the form. The local values live in `frontend/.env.local` (git-ignored).
+
+**Consequence:** ORCA has a single login, so the shown credential *is* the app's login, and anything set there is public in the bundle. The hosted copy does not set them; whether it should is an open decision (TASKS.md).
+
+## 2026-10-14 - Benchmark the conjunction pipeline; freeze the original engine before changing it
+
+**Context:** A research paper needed stage-by-stage measurements of ORCA as built, and the planned fixes would change that code.
+
+**Decision:**
+- Tag the original as `orca-as-built-2026-10-14` (eb53f1c).
+- Keep verbatim copies in `benchmarks/legacy/`, and have every benchmark import those.
+- Run the experiments on frozen catalog snapshots (sha256 manifests), with three seeds, against references with stated guarantees.
+
+**Verified:** after the freeze, the legacy-Pc check and Exp 5 reproduced the committed results exactly.
+
+**Where:**
+- code: `benchmarks/`
+- results: `benchmarks/results/`
+- write-up: research_paper_brief.md §10, paper_draft.md, `paper/`
+
+---
+
+## 2026-10-08 - Host ORCA on free tiers: Vercel frontend, Oracle Always Free backend, deploys from GitHub
+
+**Context:** The project needed a shareable hosted copy at zero cost. The backend's conjunction search is CPU-heavy and uses a process pool, SQLite allows one writer, and `auth.json` is a secret.
+
+**Decision:**
+- **Backend:** Docker (`Dockerfile`, target `api`) behind Caddy for automatic HTTPS, on an Oracle Cloud Always Free VM in the home region (`ap-hyderabad-1`). The hostname is `<ip>.sslip.io`, so no domain or DNS signup is needed. Data and credential live on a Docker volume. One uvicorn worker.
+- **Frontend:** Vercel Hobby, root directory `frontend/`, with `VITE_API_BASE` pointing at the API and the Vercel origin listed in `ORCA_CORS_ORIGINS`. Public URL https://orca-vitap.vercel.app.
+- **Delivery:** Pushes to `main` deploy both. Vercel's GitHub integration handles the frontend. `.github/workflows/deploy-backend.yml` runs the Python tests, then ships the code to the VM over SSH and rebuilds.
+- **New settings:** `ORCA_DB_PATH`, `ORCA_TLE_GROUP` and `ORCA_STATIC_DIR` in `api_server.py`. Local behaviour is unchanged when they are unset.
+
+**Why this shape:** The free tiers with real CPU are few. Render, Koyeb and serverless platforms give ~0.1 vCPU or short timeouts, which do not fit a minutes-long search. Oracle Always Free has the most compute, and the VM keeps SQLite on a persistent disk.
+
+**What actually happened:** Ampere A1 (2 OCPU / 12 GB) was the plan, but Hyderabad returned "Out of host capacity" on every attempt. The live backend is the always-free AMD micro VM (1 GB RAM + 2 GB swap) with the small `stations` group until A1 is available (TASKS.md). Other regions were ruled out because Always Free compute exists only in the home region.
+
+**Alternatives considered:** Hugging Face Spaces (free 2 vCPU / 16 GB, but sleeps and has no persistent disk), DigitalOcean or Azure student credits, a Hetzner VPS (~€4/month), Fly.io or Railway (paid), Cloud Run (background work throttled).
+
+---
+
 ## 2026-10-03 - Finding: the engine propagator is far less accurate than the docs implied
+
+> **Resolved 2026-10-15:** conjunction work and `/api/propagate` now use SGP4 (engine v2, top of this file).
 
 **Context:** The docs said `orbit_mech_engine.SGP4Propagator` is "simplified" without a number. Measured it against the `sgp4` package (`tests/measure_propagator_error.py`): 600 random TLEs from the 15,968-object catalog, position difference in km at several hours after each TLE's own epoch. Reproduce with `PYTHONIOENCODING=utf-8 python tests/measure_propagator_error.py`.
 
@@ -180,6 +272,8 @@ is revisited.
 
 ## (pre-existing) — Two-phase conjunction screening: KDTree pre-screen + Brent's-method TCA refinement
 
+> **Superseded 2026-10-15** by engine v2 (top of this file). The coarse first pass measured ~1 % recall, and the ±6 h Brent search found the closest approach 5–6 % of the time.
+
 **Context:** Naively checking every pair of objects at every time step across
 a multi-thousand-object catalog is O(N²) per step and does not scale.
 
@@ -201,6 +295,8 @@ explicitly not conjunction-avoidance-grade).
 ---
 
 ## (pre-existing) — Alfano 2D Gaussian approximation for collision probability, not a full 3D covariance model
+
+> **Superseded 2026-10-15.** The implemented formula was not Alfano's and was off by 1/α². It is replaced by Foster's 2D integral with a measured, ESA-floored RIC uncertainty. The thresholds are kept and are now sourced to NASA's CA handbook. See engine v2 at the top of this file.
 
 **Context:** True conjunction-assessment-grade probability of collision
 requires propagated 3×3 (or 6×6) covariance matrices per object, which this

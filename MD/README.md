@@ -15,10 +15,12 @@ ORCA ingests public satellite tracking data, propagates orbits, screens the cata
 ## What it does
 
 1. **Ingest** TLEs from [Celestrak](https://celestrak.org/) into a local SQLite file.
-2. **Propagate** each object to a position and velocity at any time up to 7 days ahead.
-3. **Screen** the catalog for conjunctions: a KD-tree finds candidate pairs, then each pair's time of closest approach (TCA) is refined.
-4. **Rank** events by probability of collision (Pc) into five risk tiers.
+2. **Propagate** each object with SGP4 to a position and velocity at any time up to 7 days ahead.
+3. **Screen** the catalog for conjunctions: every object every 20 s, with a KD-tree radius wide enough that no approach closer than 10 km can fall between two steps. Each time of closest approach (TCA) is then refined with exact SGP4 states.
+4. **Rank** events by probability of collision (Pc, Foster's 2D method with a measured TLE uncertainty) into five risk tiers, and say next to every number what the tier depends on.
 5. **Show** it: a 3D globe, sortable tables, charts, pair detail and CSV/JSON export.
+
+The conjunction engine was rebuilt on 2026-10-15 after a benchmark study measured the original one: see [conjunction_engine_v2.md](conjunction_engine_v2.md). The original is preserved at the git tag `orca-as-built-2026-10-14`.
 
 Screening is not risk assessment. A pair that passes screening is a hypothesis; only the analysis stage says how dangerous it is.
 
@@ -43,6 +45,8 @@ cd frontend && npm run dev
 curl -X POST http://127.0.0.1:8000/api/update-tles
 ```
 
+**Sign in.** Set a password once with `python auth.py set-password` (user `admin`). Optionally, show a shared demo login on the sign-in page ("Evaluator access") by putting the same values in `frontend/.env.local` as `VITE_EVALUATOR_USERNAME` and `VITE_EVALUATOR_PASSWORD`. That file is git-ignored, but anything set there is public in the built bundle, so use a demo credential.
+
 `PYTHONIOENCODING=utf-8` is **required on Windows**: the parser prints a Unicode check mark per TLE, which crashes on the default `cp1252` console and silently truncates ingestion.
 
 Celestrak returns `403` if the large `active` group is requested repeatedly in a short time. The refresh then looks like an empty fetch. Wait a while, or seed from the small `stations` group.
@@ -61,8 +65,10 @@ Celestrak TLEs ──► parser_pipeline.py ──► orbit_mech_engine.py ─�
 | Module | Role |
 |---|---|
 | `parser_pipeline.py` | TLE parsing (including BSTAR notation), Celestrak client, SQLite storage |
-| `orbit_mech_engine.py` | Foundation layer: orbital elements, Kepler solver, propagator, ECI/ECEF/geographic transforms. Imports no other project module |
-| `conjunction_detection.py` | Two-phase screening, TCA refinement, Pc and risk tiers |
+| `orbit_mech_engine.py` | Foundation layer: orbital elements, Kepler solver, SGP4 propagator (`SGP4Propagator`), ECI/ECEF/geographic transforms. Imports no other project module |
+| `conjunction_detection.py` | Gap-free screening, exact TCA, Foster Pc with a measured uncertainty model, risk tiers, and the method description served to the UI |
+| `benchmarks/` | The research benchmarks behind the engine (results in `benchmarks/results/`, figures in `benchmarks/figures/`) |
+| `paper/` | The conference paper (`main.tex`, compiled `main.pdf`) |
 | `Analytics.py` | Catalog statistics, Plotly figures, export helpers |
 | `api_server.py` | REST API |
 | `frontend/` | React + TypeScript + Vite + three.js app, one component per UI piece ([frontend/README.md](../frontend/README.md)) |
@@ -75,7 +81,7 @@ The frontend reads the SQLite file only through the API. More detail is in [ARCH
 |---|---|---|
 | `1` | Overview | Catalog KPIs, sortable table, object detail, regime breakdown |
 | `2` | Globe | three.js Earth with every object, orbit paths, time scrub up to +7 days |
-| `3` | Conjunctions | Cancellable screening search, risk summary, pair detail, CSV/JSON export |
+| `3` | Conjunctions | Cancellable search, a "How this list is made, and what it cannot tell you" panel, tier counts over everything found, uncertainty and TLE age per event, pair detail, CSV/JSON export |
 | `4` | Analytics | Server statistics plus histograms and a scatter plot |
 | `5` | Data | Catalog freshness and a Celestrak refresh with honest progress |
 
@@ -93,22 +99,33 @@ Interactive docs at `/docs` (Swagger) and `/redoc`.
 | GET | `/api/tles` | List TLEs (`limit` up to 5000) |
 | GET | `/api/tle/{norad_id}` | One TLE |
 | POST | `/api/update-tles` | Start a background Celestrak fetch (no completion event: poll `/health`) |
-| GET | `/api/propagate/{norad_id}` | State vector `hours_ahead` after the TLE epoch (0 to 168) |
+| GET | `/api/propagate/{norad_id}` | SGP4 state vector `hours_ahead` after the TLE epoch (0 to 168); 422 if SGP4 refuses the element set (e.g. decayed) |
 | GET | `/api/positions` | Bulk positions and velocities at now + `hours_offset` (for the globe) |
 | GET | `/api/orbit-path/{norad_id}` | One orbital period of ECI positions |
 | GET | `/api/orbital-elements/{norad_id}` | Keplerian elements (angles in degrees) |
-| GET | `/api/conjunctions` | Catalog-wide search (`time_horizon_days` 1 to 30, `search_step_hours`, `limit`) |
-| GET | `/api/conjunction-pair/{id1}/{id2}` | Assess one pair |
+| GET | `/api/conjunctions` | Catalog-wide search (`time_horizon_days` 1 to 7, default 1; `limit` rows). Returns `{events, total_events, tier_counts, long_encounters, window_start, window_end, objects, report_km, step_s, runtime_s}`. `search_step_hours` is accepted and ignored |
+| GET | `/api/conjunctions/method` | How conjunctions are found and scored, and the limits of the result (shown in the UI) |
+| GET | `/api/conjunction-pair/{id1}/{id2}` | The pair's closest approach under 10 km in the next 7 days, or `no_risk` |
 | GET | `/api/statistics` | Apogee, perigee, period and inclination summary |
-| GET | `/api/export/conjunctions` | Server-side export (`format=json` or `csv`, 3-day horizon from now). The frontend exports in the browser instead |
+| GET | `/api/export/conjunctions` | Server-side export (`format=json` or `csv`): 1-day horizon from now, the 10,000 most probable events. The frontend exports in the browser instead |
 
 CORS defaults to the Vite dev origins. Set `ORCA_CORS_ORIGINS="https://a.example,https://b.example"` to allow others.
 
+**Hosted copy:** https://orca-vitap.vercel.app (frontend on Vercel, API on an Oracle Cloud Always Free VM). Every push to `main` redeploys it. See [deployment.md](deployment.md). As of 2026-10-15 the hosted copy still runs the original engine: the v2 work is on the branch `fix/honest-conjunctions`, not yet merged or pushed.
+
 ## How the risk model works
 
-**Screening.** The catalog is propagated at a coarse step (`search_step_hours`). A `scipy.spatial.cKDTree` finds pairs within `initial_screen_km` (default 100 km) in roughly O(N log N). Only those pairs get a precise TCA, found with bounded Brent minimisation in a ±`refine_window_hours` window. A pass that closes entirely between two steps can be missed.
+The method is also served by `GET /api/conjunctions/method` and shown on the Conjunctions page. Details and validation are in [conjunction_engine_v2.md](conjunction_engine_v2.md).
 
-**Probability of collision.** A simplified Alfano 2D Gaussian method: relative position uncertainty is treated as Gaussian, the collision region is a circle of the combined hard-body radius, and a single equivalent sigma stands in for the spread. TLEs carry no covariance, so uncertainty is an assumption: `sigma = 0.5 km + 2.0 km/day × age`.
+**Propagation.** SGP4, the model TLEs are fitted for (the `sgp4` package, which wraps the reference code of Vallado et al. 2006).
+
+**Screening.** Every object is propagated every 20 s. At each step a `scipy.spatial.cKDTree` finds every pair closer than 10 km + v_max × 10 s, where v_max is twice the fastest perigee speed in the catalog (about 167–211 km in practice). By the sampling condition r ≥ d + v·Δt/2, no approach closer than 10 km can fall between two steps.
+
+**Closest approach.** A parabola through d² at the three samples around each grid minimum locates the TCA. Both objects are then propagated exactly at that time and corrected by one range-rate step. The miss distance and relative velocity come from SGP4.
+
+**Probability of collision.** Foster's 2D method: the Gaussian relative-position uncertainty, projected onto the encounter plane, is integrated over the disc of the combined hard-body radius.
+- TLEs carry no covariance, so each object's radial / in-track / cross-track uncertainty is a model. It is measured from successive public TLEs (2026-10-14), kept separate for Starlink, and floored at ESA's published at-epoch TLE uncertainties.
+- Encounters slower than 0.1 km/s are flagged as **long encounters**, for which the 2D model can be several times too low.
 
 | Risk tier | Pc |
 |---|---|
@@ -118,6 +135,8 @@ CORS defaults to the Vite dev origins. Set `ORCA_CORS_ORIGINS="https://a.example
 | LOW | > 1×10⁻⁷ |
 | NEGLIGIBLE | otherwise |
 
+NASA's Conjunction Assessment handbook (NASA/SP-20205011318, 2020) recommends mitigation above 1×10⁻⁴.
+
 Hard-body radius is looked up by name keyword: Starlink 5.65 m, OneWeb 4.0 m, Iridium 3.9 m, CubeSat 0.5 m, debris 0.1 m, anything else 3.0 m.
 
 **Units** (a past bug source): `OrbitalElement.n` is rad/s, `OrbitalElement.i` is radians, `TLE.inclination` is degrees, positions are km and velocities km/s in the ECI frame. The full contract is in [ARCHITECTURE.md](ARCHITECTURE.md#7-units-contract).
@@ -126,13 +145,13 @@ Hard-body radius is looked up by name keyword: Starlink 5.65 m, OneWeb 4.0 m, Ir
 
 These are real, current behaviours, not boilerplate:
 
-- **Simplified propagation in the conjunction search.** `orbit_mech_engine.SGP4Propagator` is two-body motion with an exponential drag term and no J2, not full SGP4. Against the `sgp4` package its position error has a median of about 300 km at 24 h and over 1,000 km at 72 h, which is larger than the 100 km screening threshold. The globe and `/api/positions` use the real `sgp4` package. See `tests/measure_propagator_error.py` and DECISIONS.md.
-- **Stale data degrades everything.** Orbit prediction accuracy falls quickly with TLE age. Refresh the catalog before reading anything into a result.
-- **Conjunction times of closest approach can fall a few hours before now.** The search window starts at the current time, but each TCA is refined within ±6 h of its search step, so an event near the start of the window can land slightly in the past. The frontend flags any event already behind us.
-- **Pc uses an assumed covariance**, so it is a ranking aid, not a validated collision probability.
-- **A failed Celestrak fetch looks like an empty catalog.** The API swallows the failure into an empty list.
-- **No authentication and a single SQLite file.** Suitable for local or trusted-network use only.
-- **No CI yet**, and the Python side has no automated tests. The frontend has unit tests for its pure logic (`cd frontend && npm test`).
+- **TLEs are not accurate enough for operations.** NASA does not recommend TLE-based conjunction assessment for operational decisions. TLE error is mostly along-track: about 0.16 km after a third of a day and about 15 km after 6 days for non-Starlink LEO objects, and roughly 15 times worse for Starlink. Refresh the catalog before reading anything into a result.
+- **Every Pc and tier depends on the uncertainty model.** The model is measured from one day of public TLEs (LEO only) and floored at ESA's values. A different, equally plausible model can move the tier by orders of magnitude.
+- **Long encounters** (relative speed under 0.1 km/s) are flagged: their 2D Pc can be several times too low. Only their closest approach per pair is listed.
+- **Searches take minutes.** About 1.5–2 min per day of horizon for ~16,000 objects on a laptop. That is the cost of not missing approaches; the original engine took ~20 s and caught about 0.1 % of them.
+- **Cancel stops waiting, not computing.** Cancelling a search stops the browser waiting; the server finishes the search anyway.
+- **Single operator and a single SQLite file.** One login, no per-user accounts. Suitable for local or trusted-network use.
+- **CI covers the backend only.** GitHub Actions runs the Python tests (`python -m unittest discover -s tests`, 89 tests) before every backend deploy. The frontend unit tests (`cd frontend && npm test`, 89 tests) and typecheck are run by hand.
 
 ## Project documents
 
@@ -144,6 +163,10 @@ These are real, current behaviours, not boilerplate:
 | What is it for, and for whom? | [PRD.md](PRD.md) |
 | What is left to do? | [TASKS.md](TASKS.md) |
 | How must UI be built? | [rules.md](rules.md) |
+| How does the conjunction engine work, and how was it checked? | [conjunction_engine_v2.md](conjunction_engine_v2.md) |
+| What did the research measure? | [research_paper_brief.md](research_paper_brief.md) (§10), the paper in [../paper/](../paper/) and its long draft [paper_draft.md](paper_draft.md) |
+| Which sources were checked, and what do they say? | [literature_verification.md](literature_verification.md), [references.bib](references.bib) |
+| I want to learn the whole story | [learning_guide.md](learning_guide.md) |
 
 ## Contact
 
