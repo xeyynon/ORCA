@@ -46,11 +46,13 @@
   booktitle = {Proc. 5th European Conference on Space Debris}, address = {Darmstadt},
   series = {ESA SP-672}, year = {2009}}
 
-% SECONDARY-ONLY (cited in flohrer2009improving; AMOS PDF not opened)
+% Confirmed at amostech.com; pages from a secondary reference list
 @inproceedings{flohrer2008assessment,
-  author = {Flohrer, T. and Krag, H. and Klinkrad, H.},
+  author = {Flohrer, Tim and Krag, Holger and Klinkrad, Heiner},
   title = {Assessment and Categorization of {TLE} Orbit Errors for the {US SSN} Catalogue},
-  booktitle = {Advanced Maui Optical and Space Surveillance Technologies Conference}, address = {Wailea, Maui}, year = {2008}}
+  booktitle = {Proc. Advanced Maui Optical and Space Surveillance Technologies Conference (AMOS)},
+  address = {Maui, HI}, year = {2008}, pages = {513--524},
+  howpublished = {\url{https://amostech.com/TechnicalPapers/2008/Orbital_Debris/Flohrer.pdf}}}
 
 % ---------------------------------------------------------------- Starlink TLE accuracy
 @misc{celestrak_supgp,
@@ -69,10 +71,10 @@
   title = {Near-Real-Time Global Thermospheric Density Variations Unveiled by {Starlink} Ephemeris},
   journal = {Remote Sensing}, volume = {17}, number = {9}, pages = {1549}, year = {2025}, doi = {10.3390/rs17091549}}
 
-% Metadata via Crossref; content SECONDARY-ONLY (abstract blocked)
+% Abstract read at ScienceDirect: manoeuvre frequency from SpaceX ephemerides; says nothing about TLE accuracy
 @article{liu2024maneuver,
   author = {Liu, Airong and Xu, Xiaoli and Xiong, Yongqing and Yu, Shengxian},
-  title = {Maneuver strategies of {Starlink} satellite based on {SpaceX}-released ephemeris},
+  title = {Maneuver Strategies of {Starlink} Satellite Based on {SpaceX}-Released Ephemeris},
   journal = {Advances in Space Research}, volume = {74}, number = {7}, pages = {3157--3169}, year = {2024},
   doi = {10.1016/j.asr.2024.06.038}}
 
@@ -94,10 +96,11 @@
   journal = {Celestial Mechanics}, volume = {33}, number = {2}, pages = {143--158}, year = {1984},
   doi = {10.1007/BF01234152}}
 
-% SECONDARY-ONLY: index/search snippets. Fits cubic polynomials to the distance waveform (not range-rate roots).
+% SECONDARY-ONLY (no DOI exists: Crossref's JAS records start at vol. 45). Fits cubic polynomials to the
+% distance waveform (not range-rate roots)
 @article{alfano1993,
   author = {Alfano, Salvatore and Negron, Jr., David},
-  title = {Determining satellite close approaches},
+  title = {Determining Satellite Close Approaches},
   journal = {The Journal of the Astronautical Sciences}, volume = {41}, number = {2}, pages = {217--225}, year = {1993}}
 
 @article{healy1995,
@@ -105,12 +108,13 @@
   journal = {Journal of Guidance, Control, and Dynamics}, volume = {18}, number = {4},
   pages = {824--829}, year = {1995}, doi = {10.2514/3.21465}}
 
-% SECONDARY-ONLY: cited in woodburn2009; ADS record not opened
+% SECONDARY-ONLY: cited in woodburn2009 and a GMV ISSFD 2011 paper; ADS record blocked
 @inproceedings{alarcon2002,
-  author = {Alarc{\'o}n-Rodr{\'i}guez, J. R. and Mart{\'i}nez Fadrique, F. and Klinkrad, H.},
-  title = {Collision risk assessment with a ``smart sieve'' method},
-  booktitle = {Proc. Joint ESA-NASA Space-Flight Safety Conference}, series = {ESA SP-486},
-  pages = {159--164}, year = {2002}}
+  author = {Alarc{\'o}n-Rodr{\'i}guez, J. R. and Mart{\'i}nez-Fadrique, F. M. and Klinkrad, H.},
+  title = {Collision Risk Assessment with a ``Smart Sieve'' Method},
+  booktitle = {Proc. Joint ESA-NASA Space-Flight Safety Conference},
+  editor = {Battrick, B. and Preyssl, C.}, series = {ESA SP-486},
+  publisher = {ESA Publications Division}, address = {Noordwijk}, pages = {159--164}, year = {2002}}
 
 @inproceedings{kelso2005socrates,
   author = {Kelso, T. S. and Alfano, S.},
@@ -118,11 +122,13 @@
   booktitle = {AAS/AIAA Space Flight Mechanics Conference}, address = {Copper Mountain, CO},
   year = {2005}, note = {AAS 05-124}}
 
-% Venue inferred from its sibling paper AAS 09-374
+% Confirmed: AGI-hosted PDF (AAS 09-372) and Univelt Vol. 135 contents; pages from a secondary source
 @inproceedings{woodburn2009,
   author = {Woodburn, James and Coppola, Vincent and Stoner, Frank},
-  title = {A description of filters for minimizing the time required for orbital conjunction computations},
-  booktitle = {AAS/AIAA Astrodynamics Specialist Conference}, year = {2009}, note = {AAS 09-372}}
+  title = {A Description of Filters for Minimizing the Time Required for Orbital Conjunction Computations},
+  booktitle = {Astrodynamics 2009}, series = {Advances in the Astronautical Sciences},
+  volume = {135}, pages = {1157--1173}, publisher = {Univelt}, year = {2010},
+  note = {AAS 09-372, AAS/AIAA Astrodynamics Specialist Conference, Pittsburgh, PA, Aug. 2009}}
 
 @article{bentley1975,
   author = {Bentley, Jon Louis},
@@ -150,11 +156,13 @@
   author = {Brent, Richard P.}, title = {Algorithms for Minimization without Derivatives},
   publisher = {Prentice-Hall}, address = {Englewood Cliffs, NJ}, year = {1973}}
 
-% ---------------------------------------------------------------- Closest prior work (research gap)
+% Confirmed at amostech.com (poster paper)
 @inproceedings{georgeharvey2011,
   author = {George, Eric R. and Harvey, Seth},
   title = {A Comparison of Satellite Conjunction Analysis Screening Tools},
-  booktitle = {Advanced Maui Optical and Space Surveillance Technologies Conference}, year = {2011}}
+  booktitle = {Proc. Advanced Maui Optical and Space Surveillance Technologies Conference (AMOS)},
+  address = {Maui, HI}, year = {2011},
+  howpublished = {\url{https://amostech.com/TechnicalPapers/2011/Poster/GEORGE.pdf}}}
 
 @inproceedings{auman2025,
   author = {Auman, Kerstyn and Murphy, Timothy S. and George, Eric and Kelly, Patrick and Coursey, Carson and Goldstein, David and Ruh, Ian and Hymes, Kate},
@@ -179,25 +187,28 @@
   title = {Accelerating Satellite Conjunction Assessment: Spatial Partitioning and Parallel Computing for Full-Catalog Collision Screening},
   howpublished = {Preprints.org}, year = {2026}, month = oct, doi = {10.20944/preprints202610.0012.v1}}
 
-% Title, authors, paper number from the 2001 AAS program; proceedings volume and pages not verified
+% Title, authors, number from the 2001 AAS program; volume fits the meeting; pages from a secondary source
 @inproceedings{peterson2001covgen,
   author = {Peterson, G. E. and Gist, R. G. and Oltrogge, D. L.},
   title = {Covariance Generation for Space Objects Using Public Data},
-  booktitle = {AAS/AIAA Space Flight Mechanics Meeting}, address = {Santa Barbara, CA}, year = {2001}, month = feb,
-  note = {AAS 01-113}}
+  booktitle = {Spaceflight Mechanics 2001}, series = {Advances in the Astronautical Sciences},
+  volume = {108}, pages = {201--214}, publisher = {Univelt}, year = {2001},
+  note = {AAS 01-113, AAS/AIAA Space Flight Mechanics Meeting, Santa Barbara, CA}}
 
-% AAS number and venue confirmed via alfano2009mc ref. 8; Adv. Astronaut. Sci. volume/pages not verified
+% Number and volume confirmed at Univelt; the often-quoted pp. 719-746 conflicts with the 44-page paper: omitted
 @inproceedings{alfano2007review,
   author = {Alfano, Salvatore},
   title = {Review of Conjunction Probability Methods for Short-term Encounters},
-  booktitle = {AAS/AIAA Space Flight Mechanics Meeting}, address = {Sedona, AZ}, year = {2007}, note = {AAS 07-148}}
+  booktitle = {Spaceflight Mechanics 2007}, series = {Advances in the Astronautical Sciences},
+  volume = {127}, publisher = {Univelt}, year = {2007},
+  note = {AAS 07-148, AAS/AIAA Space Flight Mechanics Meeting, Sedona, AZ}}
 
-% ---------------------------------------------------------------- Collision probability
-% SECONDARY-ONLY: not on NTRS; citation as given in nasa_ca_handbook2020 ref. 19, alfano2009mc, coppola2012
+% SECONDARY-ONLY: no NTRS record; citation as given in nasa_ca_handbook2020 ref. 19 and Alfano AAS 07-148
 @techreport{foster1992,
   author = {Foster, James L. and Estes, Herbert S.},
   title = {A Parametric Analysis of Orbital Debris Collision Probability and Maneuver Rate for Space Vehicles},
-  institution = {NASA Johnson Space Center}, number = {JSC-25898}, month = aug, year = {1992}}
+  institution = {NASA Johnson Space Center}, address = {Houston, TX},
+  number = {JSC-25898}, month = aug, year = {1992}}
 
 @article{alfano2005numerical,
   author = {Alfano, Salvatore},
@@ -205,11 +216,12 @@
   journal = {The Journal of the Astronautical Sciences}, volume = {53}, number = {1},
   pages = {103--109}, year = {2005}, doi = {10.1007/BF03546397}}
 
-% Title, author, paper number confirmed from PDF; meeting/volume SECONDARY
+% Volume confirmed at Univelt; pages from a secondary source (li2022review)
 @inproceedings{alfano2009mc,
-  author = {Alfano, Salvatore}, title = {Satellite Conjunction Monte Carlo Analysis},
-  booktitle = {AAS/AIAA Spaceflight Mechanics Meeting}, address = {Pittsburgh, PA},
-  month = feb, year = {2009}, note = {AAS 09-233}}
+  author = {Alfano, Salvatore}, title = {Satellite Conjunction {Monte Carlo} Analysis},
+  booktitle = {Spaceflight Mechanics 2009}, series = {Advances in the Astronautical Sciences},
+  volume = {134}, pages = {2007--2024}, publisher = {Univelt}, address = {San Diego, CA}, year = {2009},
+  note = {AAS 09-233, AAS/AIAA Space Flight Mechanics Meeting, Savannah, GA}}
 
 @book{chan2008,
   author = {Chan, F. Kenneth}, title = {Spacecraft Collision Probability},

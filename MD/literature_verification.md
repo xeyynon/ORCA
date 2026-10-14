@@ -90,3 +90,19 @@
 **Prior art to cite, not claim:** k-d tree / grid screening (budianto2014; sonawane2026), Pc formulas and their comparison (alfano2007review; li2022review), covariance from public TLE data (peterson2001covgen), and snapshot blindness in a synthetic setting (medhin2026).
 
 All TITLE-TODO entries in references.bib are now filled.
+## 6. Second check of SECONDARY entries (2026-10-15)
+
+| Entry | Now | Note |
+|---|---|---|
+| flohrer2008assessment | CONFIRMED (amostech.com) | pages from a secondary list |
+| georgeharvey2011 | CONFIRMED (amostech.com, poster) | |
+| woodburn2009 | CONFIRMED (AGI PDF; Univelt Vol. 135, 2010) | pages secondary |
+| alfano2009mc | volume CONFIRMED (Univelt Vol. 134) | pages secondary |
+| alfano2007review | number and volume CONFIRMED (Vol. 127) | the quoted pp. 719-746 conflicts with the 44-page length: omitted |
+| liu2024maneuver | abstract CONFIRMED | manoeuvre frequency only (about every 2 d in Shell 1, about daily in Shells 2-5); **says nothing about TLE accuracy**. Text reworded: Liu for manoeuvre frequency, Lang & Jiang for prediction error |
+| foster1992 | SECONDARY | not on NTRS; August 1992 per two citing papers |
+| alfano1993 | SECONDARY | no DOI exists (JAS on Crossref starts at vol. 45) |
+| alarcon2002 | SECONDARY | ADS blocked; editors Battrick & Preyssl per a library record |
+| peterson2001covgen | SECONDARY (pages) | Vol. 108 fits the meeting; pp. 201-214 per George (AMOS 2012) |
+
+**Still SECONDARY:** foster1992, alfano1993, alarcon2002, and the pages of peterson2001covgen. All are standard, widely cited works; keep them, but these are the ones to check in a library before submission.
