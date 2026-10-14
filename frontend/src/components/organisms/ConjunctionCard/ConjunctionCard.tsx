@@ -59,7 +59,7 @@ export function ConjunctionCard({ event, nowMs, onJumpToTca, onViewDetails, onCl
           {coMoving ? <> <Badge tone="accent" title="Relative speed under 50 m/s at closest approach">Co-moving</Badge></> : null}
         </FactRow>
         <FactRow label="Probability of collision"><Mono>{pc(event.probability_of_collision)}</Mono></FactRow>
-        <FactRow label="Position uncertainty (1σ)"><ValueUnit value={fixed(event.uncertainty_km, 2)} unit="km" /></FactRow>
+        <FactRow label="Position uncertainty (1 sigma)"><ValueUnit value={fixed(event.uncertainty_km, 2)} unit="km" /></FactRow>
         <FactRow label="Older TLE's age"><ValueUnit value={fixed(event.tle_age_days, 1)} unit="days" /></FactRow>
       </div>
 
