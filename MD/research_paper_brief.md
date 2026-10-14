@@ -178,6 +178,7 @@ No covariance in TLEs (assumed or estimated uncertainty only). Every reference u
 - `benchmarks/pc_comparison.py`: Exp 4 on real encounters; `ric_covariance` added to `benchmarks/pc.py`.
 - `benchmarks/screening_runtime.py`: Exp 2a.
 - `benchmarks/encounter_curvature.py` + `pc_line_integral` in `benchmarks/pc.py`: Exp 4b, the short-term encounter test.
+- `benchmarks/end_to_end.py`: Exp 5.
 - `benchmarks/propagators.py`, `benchmarks/propagation_accuracy.py`: Exp 1. `tests/test_benchmark_propagators.py` checks the J2 rates against SGP4's own secular rates. `snapshot_catalog.py --celestrak GROUP` takes a snapshot straight from Celestrak without touching the app database.
 
 ## 10. Results so far [MEASURED]
@@ -424,3 +425,48 @@ Event recall, miss < 10 km (range over the three seeds):
 - The newer TLE has its own error, and manoeuvres between the epochs count as propagation error.
 - One pair of snapshots.
 - Some epochs in the Celestrak snapshot are dated up to a day after the fetch. Those objects have later epochs and are used as normal; the cause is not investigated.
+
+### Exp 5: end to end, ORCA as built vs corrected (preliminary)
+
+**Setup:**
+- The same 2,000 objects and 24 h window as each Exp 2b seed.
+- **A** = `ConjunctionSearch` exactly as in production: elements through ORCA's parser, engine propagator, 1 h / 100 km KD-tree, bounded Brent over ±6 h, legacy Pc and tiers. Single process.
+- **B** = SGP4; KD-tree every 20 s at 200 km (guaranteed capture below 10 km); range-rate root-finding per pass; Foster Pc with ORCA's hard-body radii. Reports encounters below 10 km. Two covariances:
+  - **B_iso:** ORCA's isotropic σ.
+  - **B_ric:** in-track = ORCA's σ; radial = cross-track = max(σ/100, 0.1 km). This is the Exp 1 shape at ORCA's size; the floor is an assumption.
+- A's events are checked against SGP4 near the TCA A claims (±10 min). A "finds" a B encounter if it reports the same pair within ±10 min.
+- Outputs: `benchmarks/results/end_to_end_n2000_h24_ref10s_seed{1,2,3}/`.
+
+| | Seed 1 | Seed 2 | Seed 3 |
+|---|---|---|---|
+| A: events reported | 231 | 204 | 203 |
+| A: events claiming miss < 10 km | 32 | 34 | 29 |
+| … of which really < 10 km near the claimed TCA | 2 | 3 | 4 |
+| A: \|claimed − true miss\|, median | 90 km | 98 km | 85 km |
+| A: TCA outside the 24 h window | 27 | 28 | 25 |
+| B: encounters < 10 km (Exp 2b reference: 6,576 / 6,803 / 6,244) | 6,576 | 6,802 | 6,244 |
+| **B encounters that A finds** (non-persistent) | **8 of 6,568** | **6 of 6,785** | **7 of 6,214** |
+| Runtime A / B (s, single process) | 2.6 / 23.8 | 2.7 / 25.3 | 2.6 / 24.0 |
+
+**Tiers (ORCA thresholds for all):**
+
+| | CRITICAL | HIGH | MEDIUM | LOW | NEGLIGIBLE |
+|---|---|---|---|---|---|
+| A, legacy (seeds 1–3) | 0–1 | 1–2 | 6–13 | 36–45 | 145–180 |
+| B_iso | 0 | 0 | 15–37 | ~6,200–6,770 | 0–9 |
+| B_ric | 0 | 471–576 | 322–451 | 214–271 | 5,205–5,707 |
+
+**Kendall τ (miss vs Pc ranking):** A 0.87 · B_iso 0.41 · B_ric 0.34.
+
+**Reading:**
+- **End-to-end recall of ORCA as built is ~0.1 %:** 6–8 of ~6,500 encounters below 10 km in 24 h are reported. Its reported miss distances are off by ~90 km (median), and about 1 in 8 of its TCAs fall outside the forecast window.
+  - Exp 2b (sampling), Exp 3 (refinement) and Exp 1 (propagator) each explain part of this.
+  - The corrected pipeline B costs ~9× more time (24 s vs 2.6 s for 2,000 objects and 24 h, single process). It reproduces the dense reference encounter set to within 1 event per seed.
+- **Tiers depend mainly on the assumed covariance, not on the pipeline.** With identical encounters and the same Foster formula, B_iso puts no encounter above MEDIUM. B_ric, with the measured elongated shape, puts ~470–580 per seed in HIGH.
+  - TLEs carry no covariance, so **the risk tier is the least defensible output of any TLE-only pipeline.** The paper should present tiers as conditional on a stated covariance model, not as findings.
+  - That is also the strongest argument for finishing Exp 1's horizon fit, which needs more snapshots.
+
+**Caveats:**
+- B is "corrected" relative to the specific faults measured in Exp 1–4. It is not validated against operational data such as conjunction data messages (CDMs).
+- B_ric's floor and ratio are assumptions, informed by one horizon bin.
+- A and B both use 2,000-object subsets, so absolute counts scale with N²; the ratios are what carry over.
