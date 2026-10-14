@@ -112,7 +112,7 @@ export function ConjunctionsView({ catalogSize, now, onShowOnGlobe }: Props) {
           </div>
         </div>
         <div className={selected ? 'conj-view__grid conj-view__grid--split' : 'conj-view__grid'}>
-          <div className="conj-view__table"><ConjunctionTable events={search.events} selectedKey={selectedKey} onSelect={(e) => setSelectedKey(pairKey(e))} /></div>
+          <div className="conj-view__table"><ConjunctionTable events={search.events} selectedKey={selectedKey} compact={selected !== null} onSelect={(e) => setSelectedKey(pairKey(e))} /></div>
           {selected ? (
             <PairCard
               event={selected}

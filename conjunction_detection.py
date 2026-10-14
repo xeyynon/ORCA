@@ -47,9 +47,9 @@ _ESTIMATE_MARGIN_KM = 5.0     # the parabola locates TCA well but its minimum va
 
 METHOD = {
     "propagator": "SGP4 (sgp4 package, reference code of Vallado et al. 2006), TEME frame",
-    "screening": "KD-tree on every object every {step:g} s; screening radius = report distance + v_max x step / 2, "
+    "screening": "KD-tree on every object every {step:g} s; screening radius = report distance + v_max × step / 2, "
                  "so no approach closer than the report distance falls between samples",
-    "closest_approach": "parabola through d^2 at the three grid samples around each local minimum, then exact "
+    "closest_approach": "parabola through d² at the three grid samples around each local minimum, then exact "
                         "SGP4 states and one range-rate correction at that time",
     "collision_probability": "Foster 2D: Gaussian relative position over the combined hard-body disc in the "
                              "encounter plane (closed small-radius form; quadrature when the radius is not small)",
