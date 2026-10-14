@@ -74,3 +74,5 @@ auth.json
 
 # Benchmark TLE snapshots are live data; their .json manifests are committed
 benchmarks/data/*.tle
+# Per-encounter TCA rows (~7 MB per run); regenerate with benchmarks/tca_estimation.py
+benchmarks/results/tca_*/local.csv

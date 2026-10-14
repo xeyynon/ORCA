@@ -172,6 +172,7 @@ No covariance in TLEs (assumed or estimated uncertainty only). Every reference u
 - `tests/test_benchmark_pc.py`: checks Foster against the closed form and MC against Foster.
 - `benchmarks/catalog.py`, `benchmarks/snapshot_catalog.py`: frozen TLE snapshots. The `.tle` files are git-ignored (live data); the `.json` manifest with sha256 and epoch range is committed.
 - `benchmarks/screening_recall.py`: Exp 2b. `tests/test_screening_recall.py` covers local minima, passes and screen evaluation.
+- `benchmarks/tca.py`, `benchmarks/tca_estimation.py`: Exp 3. `tests/test_benchmark_tca.py` checks the methods on synthetic straight-line and multi-minimum motion.
 
 ## 10. Results so far [MEASURED]
 
@@ -218,3 +219,51 @@ Event recall, miss < 10 km (range over the three seeds):
 - One snapshot, one 24 h window.
 - 2,000-object subsets, not the full catalog. Encounter counts scale with N², but recall by velocity band should not depend strongly on N; this is unverified.
 - The KD-tree screen here takes the same samples as ORCA but uses the `sgp4` propagator, not ORCA's engine.
+
+### Exp 3: TCA estimation (preliminary)
+
+**Setup:**
+- The reference encounters from the three Exp 2b runs (persistent pairs excluded), with the same SGP4 propagator.
+- Outputs: `benchmarks/results/tca_n2000_h24_ref10s_seed{1,2,3}/`. `local.csv` is git-ignored; regenerate it with the script.
+
+**3a, local:**
+- Each encounter is re-solved by range-rate root-finding to 1e-6 s; this is the reference.
+- Each method gets [t_c − 60 s, t_c + 60 s], with t_c = t_ref + U(−30, 30) s.
+- Errors are absolute; medians and p95 over 6,214–6,786 encounters per seed. The three seeds agree to about two significant figures, so seed 1 is shown.
+
+| Method | TCA error, median / p95 | Miss-distance error, median / p95 | Pair evaluations |
+|---|---|---|---|
+| grid 60 s | 15 s / 28 s | 119 km / 345 km | 3 |
+| grid 10 s | 2.6 s / 4.7 s | 16 km / 53 km | 13 |
+| grid 1 s | 0.25 s / 0.48 s | **353 m / 2.5 km** | 121 |
+| grid 60 s + quadratic fit on d² | 12 ms / 17 ms | 0.84 m / 5.4 m | 4 |
+| grid 10 s + quadratic fit on d² | 0.06 ms / 0.08 ms | < 1 mm | 14 |
+| bounded Brent on d (ORCA's method, local window) | 0.1 ms / 0.5 ms | < 4 mm | 12 |
+| Brent root-find on range rate, 60 s bracket | < 5 µs | < 1 µm | 9 |
+
+**Reading:**
+- A plain grid is a poor miss-distance estimator. At 10 km/s, a 0.5 s timing offset adds about 5 km, so even a 1 s grid errs by hundreds of metres. That is larger than the hard-body radii and larger than v1's proposed 100 m risk boundary.
+- Fitting the parabola to **d² rather than d** is exact for straight-line motion. It reaches metre-level miss accuracy from four evaluations.
+- **Caveat:** the reference and the root-find method are the same family, so their sub-microsecond agreement is partly self-agreement. The independent methods (bounded Brent, quadratic on a 10 s grid) agree with the reference to < 0.1 ms and < 4 mm, which validates it.
+
+**3b, ORCA's global refinement:**
+- Pairs with a < 10 km reference encounter that ORCA's hourly 100 km screen flags at all: 261 / 293 / 247 of 3,090 / 3,344 / 3,025 (8–9 %).
+- For those pairs, truth is the closest approach in the t_c ± 6 h window: a dense 10 s grid, then every candidate minimum refined.
+
+| | ORCA: bounded Brent over ±6 h | Range-rate root-find of every minimum, 60 s grid |
+|---|---|---|
+| Finds the closest approach in the window | **5.4–6.1 %** | 100 % |
+| Reports a miss < 10 km (truth: 83–89 % have one in the window) | 13–16 % | 83–89 % |
+| Reported miss minus true miss, median / p95 | 30 km / 160 km | ~0 |
+| Result outside the 24 h forecast window | 11–16 % | 3–4 % (the true closest approach itself) |
+| Pair evaluations | 19 | 810 |
+
+**Reading:**
+- A single bounded Brent run over ±6 h, which contains about 15 approach minima for LEO pairs, usually stops at a minimum that is not the closest.
+- Combined with Exp 2b, and still with SGP4: of the pairs that have an encounter below 10 km within 24 h, ORCA's screen-plus-refinement reports one below 10 km for about **1 %** (34 / 3,090 for seed 1).
+- The fix is cheap in absolute terms (810 evaluations per candidate pair). A coarser range-rate grid (e.g. 300 s) may give the same result for a fifth of the cost; that is untested.
+
+**Caveats:**
+- The same as Exp 2b.
+- This is ORCA's *algorithm* on SGP4, not ORCA's *pipeline*. ORCA's own propagator adds the Exp 1 errors on top.
+- "Found" means within 1 s of the true closest approach.
