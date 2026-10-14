@@ -16,6 +16,7 @@ from benchmarks.pc import (  # noqa: E402
     pc_foster,
     pc_isotropic_exact,
     pc_monte_carlo,
+    ric_covariance,
 )
 
 
@@ -72,6 +73,11 @@ class EncounterPlane(unittest.TestCase):
         self.assertAlmostEqual(miss[1], 0.0, places=12)
         # In-plane covariance keeps the x/z variances and discards the along-track 25.0.
         self.assertAlmostEqual(np.trace(cov2), 1.04, places=12)
+
+    def test_ric_covariance_axes(self):
+        r, v = np.array([7000.0, 0.0, 0.0]), np.array([0.0, 7.5, 0.0])  # in-track = +y, cross-track = +z
+        cov = ric_covariance(r, v, 0.1, 2.0, 0.3)
+        np.testing.assert_allclose(cov, np.diag([0.01, 4.0, 0.09]), atol=1e-12)
 
     def test_parallel_miss(self):
         miss, _ = encounter_plane(np.array([0.0, 3.0, 0.0]), np.array([0.0, 1.0, 0.0]), np.eye(3))

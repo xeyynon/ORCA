@@ -173,6 +173,7 @@ No covariance in TLEs (assumed or estimated uncertainty only). Every reference u
 - `benchmarks/catalog.py`, `benchmarks/snapshot_catalog.py`: frozen TLE snapshots. The `.tle` files are git-ignored (live data); the `.json` manifest with sha256 and epoch range is committed.
 - `benchmarks/screening_recall.py`: Exp 2b. `tests/test_screening_recall.py` covers local minima, passes and screen evaluation.
 - `benchmarks/tca.py`, `benchmarks/tca_estimation.py`: Exp 3. `tests/test_benchmark_tca.py` checks the methods on synthetic straight-line and multi-minimum motion.
+- `benchmarks/pc_comparison.py`: Exp 4 on real encounters; `ric_covariance` added to `benchmarks/pc.py`.
 
 ## 10. Results so far [MEASURED]
 
@@ -267,3 +268,49 @@ Event recall, miss < 10 km (range over the three seeds):
 - The same as Exp 2b.
 - This is ORCA's *algorithm* on SGP4, not ORCA's *pipeline*. ORCA's own propagator adds the Exp 1 errors on top.
 - "Found" means within 1 s of the true closest approach.
+
+### Exp 4: collision probability on real encounters (preliminary)
+
+**Setup:**
+- The Exp 2b encounters below 10 km (6,214–6,786 per seed, persistent pairs excluded).
+- SGP4 states at each TCA.
+- **ORCA's own inputs:** hard-body radii from the name model, σ = 0.5 km + 2 km/day × TLE age per object, summed. The legacy Pc is computed by calling ORCA's `_mahalanobis_distance` and `_collision_probability` directly.
+- Foster 2D is evaluated in the encounter plane.
+- **Anisotropic variants:** aspect ratio A = 3 and 10, in-track dominant. The error volume is the same as ORCA's, so only the shape changes. These are assumed values until Exp 1 measures real TLE error shapes.
+- Outputs: `benchmarks/results/pc_n2000_h24_ref10s_seed{1,2,3}/`.
+
+**Checks:**
+- Foster matches the isotropic closed form to a relative difference of ≤ 1.4e-12.
+- 2D Monte Carlo (2e6 samples, 99.9 % Clopper-Pearson) contains the Foster value for 50 of 50 top-Pc events in every seed.
+
+**Same inputs, different formula: legacy tier (rows) vs Foster tier (columns), seed 1**
+
+| legacy \ Foster | CRITICAL | HIGH | MEDIUM | LOW | NEGLIGIBLE |
+|---|---|---|---|---|---|
+| CRITICAL (121) | 0 | 0 | 2 | 119 | 0 |
+| HIGH (429) | 0 | 0 | 4 | 425 | 0 |
+| MEDIUM (2,812) | 0 | 0 | 9 | 2,803 | 0 |
+| LOW (3,196) | 0 | 0 | 0 | 3,196 | 0 |
+
+- Across the seeds, **every** legacy CRITICAL or HIGH event (455–550 per seed) is MEDIUM or LOW under the correct formula with identical inputs. Tier agreement is 49–50 %.
+- The legacy / Foster ratio follows **1/α²** exactly (α = miss/σ). The observed range in each α band ends at the band edges (16 = 1/0.25², 4 = 1/0.5²). The median is ~46× for α < 0.25 and 0.87 for 1 ≤ α < 2.
+- With ORCA's covariance floor (σ ≥ 0.5 km per object) and radii around 10 m, a correct Pc cannot exceed about 1e-4 even at zero miss, so CRITICAL is essentially unreachable. The legacy tiers come from the formula error, not from the encounters.
+
+**Ranking (H5): how far each Pc ranking agrees with a miss-distance ranking**
+
+| Pc method | Kendall τ vs miss distance | Top-100 overlap with miss ranking |
+|---|---|---|
+| legacy | 0.87–0.88 | 96–99 % |
+| Foster, isotropic | 0.41–0.43 | 6–11 % |
+| Foster, A = 3 | 0.25–0.26 | 0–2 % |
+| Foster, A = 10 | 0.22–0.23 | 0–1 % |
+
+**Reading:**
+- The 1/α² factor makes the legacy Pc behave like 1/miss², so ORCA's "risk ranking" is effectively a miss-distance ranking.
+- A correct Pc ranks events very differently, and covariance shape changes the ranking further (A = 10 moves 725–784 events per seed to NEGLIGIBLE).
+- This supports H5 and the proposal's distance-vs-Pc objective. It also shows that the covariance assumption matters as much as the formula, which makes Exp 1 R2 (estimating real TLE error shapes) important.
+
+**Caveats:**
+- All methods here assume a short-term encounter.
+- Relative-velocity mix per seed: 4–10 events below 0.1 km/s and 98–108 at 0.1–1 km/s, where that assumption is doubtful. The planned 3D Monte Carlo with propagation is not done yet.
+- Absolute Pc values inherit ORCA's assumed σ and radii; only the legacy-vs-Foster comparison is assumption-free, because the inputs are identical.
