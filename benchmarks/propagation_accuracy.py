@@ -21,6 +21,7 @@ With two snapshots most objects share one gap; daily snapshots give 1, 2, ... da
 Writes benchmarks/results/propagation_<tag>/{errors.csv, summary.csv, covariance_model.json, run.json}.
 """
 import argparse
+import glob
 import csv
 import json
 import math
@@ -91,7 +92,8 @@ def parse_args(argv: Optional[Sequence[str]] = None):
 def main(argv: Optional[Sequence[str]] = None) -> str:
     a = parse_args(argv)
     t_all = time.perf_counter()
-    paths = a.snapshots or [a.old, a.new]
+    # Expand wildcards here: PowerShell passes "catalog_*.tle" to Python unexpanded
+    paths = sorted({p for pat in (a.snapshots or [a.old, a.new]) for p in (glob.glob(pat) or [pat])})
     if len(paths) < 2:
         raise SystemExit("need at least two snapshots")
     snaps = [{o.norad_id: o for o in load_snapshot(p)} for p in paths]

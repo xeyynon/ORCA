@@ -22,34 +22,46 @@ def model_file(content):
     return f.name
 
 
-FITTED = {
-    "LEO_starlink": {"fit": {"R": [0.5, 0.5], "I": [5.0, 20.0], "C": [0.3, 0.0]}},
-    "LEO_other": {"fit": {"R": [0.1, 0.02], "I": [1.0, 2.0], "C": [-0.5, 0.1]}},
+def b(h, r, i, c, n=500):
+    return {"horizon_days_median": h, "n": n, "R_sigma_km": r, "I_sigma_km": i, "C_sigma_km": c}
+
+
+MODEL = {
+    "LEO_starlink": {"bins": [b(0.5, 0.1, 2.0, 0.1), b(6.0, 4.0, 160.0, 0.5)]},
+    "LEO_other": {"bins": [b(0.25, 0.01, 0.1, 0.01), b(1.0, 0.04, 0.4, 0.04), b(4.0, 0.16, 6.4, 0.16),
+                           b(2.0, 99.0, 99.0, 99.0, n=10)]},  # too few objects: ignored
 }
 
 
 class Measured(unittest.TestCase):
     def setUp(self):
-        self.path = model_file(FITTED)
+        self.path = model_file(MODEL)
+        self.m = MeasuredCovariance(self.path)
 
     def tearDown(self):
         os.unlink(self.path)
 
-    def test_group_and_age(self):
-        m = MeasuredCovariance(self.path)
-        self.assertEqual(m.sigmas("STARLINK-1234", 2.0), (1.5, 45.0, 0.3))
-        r, i, c = m.sigmas("ISS (ZARYA)", 3.0)
-        self.assertAlmostEqual(r, 0.16)
-        self.assertAlmostEqual(i, 7.0)
-        self.assertAlmostEqual(c, 0.01)  # -0.5 + 0.3 is below the floor
+    def test_hits_bin_values(self):
+        np.testing.assert_allclose(self.m.sigmas("STARLINK-1234", 6.0), (4.0, 160.0, 0.5))
+        np.testing.assert_allclose(self.m.sigmas("ISS (ZARYA)", 1.0), (0.04, 0.4, 0.04))
+
+    def test_log_log_interpolation(self):
+        # Halfway between 1 and 4 days in log time is 2 days; in-track 0.4 -> 6.4 gives the geometric mean 1.6.
+        r, i, c = self.m.sigmas("ISS (ZARYA)", 2.0)
+        self.assertAlmostEqual(r, 0.08)
+        self.assertAlmostEqual(i, 1.6)
+
+    def test_holds_ends(self):
+        np.testing.assert_allclose(self.m.sigmas("ISS", 0.01), (0.01, 0.1, 0.01))
+        np.testing.assert_allclose(self.m.sigmas("ISS", 30.0), (0.16, 6.4, 0.16))
+        np.testing.assert_allclose(self.m.sigmas("ISS", -1.0), (0.04, 0.4, 0.04))  # age sign ignored
 
     def test_cov3_is_ric(self):
-        m = MeasuredCovariance(self.path)
-        cov = m.cov3(np.array([7000.0, 0, 0]), np.array([0, 7.5, 0]), "STARLINK-1", 1.0)
-        np.testing.assert_allclose(np.diag(cov), [1.0, 625.0, 0.09])
+        cov = self.m.cov3(np.array([7000.0, 0, 0]), np.array([0, 7.5, 0]), "STARLINK-1", 6.0)
+        np.testing.assert_allclose(np.diag(cov), [16.0, 25600.0, 0.25])
 
-    def test_no_fit_refuses(self):
-        p = model_file({"LEO_all": {"fit": None, "reason": "one bin"}})
+    def test_too_few_bins_refuses(self):
+        p = model_file({"LEO_all": {"fit": None, "bins": [b(6.0, 1.0, 50.0, 1.0)]}})
         try:
             with self.assertRaises(ValueError):
                 MeasuredCovariance(p)
