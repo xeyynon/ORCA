@@ -1,6 +1,6 @@
 import './Icon.css'
 
-export type IconName = 'sun' | 'moon' | 'keyboard' | 'search' | 'close' | 'info' | 'download' | 'globe' | 'refresh' | 'arrow-left' | 'play' | 'pause' | 'logout' | 'skip-back' | 'skip-forward' | 'expand' | 'locate'
+export type IconName = 'sun' | 'moon' | 'keyboard' | 'search' | 'close' | 'info' | 'download' | 'globe' | 'refresh' | 'arrow-left' | 'play' | 'pause' | 'logout' | 'login' | 'skip-back' | 'skip-forward' | 'expand' | 'locate' | 'copy' | 'check' | 'eye' | 'eye-off'
 
 // 16x16 stroke icons. Single-path or small-group definitions keep this file readable.
 const PATHS: Record<IconName, string> = {
@@ -17,6 +17,11 @@ const PATHS: Record<IconName, string> = {
   play: 'M4.5 3v10l8-5Z',
   pause: 'M5 3v10M11 3v10',
   logout: 'M6.5 2.5h-3v11h3M10 5l3 3-3 3M13 8H6',
+  login: 'M9.5 2.5h3v11h-3M6.5 5l3 3-3 3M9.5 8h-7',
+  copy: 'M5.5 5.5h7v8h-7ZM3.5 10.5v-8h7',
+  check: 'M3 8.5l3 3 7-7',
+  eye: 'M1.5 8S4 3.5 8 3.5 14.5 8 14.5 8 12 12.5 8 12.5 1.5 8 1.5 8ZM8 10a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z',
+  'eye-off': 'M2.5 2.5l11 11M6.4 3.7A6.6 6.6 0 0 1 8 3.5c4 0 6.5 4.5 6.5 4.5a11 11 0 0 1-1.8 2.4M10.4 12a6.4 6.4 0 0 1-2.4.5c-4 0-6.5-4.5-6.5-4.5a11 11 0 0 1 2.3-2.8M6.6 6.6a2 2 0 0 0 2.8 2.8',
   'skip-back': 'M12 3 6 8l6 5V3ZM4 3v10',
   'skip-forward': 'M4 3l6 5-6 5V3ZM12 3v10',
   expand: 'M2.5 6V2.5H6M10 2.5h3.5V6M13.5 10v3.5H10M6 13.5H2.5V10',

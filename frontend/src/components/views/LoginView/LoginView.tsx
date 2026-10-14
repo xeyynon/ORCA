@@ -1,11 +1,19 @@
+import { useState } from 'react'
 import type { ReactNode } from 'react'
 import type { LoginFailure } from '@/lib/authErrors'
+import { evaluatorCredential } from '@/lib/evaluator'
+import type { Credential } from '@/lib/evaluator'
+import { useClipboard } from '@/hooks/useClipboard'
 import { Brand } from '../../molecules/Brand/Brand'
 import { Callout } from '../../molecules/Callout/Callout'
 import { FieldNote } from '../../molecules/FieldNote/FieldNote'
 import { DebrisBackdrop } from '../../organisms/DebrisBackdrop/DebrisBackdrop'
+import { EvaluatorAccess } from '../../organisms/EvaluatorAccess/EvaluatorAccess'
 import { LoginForm } from '../../organisms/LoginForm/LoginForm'
 import './LoginView.css'
+
+/** Build-time demo login (frontend/.env.local or the host's env). Absent unless both variables are set. */
+const EVALUATOR = evaluatorCredential(import.meta.env)
 
 type Props = {
   /** null = the server has not answered yet (the form is shown; a real connection error appears on submit). */
@@ -20,6 +28,9 @@ type Props = {
 }
 
 export function LoginView({ configured, notice, busy, failure, onSubmit, corner }: Props) {
+  const [prefill, setPrefill] = useState<Credential | null>(null)
+  const { last, copy } = useClipboard()
+
   return (
     <main className="login-view">
       <DebrisBackdrop />
@@ -37,8 +48,13 @@ export function LoginView({ configured, notice, busy, failure, onSubmit, corner 
             then reload this page.
           </Callout>
         ) : (
-          <LoginForm initialUsername="admin" busy={busy} failure={failure} onSubmit={onSubmit} />
+          <LoginForm initialUsername="admin" busy={busy} failure={failure} prefill={prefill} onSubmit={onSubmit} />
         )}
+
+        {EVALUATOR && configured !== false ? (
+          <EvaluatorAccess credential={EVALUATOR} lastCopy={last} onCopy={(key, text) => { void copy(key, text) }}
+            onUse={() => setPrefill({ ...EVALUATOR })} />
+        ) : null}
 
         <FieldNote>Educational and research tool built on public TLEs. Not for operational decisions.</FieldNote>
       </div>
