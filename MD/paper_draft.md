@@ -5,7 +5,7 @@
 > **Placeholders:**
 > - **[VERIFY: …]** marks a citation still to be checked at its source.
 > - **[Fig. n] / [Table n]** follow the brief's plan.
-> - **F1** (the pipeline diagram) is not drawn yet. The other figures are in `benchmarks/figures/`.
+> - All figures, including **F1** (`fig_pipeline`) and **F5** (`fig_mc_convergence`), are in `benchmarks/figures/`.
 >
 > Sections I–III and VI are not drafted. They need the literature check first.
 >
@@ -247,6 +247,8 @@ A ±6 h window holds about 15 approach minima for a LEO pair, so a single bounde
 ### D. Collision probability
 
 **Accuracy of the implementation.** Foster matches the isotropic closed form to within 1.4 × 10⁻¹² relative difference. In every seed, the Monte Carlo interval contains the Foster value for 50 of 50 events.
+
+**Monte Carlo cost [Fig. 5].** For the three highest-Pc encounters (Pc ≈ 1.2 × 10⁻⁶), Monte Carlo returns zero hits up to 10⁵ samples. It reaches ±15 % of Foster only at 10⁸ samples. Foster lies inside the 95 % interval in 22 of 24 runs. At the probabilities that matter operationally, Monte Carlo is therefore a validation tool, not a practical estimator.
 
 **ORCA's legacy formula [Fig. 5].** On identical inputs, the ratio of legacy to Foster Pc follows **1/α² exactly**, where α = miss distance / combined σ:
 - the legacy formula overstates Pc by about 46× for α < 0.25

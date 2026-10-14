@@ -16,7 +16,8 @@ component, which is what a covariance model needs; bias = median of the signed c
 The SGP4 R2 spreads per horizon bin are fitted with sigma(h) = s0 + s1 * h per RIC axis (LEO, by group)
 and written to covariance_model.json, to replace ORCA's assumed sigma = 0.5 km + 2 km/day.
 
-Run from the repo root:  python benchmarks/propagation_accuracy.py --old <snapshot.tle> --new <snapshot.tle>
+Run from the repo root:  python benchmarks/propagation_accuracy.py [--snapshots <a.tle> <b.tle> <c.tle> ...]
+With two snapshots most objects share one gap; daily snapshots give 1, 2, ... day horizons and allow the fit.
 Writes benchmarks/results/propagation_<tag>/{errors.csv, summary.csv, covariance_model.json, run.json}.
 """
 import argparse
@@ -75,6 +76,9 @@ def parse_args(argv: Optional[Sequence[str]] = None):
     ap = argparse.ArgumentParser(description="Exp 1: propagation fidelity (TLE-to-TLE and model consistency)")
     ap.add_argument("--old", default=os.path.join(DATA_DIR, "catalog_20261014T064759Z.tle"))
     ap.add_argument("--new", default=os.path.join(DATA_DIR, "catalog_20261014T090520Z.tle"))
+    ap.add_argument("--snapshots", nargs="+", metavar="TLE",
+                    help="two or more snapshots; every earlier TLE of an object is compared with every later one, "
+                         "so daily snapshots give horizons of 1, 2, ... days (default: --old --new)")
     ap.add_argument("--min-gap-h", type=float, default=1.0, help="ignore pairs whose epochs differ by less")
     ap.add_argument("--timing-objects", type=int, default=2000, help="objects used for per-state timing")
     ap.add_argument("--fit-min-n", type=int, default=100, help="horizon bins need this many objects to be fitted")
@@ -87,17 +91,30 @@ def parse_args(argv: Optional[Sequence[str]] = None):
 def main(argv: Optional[Sequence[str]] = None) -> str:
     a = parse_args(argv)
     t_all = time.perf_counter()
-    old = {o.norad_id: o for o in load_snapshot(a.old)}
-    new = {o.norad_id: o for o in load_snapshot(a.new)}
+    paths = a.snapshots or [a.old, a.new]
+    if len(paths) < 2:
+        raise SystemExit("need at least two snapshots")
+    snaps = [{o.norad_id: o for o in load_snapshot(p)} for p in paths]
+    old, new = snaps[0], snaps[-1]  # R1 uses the first snapshot
     common = sorted(set(old) & set(new))
 
+    # Every distinct TLE of each object across the snapshots, oldest first; one TLE per epoch
+    versions: Dict[str, Dict] = defaultdict(dict)
+    for snap in snaps:
+        for nid, o in snap.items():
+            versions[nid].setdefault(o.epoch, o)
+    tle_pairs = []
+    for nid, by_epoch in versions.items():
+        vs = [by_epoch[e] for e in sorted(by_epoch)]
+        tle_pairs += [(nid, vs[i], vs[j]) for i in range(len(vs)) for j in range(i + 1, len(vs))]
+
     rows: List[Dict] = []
+    timing_pairs = []
     counts = defaultdict(int)
-    for nid in common:
-        o_old, o_new = old[nid], new[nid]
+    for nid, o_old, o_new in tle_pairs:
         gap_d = (o_new.epoch - o_old.epoch).total_seconds() / 86400.0
         if gap_d * 24.0 < a.min_gap_h:
-            counts["not_later" if gap_d <= 0 else "gap_below_min"] += 1
+            counts["gap_below_min"] += 1
             continue
         b = bin_label(gap_d)
         if b is None:
@@ -113,6 +130,7 @@ def main(argv: Optional[Sequence[str]] = None) -> str:
             counts["propagation_failed"] += 1
             continue
         row = {"norad_id": nid, "name": o_new.name, "regime": regime(o_new), "group": group(o_new),
+               "old_epoch": o_old.epoch.isoformat(), "new_epoch": o_new.epoch.isoformat(),
                "horizon_days": gap_d, "bin": b}
         for m, r in pred.items():
             dR, dI, dC = ric_components(r - r_ref, r_ref, v_ref)
@@ -121,9 +139,11 @@ def main(argv: Optional[Sequence[str]] = None) -> str:
         for m in ("j2_secular", "orca_engine"):  # R1: drift from SGP4 of the same TLE
             row[f"{m}_vs_sgp4_km"] = float(np.linalg.norm(pred[m] - pred["sgp4"]))
         rows.append(row)
+        timing_pairs.append((o_old, o_new))
         counts["used"] += 1
 
-    tag = a.tag or (os.path.basename(a.old)[8:-4] + "_to_" + os.path.basename(a.new)[8:-4])
+    tag = a.tag or (os.path.basename(paths[0])[8:-4] + "_to_" + os.path.basename(paths[-1])[8:-4]
+                    + (f"_{len(paths)}snap" if len(paths) > 2 else ""))
     out_dir = os.path.join(RESULTS, f"propagation_{tag}")
     os.makedirs(out_dir, exist_ok=True)
     _write_csv(os.path.join(out_dir, "errors.csv"), rows)
@@ -209,24 +229,23 @@ def main(argv: Optional[Sequence[str]] = None) -> str:
     _write_csv(os.path.join(out_dir, "r1_model_consistency.csv"), r1_rows)
 
     # Per-state cost, scalar calls for every method (same implementation level for the call loop)
-    timing_objs = [old[r["norad_id"]] for r in rows[: a.timing_objects]]
+    timing_set = timing_pairs[: a.timing_objects]
     timing = {}
     for m in METHODS:
         tic = time.perf_counter()
-        for o in timing_objs:
-            t = new[o.norad_id].epoch
+        for o, o_later in timing_set:
+            t = o_later.epoch
             if m == "sgp4":
                 sgp4_state(o, t)
             elif m == "j2_secular":
                 J2Secular(o).state(t)
             else:
                 OrcaEngine(o).state(t)
-        timing[m] = (time.perf_counter() - tic) / max(len(timing_objs), 1) * 1e6
+        timing[m] = (time.perf_counter() - tic) / max(len(timing_set), 1) * 1e6
 
     run = {"experiment": "exp1_propagation", "args": vars(a),
-           "old": os.path.basename(a.old), "old_sha256": snapshot_sha256(a.old),
-           "new": os.path.basename(a.new), "new_sha256": snapshot_sha256(a.new),
-           "objects_in_both": len(common), "counts": dict(counts),
+           "snapshots": [{"file": os.path.basename(p), "sha256": snapshot_sha256(p)} for p in paths],
+           "objects_in_both": len(common), "tle_pairs": len(tle_pairs), "counts": dict(counts),
            "microseconds_per_state_incl_setup": timing,
            "seconds": time.perf_counter() - t_all,
            "versions": {"python": platform.python_version(), "numpy": np.__version__,
@@ -250,7 +269,7 @@ def _write_csv(path: str, rows: List[Dict]) -> None:
 
 
 def _print(summary, cov_model, run, r1_rows) -> None:
-    print(f"objects in both snapshots {run['objects_in_both']}; {dict(run['counts'])}")
+    print(f"{len(run['snapshots'])} snapshots; objects in first and last {run['objects_in_both']}; TLE pairs {run['tle_pairs']}; {dict(run['counts'])}")
     for gp in ("all", "starlink", "other"):
         sel = [s for s in summary if s["regime"] == "LEO" and s["group"] == gp]
         if not sel:

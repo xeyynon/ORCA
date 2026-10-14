@@ -181,7 +181,76 @@ def fig_pc_ratio():
     save(fig, "fig_pc_ratio")
 
 
+def fig_mc_convergence():
+    rows = read(os.path.join(RES, "mc_convergence_seed1", "convergence.csv"))
+    ranks = sorted({int(r["rank"]) for r in rows})
+    fig, axes = plt.subplots(1, len(ranks), figsize=(2 * W, 2.1), sharey=True)
+    for ax, k in zip(np.atleast_1d(axes), ranks):
+        sel = sorted((r for r in rows if int(r["rank"]) == k), key=lambda r: int(r["samples"]))
+        n = np.array([int(r["samples"]) for r in sel], dtype=float)
+        ratio = np.array([float(r["ratio_mc_foster"]) for r in sel])
+        lo = np.array([float(r["ci_low_ratio"]) for r in sel])
+        hi = np.array([float(r["ci_high_ratio"]) for r in sel])
+        pc = float(sel[0]["pc_foster"])
+        ax.axvspan(n[0] / 2, 1.0 / pc, color=GRID, alpha=0.6, linewidth=0)
+        ax.fill_between(n, lo, np.minimum(hi, 10), color=BLUE, alpha=0.15, linewidth=0)
+        ax.plot(n, ratio, "-o", color=BLUE)
+        ax.axhline(1.0, color=INK2, lw=0.8, ls="--")
+        ax.set_xscale("log")
+        ax.set_xlim(n[0] / 2, n[-1] * 2)
+        ax.set_ylim(0, 3)
+        ax.set_xlabel("Monte Carlo samples")
+        ax.set_title(f"{sel[0]['sat1_name']} / {sel[0]['sat2_name']}\nFoster Pc = {pc:.2e}", color=INK2, fontsize=7)
+        ax.text(n[0] / 1.6, 2.2, "< 1 expected hit", color=INK2, fontsize=6.5, va="top")
+    np.atleast_1d(axes)[0].set_ylabel("Monte Carlo Pc / Foster Pc")
+    np.atleast_1d(axes)[-1].text(3e5, 2.8, "band: 95 % interval\ndashed: Foster", color=INK2, fontsize=6.5,
+                                 va="top")
+    fig.tight_layout()
+    save(fig, "fig_mc_convergence")
+
+
+def fig_pipeline():
+    from matplotlib.patches import FancyArrowPatch, FancyBboxPatch
+
+    lines = "\n".join
+    stages = [
+        ("TLE input", lines(["CelesTrak GP", "(active group)", "frozen snapshots"]), "data"),
+        ("Propagation", lines(["ORCA: two-body", "+ drag", "alt: J2 secular,", "SGP4"]), "Exp 1"),
+        ("Screening", lines(["ORCA: KD-tree,", "1 h, 100 km", "alt: 20 s, 200 km;", "brute force"]), "Exp 2a, 2b"),
+        ("TCA", lines(["ORCA: Brent on d,", "±6 h", "alt: range-rate", "roots, fit on d²"]), "Exp 3"),
+        (lines(["Collision", "probability"]), lines(["ORCA: legacy 2D", "alt: Foster,", "Monte Carlo,", "curved path"]),
+         "Exp 4, 4b"),
+        ("Risk tier", lines(["Pc thresholds", "1e-4 ... 1e-7", "CRITICAL ... LOW"]), ""),
+    ]
+    fig, ax = plt.subplots(figsize=(2 * W, 2.3))
+    ax.set_xlim(0, 6)
+    ax.set_ylim(0, 2.3)
+    ax.axis("off")
+    bw, gap, y0, h = 0.84, 0.16, 0.55, 1.4
+    for i, (title, body, exp) in enumerate(stages):
+        x = i + gap / 2
+        ax.add_patch(FancyBboxPatch((x, y0), bw, h, boxstyle="round,pad=0,rounding_size=0.04",
+                                    linewidth=0.8, edgecolor=INK2, facecolor="white"))
+        ax.text(x + bw / 2, y0 + h - 0.08, title, ha="center", va="top", fontsize=7, fontweight="bold", color=INK,
+                linespacing=1.1)
+        ax.text(x + bw / 2, y0 + h - 0.48, body, ha="center", va="top", fontsize=5.8, color=INK2, linespacing=1.3)
+        if exp:
+            ax.text(x + bw / 2, y0 + h + 0.08, exp, ha="center", va="bottom", fontsize=6.5, color=BLUE,
+                    fontweight="bold")
+        if i < len(stages) - 1:
+            ax.add_patch(FancyArrowPatch((x + bw, y0 + h / 2), (x + 1, y0 + h / 2), arrowstyle="-|>",
+                                         mutation_scale=8, color=INK2, linewidth=0.8))
+    # Exp 5 spans the whole pipeline
+    ax.annotate("", xy=(6 - gap / 2, 0.38), xytext=(gap / 2, 0.38),
+                arrowprops=dict(arrowstyle="|-|", color=BLUE, lw=0.8, mutation_scale=3))
+    ax.text(3, 0.28, "Exp 5: end to end, ORCA as built vs corrected pipeline (same objects and window)",
+            ha="center", va="top", fontsize=6.5, color=BLUE)
+    save(fig, "fig_pipeline")
+
+
 if __name__ == "__main__":
+    fig_pipeline()
+    fig_mc_convergence()
     fig_propagation()
     fig_recall()
     fig_runtime()

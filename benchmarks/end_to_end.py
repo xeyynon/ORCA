@@ -45,6 +45,7 @@ from sgp4.api import jday
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from benchmarks.catalog import DATA_DIR, fresh_only, leo_only, load_snapshot, snapshot_sha256, subset  # noqa: E402
+from benchmarks.covariance import MeasuredCovariance  # noqa: E402
 from benchmarks.pc import encounter_plane, pc_foster, ric_covariance  # noqa: E402
 from benchmarks.screening_recall import close_pair_rows, grid_local_minima  # noqa: E402
 from benchmarks.tca import PropagationError, SGP4Pair, all_minima_root, brent_root  # noqa: E402
@@ -71,6 +72,8 @@ def parse_args(argv: Optional[Sequence[str]] = None):
     ap.add_argument("--vmax", type=float, default=16.0)
     ap.add_argument("--ric-ratio", type=float, default=100.0, help="in-track / radial (= cross-track) sigma")
     ap.add_argument("--ric-floor-km", type=float, default=0.1, help="lower bound on radial and cross-track sigma")
+    ap.add_argument("--covariance-model", help="Exp 1 covariance_model.json: adds B_measured, Foster with the "
+                                               "measured radial / in-track / cross-track sigmas")
     ap.add_argument("--tag")
     return ap.parse_args(argv)
 
@@ -84,6 +87,7 @@ def b_covariances(r1, v1, r2, v2, s1, s2, ratio, floor):
 
 def main(argv: Optional[Sequence[str]] = None) -> str:
     a = parse_args(argv)
+    measured = MeasuredCovariance(a.covariance_model) if a.covariance_model else None
     with open(os.path.join(a.recall_dir, "run.json"), encoding="utf-8") as f:
         run2b = json.load(f)
     args2b = run2b["args"]
@@ -153,7 +157,12 @@ def main(argv: Optional[Sequence[str]] = None) -> str:
         row = {"sat1_id": o1.norad_id, "sat1_name": o1.name, "sat2_id": o2.norad_id, "sat2_name": o2.name,
                "tca_utc": tca.isoformat(timespec="milliseconds"), "tca_s": e["tca_s"], "miss_km": e["miss_km"],
                "vrel_kms": float(np.linalg.norm(v2 - v1)), "persistent_pair": int(e["persistent"]), "hbr_km": hbr}
-        for name, cov in (("iso", iso), ("ric", ric)):
+        covs = [("iso", iso), ("ric", ric)]
+        if measured is not None:
+            age1 = (tca - o1.epoch).total_seconds() / 86400.0
+            age2 = (tca - o2.epoch).total_seconds() / 86400.0
+            covs.append(("measured", measured.cov3(r1, v1, o1.name, age1) + measured.cov3(r2, v2, o2.name, age2)))
+        for name, cov in covs:
             m2, c2 = encounter_plane(r2 - r1, v2 - v1, cov)
             pc = pc_foster(m2, c2, hbr)
             row[f"pc_{name}"], row[f"tier_{name}"] = pc, det._risk_level(pc)
@@ -190,7 +199,8 @@ def main(argv: Optional[Sequence[str]] = None) -> str:
         key = tuple(sorted((r["sat1_id"], r["sat2_id"])))
         r["found_by_a"] = int(any(abs(t - r["tca_s"]) <= MATCH_S for t in a_by_pair.get(key, [])))
 
-    tag = a.tag or os.path.basename(os.path.normpath(a.recall_dir)).replace("screening_recall_", "")
+    tag = a.tag or (os.path.basename(os.path.normpath(a.recall_dir)).replace("screening_recall_", "")
+                    + ("_measured" if measured is not None else ""))
     out_dir = os.path.join(RESULTS, f"end_to_end_{tag}")
     os.makedirs(out_dir, exist_ok=True)
     _write_csv(os.path.join(out_dir, "events_a.csv"), rows_a)
@@ -220,7 +230,11 @@ def main(argv: Optional[Sequence[str]] = None) -> str:
               "tiers_iso": {t: sum(r["tier_iso"] == t for r in rows_b) for t in TIERS},
               "tiers_ric": {t: sum(r["tier_ric"] == t for r in rows_b) for t in TIERS},
               "kendall_tau_miss_vs_pc_iso": tau([r["miss_km"] for r in rows_b], [r["pc_iso"] for r in rows_b]),
-              "kendall_tau_miss_vs_pc_ric": tau([r["miss_km"] for r in rows_b], [r["pc_ric"] for r in rows_b])},
+              "kendall_tau_miss_vs_pc_ric": tau([r["miss_km"] for r in rows_b], [r["pc_ric"] for r in rows_b]),
+              **({"tiers_measured": {t: sum(r["tier_measured"] == t for r in rows_b) for t in TIERS},
+                  "kendall_tau_miss_vs_pc_measured": tau([r["miss_km"] for r in rows_b],
+                                                         [r["pc_measured"] for r in rows_b]),
+                  "covariance_model": a.covariance_model} if measured is not None else {})},
         "run": {"args": vars(a), "exp2b_run": os.path.basename(os.path.normpath(a.recall_dir)),
                 "catalog": run2b["catalog"], "catalog_sha256": run2b["catalog_sha256"],
                 "versions": {"python": platform.python_version(), "numpy": np.__version__,
@@ -259,6 +273,8 @@ def _print(s: Dict, km: float) -> None:
     print(f"  tiers iso {B['tiers_iso']}")
     print(f"  tiers ric {B['tiers_ric']}")
     print(f"  Kendall tau(miss, Pc): iso {B['kendall_tau_miss_vs_pc_iso']:.3f}, ric {B['kendall_tau_miss_vs_pc_ric']:.3f}")
+    if "tiers_measured" in B:
+        print(f"  tiers measured {B['tiers_measured']}; Kendall tau {B['kendall_tau_miss_vs_pc_measured']:.3f}")
 
 
 if __name__ == "__main__":
