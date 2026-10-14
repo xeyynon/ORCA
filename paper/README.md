@@ -5,9 +5,13 @@
 ## Compile
 
 - **Overleaf (easiest):** zip this folder (`main.tex`, `references.bib`, `figures/`), then *New project → Upload project*. Overleaf supplies IEEEtran.
-- **Locally:** `pdflatex main`, `bibtex main`, `pdflatex main`, `pdflatex main`. Needs TeX Live or MiKTeX with IEEEtran; this machine has no TeX installation.
+- **Locally:** `pdflatex main`, `bibtex main`, `pdflatex main`, `pdflatex main` (TeX Live or MiKTeX), or `tectonic -X compile main.tex`.
 
-The PDF has not been compiled yet, so the page count is an estimate: about 2,400 words of running text, 7 figures (2 double-column), 4 tables and 40 references, which should come to about 7 pages in IEEE two-column format. Check the count after the first compile and trim §V if needed.
+`main.pdf` is compiled: **6 pages** in IEEE two-column format, with 7 figures (2 double-column), 4 tables and 40 references.
+
+It was built with Tectonic 0.15 (XeLaTeX), which uses TeX Gyre Termes as the Times body font. pdfLaTeX (Overleaf's default) uses IEEEtran's own Times; the page count may shift slightly.
+
+To rebuild with Tectonic: `tectonic -X compile main.tex`.
 
 ## Where the content comes from
 

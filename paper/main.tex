@@ -2,7 +2,14 @@
 % IEEE conference format (IEEEtran). Compile: pdflatex main, bibtex main, pdflatex main x2 (or upload the folder to Overleaf).
 % Every number traces to benchmarks/results/ in the ORCA repository; see MD/paper_draft.md for the long version.
 \documentclass[conference]{IEEEtran}
-\usepackage[utf8]{inputenc}
+\usepackage{iftex}
+\ifXeTeX  % Tectonic / XeLaTeX: Times clone (IEEE body font)
+  \usepackage{fontspec}
+  \setmainfont{texgyretermes}[Extension=.otf, UprightFont=*-regular, BoldFont=*-bold,
+    ItalicFont=*-italic, BoldItalicFont=*-bolditalic]
+\else     % pdfLaTeX (e.g. Overleaf default): IEEEtran's own Times
+  \usepackage[utf8]{inputenc}
+\fi
 \usepackage{cite}
 \usepackage{amsmath}
 \usepackage{graphicx}
@@ -196,6 +203,13 @@ Grid search alone is a poor miss-distance estimator (Fig.~\ref{fig:tca}). Even a
 \label{fig:tca}
 \end{figure}
 
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{figures/fig_pc_ratio.pdf}
+\caption{ORCA's $P_c$ divided by Foster's, against $\alpha$ (same covariance and radii); the dashed line is $1/\alpha^2$.}
+\label{fig:pcratio}
+\end{figure}
+
 \subsection{Collision Probability}
 On identical inputs, ORCA's $P_c$ equals Foster's divided by $\alpha^2$ ($\alpha$ = miss/$\sigma$; Fig.~\ref{fig:pcratio}). Foster matches the closed form to $10^{-12}$ and Monte Carlo in 50 of 50 cases per seed. The consequences:
 \begin{itemize}
@@ -212,12 +226,6 @@ On identical inputs, ORCA's $P_c$ equals Foster's divided by $\alpha^2$ ($\alpha
 \end{itemize}
 Within a single pass the straight-line model holds from 0.1\,km/s up; below that, with elongated covariance, it underestimates by about $6\times$.
 
-\begin{figure}[t]
-\centering
-\includegraphics[width=\columnwidth]{figures/fig_pc_ratio.pdf}
-\caption{ORCA's $P_c$ divided by Foster's, against $\alpha$ (same covariance and radii); the dashed line is $1/\alpha^2$.}
-\label{fig:pcratio}
-\end{figure}
 
 \subsection{End to End, and the Covariance}
 Table~\ref{tab:e2e} compares the two pipelines. ORCA as built finds 6--8 of about 6,500 encounters per seed and misreports miss distances by a median of about 90\,km. The corrected pipeline reproduces the reference to within one event per seed at nine times the runtime. Table~\ref{tab:tiers} shows that for these \emph{same} encounters the tiers depend on the covariance far more than on the method. It is now ORCA's production engine: on the full catalogue it finds about 426,000 approaches closer than 10\,km in a day, in 1.5--2 minutes.
