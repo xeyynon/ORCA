@@ -1,15 +1,71 @@
-# Paper draft: Sections IV (Methodology) and V (Results and Discussion)
+# Paper draft: Sections II, IV and V (I, III and VI to follow)
 
-> Draft 1, 2026-10-14. Written from `MD/research_paper_brief.md` (Section 10) and the committed files in `benchmarks/results/`. Every number below is traceable to one of those files.
+> Draft 2, 2026-10-15. Written from `MD/research_paper_brief.md` (Section 10) and the committed files in `benchmarks/results/`. Every number below is traceable to one of those files.
 >
 > **Placeholders:**
 > - Citations are keys in [references.bib](references.bib), written as [key]. The verification status of each is in [literature_verification.md](literature_verification.md); keys marked SECONDARY there must be re-checked before submission.
 > - **[Fig. n] / [Table n]** follow the brief's plan.
 > - All figures, including **F1** (`fig_pipeline`) and **F5** (`fig_mc_convergence`), are in `benchmarks/figures/`.
 >
-> Sections I–III and VI are not drafted. They need the literature check first.
+> Sections I, III and VI are not drafted yet: their research-gap wording waits on a full reading of the two closest prior works.
 >
-> **Length:** about 3,500 words including tables, which is well over the ~4.1-page budget for IV + V. Trim after the template is fixed.
+> **Length:** IV + V are about 3,500 words including tables, well over their ~4.1-page budget. II is about 650 words against ~0.6 page. Trim after the template is fixed.
+
+---
+
+## II. PRELIMINARIES
+
+### A. Two-line element sets and SGP4
+
+**What a TLE is.** A two-line element set (TLE) is a set of *mean* orbital elements, fitted by the US Space Surveillance Network to its tracking data, plus a drag term B\*. The elements are defined by the SGP4 theory they were fitted with. Spacetrack Report #3 warns that "inputting NORAD element sets into a different model … will result in degraded predictions" [hoots1980str3]. One detail matters later: SGP4 first converts the published Kozai mean motion to Brouwer's form [hoots1980str3; vallado2006revisiting]. We use the reference SGP4 code [vallado2006revisiting] through the sgp4 package [rhodes_sgp4].
+
+**How accurate TLEs are.** TLE predictions are accurate to roughly the kilometre level [vallado2006revisiting]. Their error is dominated by the along-track component [flohrer2009improving] and grows by about 1.5 km per day against precise orbits [levit2011improved].
+
+**No covariance.** TLEs carry no covariance [flohrer2009improving; nasa_ca_handbook2020]. Any collision probability computed from them therefore rests on an uncertainty model supplied from outside. For that reason NASA's Conjunction Assessment handbook does not recommend TLE-based conjunction assessment for operations [nasa_ca_handbook2020].
+
+### B. Conjunction screening
+
+**The all-vs-all problem.** Comparing every pair in a catalog of N objects means N(N−1)/2 pairs: about 1.3 × 10⁸ for N = 16,000. Two families of shortcuts exist:
+- **Filters** discard pairs whose orbits cannot come close [hoots1984]. Their pads must be chosen with care or conjunctions are missed [woodburn2009].
+- **Time-sampled (snapshot) screening** propagates all objects to a grid of times t_k = kΔt and, at each step, finds every pair closer than a screening radius r. A k-d tree [bentley1975] finds those pairs in close to O(N log N) time per step instead of O(N²).
+
+**When snapshots can miss an encounter.** An encounter with miss distance d and relative speed v is caught only if a sample falls while the pair is inside r. Over a straight pass, the time inside r is 2√(r² − d²)/v. So an encounter is guaranteed to be caught only if
+
+$$ r \;\ge\; d + v\,\Delta t / 2 . $$
+
+Otherwise the probability of catching it is about 2√(r² − d²)/(vΔt). For LEO, v reaches about 15 km/s.
+
+### C. Time of closest approach
+
+The time of closest approach (TCA) minimises the separation d(t) = |r₂(t) − r₁(t)|. Equivalently, it is a root of the range rate
+
+$$ \dot d \propto \Delta\mathbf r \cdot \Delta\mathbf v = 0 , $$
+
+with a sign change from negative to positive. Two ways to find it:
+- **Root-finding.** Bracketing the root on a coarse grid and refining it with Brent's method [brent1973] is robust.
+- **Fitting.** For straight-line relative motion, d²(t) is exactly quadratic in t. A parabola through d² at three samples therefore locates the TCA without further propagation.
+
+A pair in low Earth orbit has several approach minima per orbit. A single bounded minimisation over a long window can stop at any one of them.
+
+### D. Collision probability
+
+**The short-term encounter model.** Most methods assume the relative motion is straight and fast during the encounter [akella2000; chan2008]. The relative position at TCA is then projected onto the *encounter plane* normal to the relative velocity. The probability of collision P_c is the 2D Gaussian density integrated over a disc of radius R, the combined hard-body radius, centred on the miss vector m:
+
+$$ P_c = \iint_{|\mathbf x| \le R} \frac{1}{2\pi\sqrt{|C|}} \exp\!\Big(-\tfrac12 (\mathbf x - \mathbf m)^{\!\top} C^{-1} (\mathbf x - \mathbf m)\Big)\, d\mathbf x . $$
+
+Here C is the combined 2×2 position covariance in that plane.
+
+**Ways to evaluate it.**
+- Foster's method integrates this numerically [foster1992].
+- Closed and series forms exist [alfano2005numerical; patera2001; chan2008]; see the review [li2022review].
+- For R ≪ σ the integral tends to πR² times the density at the disc centre.
+- Monte Carlo sampling converges to the same value but, by binomial variance, needs about (1 − P_c)/(P_c ε²) samples for relative error ε. We report exact Clopper–Pearson intervals [clopper1934].
+
+**When the model fails.** When the relative speed is low, the encounter lasts long, curvature matters, and the 2D model no longer holds [coppola2012; alfano2009mc].
+
+### E. Risk tiers
+
+Operators act on P_c thresholds. NASA's handbook recommends mitigation above 10⁻⁴ [nasa_ca_handbook2020], and the same 1/10,000 is a "quasi-standard" at ESA [merz2019]. ORCA reports five tiers with boundaries at 10⁻⁴, 10⁻⁵, 10⁻⁶ and 10⁻⁷. Every tier inherits the covariance assumption behind P_c (§II-A).
 
 ---
 
