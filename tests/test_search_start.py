@@ -3,7 +3,8 @@ Regression test: a catalog conjunction search must look FORWARD from now, not fr
 
 Bug: ConjunctionSearch.search_catalog used the first object's TLE epoch as the search start, so with
 a stale catalog the whole "7-day horizon" lay in the past (and disagreed with assess_pair, which
-already defaulted to utcnow). Run from the repo root:  python -m unittest discover -s tests -v
+already defaulted to utcnow). The engine now records the window it searched (last_window), which is what
+these tests check. Run from the repo root:  python -m unittest discover -s tests -v
 """
 import math
 import os
@@ -14,7 +15,7 @@ from datetime import datetime, timedelta
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import conjunction_detection as cd  # noqa: E402
-from orbit_mech_engine import OrbitalElement, SGP4Propagator  # noqa: E402
+from orbit_mech_engine import OrbitalElement  # noqa: E402
 
 
 def make_elements(epoch: datetime, n: int = 3):
@@ -32,42 +33,23 @@ def make_elements(epoch: datetime, n: int = 3):
     return out
 
 
-class RecordingPropagator(SGP4Propagator):
-    times = []
-
-    def propagate(self, t_prop):
-        RecordingPropagator.times.append(t_prop)
-        return super().propagate(t_prop)
-
-
 class SearchStartTest(unittest.TestCase):
-    def setUp(self):
-        RecordingPropagator.times = []
-        self._orig = cd.SGP4Propagator
-        cd.SGP4Propagator = RecordingPropagator
-
-    def tearDown(self):
-        cd.SGP4Propagator = self._orig
-
     def _search(self, **kwargs):
-        detector = cd.ConjunctionDetector(time_horizon_days=1, search_step_hours=6.0)
-        search = cd.ConjunctionSearch(detector, parallel=False)
-        search.search_catalog(make_elements(datetime.utcnow() - timedelta(days=60)), **kwargs)
-        return RecordingPropagator.times
+        search = cd.ConjunctionSearch(cd.ConjunctionDetector(time_horizon_days=1))
+        search.search_catalog(make_elements(datetime.utcnow() - timedelta(days=5)), **kwargs)
+        return search.last_window
 
     def test_default_start_is_now_not_the_tle_epoch(self):
         before = datetime.utcnow()
-        times = self._search()
-        self.assertTrue(times, "search propagated nothing")
-        first = min(times)
-        # With 60-day-old TLEs the old behaviour started ~60 days ago. It must start at 'now'.
-        self.assertGreaterEqual(first, before - timedelta(seconds=1))
-        self.assertLessEqual(first, datetime.utcnow() + timedelta(seconds=1))
+        start, end = self._search()
+        # With 5-day-old TLEs the old behaviour started 5 days ago. It must start at 'now'.
+        self.assertGreaterEqual(start, before - timedelta(seconds=1))
+        self.assertLessEqual(start, datetime.utcnow() + timedelta(seconds=1))
+        self.assertEqual(end - start, timedelta(days=1))
 
     def test_explicit_start_epoch_is_respected(self):
         start = datetime(2026, 1, 1, 12, 0, 0)
-        times = self._search(start_epoch=start)
-        self.assertEqual(min(times), start)
+        self.assertEqual(self._search(start_epoch=start)[0], start)
 
 
 if __name__ == "__main__":

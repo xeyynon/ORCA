@@ -1,4 +1,5 @@
 import type { ConjunctionQuery } from '@/api/endpoints'
+import { expectedRuntimeMinutes } from '@/lib/conjunctionSummary'
 import { integer } from '@/lib/format'
 import { Button } from '../../atoms/Button/Button'
 import { NumberField } from '../../molecules/NumberField/NumberField'
@@ -8,20 +9,27 @@ import './ConjunctionControls.css'
 type Props = {
   query: ConjunctionQuery
   catalogSize: number | null
+  /** Screening step and report distance from the API's method description; null until it loads. */
+  stepS: number | null
+  reportKm: number | null
   running: boolean
   onChange: (q: ConjunctionQuery) => void
   onRun: () => void
 }
 
-/** Ranges mirror the API's own validation (api_server.search_conjunctions) so a 422 is never the first line of defence. */
-export function ConjunctionControls({ query, catalogSize, running, onChange, onRun }: Props) {
+/**
+ * Ranges mirror the API's own validation (api_server.search_conjunctions) so a 422 is never the first line of defence.
+ * There is no step control: the server fixes the step so that no approach closer than the report distance can fall
+ * between two steps. A user-chosen coarse step was how the old search missed ~99 % of close approaches.
+ */
+export function ConjunctionControls({ query, catalogSize, stepS, reportKm, running, onChange, onRun }: Props) {
   const tooSmall = catalogSize !== null && catalogSize < 2
+  const minutes = catalogSize !== null ? expectedRuntimeMinutes(catalogSize, query.horizonDays) : null
   return (
     <div className="conj-controls">
       <div className="conj-controls__fields">
-        <NumberField label="Horizon" value={query.horizonDays} min={1} max={30} step={1} unit="days" onChange={(v) => onChange({ ...query, horizonDays: v })} />
-        <NumberField label="Search step" value={query.stepHours} min={0.5} max={12} step={0.5} unit="h" onChange={(v) => onChange({ ...query, stepHours: v })} />
-        <NumberField label="Max results" value={query.limit} min={1} max={1000} step={10} onChange={(v) => onChange({ ...query, limit: v })} />
+        <NumberField label="Horizon" value={query.horizonDays} min={1} max={7} step={1} unit="days" onChange={(v) => onChange({ ...query, horizonDays: v })} />
+        <NumberField label="Rows to show" value={query.limit} min={1} max={1000} step={10} onChange={(v) => onChange({ ...query, limit: v })} />
         <div className="conj-controls__run">
           <Button variant="primary" disabled={running || tooSmall || catalogSize === null} onClick={onRun}>
             {running ? 'Searching…' : 'Run search'}
@@ -32,9 +40,9 @@ export function ConjunctionControls({ query, catalogSize, running, onChange, onR
         <FieldNote>A search needs at least 2 objects and the catalog has {integer(catalogSize)}. Load TLEs from the Data view first.</FieldNote>
       ) : (
         <FieldNote>
-          Coarse-then-fine screening: the whole catalog is propagated every {query.stepHours} h, pairs within the screening distance are
-          kept, then each pair's time of closest approach is refined. A pass that closes entirely between two steps can be missed;
-          a smaller step is slower but misses less.
+          Every object is propagated with SGP4 every {stepS ?? '…'} s and every approach closer than {reportKm ?? '…'} km is found:
+          the screening distance is wide enough that none can pass between two steps. Counts cover everything found; the table shows
+          the most probable rows.{minutes !== null ? ` Expect about ${minutes < 1 ? 'a minute or less' : `${Math.round(minutes)} min`} for ${integer(catalogSize)} objects over ${query.horizonDays} day${query.horizonDays === 1 ? '' : 's'} (measured on a laptop).` : ''}
         </FieldNote>
       )}
     </div>
