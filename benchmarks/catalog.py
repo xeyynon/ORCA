@@ -62,24 +62,44 @@ def snapshot_from_db(db_path: str = "ssa_data.db", out_dir: str = DATA_DIR) -> s
         for name, l1, l2 in rows:
             f.write(f"{(name or '').strip()}\n{l1.strip()}\n{l2.strip()}\n")
 
+    _write_manifest(tle_path, stamp, {"source_db": os.path.abspath(db_path), "db_fetched_at_min": fetched[0],
+                                      "db_fetched_at_max": fetched[1], "records_in_db": len(rows)})
+    return tle_path
+
+
+def snapshot_from_celestrak(group: str = "active", out_dir: str = DATA_DIR) -> str:
+    """
+    One GET of a Celestrak GP group, written as a snapshot without touching the app's database.
+    Raises on any HTTP failure (403/429 mean Celestrak is rate limiting: wait, do not retry in a loop).
+    """
+    import requests
+
+    url = "https://celestrak.org/NORAD/elements/gp.php"
+    params = {"GROUP": group, "FORMAT": "tle"}
+    resp = requests.get(url, params=params, timeout=60)
+    resp.raise_for_status()
+    lines = [ln.rstrip() for ln in resp.text.splitlines() if ln.strip()]
+
+    os.makedirs(out_dir, exist_ok=True)
+    stamp = datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
+    tle_path = os.path.join(out_dir, f"catalog_{stamp}.tle")
+    with open(tle_path, "w", encoding="utf-8", newline="\n") as f:
+        f.write("\n".join(lines) + "\n")
+    _write_manifest(tle_path, stamp, {"source_url": resp.url, "http_status": resp.status_code,
+                                      "records_in_source": len(lines) // 3})
+    return tle_path
+
+
+def _write_manifest(tle_path: str, stamp: str, source: dict) -> None:
     objs = load_snapshot(tle_path)
     epochs = sorted(o.epoch for o in objs)
-    manifest = {
-        "file": os.path.basename(tle_path),
-        "sha256": _sha256(tle_path),
-        "created_utc": stamp,
-        "source_db": os.path.abspath(db_path),
-        "db_fetched_at_min": fetched[0],
-        "db_fetched_at_max": fetched[1],
-        "records_in_db": len(rows),
-        "records_parsed": len(objs),
-        "epoch_min": epochs[0].isoformat() if epochs else None,
-        "epoch_median": statistics.median_low(epochs).isoformat() if epochs else None,
-        "epoch_max": epochs[-1].isoformat() if epochs else None,
-    }
+    manifest = {"file": os.path.basename(tle_path), "sha256": _sha256(tle_path), "created_utc": stamp,
+                **source, "records_parsed": len(objs),
+                "epoch_min": epochs[0].isoformat() if epochs else None,
+                "epoch_median": statistics.median_low(epochs).isoformat() if epochs else None,
+                "epoch_max": epochs[-1].isoformat() if epochs else None}
     with open(tle_path[:-4] + ".json", "w", encoding="utf-8") as f:
         json.dump(manifest, f, indent=2)
-    return tle_path
 
 
 def latest_snapshot(data_dir: str = DATA_DIR) -> Optional[str]:
