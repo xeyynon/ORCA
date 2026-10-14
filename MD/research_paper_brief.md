@@ -174,6 +174,8 @@ No covariance in TLEs (assumed or estimated uncertainty only). Every reference u
 - `benchmarks/screening_recall.py`: Exp 2b. `tests/test_screening_recall.py` covers local minima, passes and screen evaluation.
 - `benchmarks/tca.py`, `benchmarks/tca_estimation.py`: Exp 3. `tests/test_benchmark_tca.py` checks the methods on synthetic straight-line and multi-minimum motion.
 - `benchmarks/pc_comparison.py`: Exp 4 on real encounters; `ric_covariance` added to `benchmarks/pc.py`.
+- `benchmarks/screening_runtime.py`: Exp 2a.
+- `benchmarks/encounter_curvature.py` + `pc_line_integral` in `benchmarks/pc.py`: Exp 4b, the short-term encounter test.
 
 ## 10. Results so far [MEASURED]
 
@@ -314,3 +316,55 @@ Event recall, miss < 10 km (range over the three seeds):
 - All methods here assume a short-term encounter.
 - Relative-velocity mix per seed: 4–10 events below 0.1 km/s and 98–108 at 0.1–1 km/s, where that assumption is doubtful. The planned 3D Monte Carlo with propagation is not done yet.
 - Absolute Pc values inherit ORCA's assumed σ and radii; only the legacy-vs-Foster comparison is assumption-free, because the inputs are identical.
+
+### Exp 2a: brute-force vs KD-tree runtime
+
+**Setup:**
+- Same snapshot; every object with a TLE ≤ 7 days old that propagates cleanly (15,913, all regimes).
+- SGP4 positions at 12 hourly instants; radius 100 km (ORCA's).
+- Random subsets, seed 1. One warm-up, then 5 repeats; seconds per time step, mean ± sd. Single process.
+- Output: `benchmarks/results/screening_runtime_r100km/`. Hardware is in `run.json` (this laptop; to be stated in the paper).
+- **The pair sets were identical at every size and every instant** (exact comparison), as H1 predicts.
+
+| Objects | Candidate pairs per step | Brute force (numpy, vectorised) | KD-tree (ORCA's method) | Speedup | ORCA's pure-Python fallback |
+|---|---|---|---|---|---|
+| 1,000 | 15.5 | 15.1 ± 5.2 ms | 0.42 ± 0.03 ms | 36× | 1.02 s |
+| 2,000 | 61.6 | 38.1 ± 5.0 ms | 0.81 ± 0.01 ms | 47× | 4.09 s |
+| 4,000 | 234 | 114 ± 11 ms | 1.79 ± 0.05 ms | 63× | not run |
+| 8,000 | 940 | 461 ± 58 ms | 4.07 ± 0.10 ms | 113× | not run |
+| 15,913 | 3,720 | 1,473 ± 19 ms | 8.53 ± 0.07 ms | 173× | not run |
+
+**Reading:**
+- Brute force grows roughly as n², the KD-tree slightly above n. The speedup grows with catalog size.
+- At the full catalog, a KD-tree screen costs ~9 ms per time step. Even a 10 s step over 24 h (8,640 steps) would take ~75 s of screening. So the recall fix from Exp 2b (finer steps) is affordable; the cost lies in propagation and refinement, not in the spatial search.
+- The pure-Python loop is shown only to size ORCA's fallback branch: ~2,400–5,000× slower than the KD-tree at 1–2k objects. It is implementation, not algorithm (Section 1, row 17).
+
+### Exp 4b: does the short-term (straight-line) encounter assumption hold?
+
+**Method:**
+- For each encounter, the actual SGP4 relative path within ±3 h of TCA is integrated: πR² ∫ N(r_rel; 0, C) |dr_rel|, with the covariance frozen at TCA (`pc_line_integral`).
+- This is compared with small-radius Foster at TCA. For a straight path the two are identical (unit test).
+- The measure is the expected number of hard-body tube crossings, so it bounds Pc from above where passes overlap.
+- "Pass" = the stretch of path near the TCA. "Window" = every pass within ±3 h.
+- Encounters: all below 1 km/s (102 / 112 / 113 per seed) plus 200 faster ones as a control.
+- Covariances: ORCA's isotropic one and the A = 10 in-track-dominant variant.
+- Outputs: `benchmarks/results/curvature_n2000_h24_ref10s_seed{1,2,3}/`.
+
+| Relative velocity | Covariance | Pass / Foster, median (seeds 1–3) | Window (±3 h) / Foster, median |
+|---|---|---|---|
+| < 0.1 km/s (n = 4–10) | isotropic | 0.97–1.79 | same |
+| < 0.1 km/s | A = 10 | **5.9–6.3** (every pass truncated by the window) | same |
+| 0.1–1 km/s | isotropic | 1.00 | 6.1–6.5 |
+| 0.1–1 km/s | A = 10 | 1.00 (p95 3.6–7.0; 16–29 passes truncated) | 7.0 |
+| ≥ 1 km/s (control, n = 200) | both | **1.00** (p5–p95 1.00–1.00) | 2.4–6.9 |
+
+**Reading:**
+- **Within one pass** the straight-line model is accurate from 0.1 km/s up. The fast control lands at exactly 1, which validates the method.
+- It breaks down for the slowest, co-orbital encounters with an elongated covariance. There the "encounter" lasts hours, and Foster underestimates by about 6×. These are the encounters ORCA ranks highest.
+- **Across passes:** a LEO pair in the same shell meets again every half orbit, so within ±3 h the same pair accumulates 2–7× the single-pass value. ORCA keeps one row per pair, so the pair-level risk it shows is the single best pass. That is a reporting choice to state, not a formula error.
+- The ±3 h window is a choice, so the window ratios are indicative, not a property of the encounters.
+
+**Caveats:**
+- The covariance is frozen during the encounter.
+- The small-radius approximation (R ≪ σ holds here: about 10 m against ≥ 0.7 km).
+- No 3D Monte Carlo cross-check on real encounters yet: their Pc of ~1e-6 would need ~1e8 samples (Section 1, row 8).
