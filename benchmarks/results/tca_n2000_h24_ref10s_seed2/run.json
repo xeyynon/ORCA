@@ -1,0 +1,40 @@
+{
+  "experiment": "exp3_tca",
+  "args": {
+    "recall_dir": "benchmarks/results/screening_recall_n2000_h24_ref10s_seed2",
+    "seed": 2,
+    "max_events": 0,
+    "orca_step_h": 1.0,
+    "orca_screen_km": 100.0,
+    "orca_window_h": 6.0,
+    "tag": null
+  },
+  "exp2b_run": "screening_recall_n2000_h24_ref10s_seed2",
+  "catalog": "catalog_20261014T064759Z.tle",
+  "catalog_sha256": "600bd79d1e3b80517ec70406500649cd5697534bc4c0e263dc58a7dc1fc543a8",
+  "window_start_utc": "2026-10-10T02:10:00",
+  "window_hours": 24.0,
+  "local_events": 6786,
+  "local_skipped_propagation": 0,
+  "global_pairs_with_reference_event": 3344,
+  "global_pairs_not_flagged_by_orca_screen": 3051,
+  "global_pairs_evaluated": 293,
+  "truth_below_10km_share": 0.8873720136518771,
+  "ref_event_in_window_share": 0.8873720136518771,
+  "seconds": {
+    "local": 3.4265996000003724,
+    "global": 1.3604519999998956,
+    "total": 5.332996199999798
+  },
+  "versions": {
+    "python": "3.12.0",
+    "numpy": "2.5.2",
+    "scipy": "1.18.0",
+    "sgp4": "2.27"
+  },
+  "platform": {
+    "system": "Windows-11-10.0.26300-SP0",
+    "processor": "AMD64 Family 25 Model 80 Stepping 0, AuthenticAMD",
+    "cpu_count": 16
+  }
+}
