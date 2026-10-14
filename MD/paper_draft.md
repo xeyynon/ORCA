@@ -9,7 +9,7 @@
 >
 > Sections I–III and VI are not drafted. They need the literature check first.
 >
-> **Length:** about 2,700 words, which is over the ~4.1-page budget for IV + V. Trim after the template is fixed.
+> **Length:** about 3,500 words including tables, which is well over the ~4.1-page budget for IV + V. Trim after the template is fixed.
 
 ---
 
