@@ -139,7 +139,7 @@ def fig_tca():
              "grid_1s": "grid 1 s", "grid_quadratic_60s": "grid 60 s + quadratic on d²",
              "grid_quadratic_10s": "grid 10 s + quadratic on d²", "brent_min": "Brent on distance",
              "brent_root_60s": "Brent root on range rate"}
-    offsets = {"grid_60s": (5, 5, "left"), "grid_30s": (5, -5, "left"), "grid_1s": (-4, 6, "right"), "grid_quadratic_60s": (5, 0, "left"), "grid_quadratic_10s": (5, -5, "left"),
+    offsets = {"grid_60s": (5, 5, "left"), "grid_30s": (-5, -6, "right"), "grid_1s": (-4, 6, "right"), "grid_quadratic_60s": (5, 0, "left"), "grid_quadratic_10s": (5, -5, "left"),
                "brent_min": (-5, 2, "right"), "brent_root_60s": (5, 0, "left")}
     fig, ax = plt.subplots(figsize=(W, 2.6))
     for r in rows:
