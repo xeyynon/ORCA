@@ -1,4 +1,4 @@
-# Paper draft: Sections I–V (VI to follow)
+# Paper draft: full text, Sections I–VI
 
 > Draft 2, 2026-10-15. Written from `MD/research_paper_brief.md` (Section 10) and the committed files in `benchmarks/results/`. Every number below is traceable to one of those files.
 >
@@ -7,7 +7,7 @@
 > - **[Fig. n] / [Table n]** follow the brief's plan.
 > - All figures, including **F1** (`fig_pipeline`) and **F5** (`fig_mc_convergence`), are in `benchmarks/figures/`.
 >
-> Section VI is not drafted yet. Sections I and III use the gap verified in `MD/literature_verification.md` §5.
+> Sections I and III use the gap verified in `MD/literature_verification.md` §5. An 8-page IEEE version is in `paper/`.
 >
 > **Length:** IV + V are about 3,500 words including tables, well over their ~4.1-page budget. II is about 650 words against ~0.6 page. Trim after the template is fixed.
 
@@ -447,15 +447,56 @@ ORCA reports one row per pair, so its pair-level risk is the single best pass. T
 **Cost and fidelity of B.** B costs about nine times more computation. It reproduces the dense reference encounter set to within one event per seed.
 
 **Tiers depend mainly on the covariance.** With the same encounters and the same Foster formula:
-- under B_iso, no encounter is above MEDIUM
-- under B_ric, 471–576 per seed are HIGH
+- under B_iso, no encounter is above MEDIUM;
+- under B_ric (assumed shape), 471–576 per seed are HIGH;
+- under the measured covariance, 1–3 per seed are HIGH, and about half of all encounters are NEGLIGIBLE;
+- under the measured covariance floored at ESA's at-epoch values, 1–4 per seed are HIGH.
 
-Because TLEs carry no covariance, the risk tier is the least defensible output of any TLE-only pipeline. We therefore report tiers only as conditional on a stated covariance model.
+The measured covariance comes from TLE-to-TLE errors across three snapshots, interpolated by TLE age (§V-A). The floor answers the concern that TLE consistency underestimates error near epoch [kelso2007validation]; it barely matters here, because most TLEs were 2–9 days old at TCA.
+
+Because TLEs carry no covariance, the risk tier is the least defensible output of any TLE-only pipeline, and assumptions alone move it over two orders of magnitude. We therefore report tiers only as conditional on a stated covariance model.
+
+**The corrected pipeline in production.** Pipeline B, with the measured and floored covariance, is now ORCA's production engine:
+- Checked against the reference on all three seeds, it finds every encounter except slow pairs deduplicated by design and one at the first grid step.
+- Its miss distances agree to a median of 0.5 mm (6 cm worst case).
+- On the full catalog (15,970 objects, 24 h) it finds about 426,000 approaches closer than 10 km in about 1.5–2 minutes on a laptop: about 30 HIGH and 800 MEDIUM.
 
 ### F. What the results do not establish
 
 - No result is validated against operational conjunction data messages.
 - The R2 reference (a later TLE) is itself imperfect, and manoeuvres between the two epochs count as propagation error.
-- The covariance shape is measured at a single horizon, and the B_ric floor is assumed.
+- The covariance is measured from three snapshots taken over one day. Non-Starlink objects have no usable 1–5 day horizon bin, so the model interpolates across that gap.
 - Encounter counts come from 2,000-object subsets of a payload-only catalog over one 24 h window. Counts scale with catalog size; the ratios and recall fractions are what we expect to carry over.
 - Runtimes come from one machine and depend on implementation.
+
+---
+
+## VI. CONCLUSION AND FUTURE WORK
+
+### A. Conclusion
+
+We benchmarked each stage of an open TLE-based conjunction-assessment pipeline against a dense reference built from the same public data. Every stage lost accuracy, and the losses compound:
+
+| Stage | As built | Effect |
+|---|---|---|
+| Propagation | Two-body model treating mean elements as osculating | Drifted ~300 km from SGP4 within a day |
+| Screening | 1 h / 100 km snapshots | Saw 1.0–1.2 % of encounters closer than 10 km during their pass, as the sampling law r ≥ d + vΔt/2 predicts |
+| TCA refinement | One bounded search over ±6 h | Found the closest approach for 5–6 % of flagged pairs |
+| Collision probability | Formula off by exactly 1/α² | Every CRITICAL and HIGH label was an artefact |
+| End to end | | About 0.1 % of the encounters closer than 10 km were reported |
+
+**What fixes it.** The fixes are standard but must be applied together, at about nine times the cost:
+- SGP4;
+- a screening radius matched to the time step;
+- root-finding on every approach;
+- Foster's integral.
+
+**Covariance.** Measured TLE error is strongly anisotropic (along-track ~100× radial) and much worse for Starlink. Under a measured covariance almost none of these encounters is high-risk, while plausible assumed covariances produce anything from none to hundreds. In a TLE pipeline the tier is decided by the covariance model, not by the encounter geometry. A tool should therefore state its covariance model next to every tier, as NASA's guidance on TLE-based assessment implies [nasa_ca_handbook2020].
+
+### B. Future work
+
+- Daily snapshots over several weeks, to measure error growth with TLE age without interpolation gaps.
+- Validation of the screening against the public TraCSS answer key [auman2025], and of P_c against Monte Carlo test cases [alfano2009mc].
+- Starlink runs against operator-derived elements [celestrak_supgp], and the debris population, which the `active` catalog excludes.
+- A 3D, long-encounter P_c [coppola2012] for co-moving pairs.
+
