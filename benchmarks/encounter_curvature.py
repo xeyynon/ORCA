@@ -39,7 +39,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from benchmarks.catalog import DATA_DIR, load_snapshot, snapshot_sha256  # noqa: E402
 from benchmarks.pc import encounter_plane, pc_foster, pc_line_integral, ric_covariance  # noqa: E402
-from conjunction_detection import CovarianceModel, HardBodyRadiusModel  # noqa: E402
+from benchmarks.legacy.conjunction_detection_as_built import CovarianceModel, HardBodyRadiusModel  # noqa: E402
 
 RESULTS = os.path.join(os.path.dirname(os.path.abspath(__file__)), "results")
 V_BANDS = [(0.0, 0.1), (0.1, 1.0), (1.0, 5.0), (5.0, 10.0), (10.0, math.inf)]
