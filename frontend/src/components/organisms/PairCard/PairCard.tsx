@@ -41,7 +41,7 @@ export function PairCard({ event, assessment, assessing, assessError, onShowOnGl
       <div className="pair-card__grid">
         <FactRow label="Probability of collision"><Mono>{pc(event.probability_of_collision)}</Mono></FactRow>
         <FactRow label="Miss distance"><ValueUnit value={fixed(event.min_distance_km, 3)} unit="km" /></FactRow>
-        <FactRow label="Position uncertainty (1σ)"><ValueUnit value={fixed(event.uncertainty_km, 2)} unit="km" /></FactRow>
+        <FactRow label="Position uncertainty (1 sigma)"><ValueUnit value={fixed(event.uncertainty_km, 2)} unit="km" /></FactRow>
         <FactRow label="Relative velocity"><ValueUnit value={fixed(event.relative_velocity_kms, event.relative_velocity_kms < 0.1 ? 4 : 2)} unit="km/s" /></FactRow>
         <FactRow label="Older TLE's age at closest approach"><ValueUnit value={fixed(event.tle_age_days, 1)} unit="days" /></FactRow>
         <FactRow label="Time of closest approach">
