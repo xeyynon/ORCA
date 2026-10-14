@@ -4,6 +4,8 @@ from dataclasses import dataclass
 from typing import Tuple, Dict, Optional
 from datetime import datetime, timedelta
 
+from sgp4.api import Satrec, WGS72, jday
+
 
 # constants
 
@@ -237,10 +239,48 @@ class CoordinateTransform:
         return lat, lon, alt
 
 
+_SGP4_EPOCH0 = datetime(1949, 12, 31)  # sgp4init counts epoch days from 1949 Dec 31 00:00 UT
+
+
+def satrec_from_elements(oe: OrbitalElement, satnum: int = 0) -> Satrec:
+    """
+    An SGP4 record from TLE mean elements: the same sgp4init call Satrec.twoline2rv makes (WGS-72, 'i' mode).
+    oe.n is the TLE's Kozai mean motion in rad/s. ndot and nddot are not used by SGP4, so they are passed as 0.
+    """
+    sat = Satrec()
+    epoch_days = (oe.epoch - _SGP4_EPOCH0).total_seconds() / 86400.0
+    sat.sgp4init(WGS72, 'i', satnum, epoch_days, oe.bstar, 0.0, 0.0,
+                 oe.e, oe.omega, oe.i, oe.M, oe.n * 60.0, oe.Omega)
+    return sat
+
+
 class SGP4Propagator:
     """
-    Simplified SGP4 perturbation model.
-    Includes: atmospheric drag, J2/J3 oblateness, Lunisolar effects.
+    SGP4, the model TLEs are fitted for, through the sgp4 package (which compiles the reference code of
+    Vallado et al. 2006, "Revisiting Spacetrack Report #3"). Output is in the TEME frame, km and km/s.
+
+    Until 2026-10 this class was two-body motion plus an exponential drag term (kept below as
+    TwoBodyDragPropagator). Measured against SGP4 that drifted ~300 km in a day; see MD/research_paper_brief.md.
+    """
+
+    def __init__(self, oe: OrbitalElement):
+        self.oe = oe
+        self.satrec = satrec_from_elements(oe)
+
+    def propagate(self, t_prop: datetime) -> StateVector:
+        """State at t_prop (naive UTC). Raises ValueError when SGP4 reports an error, e.g. a decayed orbit."""
+        jd, fr = jday(t_prop.year, t_prop.month, t_prop.day, t_prop.hour, t_prop.minute,
+                      t_prop.second + t_prop.microsecond / 1e6)
+        err, r, v = self.satrec.sgp4(jd, fr)
+        if err != 0:
+            raise ValueError(f"SGP4 error {err} at {t_prop.isoformat()}")
+        return StateVector(r=np.array(r), v=np.array(v), t=t_prop)
+
+
+class TwoBodyDragPropagator:
+    """
+    ORCA's original propagator: two-body motion with an exponential drag term and no J2. It is not SGP4 and
+    should not be used for conjunctions; kept for comparison only.
     """
 
     def __init__(self, oe: OrbitalElement):

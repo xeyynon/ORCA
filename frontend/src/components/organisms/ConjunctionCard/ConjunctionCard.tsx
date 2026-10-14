@@ -59,10 +59,13 @@ export function ConjunctionCard({ event, nowMs, onJumpToTca, onViewDetails, onCl
           {coMoving ? <> <Badge tone="accent" title="Relative speed under 50 m/s at closest approach">Co-moving</Badge></> : null}
         </FactRow>
         <FactRow label="Probability of collision"><Mono>{pc(event.probability_of_collision)}</Mono></FactRow>
+        <FactRow label="Position uncertainty (1σ)"><ValueUnit value={fixed(event.uncertainty_km, 2)} unit="km" /></FactRow>
+        <FactRow label="Older TLE's age"><ValueUnit value={fixed(event.tle_age_days, 1)} unit="days" /></FactRow>
       </div>
 
       {coMoving ? <FieldNote>These two are flying together (a formation or a shared launch). A small miss distance between co-moving objects is expected and is not a crossing encounter.</FieldNote> : null}
-      <FieldNote>Pc uses an assumed uncertainty (TLEs carry none): a ranking aid, not a validated probability.</FieldNote>
+      {event.long_encounter ? <FieldNote>Long encounter (under 0.1 km/s): the probability assumes a fast pass and can be several times too low.</FieldNote> : null}
+      <FieldNote>Pc assumes the position uncertainty above (TLEs carry none): a research estimate, not an operational probability.</FieldNote>
 
       <div className="conjunction-card__actions">
         <Button size="sm" disabled={!canJump} title={canJump ? 'Move the globe to the moment of closest approach' : REASON[(jump as { reason: 'past' | 'beyond' }).reason]} onClick={onJumpToTca}>Jump to closest approach</Button>

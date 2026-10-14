@@ -24,7 +24,7 @@ class ExportTests(unittest.TestCase):
     def setUp(self):
         db = mock.Mock()
         db.get_all_tles.return_value = []
-        search = mock.Mock(search_catalog=lambda elements: [_Event()])
+        search = mock.Mock(search_catalog=lambda elements, **kwargs: [_Event()])
         for patch in (
             mock.patch.object(api_server, "db", db),
             mock.patch.object(api_server, "ConjunctionSearch", return_value=search),

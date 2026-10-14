@@ -41,6 +41,9 @@ export function PairCard({ event, assessment, assessing, assessError, onShowOnGl
       <div className="pair-card__grid">
         <FactRow label="Probability of collision"><Mono>{pc(event.probability_of_collision)}</Mono></FactRow>
         <FactRow label="Miss distance"><ValueUnit value={fixed(event.min_distance_km, 3)} unit="km" /></FactRow>
+        <FactRow label="Position uncertainty (1σ)"><ValueUnit value={fixed(event.uncertainty_km, 2)} unit="km" /></FactRow>
+        <FactRow label="Relative velocity"><ValueUnit value={fixed(event.relative_velocity_kms, event.relative_velocity_kms < 0.1 ? 4 : 2)} unit="km/s" /></FactRow>
+        <FactRow label="Older TLE's age at closest approach"><ValueUnit value={fixed(event.tle_age_days, 1)} unit="days" /></FactRow>
         <FactRow label="Time of closest approach">
           <Mono>{formatUtc(event.tca)}</Mono> <Mono muted>({formatRelative(event.tca)})</Mono>
         </FactRow>
@@ -54,16 +57,24 @@ export function PairCard({ event, assessment, assessing, assessError, onShowOnGl
 
       {assessing ? <div className="pair-card__state"><Spinner /> <span>Re-assessing this pair…</span></div> : null}
       {assessError ? <FieldNote>Pair re-assessment failed: {assessError.message}. The values above are from the search result.</FieldNote> : null}
-      {noRisk ? (
+      {noRisk ? <FieldNote>Pair re-assessment: {noRisk.message}.</FieldNote> : null}
+      {full && full.tca !== event.tca ? (
         <FieldNote>
-          The pair re-assessment (7-day horizon, 1 h step) did not reproduce this event. The search used different settings, so the
-          two can disagree; treat this row as a screening hit, not a confirmed encounter.
+          Over the next 7 days this pair comes closest on a different pass: <Mono>{fixed(full.min_distance_km, 3)}</Mono> km
+          at <Mono>{formatUtc(full.tca)}</Mono> (Pc <Mono>{pc(full.probability_of_collision)}</Mono>).
+        </FieldNote>
+      ) : null}
+      {event.long_encounter ? (
+        <FieldNote>
+          Long encounter: the two pass slower than 0.1 km/s and stay close for a long time. The probability assumes a fast, straight-line
+          pass and can be several times too low here.
         </FieldNote>
       ) : null}
 
       <FieldNote>
-        Pc uses an assumed, time-growing position uncertainty, because TLEs carry no covariance. It ranks encounters; it is not a
-        validated collision probability and must not drive a manoeuvre decision.
+        Pc assumes the position uncertainty above, measured from successive public TLEs, because TLEs carry no covariance. A different
+        assumption can move the tier by orders of magnitude. It is a research estimate, not an operational one, and must not drive a
+        manoeuvre decision.
       </FieldNote>
 
       <Button variant="primary" onClick={onShowOnGlobe}>Show both objects on the globe</Button>
