@@ -22,8 +22,10 @@ implementation that takes a learner or small team from "raw TLE text" to
 - **G2 — Propagate**: Compute accurate satellite state vectors (position/velocity)
   at arbitrary future times, using SGP4 as the authoritative model.
 - **G3 — Screen**: Detect close-approach (conjunction) events across the catalog
-  in better-than-quadratic time, and rank them by collision probability using a
-  standards-calibrated method (NASA CARA / ESA thresholds).
+  in better-than-quadratic time without missing approaches under the report
+  distance, and rank them by collision probability (Foster 2D Pc; the CRITICAL
+  boundary of 1e-4 follows the NASA CA Handbook and ESA practice, the lower tiers
+  are ORCA's own).
 - **G4 — Expose**: Serve all of the above over a documented REST API (FastAPI/Swagger).
 - **G5 — Visualize**: Provide a non-technical-friendly web frontend (3D globe,
   3D globe, risk tables, catalog analytics).
@@ -34,11 +36,10 @@ implementation that takes a learner or small team from "raw TLE text" to
 
 - Not a certified/operational SSA system — outputs are not conjunction-avoidance
   grade and must not be used for real maneuver decisions.
-- No high-fidelity perturbation model beyond SGP4 + the engine's simplified J2/drag
-  approximation (no full numerical integrator, no solar radiation pressure, no
-  precise atmospheric density models).
-- No user authentication/multi-tenancy — single-operator/local or trusted-network
-  deployment only, as built today.
+- No high-fidelity perturbation model beyond SGP4 (no numerical integrator, no
+  solar radiation pressure, no precise atmospheric density models).
+- No multi-user accounts or multi-tenancy. One operator credential, local or a
+  single hosted instance (deployment.md).
 - No mobile app; the frontend is desktop-browser oriented.
 
 ## 5. Users / Personas
@@ -58,7 +59,8 @@ implementation that takes a learner or small team from "raw TLE text" to
 3. System **must** propagate any stored object to a state vector at a caller-supplied
    future time (0–168 hours ahead) via `GET /api/propagate/{norad_id}`.
 4. System **must** search the full stored catalog for conjunctions within a
-   caller-supplied time horizon (1–30 days) and return risk-classified results.
+   caller-supplied time horizon (1–7 days), find every approach under 10 km, and
+   return risk-classified results with the method and its limits.
 5. System **must** classify conjunction risk into 5 tiers (CRITICAL/HIGH/MEDIUM/
    LOW/NEGLIGIBLE) using fixed Pc thresholds.
 6. System **must** expose catalog statistics (apogee/perigee/period/inclination
@@ -73,8 +75,8 @@ implementation that takes a learner or small team from "raw TLE text" to
 - **Runs free**: zero paid API keys or licenses required for core functionality.
 - **Local-first**: must run entirely on a single machine (SQLite, no external DB).
 - **Reasonable latency**: conjunction search over the full "active" catalog
-  (~9–11k objects) should complete via KDTree screening, not brute-force O(N²),
-  within the FastAPI default request timeout for realistic (≤30 day) horizons.
+  (~16k objects) uses KD-tree screening, not brute-force O(N²). Engine v2 takes
+  about 1.5–2 min per day of horizon on a laptop, so the horizon is capped at 7 days.
 - **Cross-platform**: must run on Windows, macOS, and Linux. (See
   [DECISIONS.md](DECISIONS.md) for a Windows console-encoding issue this
   constraint already surfaced.)
@@ -99,9 +101,9 @@ implementation that takes a learner or small team from "raw TLE text" to
 
 - What conjunction time horizon / catalog size is the intended "default demo"
   configuration, given full-catalog search cost?
-- Is multi-user / hosted deployment ever in scope, or is this permanently a
-  local/portfolio tool? (Affects whether auth, containerization, and a real DB
-  are worth building.)
+- ~~Is hosted deployment ever in scope?~~ Answered 2026-10-08: a hosted
+  single-operator copy runs on free tiers (deployment.md). Multi-user accounts
+  and a concurrent-safe DB remain out of scope.
 - Should the in-memory `_conjunction_cache` / `_analytics_cache` mentioned in
   `api_server.py` be wired up, or removed as dead scaffolding?
 

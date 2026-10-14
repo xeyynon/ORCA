@@ -2,6 +2,8 @@
 
 > **Version 2, 2026-10-14.** v1 was a handoff written without access to the ORCA code. v2 checks it against the code, the measurements already in `MD/DECISIONS.md`, and the capstone proposal in `MD/LEO_Conjunction_Project_Context.md`, then corrects it. Section 1 lists what v1 got wrong. Everything after it replaces v1.
 >
+> **Since 2026-10-15** production runs conjunction engine v2 ([conjunction_engine_v2.md](conjunction_engine_v2.md)). Section 3 still describes ORCA as built, the paper's baseline, which is frozen in `benchmarks/legacy/`.
+>
 > Labels used below: **[CODE]** read from the repo, **[MEASURED]** a number produced by a script in the repo (the script is named), **[PROPOSAL]** from the approved capstone proposal, **[PLAN]** a proposal for this paper that is not done yet, **[VERIFY]** a citation or external fact that must be checked at its source before it goes into the paper.
 
 ---

@@ -30,15 +30,49 @@ Backlog and status tracking. Not a changelog — see `git log` for history and
       longer stamps `last_update`. Non-ASCII prints removed from the parser.
       Streamlit binds to 127.0.0.1. (DECISIONS.md, 2026-10-03)
 
+- [x] Conjunction engine v2 (2026-10-15, branch `fix/honest-conjunctions`, DECISIONS.md):
+      - SGP4 everywhere (`SGP4Propagator` is now real SGP4);
+      - 20 s gap-free screening;
+      - exact TCA;
+      - Foster Pc with a measured, ESA-floored uncertainty model;
+      - long encounters flagged;
+      - an honest Conjunctions page.
+
+      Validated against the benchmark reference. See conjunction_engine_v2.md.
+- [x] `GET /api/propagate/{id}` uses SGP4 and returns 422 when SGP4 refuses an element set.
+- [x] Benchmark study of the original engine (`benchmarks/`, results in `benchmarks/results/`),
+      with the original frozen at tag `orca-as-built-2026-10-14` and in `benchmarks/legacy/`.
+- [x] Evaluator access panel on the sign-in page (`VITE_EVALUATOR_*` in `frontend/.env.local`).
+
+## Open — release
+
+- [ ] **Merge `fix/honest-conjunctions` into `main` and push.** This deploys v2. The
+      `/api/conjunctions` response changed shape, so the backend and frontend must deploy
+      together; one push to `main` does both. Needs the owner's go-ahead.
+- [ ] Decide whether the hosted site shows an evaluator login. Setting `VITE_EVALUATOR_*` in
+      Vercel makes that login public.
+- [ ] Update the screenshots in `docs/screenshots/` (the Conjunctions page changed).
+
 ## Open — accuracy
 
-- [ ] **Decide how to fix the engine propagator error** (measured 2026-10-03, DECISIONS.md):
-      median 297 km at 24 h and 1,277 km at 72 h versus the `sgp4` package, which is more
-      than the 100 km screening threshold. Recommended: run `ConjunctionSearch` and
-      `ConjunctionDetector` on `SatrecArray` (as `/api/positions` already does) and either
-      fix or retire `SGP4Propagator`. Needs a decision, because every conjunction number changes.
-- [ ] Split the error measurement by altitude band and eccentricity, and by TLE age.
-- [ ] `GET /api/propagate/{id}` still uses the engine propagator and is not labelled as such.
+- [ ] Take a catalog snapshot daily for about a week
+      (`powershell -ExecutionPolicy Bypass -File benchmarks\refresh_measured.ps1`). This fills the
+      1–5 day gap in the measured uncertainty. Then copy the new bins into
+      `CovarianceModel.MEASURED` in `conjunction_detection.py`.
+- [ ] Split the error measurement by altitude band, eccentricity and TLE age.
+- [ ] Validate screening against the public TraCSS answer key (Auman et al. 2025).
+- [ ] Starlink: compare against CelesTrak's operator-derived SupGP elements.
+- [ ] Long encounters: a 3D Pc (Coppola 2012) instead of only flagging them.
+
+## Open — paper (paper/, MD/paper_draft.md)
+
+- [ ] Choose the conference; adapt `paper/main.tex` to its template and page rules
+      (currently 6 pages, IEEE two-column).
+- [ ] Fill in authors' department, university and e-mails (TODO in `main.tex`); confirm the author order.
+- [ ] Check the 4 SECONDARY references in a library: Foster & Estes 1992, Alfano & Negron 1993,
+      the smart-sieve paper (2002), and COVGEN's pages.
+- [ ] Archive the TLE snapshots (`benchmarks/data/*.tle`, git-ignored) somewhere citable, and cite
+      their sha256 values.
 
 ## Open — reliability
 
@@ -48,31 +82,49 @@ Backlog and status tracking. Not a changelog — see `git log` for history and
 - [ ] Decide whether the in-memory `_conjunction_cache` / `_analytics_cache`
       referenced in `api_server.py` (per README.md) should be wired up or
       removed — currently declared but unused.
+- [ ] A conjunction search takes minutes, and Cancel only stops the browser waiting. Consider a
+      job endpoint with progress and server-side cancel.
 
 ## Open — verification / testing
 
-- [ ] No automated test suite exists yet. At minimum: unit tests for
-      `TLEParser._parse_bstar` (compressed exponential notation is a known
-      historical bug source per README.md units contract) and for the
+- [x] Automated tests exist:
+      - 89 Python tests (`python -m unittest discover -s tests`): engine, SGP4,
+        Pc, auth, export, fetch status, catalog, search window, benchmarks;
+      - 89 frontend tests (`cd frontend && npm test`).
+- [ ] Still missing: unit tests for `TLEParser._parse_bstar` (compressed
+      exponential notation is a known historical bug source) and for the
       units-contract boundary between `TLE.inclination` (degrees) and
       `OrbitalElement.i` (radians).
-- [ ] No CI configured. Even a minimal "install deps, import every module"
-      smoke workflow would have caught the dead Celestrak group and the
-      hardcoded path before they shipped.
-- [ ] Manually click through all five frontend views (Overview, Globe,
-      Conjunctions, Analytics, Data) in a real
-      browser — verification so far has been server/log-level (health check,
-      absence of tracebacks), not visual/interactive.
+- [~] CI: `.github/workflows/deploy-backend.yml` runs the Python tests before
+      every backend deploy (2026-10-08). Still missing: frontend `npm test` /
+      `npm run typecheck` in CI, and a live "fetch `stations`, assert non-empty"
+      smoke test.
+- [~] Click through all five frontend views in a real browser.
+      - Done 2026-10-15: the sign-in page and the Conjunctions view (search,
+        table, detail card), driven in headless Chrome. Screenshots caught and
+        fixed three UI bugs.
+      - Still to do: Overview, Globe, Analytics and Data.
 
 ## Open — product direction (see PRD.md §9 Open Questions)
 
 - [ ] Decide the intended default demo configuration (catalog size, time
       horizon) balancing realism against conjunction-search latency.
-- [ ] Decide if hosted/multi-user deployment is ever in scope. If yes: needs
-      auth, a real concurrent-safe datastore (current SQLite-by-direct-import
-      model doesn't scale past one writer — ARCHITECTURE.md §3), and
-      containerization. If no: worth stating explicitly so future
-      contributors don't build toward it by accident.
+- [x] Hosted single-operator deployment (2026-10-08): Vercel + Oracle Always
+      Free VM + GitHub Actions, at no cost. See deployment.md and DECISIONS.md.
+- [ ] Multi-user hosting stays out of scope unless decided otherwise: it would
+      need per-user accounts and a concurrent-safe datastore (SQLite by direct
+      import has one writer — ARCHITECTURE.md §3).
+
+## Open — hosting
+
+- [ ] Move the backend to an Oracle A1 VM (2 OCPU / 12 GB, free) when
+      Hyderabad has capacity, then switch `ORCA_TLE_GROUP` to `active`.
+      Steps: deploy/ORACLE.md §7.
+- [ ] Bump `actions/checkout` and `actions/setup-python` to Node 24 versions
+      (Actions warns that Node 20 is deprecated).
+- [ ] Scheduled catalog refresh on the VM (respecting Celestrak's rate limit).
+- [ ] Optional: a stable hostname (e.g. DuckDNS) so a VM move does not change
+      the API URL baked into the frontend.
 
 ## Open — housekeeping
 
