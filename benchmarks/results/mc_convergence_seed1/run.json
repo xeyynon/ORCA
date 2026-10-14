@@ -1,0 +1,33 @@
+{
+  "experiment": "exp4_mc_convergence",
+  "args": {
+    "pc_dir": "E:\\Acadamics\\4th Year\\Capstone\\ORCA\\benchmarks\\results\\pc_n2000_h24_ref10s_seed1",
+    "recall_dir": "E:\\Acadamics\\4th Year\\Capstone\\ORCA\\benchmarks\\results\\screening_recall_n2000_h24_ref10s_seed1",
+    "events": 3,
+    "samples": [
+      1000,
+      10000,
+      100000,
+      1000000,
+      3000000,
+      10000000,
+      30000000,
+      100000000
+    ],
+    "confidence": 0.95,
+    "seed": 1,
+    "tag": "seed1"
+  },
+  "pc_dir": "pc_n2000_h24_ref10s_seed1",
+  "catalog": "catalog_20261014T064759Z.tle",
+  "catalog_sha256": "600bd79d1e3b80517ec70406500649cd5697534bc4c0e263dc58a7dc1fc543a8",
+  "runs": 24,
+  "foster_inside_ci": 22,
+  "seconds": 17.50395529999969,
+  "versions": {
+    "python": "3.12.0",
+    "numpy": "2.5.3",
+    "scipy": "1.16.2",
+    "sgp4": "2.27"
+  }
+}

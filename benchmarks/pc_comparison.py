@@ -41,6 +41,7 @@ from sgp4.api import jday
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from benchmarks.catalog import DATA_DIR, load_snapshot, snapshot_sha256  # noqa: E402
+from benchmarks.covariance import MeasuredCovariance  # noqa: E402
 from benchmarks.pc import (  # noqa: E402
     encounter_plane,
     pc_foster,
@@ -75,6 +76,8 @@ def parse_args(argv: Optional[Sequence[str]] = None):
     ap.add_argument("--mc-samples", type=int, default=2_000_000)
     ap.add_argument("--seed", type=int, default=1)
     ap.add_argument("--top-k", type=int, default=100, help="top-k overlap between Pc and miss rankings")
+    ap.add_argument("--covariance-model", help="Exp 1 covariance_model.json: adds Foster with the measured "
+                                               "radial / in-track / cross-track sigmas (column pc_foster_measured)")
     ap.add_argument("--tag")
     return ap.parse_args(argv)
 
@@ -95,6 +98,7 @@ def main(argv: Optional[Sequence[str]] = None) -> str:
         events = [r for r in csv.DictReader(f) if r["persistent_pair"] == "0"]
 
     det = ConjunctionDetector()
+    measured = MeasuredCovariance(a.covariance_model) if a.covariance_model else None
     rows: List[Dict] = []
     skipped = 0
     for e in events:
@@ -133,11 +137,16 @@ def main(argv: Optional[Sequence[str]] = None) -> str:
                 return ric_covariance(r, v, s * A ** (-1 / 3), s * A ** (2 / 3), s * A ** (-1 / 3))
             m2, c2 = encounter_plane(r_rel, v_rel, ric(r1, v1, s1) + ric(r2, v2, s2))
             row[f"pc_foster_a{A:g}"] = pc_foster(m2, c2, hbr)
+        if measured is not None:
+            age1, age2 = ((tca - o.epoch).total_seconds() / 86400.0 for o in (o1, o2))
+            m2, c2 = encounter_plane(r_rel, v_rel, measured.cov3(r1, v1, o1.name, age1) + measured.cov3(r2, v2, o2.name, age2))
+            row["pc_foster_measured"] = pc_foster(m2, c2, hbr)
         for key in [k for k in row if k.startswith("pc_")]:
             row["tier_" + key[3:]] = det._risk_level(row[key])
         rows.append(row)
 
-    tag = a.tag or os.path.basename(os.path.normpath(a.recall_dir)).replace("screening_recall_", "")
+    tag = a.tag or (os.path.basename(os.path.normpath(a.recall_dir)).replace("screening_recall_", "")
+                    + ("_measured" if measured is not None else ""))
     out_dir = os.path.join(RESULTS, f"pc_{tag}")
     os.makedirs(out_dir, exist_ok=True)
     _write_csv(os.path.join(out_dir, "events_pc.csv"), rows)

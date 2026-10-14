@@ -179,6 +179,10 @@ No covariance in TLEs (assumed or estimated uncertainty only). Every reference u
 - `benchmarks/screening_runtime.py`: Exp 2a.
 - `benchmarks/encounter_curvature.py` + `pc_line_integral` in `benchmarks/pc.py`: Exp 4b, the short-term encounter test.
 - `benchmarks/end_to_end.py`: Exp 5.
+- `benchmarks/mc_convergence.py`: Monte Carlo convergence against Foster (figure F5).
+- `benchmarks/covariance.py`: `--covariance-model` for `pc_comparison.py` and `end_to_end.py`, which applies the Exp 1 fit (σ per radial / in-track / cross-track axis vs TLE age, Starlink and non-Starlink). It refuses to run while `covariance_model.json` has no fit, so nothing falls back silently to an assumed shape. Smoke-tested with a synthetic model only.
+- `propagation_accuracy.py --snapshots a b c ...`: compares every earlier TLE of each object with every later one, so daily snapshots give 1-, 2-, ... day horizons. On the two existing snapshots it reproduces the committed results exactly.
+- `benchmarks/figures.py` now also draws F1 (pipeline, double column) and F5 (convergence, three small multiples).
 - `benchmarks/propagators.py`, `benchmarks/propagation_accuracy.py`: Exp 1. `tests/test_benchmark_propagators.py` checks the J2 rates against SGP4's own secular rates. `snapshot_catalog.py --celestrak GROUP` takes a snapshot straight from Celestrak without touching the app database.
 
 ## 10. Results so far [MEASURED]
@@ -470,3 +474,18 @@ Event recall, miss < 10 km (range over the three seeds):
 - B is "corrected" relative to the specific faults measured in Exp 1–4. It is not validated against operational data such as conjunction data messages (CDMs).
 - B_ric's floor and ratio are assumptions, informed by one horizon bin.
 - A and B both use 2,000-object subsets, so absolute counts scale with N²; the ratios are what carry over.
+
+### Monte Carlo convergence (F5)
+
+**Setup:**
+- The three highest-Pc encounters of Exp 4, seed 1, one per pair. All are Starlink–Starlink with Foster Pc ≈ 1.17–1.18 × 10⁻⁶ under ORCA's covariance.
+- 2D Monte Carlo at 10³ to 10⁸ samples; each count is an independent run with a 95 % Clopper-Pearson interval.
+- Output: `benchmarks/results/mc_convergence_seed1/`.
+
+**Result:**
+- Up to 10⁵ samples, and at 10⁶ for one case, there are no hits, so the estimate is 0.
+- At 10⁷ samples the estimate is still within a factor of ~2 of Foster.
+- At 10⁸ samples all three are within ±15 % (ratios 0.86, 0.93, 1.12).
+- Foster lies inside the 95 % interval in 22 of 24 runs, consistent with the 5 % expected miss rate.
+
+This confirms Section 1, row 8: at Pc ~ 10⁻⁶, Monte Carlo needs ~10⁸ samples, and v1's 10³–10⁵ would return zero.
