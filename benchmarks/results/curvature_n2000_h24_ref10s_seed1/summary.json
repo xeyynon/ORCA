@@ -1,0 +1,132 @@
+{
+  "events": 302,
+  "slow_events": 102,
+  "fast_control": 200,
+  "failed": 0,
+  "by_band": {
+    "0-0.1|iso": {
+      "n": 4,
+      "pass_ratio_median": 0.9652503333600789,
+      "pass_ratio_p5": 0.8937200255454135,
+      "pass_ratio_p95": 1.051899127934099,
+      "window_ratio_median": 0.9652503333600789,
+      "window_ratio_p5": 0.8937200255454135,
+      "window_ratio_p95": 1.0518991279340992,
+      "share_pass_ratio_off_by_2x": 0.0,
+      "pass_truncated": 0
+    },
+    "0-0.1|a10": {
+      "n": 4,
+      "pass_ratio_median": 6.295806769477544,
+      "pass_ratio_p5": 2.416570256541258,
+      "pass_ratio_p95": 8.218852660134132,
+      "window_ratio_median": 6.295806769477544,
+      "window_ratio_p5": 2.416570256541258,
+      "window_ratio_p95": 8.218852660134132,
+      "share_pass_ratio_off_by_2x": 0.75,
+      "pass_truncated": 4
+    },
+    "0.1-1|iso": {
+      "n": 98,
+      "pass_ratio_median": 1.0000216787468876,
+      "pass_ratio_p5": 0.9992002162190163,
+      "pass_ratio_p95": 1.0002939621694447,
+      "window_ratio_median": 6.467980124609065,
+      "window_ratio_p5": 1.000021515248833,
+      "window_ratio_p95": 7.448630325212601,
+      "share_pass_ratio_off_by_2x": 0.0,
+      "pass_truncated": 0
+    },
+    "0.1-1|a10": {
+      "n": 98,
+      "pass_ratio_median": 1.000000940192845,
+      "pass_ratio_p5": 0.9998225558163435,
+      "pass_ratio_p95": 6.109840865471567,
+      "window_ratio_median": 6.964616909444507,
+      "window_ratio_p5": 2.629683106757048,
+      "window_ratio_p95": 7.041971942628537,
+      "share_pass_ratio_off_by_2x": 0.14285714285714285,
+      "pass_truncated": 16
+    },
+    "1-5|iso": {
+      "n": 24,
+      "pass_ratio_median": 1.000000415325555,
+      "pass_ratio_p5": 0.9999819862713277,
+      "pass_ratio_p95": 1.0000079556686563,
+      "window_ratio_median": 4.959549957922494,
+      "window_ratio_p5": 1.0051718127764546,
+      "window_ratio_p95": 6.89363072065005,
+      "share_pass_ratio_off_by_2x": 0.0,
+      "pass_truncated": 0
+    },
+    "1-5|a10": {
+      "n": 24,
+      "pass_ratio_median": 1.0000002719266468,
+      "pass_ratio_p5": 0.9999421975825813,
+      "pass_ratio_p95": 1.0000009592461439,
+      "window_ratio_median": 6.8600010611029205,
+      "window_ratio_p5": 1.7080230158058811,
+      "window_ratio_p95": 7.069952213602571,
+      "share_pass_ratio_off_by_2x": 0.0,
+      "pass_truncated": 0
+    },
+    "5-10|iso": {
+      "n": 69,
+      "pass_ratio_median": 1.0000003162593964,
+      "pass_ratio_p5": 0.9999984804900782,
+      "pass_ratio_p95": 1.0000011937680815,
+      "window_ratio_median": 3.115886848863509,
+      "window_ratio_p5": 1.0349215379792585,
+      "window_ratio_p95": 6.862752114498735,
+      "share_pass_ratio_off_by_2x": 0.0,
+      "pass_truncated": 0
+    },
+    "5-10|a10": {
+      "n": 69,
+      "pass_ratio_median": 0.9999970633967616,
+      "pass_ratio_p5": 0.9999616160267111,
+      "pass_ratio_p95": 1.000001078861943,
+      "window_ratio_median": 6.276825842829971,
+      "window_ratio_p5": 2.0161593605891177,
+      "window_ratio_p95": 7.066994128887486,
+      "share_pass_ratio_off_by_2x": 0.0,
+      "pass_truncated": 0
+    },
+    ">=10|iso": {
+      "n": 107,
+      "pass_ratio_median": 1.0000001961220886,
+      "pass_ratio_p5": 0.9999996313640706,
+      "pass_ratio_p95": 1.0000003951235976,
+      "window_ratio_median": 2.914034273049823,
+      "window_ratio_p5": 1.246231700197186,
+      "window_ratio_p95": 4.419126660936057,
+      "share_pass_ratio_off_by_2x": 0.0,
+      "pass_truncated": 0
+    },
+    ">=10|a10": {
+      "n": 107,
+      "pass_ratio_median": 0.9999889489730321,
+      "pass_ratio_p5": 0.9999612808822068,
+      "pass_ratio_p95": 1.0000007322308357,
+      "window_ratio_median": 4.253269848637876,
+      "window_ratio_p5": 1.1537978885288913,
+      "window_ratio_p95": 6.94211324811152,
+      "share_pass_ratio_off_by_2x": 0.0,
+      "pass_truncated": 0
+    }
+  },
+  "run": {
+    "args": {
+      "recall_dir": "E:\\Acadamics\\4th Year\\Capstone\\ORCA\\benchmarks\\results\\screening_recall_n2000_h24_ref10s_seed1",
+      "slow_kms": 1.0,
+      "fast_sample": 200,
+      "window_h": 3.0,
+      "aspect": 10.0,
+      "seed": 1,
+      "tag": null
+    },
+    "exp2b_run": "screening_recall_n2000_h24_ref10s_seed1",
+    "catalog": "catalog_20261014T064759Z.tle",
+    "seconds": 16.83077450000019
+  }
+}

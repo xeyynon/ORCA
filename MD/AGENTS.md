@@ -43,9 +43,12 @@ curl -X POST http://127.0.0.1:8000/api/update-tles
 This fetches Celestrak's `active` group (~9-11k objects, ~2.7MB) as a
 background task — poll `GET /api/statistics` to see when the count updates.
 Celestrak will 403 this endpoint if hit repeatedly in a short window; the
-smaller `stations` group (`GROUP=stations`) is a reliable fallback for
-smoke-testing without tripping that limit. See DECISIONS.md before changing
-the hardcoded group name in `parser_pipeline.py` / `api_server.py`.
+smaller `stations` group is a reliable fallback for smoke-testing without
+tripping that limit: start the API with `ORCA_TLE_GROUP=stations` (default
+`active`). See DECISIONS.md before changing the default.
+
+Deploying: push to `main`. CI runs the Python tests and redeploys the backend;
+Vercel redeploys the frontend. See [deployment.md](deployment.md).
 
 ## Verifying a change actually works
 
@@ -60,6 +63,26 @@ type-check alone — actually launch the affected process and hit it:
 - **Orbit mechanics / conjunction change** → run against real seeded data
   (`stations` group is enough) and sanity-check output units against the
   Units Contract in ARCHITECTURE.md §7, not just "it didn't throw."
+  The engine's accuracy claims are checked by `tests/test_conjunction_engine.py`
+  and, against a dense reference, by the benchmark harness (below).
+
+Tests: `.venv/Scripts/python.exe -m unittest discover -s tests` (89 tests) and
+`cd frontend && npm run typecheck && npm test` (89 tests). Use the project
+`.venv`: it pins the scipy / numpy / sgp4 versions the results were produced with.
+
+## Benchmarks (research)
+
+- `benchmarks/` holds the paper's experiments. Each reads a frozen catalog snapshot
+  (`benchmarks/data/catalog_*.tle` + `.json` manifest with sha256) and writes to
+  `benchmarks/results/`. Install extras with `pip install -r benchmarks/requirements.txt`.
+- "ORCA as built" is measured through `benchmarks/legacy/`, frozen copies of the original
+  engine (tag `orca-as-built-2026-10-14`). **Never edit those files**, and never point a
+  benchmark at the production modules for the baseline.
+- New snapshot + refreshed covariance tables:
+  `powershell -ExecutionPolicy Bypass -File benchmarks\refresh_measured.ps1` (at most once a
+  day; Celestrak rate-limits). Snapshot `.tle` files are git-ignored; commit only the `.json`.
+- Method and results: [research_paper_brief.md](research_paper_brief.md) §10,
+  [conjunction_engine_v2.md](conjunction_engine_v2.md), the paper in `paper/`.
 
 ## Code conventions (as established in this repo)
 
@@ -74,8 +97,11 @@ type-check alone — actually launch the affected process and hit it:
   developer path in the old Streamlit dashboard broke the app on every other machine — see
   DECISIONS.md). Use `Path(__file__).parent / "..."` or an existing constant
   like `DB_PATH`.
-- `ConjunctionSearch`'s pairwise worker (`_assess_pair_worker`) must stay a
-  top-level, picklable function — `ProcessPoolExecutor` requires it.
+- The conjunction engine's guarantee is `r >= d + v*dt/2` (screen radius vs report
+  distance, relative speed and step). If you change `STEP_S` or `REPORT_KM`, keep it,
+  and update `method_description()`: the UI shows that text verbatim.
+- `SGP4Propagator` raises `ValueError` when SGP4 rejects an element set (e.g. decayed);
+  callers must handle it (the API returns 422).
 - Keep units exactly as documented in ARCHITECTURE.md §7 (`OrbitalElement.n`
   in rad/s, `OrbitalElement.i` in radians, `TLE.inclination` in degrees).
   Silent unit mismatches between `TLE` and `OrbitalElement` have been a real

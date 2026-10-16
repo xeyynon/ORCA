@@ -1,0 +1,69 @@
+{
+  "experiment": "exp2b_screening_recall",
+  "args": {
+    "catalog": null,
+    "n": 2000,
+    "seed": 1,
+    "hours": 24.0,
+    "start": null,
+    "max_age_days": 7.0,
+    "ref_step": 10.0,
+    "event_km": 10.0,
+    "thresholds": [
+      1.0,
+      5.0,
+      10.0
+    ],
+    "vmax": 16.0,
+    "steps": [
+      3600,
+      1800,
+      600,
+      300,
+      60,
+      20
+    ],
+    "radii": [
+      10.0,
+      25.0,
+      50.0,
+      100.0,
+      200.0
+    ],
+    "tag": null
+  },
+  "catalog": "catalog_20261014T064759Z.tle",
+  "catalog_sha256": "600bd79d1e3b80517ec70406500649cd5697534bc4c0e263dc58a7dc1fc543a8",
+  "objects_in_catalog": 15970,
+  "objects_used": 2000,
+  "window_start_utc": "2026-10-10T02:10:00",
+  "steps_in_reference": 8641,
+  "query_radius_km": 200.0,
+  "capture_bound_km": 90.0,
+  "close_samples": 2836413,
+  "failed_states": 7299,
+  "grid_minima": 600398,
+  "grid_minima_at_window_edge": 401,
+  "refined": 180004,
+  "refine_failed": 0,
+  "events": 6576,
+  "events_persistent_pair": 8,
+  "events_refine_at_bound": 0,
+  "seconds": {
+    "reference_grid": 11.189053999999487,
+    "refinement": 17.71283559999938,
+    "screens": 1.0666894000005414,
+    "total": 30.577249899999515
+  },
+  "versions": {
+    "python": "3.12.0",
+    "numpy": "2.5.2",
+    "scipy": "1.18.0",
+    "sgp4": "2.27"
+  },
+  "platform": {
+    "system": "Windows-11-10.0.26300-SP0",
+    "processor": "AMD64 Family 25 Model 80 Stepping 0, AuthenticAMD",
+    "cpu_count": 16
+  }
+}

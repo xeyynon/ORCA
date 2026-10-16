@@ -65,6 +65,40 @@ export interface ConjunctionEvent {
   risk_level: RiskLevel
   /** |v1 - v2| at the time of closest approach, km/s. Near zero means two objects flying in formation, not crossing paths. */
   relative_velocity_kms: number
+  /** Age of the older of the two TLEs at the time of closest approach, days. */
+  tle_age_days: number
+  /** 1-sigma of the combined position uncertainty along its widest axis at closest approach, km (assumed, see method). */
+  uncertainty_km: number
+  /** Relative speed below the method's long-encounter limit: the 2D probability is unreliable for this event. */
+  long_encounter: boolean
+}
+
+/** /api/conjunctions: the most probable events plus counts over everything found. */
+export interface ConjunctionSearchResult {
+  events: ConjunctionEvent[]
+  total_events: number
+  tier_counts: Partial<Record<RiskLevel, number>>
+  long_encounters: number
+  window_start: string
+  window_end: string
+  objects: number
+  report_km: number
+  step_s: number
+  runtime_s: number
+}
+
+/** /api/conjunctions/method: how the list is made, and its limits (shown next to the numbers). */
+export interface ConjunctionMethod {
+  propagator: string
+  screening: string
+  closest_approach: string
+  collision_probability: string
+  uncertainty: string
+  risk_tiers: string
+  limits: string[]
+  step_s: number
+  report_km: number
+  long_encounter_kms: number
 }
 
 /** /api/conjunction-pair returns the full event, or {status:'no_risk'}. */

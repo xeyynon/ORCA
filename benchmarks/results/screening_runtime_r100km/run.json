@@ -1,0 +1,35 @@
+{
+  "experiment": "exp2a_screening_runtime",
+  "args": {
+    "catalog": null,
+    "sizes": [
+      1000,
+      2000,
+      4000,
+      8000,
+      0
+    ],
+    "radius": 100.0,
+    "steps": 12,
+    "repeats": 5,
+    "python_max_n": 2000,
+    "max_age_days": 7.0,
+    "seed": 1,
+    "tag": "r100km"
+  },
+  "catalog": "catalog_20261014T064759Z.tle",
+  "catalog_sha256": "600bd79d1e3b80517ec70406500649cd5697534bc4c0e263dc58a7dc1fc543a8",
+  "start_utc": "2026-10-10T02:10:00",
+  "objects_available": 15913,
+  "versions": {
+    "python": "3.12.0",
+    "numpy": "2.5.2",
+    "scipy": "1.18.0",
+    "sgp4": "2.27"
+  },
+  "platform": {
+    "system": "Windows-11-10.0.26300-SP0",
+    "processor": "AMD64 Family 25 Model 80 Stepping 0, AuthenticAMD",
+    "cpu_count": 16
+  }
+}

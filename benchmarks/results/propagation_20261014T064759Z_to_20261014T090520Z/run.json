@@ -1,0 +1,47 @@
+{
+  "experiment": "exp1_propagation",
+  "args": {
+    "old": "E:\\Acadamics\\4th Year\\Capstone\\ORCA\\benchmarks\\data\\catalog_20261014T064759Z.tle",
+    "new": "E:\\Acadamics\\4th Year\\Capstone\\ORCA\\benchmarks\\data\\catalog_20261014T090520Z.tle",
+    "min_gap_h": 1.0,
+    "timing_objects": 2000,
+    "fit_min_n": 100,
+    "r1_hours": [
+      0,
+      1,
+      6,
+      24,
+      72,
+      168
+    ],
+    "tag": null
+  },
+  "old": "catalog_20261014T064759Z.tle",
+  "old_sha256": "600bd79d1e3b80517ec70406500649cd5697534bc4c0e263dc58a7dc1fc543a8",
+  "new": "catalog_20261014T090520Z.tle",
+  "new_sha256": "968d6f15ec37c5a9e0c1507c3ffcd4ae6a73ce3313b1668875e5624901e1a0d4",
+  "objects_in_both": 15932,
+  "counts": {
+    "used": 15893,
+    "not_later": 35,
+    "gap_below_min": 2,
+    "gap_above_14d": 2
+  },
+  "microseconds_per_state_incl_setup": {
+    "orca_engine": 37.71020000021963,
+    "j2_secular": 7.754150000437221,
+    "sgp4": 2.4372500001845765
+  },
+  "seconds": 18.498673000000053,
+  "versions": {
+    "python": "3.12.0",
+    "numpy": "2.5.2",
+    "scipy": "1.18.0",
+    "sgp4": "2.27"
+  },
+  "platform": {
+    "system": "Windows-11-10.0.26300-SP0",
+    "processor": "AMD64 Family 25 Model 80 Stepping 0, AuthenticAMD",
+    "cpu_count": 16
+  }
+}

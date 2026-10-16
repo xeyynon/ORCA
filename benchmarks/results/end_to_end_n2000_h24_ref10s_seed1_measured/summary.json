@@ -1,0 +1,84 @@
+{
+  "objects": 2000,
+  "window_start_utc": "2026-10-10T02:10:00",
+  "hours": 24.0,
+  "A": {
+    "events": 231,
+    "seconds": 2.635242500000004,
+    "claimed_below_report_km": 32,
+    "claimed_below_report_km_and_true": 2,
+    "true_miss_near_claim_below_report_km": 8,
+    "claimed_minus_true_miss_km_median": 89.81287118517781,
+    "matches_a_b_encounter": 8,
+    "tca_outside_window": 27,
+    "tiers": {
+      "CRITICAL": 0,
+      "HIGH": 2,
+      "MEDIUM": 6,
+      "LOW": 43,
+      "NEGLIGIBLE": 180
+    },
+    "kendall_tau_miss_vs_pc": 0.8667419536984755
+  },
+  "B": {
+    "encounters": 6576,
+    "persistent_pair_encounters": 8,
+    "seconds_total": 26.269792600000073,
+    "seconds_screen": 6.165692699999909,
+    "seconds_refine": 11.199915400000009,
+    "found_by_a": 8,
+    "found_by_a_non_persistent": 8,
+    "tiers_iso": {
+      "CRITICAL": 0,
+      "HIGH": 0,
+      "MEDIUM": 15,
+      "LOW": 6561,
+      "NEGLIGIBLE": 0
+    },
+    "tiers_ric": {
+      "CRITICAL": 0,
+      "HIGH": 576,
+      "MEDIUM": 451,
+      "LOW": 271,
+      "NEGLIGIBLE": 5278
+    },
+    "kendall_tau_miss_vs_pc_iso": 0.41071549499042487,
+    "kendall_tau_miss_vs_pc_ric": 0.3349291959495837,
+    "tiers_measured": {
+      "CRITICAL": 0,
+      "HIGH": 2,
+      "MEDIUM": 27,
+      "LOW": 3107,
+      "NEGLIGIBLE": 3440
+    },
+    "kendall_tau_miss_vs_pc_measured": 0.30609208944346833,
+    "covariance_model": "benchmarks/results/propagation_20261014T064759Z_to_20261014T174434Z_3snap/covariance_model.json"
+  },
+  "run": {
+    "args": {
+      "recall_dir": "benchmarks/results/screening_recall_n2000_h24_ref10s_seed1",
+      "b_step": 20.0,
+      "b_radius": 200.0,
+      "report_km": 10.0,
+      "vmax": 16.0,
+      "ric_ratio": 100.0,
+      "ric_floor_km": 0.1,
+      "covariance_model": "benchmarks/results/propagation_20261014T064759Z_to_20261014T174434Z_3snap/covariance_model.json",
+      "tag": null
+    },
+    "exp2b_run": "screening_recall_n2000_h24_ref10s_seed1",
+    "catalog": "catalog_20261014T064759Z.tle",
+    "catalog_sha256": "600bd79d1e3b80517ec70406500649cd5697534bc4c0e263dc58a7dc1fc543a8",
+    "versions": {
+      "python": "3.12.0",
+      "numpy": "2.5.2",
+      "scipy": "1.18.0",
+      "sgp4": "2.27"
+    },
+    "platform": {
+      "system": "Windows-11-10.0.26300-SP0",
+      "processor": "AMD64 Family 25 Model 80 Stepping 0, AuthenticAMD",
+      "cpu_count": 16
+    }
+  }
+}

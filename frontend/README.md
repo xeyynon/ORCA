@@ -48,6 +48,7 @@ src/
 ## What the UI is honest about
 
 - TLE age is shown wherever a position or object is: old element sets propagate poorly.
-- The globe and positions use the `sgp4` package (the label is read from the API response). The conjunction search still uses `orbit_mech_engine`'s simpler propagator, which drifts from SGP4 by hundreds of km within a day (see MD/DECISIONS.md), so miss distances beyond the first day are not reliable.
-- The conjunction search starts at the current time. An event whose closest approach is already behind us (up to ~6 h before now is normal, from TCA refinement) is flagged, because it is not a forecast.
-- Pc uses an assumed covariance. It ranks events; it is not an operational collision probability.
+- Everything uses SGP4, including the conjunction search (engine v2, see MD/conjunction_engine_v2.md). The method and its limits are shown above the results, read from `/api/conjunctions/method`.
+- The conjunction search starts at the current time and finds every approach under 10 km in the window. Events whose closest approach has passed since the search ran are flagged, because they are not forecasts.
+- The table shows the top N by Pc; the tier counts cover all M approaches found.
+- Pc depends on an uncertainty model measured from public TLEs (shown per event, with TLE age). It is not an operational collision probability. Slow "long" encounters are badged, because the 2D Pc may understate them.

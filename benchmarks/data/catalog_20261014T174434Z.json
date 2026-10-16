@@ -1,0 +1,12 @@
+{
+  "file": "catalog_20261014T174434Z.tle",
+  "sha256": "f3c488c654e3dbd4eed643e77e04008cfb0ca9e962843c0fb11384d2ab0eb525",
+  "created_utc": "20261014T174434Z",
+  "source_url": "https://celestrak.org/NORAD/elements/gp.php?GROUP=active&FORMAT=tle",
+  "http_status": 200,
+  "records_in_source": 15932,
+  "records_parsed": 15932,
+  "epoch_min": "2026-09-15T07:12:15.355008",
+  "epoch_median": "2026-10-14T03:19:38.038944",
+  "epoch_max": "2026-10-15T09:05:36.228192"
+}
