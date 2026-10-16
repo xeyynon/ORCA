@@ -180,7 +180,10 @@ class OrbitalVisualizer:
             
             # Propagate orbit trace
             times = [oe.epoch + timedelta(hours=i) for i in np.linspace(0, propagation_hours, 100)]
-            positions = [prop.propagate(t).r for t in times]
+            try:
+                positions = [prop.propagate(t).r for t in times]
+            except ValueError:  # SGP4 rejects this object (e.g. decayed): leave it out of the plot
+                continue
             
             xs = [p[0] for p in positions]
             ys = [p[1] for p in positions]
@@ -234,7 +237,10 @@ class OrbitalVisualizer:
             lats, lons = [], []
             
             for t in times:
-                state = prop.propagate(t)
+                try:
+                    state = prop.propagate(t)
+                except ValueError:  # SGP4 rejects this object from here on (e.g. decayed)
+                    break
                 lat, lon, _ = CoordinateTransform.eci_to_geographic(state.r, t)
                 lats.append(lat)
                 lons.append(lon)
@@ -373,7 +379,8 @@ class ExportUtils:
             writer = csv.DictWriter(f, fieldnames=[
                 'sat1_id', 'sat1_name', 'sat2_id', 'sat2_name',
                 'tca', 'min_distance_km', 'mahalanobis_distance',
-                'probability_of_collision', 'risk_level', 'combined_hbr_km'
+                'probability_of_collision', 'risk_level', 'combined_hbr_km',
+                'relative_velocity_kms', 'tle_age_days', 'uncertainty_km', 'long_encounter'
             ])
             writer.writeheader()
             for c in conjunctions:
@@ -460,7 +467,7 @@ if __name__ == "__main__":
     
     # Conjunctions
     print("\nComputing conjunctions...")
-    detector = ConjunctionDetector(time_horizon_days=5, search_step_hours=.5)
+    detector = ConjunctionDetector(time_horizon_days=1)
     search = ConjunctionSearch(detector)
     conjunctions = search.search_catalog(orbital_elements)
     

@@ -1,0 +1,13 @@
+{
+  "file": "catalog_20261014T064759Z.tle",
+  "sha256": "600bd79d1e3b80517ec70406500649cd5697534bc4c0e263dc58a7dc1fc543a8",
+  "created_utc": "20261014T064759Z",
+  "source_db": "E:\\Acadamics\\4th Year\\Capstone\\ORCA\\ssa_data.db",
+  "db_fetched_at_min": "2026-08-18 12:18:53",
+  "db_fetched_at_max": "2026-10-08 05:26:53",
+  "records_in_db": 15970,
+  "records_parsed": 15970,
+  "epoch_min": "2026-08-18T04:18:27.789120",
+  "epoch_median": "2026-10-07T13:41:44.656800",
+  "epoch_max": "2026-10-10T02:09:12.691008"
+}

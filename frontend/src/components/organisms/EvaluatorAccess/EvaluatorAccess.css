@@ -1,0 +1,8 @@
+.evaluator { display: flex; flex-direction: column; gap: var(--gap-2); padding-top: var(--gap-4); border-top: 1px solid var(--border); }
+.evaluator__title { margin: 0; color: var(--text-tertiary); font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; }
+.evaluator__note { margin: 0; color: var(--text-secondary); font-size: 13px; }
+.evaluator__box { border: 1px solid var(--border-strong); border-radius: var(--radius-lg); background: var(--bg-input); }
+.evaluator__join { position: relative; height: 1px; background: var(--border-strong); }
+/* Round badge on the divider: the wrapper clips the square IconButton to a circle instead of restyling it. */
+.evaluator__use { position: absolute; left: 50%; top: 50%; display: grid; width: 30px; height: 30px; overflow: hidden; transform: translate(-50%, -50%); border: 1px solid var(--border-strong); border-radius: 50%; background: var(--bg-input); }
+.evaluator__status { min-height: 1.2em; margin: 0; color: var(--text-tertiary); font-size: 12px; }

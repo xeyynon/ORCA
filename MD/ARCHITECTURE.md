@@ -1,9 +1,10 @@
 # ORCA — Architecture
 
 This document describes the system as it actually runs today, including the
-seams that matter for anyone modifying or operating it. For per-class/method
-detail, see [README.md](README.md#module-deep-dives) — that document is kept
-as the authoritative module reference and is not duplicated here.
+seams that matter for anyone modifying or operating it. For the module list see
+[README.md](README.md#architecture), and for per-class detail the module docstrings.
+The conjunction engine (v2, 2026-10-15) is described and validated in
+[conjunction_engine_v2.md](conjunction_engine_v2.md).
 
 ## 1. System Diagram
 
@@ -23,7 +24,7 @@ as the authoritative module reference and is not duplicated here.
                              ▼
 ┌─────────────────────────────────────────────────────────────────┐
 │                   orbit_mech_engine.py  (foundation layer)        │
-│  OrbitalElement · KeplerSolver · SGP4Propagator                   │
+│  OrbitalElement · KeplerSolver · SGP4Propagator (real SGP4)       │
 │  CoordinateTransform (ECI ↔ ECEF ↔ Geographic)                   │
 └──────────┬──────────────────────────────────────────────────────┘
            │ StateVector streams                  │ OrbitalElement
@@ -31,8 +32,8 @@ as the authoritative module reference and is not duplicated here.
 ┌──────────────────────┐            ┌─────────────────────────────┐
 │ conjunction_          │            │       Analytics.py           │
 │ detection.py          │            │  OrbitalAnalytics             │
-│ KDTree + TCA + Alfano │            │  OrbitalVisualizer / Risk-    │
-│ 2D Pc                 │            │  Visualizer / ExportUtils     │
+│ KD-tree every 20 s,   │            │  OrbitalVisualizer / Risk-    │
+│ exact TCA, Foster Pc  │            │  Visualizer / ExportUtils     │
 └──────────┬────────────┘            └───────────────┬──────────────┘
            │                                          │
            └──────────────────┬──────────────────────┘
@@ -54,7 +55,11 @@ conjunction_detection.py    → orbit_mech_engine
 Analytics.py                → orbit_mech_engine, parser_pipeline, conjunction_detection
 api_server.py                → parser_pipeline, orbit_mech_engine, conjunction_detection, Analytics
 frontend/                   → api_server over HTTP only
+benchmarks/                 → parser_pipeline, and benchmarks/legacy/ (frozen copies of the original
+                              conjunction_detection.py and orbit_mech_engine.py, tag orca-as-built-2026-10-14)
 ```
+
+The benchmarks measure "ORCA as built" through `benchmarks/legacy/`, never through the production modules, so fixing production cannot move the paper's baseline. Nothing in production imports `benchmarks/`.
 
 **Invariant:** `orbit_mech_engine.py` must never import another project module.
 It is the layer everything else is built on; a cycle here breaks the whole
@@ -90,8 +95,8 @@ if the API ever runs more than one worker/replica (see PRD §9, TASKS.md).
 
 | Dependency | Used for | Failure mode if unreachable |
 |---|---|---|
-| `https://celestrak.org/NORAD/elements/gp.php` | Live TLE catalog | `CelestrackClient.fetch_group` catches `requests.RequestException`, logs, returns `[]`. Callers must check for an empty list — an empty catalog is silent, not an exception. See DECISIONS.md for the rate-limiting behavior observed under repeated requests. |
-| `sgp4` (PyPI) | Authoritative orbit propagation | Hard dependency; `TLE.to_orbital_element()` has no fallback. |
+| `https://celestrak.org/NORAD/elements/gp.php` | Live TLE catalog | `CelestrackClient.fetch_group_checked` returns a `FetchResult` (`ok`, `empty`, `rate_limited`, `not_found`, `http_error` or `network_error`), surfaced as `last_fetch` in `/health` and in the Data view. A failed fetch leaves the catalog unchanged. See DECISIONS.md for the rate limiting observed under repeated requests. |
+| `sgp4` (PyPI) | All orbit propagation: `SGP4Propagator`, the conjunction engine, the globe | Hard dependency; no fallback. |
 | three.js (bundled by Vite) | 3D globe | Part of the built bundle; no runtime fetch. |
 
 ## 6. Concurrency Model
@@ -101,11 +106,13 @@ if the API ever runs more than one worker/replica (see PRD §9, TASKS.md).
   the HTTP response returns immediately ("update started") while ingestion
   continues async — callers must poll `/api/statistics` or `/api/tles` to
   observe completion, there is no completion webhook/event.
-- **Conjunction search**: `ConjunctionSearch` can parallelize pairwise TCA
-  refinement via `concurrent.futures.ProcessPoolExecutor` (default) or
-  `ThreadPoolExecutor`. Process-pool workers require `_assess_pair_worker` to
-  stay a top-level, picklable function — do not turn it into a closure or
-  instance method.
+- **Conjunction search** (engine v2): vectorised in one process.
+  - SGP4 is run in batches (`SatrecArray`) of 120 grid steps.
+  - A KD-tree runs per step.
+  - The exact TCA refinement is batched per object (`Satrec.sgp4_array`).
+  - Pc is vectorised.
+
+  `/api/conjunctions` is a plain `def`, so FastAPI runs it in its thread pool and `/health` stays responsive during a search. The `parallel`, `use_processes` and `max_workers` arguments are accepted for compatibility and ignored. A full-catalog search takes about 1.5–2 min per day of horizon; Cancel in the UI stops the browser waiting, not the server.
 - **Frontend**: conjunction search is cancellable on the client; the catalog
   refresh is polled through `/health` (there is no completion event).
 
@@ -138,7 +145,12 @@ crosses every module boundary in the system:
 
 ## 9. Deployment Shape (current)
 
-Local-only, one API process plus the frontend dev server, one file-based database, no
-containerization, no process manager, no reverse proxy. Suitable for a demo or
-single-operator use; see PRD.md §9 for open questions on whether a hosted
-multi-user deployment is ever in scope.
+Two shapes, both single-operator with one file-based database:
+
+- **Local development:** one API process plus the Vite dev server.
+- **Hosted (since 2026-10-08):** the React build on Vercel (https://orca-vitap.vercel.app), and the API in Docker
+  behind Caddy (HTTPS) on an Oracle Cloud Always Free VM. GitHub Actions redeploys the backend on every push to
+  `main`, and Vercel redeploys the frontend.
+
+Still one API worker and one SQLite file, so no horizontal scaling. Multi-user
+accounts remain out of scope. Details: [deployment.md](deployment.md).

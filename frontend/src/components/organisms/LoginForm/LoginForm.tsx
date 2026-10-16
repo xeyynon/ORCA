@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
 import type { LoginFailure } from '@/lib/authErrors'
+import type { Credential } from '@/lib/evaluator'
 import { Button } from '../../atoms/Button/Button'
 import { Callout } from '../../molecules/Callout/Callout'
 import { TextField } from '../../molecules/TextField/TextField'
@@ -11,6 +12,8 @@ type Props = {
   busy: boolean
   /** A new object per failed attempt, so the form reacts to every failure, including two identical ones in a row. */
   failure: LoginFailure | null
+  /** Values to put into the fields, e.g. from the evaluator panel. A new object per request, like `failure`. */
+  prefill?: Credential | null
   onSubmit: (username: string, password: string) => void
 }
 
@@ -27,7 +30,7 @@ const TITLE: Record<LoginFailure['kind'], string> = {
  * is kept, so the person can retype without losing their place. No "remember me" and no "forgot password": each would
  * look like it works and not work.
  */
-export function LoginForm({ initialUsername, busy, failure, onSubmit }: Props) {
+export function LoginForm({ initialUsername, busy, failure, prefill = null, onSubmit }: Props) {
   const [username, setUsername] = useState(initialUsername)
   const [password, setPassword] = useState('')
   const passwordRef = useRef<HTMLInputElement>(null)
@@ -38,6 +41,12 @@ export function LoginForm({ initialUsername, busy, failure, onSubmit }: Props) {
     setPassword('')
     passwordRef.current?.focus()
   }, [failure])
+  useEffect(() => {
+    if (!prefill) return
+    setUsername(prefill.username)
+    setPassword(prefill.password)
+    passwordRef.current?.focus() // Enter now signs in
+  }, [prefill])
 
   const submit = (e: FormEvent) => {
     e.preventDefault()

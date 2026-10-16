@@ -1,0 +1,571 @@
+# Research Brief (v2): Benchmarking Algorithmic Choices in TLE-Based Conjunction Assessment
+
+> **Version 2, 2026-10-14.** v1 was a handoff written without access to the ORCA code. v2 checks it against the code, the measurements already in `MD/DECISIONS.md`, and the capstone proposal in `MD/LEO_Conjunction_Project_Context.md`, then corrects it. Section 1 lists what v1 got wrong. Everything after it replaces v1.
+>
+> **Since 2026-10-15** production runs conjunction engine v2 ([conjunction_engine_v2.md](conjunction_engine_v2.md)). Section 3 still describes ORCA as built, the paper's baseline, which is frozen in `benchmarks/legacy/`.
+>
+> Labels used below: **[CODE]** read from the repo, **[MEASURED]** a number produced by a script in the repo (the script is named), **[PROPOSAL]** from the approved capstone proposal, **[PLAN]** a proposal for this paper that is not done yet, **[VERIFY]** a citation or external fact that must be checked at its source before it goes into the paper.
+
+---
+
+## 0. Rules for anyone continuing this work (human or LLM)
+
+- Do not invent results, dataset statistics, citations or performance numbers. Only numbers tagged [MEASURED] exist.
+- A proposed experiment is not a run experiment.
+- Check every citation at its source. Verified references are in `MD/references.bib`, with status in `MD/literature_verification.md` (2026-10-14). Anything still marked [VERIFY] here is unchecked.
+- **When a document and the code disagree, trust the code** (the same rule as `MD/ORCA_MASTER.md`).
+- Do not change production modules (`conjunction_detection.py`, `orbit_mech_engine.py`) to fit the paper without the owner's decision. Benchmark code goes in `benchmarks/`.
+- Keep the paper to eight pages. Organise it like the example paper (Section 9).
+
+---
+
+## 1. What v1 got wrong or left out
+
+| # | v1 said | What is actually true | Consequence |
+|---|---|---|---|
+| 1 | ORCA is a framework still to be built; implementation details are unconfirmed. | ORCA exists and runs [CODE]: Celestrak TLEs → SQLite → propagate → KD-tree screen → TCA refinement → Pc → five risk tiers → FastAPI → React. Apache-2.0 licence. Hosted at orca-vitap.vercel.app. | Most of v1's "unconfirmed implementation" list can be answered from the code (Section 3). The paper benchmarks a real system. |
+| 2 | "SGP4 is the primary propagator; Two-Body is the baseline." | The conjunction pipeline uses a class **named** `SGP4Propagator` that is really **two-body motion plus an exponential drag term, with no J2** [CODE]. Its docstring wrongly claims J2/J3, drag and lunisolar terms. The real `sgp4` package is used only for the globe (`/api/positions`, `/api/orbit-path`). | Today ORCA's production path *is* the baseline. Real SGP4 still has to be wired into the benchmark. |
+| 3 | Propagation error has not been measured. | Already measured against the `sgp4` package on 600 real TLEs [MEASURED, `tests/measure_propagator_error.py`]: median **16.6 km at epoch**, 80 km at 6 h, 297 km at 24 h, 1,277 km at 72 h. | Experiment 1 has a first result. But "error" here means **difference from SGP4**, not error against the true orbit (row 4). |
+| 4 | Comparing Two-Body with SGP4 measures accuracy. | TLEs hold SGP4-specific *mean* elements. Feeding them to a two-body propagator is a model mismatch, which is why the error is already 16.6 km at epoch. Two-Body vs SGP4 measures **model inconsistency**, not accuracy. | A reference independent of the propagator is needed (Section 4.1): a later TLE of the same object (TLE-to-TLE consistency) and, for a few objects, a precise ephemeris. Add a fair middle tier: two-body + J2 secular rates. |
+| 5 | KD-tree might miss pairs that brute force finds, so brute force is the correctness reference for KD-tree. | `cKDTree.query_pairs(r)` is an **exact** fixed-radius search. At the same time step and radius it returns *exactly* the brute-force pair set [CODE]. | KD-tree vs brute force is a **runtime-only** comparison. Equal candidate sets are a correctness check (a unit test), not a hypothesis. "Candidate reduction" belongs to the threshold, not the method. |
+| 6 | (not mentioned) | ORCA screens **snapshots on a 1-hour grid** with a 100 km radius [CODE]. A head-on LEO pass at ~14 km/s stays inside 100 km for about 14 s, so the chance a 1-hour snapshot catches it is ~2·100/(14·3600) ≈ **0.4 %**. Brute force and KD-tree share this blind spot. | The real screening research question is **recall versus time step and threshold**, measured against a dense-time reference. That is also what the proposal promised (threshold sensitivity, filter trade-off). This is the strongest new experiment. |
+| 7 | Discrete search and Brent are two alternative TCA methods. | ORCA already does both [CODE]: a coarse 1 h grid, then `scipy.optimize.minimize_scalar(method='bounded')` (Brent's bounded minimiser) over ±6 h. The separation function has many local minima over ±6 h (two LEO orbits approach roughly twice per revolution, ~every 45 min), so the bounded search can settle on a minimum that is not the closest one. | The fair comparison is: **coarse grid + local refinement** (properly bracketed, e.g. Brent root-finding on range-rate between sign changes) versus **fine grid only**, at matched cost, against a high-precision reference TCA. Also report how often the ±6 h search lands on the wrong minimum. |
+| 8 | Monte Carlo with 1,000–100,000 samples. | For a probability *p*, relative standard error ≈ √((1−p)/(p·N)). At p = 1e-6 a 10 % error needs ~**1e8** samples. With 1e5 samples, any Pc below ~1e-5 mostly comes out as zero. | Report MC with confidence intervals (Clopper-Pearson). Choose N from the target Pc, or use high-Pc scenarios and say so. The v1 sample counts can only resolve Pc ≳ 1e-3. |
+| 9 | Foster vs Monte Carlo will reveal differences between the methods. | With the same 2D Gaussian, short-encounter assumptions, a 2D MC simply converges to Foster. The difference is numerical noise, not a finding. | The meaningful MC is **3D, with propagated (non-linear) motion**. It tests the short-encounter assumption, which fails for **slow encounters**. ORCA finds many of those: in the exported top-100 list, 21 % have relative velocity < 0.1 km/s, 85 of 100 are Starlink–Starlink [MEASURED, `frontend/public/orca-conjunctions-2026-10-02T21-24-22.csv`; note this is a top-by-Pc cut, not a random sample]. |
+| 10 | ORCA computes Pc with an unspecified method; "Foster" is the analytical baseline. | ORCA calls its method "Alfano (2005) 2D", but the formula is **neither Alfano nor correct** [CODE + MEASURED, `benchmarks/legacy_pc_check.py`]. In the isotropic case it equals the correct small-object result **divided by α²** (α = miss / σ). Close approaches (α = 0.1) are **overstated ~100×**; distant ones (α = 5) are **understated ~25×**. It is only right at α ≈ 1. | Every CRITICAL/HIGH tier in the app is affected. The benchmark needs a correct reference: Foster 2D integration, exact here because the isotropic case has a closed form (Rician / non-central χ²). Fixing production is the owner's decision (`MD/TASKS.md`). |
+| 11 | Covariance assumptions are unknown. | ORCA assumes an **isotropic** σ = 0.5 km + 2.0 km/day × TLE age, the same for both objects, summed [CODE]. Real TLE error is strongly anisotropic: along-track dominates [flohrer2009improving]. | Isotropy hides the effect of encounter geometry on Pc. Add an anisotropic radial/in-track/cross-track (RIC) covariance, ideally estimated from TLE-to-TLE differences on our own catalog, and run Pc sensitivity to it. |
+| 12 | Risk categories by miss distance: >1 km safe, 100–500 m borderline, <100 m high (with a gap). | ORCA already classifies by **Pc**: CRITICAL > 1e-4, HIGH > 1e-5, MEDIUM > 1e-6, LOW > 1e-7 [CODE]. With propagation differences of tens to hundreds of km, a 100 m miss-distance class cannot be resolved anyway. | Drop the miss-distance tiers. Use Pc tiers, and keep miss distance as the comparison ranking. "Distance ranking vs Pc ranking disagreement" is a **proposal objective** [PROPOSAL] and makes a better end-to-end result than v1's "classification agreement". |
+| 13 | Orbital regimes LEO–LEO and LEO–GEO. | LEO and GEO orbits do not intersect, so an apogee–perigee filter removes almost every LEO–GEO pair (only GTO-type objects cross both). The catalog in use is Celestrak `active`: 15,968 objects, **payloads only, no debris** [MEASURED 2026-10-03]. | Stratify by **encounter geometry** (head-on vs co-planar, i.e. relative velocity) and **shell density**, as the proposal does, not by LEO–GEO. Treat "no debris" as a stated limitation, or add a debris group. |
+| 14 | Catalog sizes 1k–50k. | `active` holds ~16k objects. 20k–50k needs a fuller catalog (Space-Track or extra Celestrak groups). The hosted VM is 1 GB RAM. | Sizes: 1k, 2k, 4k, 8k, 16k (all of `active`). Larger only if a fuller catalog is fetched. Run experiments locally, not on the VM. |
+| 15 | Prediction horizon measured from "now". | Catalog search starts at *now*, but TLEs are days old, so the real propagation span is TLE age + forecast offset [CODE]. | Measure horizons **from TLE epoch** (as the existing measurement does) and report TLE age. |
+| 16 | No prior literature or framing given; novelty unknown. | The proposal and its literature review already position the work [PROPOSAL]: SOCRATES (public, one-vs-all, since 2004), Stevenson et al. 2023 (closest work, uses non-public high-fidelity data), and "Gap 2": nobody measures what screening quality is lost by relying on public TLEs. | Build the gap on this. Rows 6 and 10 strengthen it: the screening recall loss and the Pc-formula error are both measurable on public data. |
+| 17 | Runtime comparisons between algorithms. | ORCA's propagator is pure Python, one call per time step. The `sgp4` package is compiled C++ and vectorised (`SatrecArray`). | Runtime differences mix the algorithm with the implementation. Say so, or compare at equal implementation level. |
+
+v1 points that **remain correct**: TLEs carry no covariance. Monte Carlo is not ground truth. Do not report precision/recall/F1 without a defensible reference. Report runtimes as mean ± sd over repeated runs. Keep the scope tight.
+
+---
+
+## 2. Research objective (revised)
+
+> Using only public TLE data and an open pipeline (ORCA), measure how each algorithmic choice in TLE-based conjunction assessment changes what the pipeline reports: which encounters it finds, when and how close they are, and how risky it says they are. Report each choice's computational cost.
+
+The contribution is a **measured, reproducible accounting of where accuracy is lost** in a public-data conjunction pipeline, stage by stage. It is not a new algorithm. Rows 3, 6, 9 and 10 of Section 1 show that the losses are large and measurable, which is a stronger claim than "we compared standard methods" (v1's novelty risk).
+
+Working title [PLAN]: **Where Accuracy Is Lost: A Stage-by-Stage Benchmark of TLE-Based Conjunction Assessment**
+Alternative: **ORCA: An Open Benchmark of Algorithmic Choices in TLE-Based Conjunction Assessment**
+ORCA has no expansion in any project document; do not invent one.
+
+---
+
+## 3. The system as built (answers v1's "unconfirmed" list)
+
+| Item | Fact [CODE] | Where |
+|---|---|---|
+| Data | Celestrak GP, `GROUP=active` by default (`ORCA_TLE_GROUP`), stored in SQLite `ssa_data.db` | `parser_pipeline.py` |
+| Catalog | 15,968 objects on 2026-10-03 [MEASURED] | `MD/external_research.md` |
+| Propagator (conjunctions) | two-body + exp(−B*·dt/1e5) decay, Newton-Raphson Kepler solve, no J2 | `orbit_mech_engine.py:240` |
+| Propagator (globe) | `sgp4` package, TEME frame | `api_server.py` |
+| Frame / units | ECI (effectively TEME, since elements come from TLEs), km, km/s, rad/s | `MD/ORCA_MASTER.md` units contract |
+| Screening | positions on a 1 h grid over a 7-day horizon; `cKDTree.query_pairs(100 km)` per time step; brute-force fallback if SciPy is missing; keeps the closest grid time per pair | `conjunction_detection.py:410-448` |
+| TCA | Brent bounded minimisation of \|r₁−r₂\| over ±6 h around the grid time | `conjunction_detection.py:245` |
+| Covariance | isotropic, σ = 0.5 km + 2 km/day × \|t − epoch\|, per object, summed | `conjunction_detection.py:96` |
+| Hard-body radius | by name keyword: Starlink 5.65 m, OneWeb 4.0 m, Iridium 3.9 m, CubeSat 0.5 m, debris 0.1 m, other 3.0 m; summed | `conjunction_detection.py:71` |
+| Pc | mislabelled "Alfano 2005"; incorrect (Section 1, row 10) | `conjunction_detection.py:300` |
+| Risk tiers | Pc > 1e-4 / 1e-5 / 1e-6 / 1e-7 → CRITICAL / HIGH / MEDIUM / LOW, else NEGLIGIBLE; events with Pc < 1e-12 dropped | `conjunction_detection.py:233` |
+| Runtime | 1-day search over 15,968 objects took 19 s [MEASURED 2026-10-03, single run, hardware not recorded] | `MD/DECISIONS.md` |
+| Parallelism | ProcessPool for pair refinement | `conjunction_detection.py:475` |
+
+---
+
+## 4. Experiments (revised: four core + one end-to-end)
+
+Each experiment varies **one stage** and holds the others at a fixed reference configuration.
+
+### Exp 1: Propagation fidelity vs horizon
+
+- **Methods:** (a) ORCA engine (two-body + drag), (b) two-body + J2 secular rates [PLAN, to implement], (c) SGP4 (`sgp4` package).
+- **References:**
+  - R1: SGP4 itself. Measures model inconsistency; already done for (a).
+  - R2: TLE-to-TLE consistency. Propagate TLE *k* to the epoch of a later TLE *k+1* of the same object and compare with TLE *k+1* evaluated at its own epoch. This is a standard proxy, but it is not truth either.
+  - R3 (optional): a precise ephemeris for a handful of objects, e.g. ILRS CPF predictions for laser-ranging satellites [VERIFY availability].
+- **Horizons (from TLE epoch):** 0, 1, 6, 12, 24, 48, 72 h.
+- **Metrics:** position error; split into radial, in-track and cross-track; median and 90th percentile; runtime per state.
+- **Strata:** altitude band, eccentricity, B* and TLE age.
+- **Also:** the effect on TCA and miss distance for a fixed set of encounters.
+
+### Exp 2: Screening: runtime and recall
+
+- **2a, runtime:** brute force vs KD-tree at an identical time step and radius. Catalog sizes 1k, 2k, 4k, 8k, 16k, random subsets with a fixed seed, ≥ 5 repeats. Assert that the two candidate sets are identical (correctness check). Metrics: runtime, pair evaluations, speedup.
+- **2b, recall (the new experiment):** the same objects screened at time steps of 60, 10, 1 min and 10 s, and radii of 10–200 km. Reference: a dense-time search with a range-rate root-find on every pair surviving an apogee–perigee filter, which gives the true closest approaches below a threshold. Metrics: **recall** of reference encounters with miss distance below 5 / 10 km, candidate count, runtime. Split recall by relative velocity. Report the analytic sufficient condition: radius ≥ d + v_rel·Δt/2.
+- **Optional:** add the classic filter chain (apogee–perigee, orbit path, time window [hoots1984]; failure cases in [woodburn2009]) as the proposal planned [PROPOSAL].
+
+### Exp 3: TCA estimation
+
+- **Methods:**
+  - (a) fine grid only (Δt = 1, 5, 10, 30, 60 s)
+  - (b) ORCA's coarse grid + bounded Brent over ±6 h, as built
+  - (c) coarse grid + bracketed Brent root-find on range-rate ḋ = (Δr·Δv)/|Δr|, refining only intervals where ḋ changes sign, with Brent's method [brent1973]. Related but different: Alfano & Negron 1993 fit cubic polynomials to the distance waveform [alfano1993].
+- **Reference:** (c) with a tight tolerance (e.g. 1e-6 s) on the same propagator. Using the same propagator isolates TCA error from propagation error.
+- **Metrics:** TCA error (s), miss-distance error (m), propagator calls, runtime, and the share of cases converging to the wrong local minimum.
+- **Strata:** fast (head-on) vs slow (co-orbital) encounters.
+
+### Exp 4: Collision probability
+
+- **Methods:**
+  - (a) ORCA legacy formula
+  - (b) Foster 2D: numerical integration of the 2D Gaussian over the hard-body disc in the encounter plane [foster1992; akella2000]
+  - (c) isotropic closed form via the non-central χ² distribution; this is the exactness check for (b)
+  - (d) 2D Monte Carlo with Clopper-Pearson intervals
+  - (e) [PLAN] 3D Monte Carlo: sample both states at TCA − Δ, propagate, and count hard-body penetrations. This tests the short-encounter assumption.
+- **Covariance:** (i) ORCA isotropic; (ii) anisotropic RIC with in-track dominant, values estimated from Exp 1 R2 residuals.
+- **Scenarios:** use the test set in Alfano 2009, *Satellite Conjunction Monte Carlo Analysis* [alfano2009mc], which has 12 test cases, and NASA CARA's open-source Pc tools [cara_tools] for validated cases. Add real ORCA encounters stratified by relative velocity.
+- **Metrics:** Pc; log₁₀ ratio to Foster; MC confidence-interval width; runtime; tier changes.
+
+### Exp 5: End-to-end: which events, which ranking
+
+- Run the full pipeline under (A) ORCA as built and (B) the corrected configuration (SGP4 + recall-adequate screening + bracketed TCA + Foster with anisotropic covariance) over the same catalog and window.
+- **Metrics:** events found by A only / B only / both; tier confusion between A and B (agreement, not accuracy); Kendall τ between miss-distance ranking and Pc ranking [PROPOSAL objective]; total runtime.
+- Do not call B "optimised" or "correct" overall. Call it the corrected configuration, and say what each correction is relative to.
+
+**Hypotheses (testable, no built-in result):**
+- H1: KD-tree and brute force return identical candidate sets; KD-tree runtime grows more slowly with catalog size.
+- H2: Screening recall depends on time step and relative velocity; a 1 h step misses a substantial share of fast encounters.
+- H3: The difference between propagators grows with horizon and changes TCA and miss distance by more than the screening threshold beyond some horizon.
+- H4: Legacy Pc differs from Foster by a factor that depends on α; 2D MC agrees with Foster within its confidence interval; 3D MC departs from Foster at low relative velocity.
+- H5: Pc ranking and miss-distance ranking disagree, and the disagreement grows with spread in relative velocity and covariance.
+
+---
+
+## 5. Reproducibility protocol [PLAN]
+
+- **Frozen catalog:** keep one TLE snapshot (file plus retrieval timestamp) for all experiments, and a second, later snapshot for Exp 1 R2. Do not refetch mid-study.
+- Fixed random seeds; record versions (Python, numpy, scipy, sgp4), CPU, RAM and OS.
+- Runtimes: warm-up run, then ≥ 5 repeats, mean ± sd. Single process unless parallelism is the variable.
+- Every table and figure is produced by a script in `benchmarks/` that writes CSV to `benchmarks/results/`. The paper cites only those CSVs.
+
+## 6. Paper structure (follows the example paper's organisation)
+
+I. Introduction (background, problem, gap, contributions) · II. Preliminaries (TLE/SGP4, encounter geometry and the encounter plane, Pc, spatial indexing) · III. Literature Review (propagation, screening, TCA, Pc, public SSA tools such as SOCRATES and Stevenson 2023, the gap) · IV. Methodology (ORCA, dataset, the five experiments, metrics, protocol) · V. Results and Discussion · VI. Conclusion and Future Work · References.
+
+**Page budget (8 pages):** I 0.8 · II 0.6 · III 0.8 · IV 1.5 · V 2.6 · VI 0.4 · references to fit the template.
+
+**Tables:** T1 dataset and environment · T2 experiment design (all five experiments) · T3 screening runtime and recall · T4 Pc comparison (legacy / Foster / MC) on the validated cases · T5 end-to-end A vs B.
+
+**Figures:** F1 pipeline with swap points · F2 propagation error vs horizon (RIC split) · F3 recall vs time step by relative-velocity band · F4 legacy-Pc / Foster ratio vs α · F5 MC convergence with CI · (F6 accuracy vs runtime, if space allows).
+
+---
+
+## 7. Limitations to state in the paper
+
+No covariance in TLEs (assumed or estimated uncertainty only). Every reference used is itself imperfect (SGP4, later TLEs). Payload-only catalog, unless debris is added. Runtimes depend on implementation and hardware. Results are for one catalog snapshot and window. ORCA is educational, not operational.
+
+## 8. Still open (needs the team)
+
+1. Target conference, template, and whether references count in the 8 pages.
+2. Whether the production Pc bug and propagator are fixed in ORCA before the paper (that changes what "ORCA as built" means in Exp 5), or documented as found.
+3. Whether to fetch debris / a fuller catalog.
+4. ~~Verification of every [VERIFY] reference~~ Done 2026-10-14: see `MD/literature_verification.md`. Still open: SECONDARY entries, TITLE-TODO fields, and reading Sonawane 2026 and Medhin & Servadio 2026 in full.
+5. Whether R3 (precise ephemerides) is worth the effort.
+6. **Snapshot archiving:** the `.tle` snapshots are git-ignored (live-data policy), so others cannot regenerate the results from the repo alone. Before submission, archive them (e.g. a release asset or Zenodo) and cite the sha256 values from the manifests.
+7. More snapshots over several days, so Exp 1 can fit error growth with horizon (Section 10, Exp 1).
+
+## 9. Work started on this branch
+
+- `benchmarks/pc.py`: encounter-plane projection, Foster 2D Pc, isotropic closed form, 2D Monte Carlo with Clopper-Pearson CI, MC sample-size helper.
+- `benchmarks/legacy_pc_check.py`: reproduces Section 1, row 10 (legacy Pc vs exact).
+- `tests/test_benchmark_pc.py`: checks Foster against the closed form and MC against Foster.
+- `benchmarks/catalog.py`, `benchmarks/snapshot_catalog.py`: frozen TLE snapshots. The `.tle` files are git-ignored (live data); the `.json` manifest with sha256 and epoch range is committed.
+- `benchmarks/screening_recall.py`: Exp 2b. `tests/test_screening_recall.py` covers local minima, passes and screen evaluation.
+- `benchmarks/tca.py`, `benchmarks/tca_estimation.py`: Exp 3. `tests/test_benchmark_tca.py` checks the methods on synthetic straight-line and multi-minimum motion.
+- `benchmarks/pc_comparison.py`: Exp 4 on real encounters; `ric_covariance` added to `benchmarks/pc.py`.
+- `benchmarks/screening_runtime.py`: Exp 2a.
+- `benchmarks/encounter_curvature.py` + `pc_line_integral` in `benchmarks/pc.py`: Exp 4b, the short-term encounter test.
+- `benchmarks/end_to_end.py`: Exp 5.
+- `benchmarks/mc_convergence.py`: Monte Carlo convergence against Foster (figure F5).
+- `benchmarks/refresh_measured.ps1`: the daily routine in one command (snapshot, refit Exp 1, rerun Exp 4 and 5 for three seeds with the measured covariance), using the project `.venv`.
+- `benchmarks/covariance.py`: `--covariance-model` for `pc_comparison.py` and `end_to_end.py`, which applies the Exp 1 fit (σ per radial / in-track / cross-track axis vs TLE age, Starlink and non-Starlink). It refuses to run while `covariance_model.json` has no fit, so nothing falls back silently to an assumed shape. Smoke-tested with a synthetic model only.
+- `propagation_accuracy.py --snapshots a b c ...`: compares every earlier TLE of each object with every later one, so daily snapshots give 1-, 2-, ... day horizons. On the two existing snapshots it reproduces the committed results exactly.
+- `benchmarks/figures.py` now also draws F1 (pipeline, double column) and F5 (convergence, three small multiples).
+- `benchmarks/propagators.py`, `benchmarks/propagation_accuracy.py`: Exp 1. `tests/test_benchmark_propagators.py` checks the J2 rates against SGP4's own secular rates. `snapshot_catalog.py --celestrak GROUP` takes a snapshot straight from Celestrak without touching the app database.
+
+## 10. Results so far [MEASURED]
+
+### Exp 2b: snapshot screening recall (preliminary)
+
+**Setup:**
+- Snapshot `catalog_20261014T064759Z` (15,970 records; sha256 in its manifest).
+- LEO only (apogee ≤ 2000 km); TLEs ≤ 7 days old at the start.
+- 2,000 random objects; seeds 1, 2, 3.
+- 24 h window from 2026-10-10 02:10 UTC.
+- SGP4 (`sgp4` package) for both the reference and the screens, so only sampling differs.
+- Reference: 10 s grid, KD-tree at 200 km, grid minima refined with bounded Brent over ±10 s. The capture bound of 10 + 16 × 5 = 90 km guarantees every encounter below 10 km is found.
+- **Event recall:** the screen flags a sample during the encounter's own pass. **Pair recall:** the pair is flagged at any time.
+- Outputs: `benchmarks/results/screening_recall_n2000_h24_ref10s_seed{1,2,3}/`.
+
+Reference encounters below 10 km: 6,576 / 6,803 / 6,244 (seeds 1/2/3). Persistent pairs, i.e. docked or formation flying (8 / 17 / 30 events), are excluded from the numbers below.
+
+Event recall, miss < 10 km (range over the three seeds):
+
+| step \ radius | 10 km | 25 km | 50 km | 100 km | 200 km |
+|---|---|---|---|---|---|
+| 3600 s (ORCA) | 0.1 % | 0.2–0.3 % | 0.4–0.8 % | **1.0–1.2 %** | 2.0 % |
+| 600 s | 0.4–0.6 % | 1.3–1.6 % | 2.6–3.2 % | 5.6–5.7 % | 10.1–10.7 % |
+| 60 s | 3.8–4.0 % | 11.6–12.3 % | 21.5–23.7 % | 40.2–41.9 % | 69.7–71.2 % |
+| 20 s | 10.2–11.0 % | 30.9–32.4 % | 55.8–58.1 % | 88.0–89.8 % | 100 % |
+
+**ORCA's configuration (3600 s, 100 km) by relative velocity:**
+
+| Relative velocity | Event recall | Pair recall |
+|---|---|---|
+| < 0.1 km/s | 100 % (n = 4–10) | 100 % |
+| 0.1–1 km/s | 16–22 % | 84–91 % |
+| 1–5 km/s | 1–3 % | 37–41 % |
+| 5–10 km/s | 0.5–1.0 % | 13–16 % |
+| ≥ 10 km/s | 0.4–0.7 % | 6–8 % |
+
+**Cross-check:** a straight pass stays inside radius r for about 2r/v, so a step Δs catches it with probability ≈ 2r/(v·Δs). For 100 km, 3600 s and 10 km/s that is 0.56 %, consistent with the fast bands. At 20 s / 200 km the sufficient condition r ≥ d + v·Δs/2 = 170 km holds, and recall is 100 % as it must be.
+
+**Reading:**
+- ORCA's screen sees about 1 in 100 encounters below 10 km during the encounter itself. It sees almost every slow, co-orbital one, which explains why its output is dominated by low-velocity Starlink pairs (Section 1, row 9).
+- Pair recall (14–15 %) is an upper bound on what ORCA's ±6 h refinement could recover. Whether the refinement actually lands on the right pass is Exp 3.
+
+**Caveats:**
+- One snapshot, one 24 h window.
+- 2,000-object subsets, not the full catalog. Encounter counts scale with N², but recall by velocity band should not depend strongly on N; this is unverified.
+- The KD-tree screen here takes the same samples as ORCA but uses the `sgp4` propagator, not ORCA's engine.
+
+### Exp 3: TCA estimation (preliminary)
+
+**Setup:**
+- The reference encounters from the three Exp 2b runs (persistent pairs excluded), with the same SGP4 propagator.
+- Outputs: `benchmarks/results/tca_n2000_h24_ref10s_seed{1,2,3}/`. `local.csv` is git-ignored; regenerate it with the script.
+
+**3a, local:**
+- Each encounter is re-solved by range-rate root-finding to 1e-6 s; this is the reference.
+- Each method gets [t_c − 60 s, t_c + 60 s], with t_c = t_ref + U(−30, 30) s.
+- Errors are absolute; medians and p95 over 6,214–6,786 encounters per seed. The three seeds agree to about two significant figures, so seed 1 is shown.
+
+| Method | TCA error, median / p95 | Miss-distance error, median / p95 | Pair evaluations |
+|---|---|---|---|
+| grid 60 s | 15 s / 28 s | 119 km / 345 km | 3 |
+| grid 10 s | 2.6 s / 4.7 s | 16 km / 53 km | 13 |
+| grid 1 s | 0.25 s / 0.48 s | **353 m / 2.5 km** | 121 |
+| grid 60 s + quadratic fit on d² | 12 ms / 17 ms | 0.84 m / 5.4 m | 4 |
+| grid 10 s + quadratic fit on d² | 0.06 ms / 0.08 ms | < 1 mm | 14 |
+| bounded Brent on d (ORCA's method, local window) | 0.1 ms / 0.5 ms | < 4 mm | 12 |
+| Brent root-find on range rate, 60 s bracket | < 5 µs | < 1 µm | 9 |
+
+**Reading:**
+- A plain grid is a poor miss-distance estimator. At 10 km/s, a 0.5 s timing offset adds about 5 km, so even a 1 s grid errs by hundreds of metres. That is larger than the hard-body radii and larger than v1's proposed 100 m risk boundary.
+- Fitting the parabola to **d² rather than d** is exact for straight-line motion. It reaches metre-level miss accuracy from four evaluations.
+- **Caveat:** the reference and the root-find method are the same family, so their sub-microsecond agreement is partly self-agreement. The independent methods (bounded Brent, quadratic on a 10 s grid) agree with the reference to < 0.1 ms and < 4 mm, which validates it.
+
+**3b, ORCA's global refinement:**
+- Pairs with a < 10 km reference encounter that ORCA's hourly 100 km screen flags at all: 261 / 293 / 247 of 3,090 / 3,344 / 3,025 (8–9 %).
+- For those pairs, truth is the closest approach in the t_c ± 6 h window: a dense 10 s grid, then every candidate minimum refined.
+
+| | ORCA: bounded Brent over ±6 h | Range-rate root-find of every minimum, 60 s grid |
+|---|---|---|
+| Finds the closest approach in the window | **5.4–6.1 %** | 100 % |
+| Reports a miss < 10 km (truth: 83–89 % have one in the window) | 13–16 % | 83–89 % |
+| Reported miss minus true miss, median / p95 | 30 km / 160 km | ~0 |
+| Result outside the 24 h forecast window | 11–16 % | 3–4 % (the true closest approach itself) |
+| Pair evaluations | 19 | 810 |
+
+**Reading:**
+- A single bounded Brent run over ±6 h, which contains about 15 approach minima for LEO pairs, usually stops at a minimum that is not the closest.
+- Combined with Exp 2b, and still with SGP4: of the pairs that have an encounter below 10 km within 24 h, ORCA's screen-plus-refinement reports one below 10 km for about **1 %** (34 / 3,090 for seed 1).
+- The fix is cheap in absolute terms (810 evaluations per candidate pair). A coarser range-rate grid (e.g. 300 s) may give the same result for a fifth of the cost; that is untested.
+
+**Caveats:**
+- The same as Exp 2b.
+- This is ORCA's *algorithm* on SGP4, not ORCA's *pipeline*. ORCA's own propagator adds the Exp 1 errors on top.
+- "Found" means within 1 s of the true closest approach.
+
+### Exp 4: collision probability on real encounters (preliminary)
+
+**Setup:**
+- The Exp 2b encounters below 10 km (6,214–6,786 per seed, persistent pairs excluded).
+- SGP4 states at each TCA.
+- **ORCA's own inputs:** hard-body radii from the name model, σ = 0.5 km + 2 km/day × TLE age per object, summed. The legacy Pc is computed by calling ORCA's `_mahalanobis_distance` and `_collision_probability` directly.
+- Foster 2D is evaluated in the encounter plane.
+- **Anisotropic variants:** aspect ratio A = 3 and 10, in-track dominant. The error volume is the same as ORCA's, so only the shape changes. These are assumed values until Exp 1 measures real TLE error shapes.
+- Outputs: `benchmarks/results/pc_n2000_h24_ref10s_seed{1,2,3}/`.
+
+**Checks:**
+- Foster matches the isotropic closed form to a relative difference of ≤ 1.4e-12.
+- 2D Monte Carlo (2e6 samples, 99.9 % Clopper-Pearson) contains the Foster value for 50 of 50 top-Pc events in every seed.
+
+**Same inputs, different formula: legacy tier (rows) vs Foster tier (columns), seed 1**
+
+| legacy \ Foster | CRITICAL | HIGH | MEDIUM | LOW | NEGLIGIBLE |
+|---|---|---|---|---|---|
+| CRITICAL (121) | 0 | 0 | 2 | 119 | 0 |
+| HIGH (429) | 0 | 0 | 4 | 425 | 0 |
+| MEDIUM (2,812) | 0 | 0 | 9 | 2,803 | 0 |
+| LOW (3,196) | 0 | 0 | 0 | 3,196 | 0 |
+
+- Across the seeds, **every** legacy CRITICAL or HIGH event (455–550 per seed) is MEDIUM or LOW under the correct formula with identical inputs. Tier agreement is 49–50 %.
+- The legacy / Foster ratio follows **1/α²** exactly (α = miss/σ). The observed range in each α band ends at the band edges (16 = 1/0.25², 4 = 1/0.5²). The median is ~46× for α < 0.25 and 0.87 for 1 ≤ α < 2.
+- With ORCA's covariance floor (σ ≥ 0.5 km per object) and radii around 10 m, a correct Pc cannot exceed about 1e-4 even at zero miss, so CRITICAL is essentially unreachable. The legacy tiers come from the formula error, not from the encounters.
+
+**Ranking (H5): how far each Pc ranking agrees with a miss-distance ranking**
+
+| Pc method | Kendall τ vs miss distance | Top-100 overlap with miss ranking |
+|---|---|---|
+| legacy | 0.87–0.88 | 96–99 % |
+| Foster, isotropic | 0.41–0.43 | 6–11 % |
+| Foster, A = 3 | 0.25–0.26 | 0–2 % |
+| Foster, A = 10 | 0.22–0.23 | 0–1 % |
+
+**Reading:**
+- The 1/α² factor makes the legacy Pc behave like 1/miss², so ORCA's "risk ranking" is effectively a miss-distance ranking.
+- A correct Pc ranks events very differently, and covariance shape changes the ranking further (A = 10 moves 725–784 events per seed to NEGLIGIBLE).
+- This supports H5 and the proposal's distance-vs-Pc objective. It also shows that the covariance assumption matters as much as the formula, which makes Exp 1 R2 (estimating real TLE error shapes) important.
+
+**Caveats:**
+- All methods here assume a short-term encounter.
+- Relative-velocity mix per seed: 4–10 events below 0.1 km/s and 98–108 at 0.1–1 km/s, where that assumption is doubtful. The planned 3D Monte Carlo with propagation is not done yet.
+- Absolute Pc values inherit ORCA's assumed σ and radii; only the legacy-vs-Foster comparison is assumption-free, because the inputs are identical.
+
+### Exp 2a: brute-force vs KD-tree runtime
+
+**Setup:**
+- Same snapshot; every object with a TLE ≤ 7 days old that propagates cleanly (15,913, all regimes).
+- SGP4 positions at 12 hourly instants; radius 100 km (ORCA's).
+- Random subsets, seed 1. One warm-up, then 5 repeats; seconds per time step, mean ± sd. Single process.
+- Output: `benchmarks/results/screening_runtime_r100km/`. Hardware is in `run.json` (this laptop; to be stated in the paper).
+- **The pair sets were identical at every size and every instant** (exact comparison), as H1 predicts.
+
+| Objects | Candidate pairs per step | Brute force (numpy, vectorised) | KD-tree (ORCA's method) | Speedup | ORCA's pure-Python fallback |
+|---|---|---|---|---|---|
+| 1,000 | 15.5 | 15.1 ± 5.2 ms | 0.42 ± 0.03 ms | 36× | 1.02 s |
+| 2,000 | 61.6 | 38.1 ± 5.0 ms | 0.81 ± 0.01 ms | 47× | 4.09 s |
+| 4,000 | 234 | 114 ± 11 ms | 1.79 ± 0.05 ms | 63× | not run |
+| 8,000 | 940 | 461 ± 58 ms | 4.07 ± 0.10 ms | 113× | not run |
+| 15,913 | 3,720 | 1,473 ± 19 ms | 8.53 ± 0.07 ms | 173× | not run |
+
+**Reading:**
+- Brute force grows roughly as n², the KD-tree slightly above n. The speedup grows with catalog size.
+- At the full catalog, a KD-tree screen costs ~9 ms per time step. Even a 10 s step over 24 h (8,640 steps) would take ~75 s of screening. So the recall fix from Exp 2b (finer steps) is affordable; the cost lies in propagation and refinement, not in the spatial search.
+- The pure-Python loop is shown only to size ORCA's fallback branch: ~2,400–5,000× slower than the KD-tree at 1–2k objects. It is implementation, not algorithm (Section 1, row 17).
+
+### Exp 4b: does the short-term (straight-line) encounter assumption hold?
+
+**Method:**
+- For each encounter, the actual SGP4 relative path within ±3 h of TCA is integrated: πR² ∫ N(r_rel; 0, C) |dr_rel|, with the covariance frozen at TCA (`pc_line_integral`).
+- This is compared with small-radius Foster at TCA. For a straight path the two are identical (unit test).
+- The measure is the expected number of hard-body tube crossings, so it bounds Pc from above where passes overlap.
+- "Pass" = the stretch of path near the TCA. "Window" = every pass within ±3 h.
+- Encounters: all below 1 km/s (102 / 112 / 113 per seed) plus 200 faster ones as a control.
+- Covariances: ORCA's isotropic one and the A = 10 in-track-dominant variant.
+- Outputs: `benchmarks/results/curvature_n2000_h24_ref10s_seed{1,2,3}/`.
+
+| Relative velocity | Covariance | Pass / Foster, median (seeds 1–3) | Window (±3 h) / Foster, median |
+|---|---|---|---|
+| < 0.1 km/s (n = 4–10) | isotropic | 0.97–1.79 | same |
+| < 0.1 km/s | A = 10 | **5.9–6.3** (every pass truncated by the window) | same |
+| 0.1–1 km/s | isotropic | 1.00 | 6.1–6.5 |
+| 0.1–1 km/s | A = 10 | 1.00 (p95 3.6–7.0; 16–29 passes truncated) | 7.0 |
+| ≥ 1 km/s (control, n = 200) | both | **1.00** (p5–p95 1.00–1.00) | 2.4–6.9 |
+
+**Reading:**
+- **Within one pass** the straight-line model is accurate from 0.1 km/s up. The fast control lands at exactly 1, which validates the method.
+- It breaks down for the slowest, co-orbital encounters with an elongated covariance. There the "encounter" lasts hours, and Foster underestimates by about 6×. These are the encounters ORCA ranks highest.
+- **Across passes:** a LEO pair in the same shell meets again every half orbit, so within ±3 h the same pair accumulates 2–7× the single-pass value. ORCA keeps one row per pair, so the pair-level risk it shows is the single best pass. That is a reporting choice to state, not a formula error.
+- The ±3 h window is a choice, so the window ratios are indicative, not a property of the encounters.
+
+**Caveats:**
+- The covariance is frozen during the encounter.
+- The small-radius approximation (R ≪ σ holds here: about 10 m against ≥ 0.7 km).
+- No 3D Monte Carlo cross-check on real encounters yet: their Pc of ~1e-6 would need ~1e8 samples (Section 1, row 8).
+
+### Exp 1: propagation fidelity (preliminary)
+
+**Setup:**
+- Two snapshots: `catalog_20261014T064759Z` (from the app database; median epoch 2026-10-07) and `catalog_20261014T090520Z` (one Celestrak GET of `active` on 2026-10-14; median epoch 2026-10-13).
+- 15,932 objects in both. 15,893 used: 35 had no later TLE, and 4 had gaps under 1 h or over 14 days.
+- Methods:
+  - ORCA's engine (two-body + drag, built through ORCA's own parser)
+  - two-body + first-order J2 secular rates, using Brouwer mean elements; unit-tested against SGP4's own secular rates (mean-anomaly rate agrees to 1e-5)
+  - SGP4
+- Output: `benchmarks/results/propagation_20261014T064759Z_to_20261014T090520Z/`. `errors.csv` is git-ignored; regenerate it with the script.
+- The J2 tier first used the TLE's Kozai mean motion. That double-counts J2 and produced ~270 km per day of in-track error. It was corrected before the numbers below.
+
+**R1, model consistency** (LEO, 15,157–15,168 objects; the same TLE propagated by each model and differenced against SGP4, median):
+
+| Hours after TLE epoch | 0 | 1 | 6 | 24 | 72 | 168 |
+|---|---|---|---|---|---|---|
+| ORCA engine vs SGP4 (km) | 12 | 15 | 83 | 303 | 1,280 | 2,920 |
+| J2 secular vs SGP4 (km) | 12 | 9 | 8 | 11 | 20 | 83 |
+
+- Both start at ~12 km because they treat mean elements as osculating (mostly in-track short-period terms).
+- J2 holds the orbit plane: cross-track ~2 km at all horizons. ORCA's engine drifts by 100 km cross-track within a day.
+- **Adding J2 to ORCA's engine is the single biggest propagation fix:** ~300 km → ~11 km at 24 h.
+- Per-state cost including setup (scalar calls): SGP4 2 µs, J2 8 µs, ORCA engine 38 µs.
+
+**R2, TLE-to-TLE: old TLE propagated to the new TLE's epoch, against SGP4 of the new TLE.** LEO, horizon 5–7 days (15,041 objects; nearly all objects fall in this one bin, because both snapshots are single fetches).
+
+| Group | Method | Median error | p90 | Robust σ R / I / C (km) |
+|---|---|---|---|---|
+| non-Starlink (4,432) | ORCA engine | 2,531 km | 2,818 km | 99 / 324 / 1,108 |
+| | J2 secular | 24.7 km | 271 km | 0.82 / 35.3 / 1.45 |
+| | **SGP4** | **12.0 km** | 89 km | **0.13 / 14.2 / 0.20** |
+| Starlink (10,609) | ORCA engine | 2,806 km | 3,224 km | 117 / 1,972 / 175 |
+| | **J2 secular** | **38.2 km** | 159 km | 2.53 / 33.3 / 2.47 |
+| | SGP4 | 147.5 km | 475 km | 3.46 / 160 / 0.44 |
+
+**Reading:**
+- **The error shape is extremely anisotropic.** For non-Starlink LEO objects at about 6 days, SGP4's in-track spread is ~100× its radial spread and ~70× its cross-track spread.
+- ORCA assumes an isotropic σ = 0.5 + 2 × 6 ≈ 12.5 km per object at this horizon. That roughly matches the real in-track spread, but overstates radial and cross-track by ~100×. The A = 10 variant in Exp 4 is therefore *conservative*. Real TLE error is more elongated still, which pushes the Pc ranking even further from the miss-distance ranking.
+- **Starlink anomaly:** SGP4 is *worse* than plain J2 for Starlink, and its error grows with B*:
+
+  | Starlink \|B*\| quartile | lowest | 2nd | 3rd | highest |
+  |---|---|---|---|---|
+  | SGP4 median error | 15 km | 49 km | 223 km | 383 km |
+  | J2 median error | 21 km | 29 km | 45 km | 87 km |
+
+  For non-Starlink objects SGP4 beats J2 in every B* quartile. **Hypothesis, now partly supported (see `MD/literature_verification.md` §2.2):** Starlink TLE fits absorb low-thrust station-keeping or manoeuvres into B*, and SGP4 then extrapolates that as drag. Starlink is 70 % of LEO in this catalog, so the result matters for any catalog-wide claim. Evidence and wording: `MD/literature_verification.md` §2.2.
+- The horizon dependence cannot be fitted from one 5–7 day bin. `covariance_model.json` therefore records "no fit". Taking snapshots daily for about a week would give horizons from 1 to 7 days.
+
+**Caveats:**
+- The newer TLE has its own error, and manoeuvres between the epochs count as propagation error.
+- One pair of snapshots.
+- Some epochs in the Celestrak snapshot are dated up to a day after the fetch. Those objects have later epochs and are used as normal; the cause is not investigated.
+
+### Exp 5: end to end, ORCA as built vs corrected (preliminary)
+
+**Setup:**
+- The same 2,000 objects and 24 h window as each Exp 2b seed.
+- **A** = `ConjunctionSearch` exactly as in production: elements through ORCA's parser, engine propagator, 1 h / 100 km KD-tree, bounded Brent over ±6 h, legacy Pc and tiers. Single process.
+- **B** = SGP4; KD-tree every 20 s at 200 km (guaranteed capture below 10 km); range-rate root-finding per pass; Foster Pc with ORCA's hard-body radii. Reports encounters below 10 km. Two covariances:
+  - **B_iso:** ORCA's isotropic σ.
+  - **B_ric:** in-track = ORCA's σ; radial = cross-track = max(σ/100, 0.1 km). This is the Exp 1 shape at ORCA's size; the floor is an assumption.
+- A's events are checked against SGP4 near the TCA A claims (±10 min). A "finds" a B encounter if it reports the same pair within ±10 min.
+- Outputs: `benchmarks/results/end_to_end_n2000_h24_ref10s_seed{1,2,3}/`.
+
+| | Seed 1 | Seed 2 | Seed 3 |
+|---|---|---|---|
+| A: events reported | 231 | 204 | 203 |
+| A: events claiming miss < 10 km | 32 | 34 | 29 |
+| … of which really < 10 km near the claimed TCA | 2 | 3 | 4 |
+| A: \|claimed − true miss\|, median | 90 km | 98 km | 85 km |
+| A: TCA outside the 24 h window | 27 | 28 | 25 |
+| B: encounters < 10 km (Exp 2b reference: 6,576 / 6,803 / 6,244) | 6,576 | 6,802 | 6,244 |
+| **B encounters that A finds** (non-persistent) | **8 of 6,568** | **6 of 6,785** | **7 of 6,214** |
+| Runtime A / B (s, single process) | 2.6 / 23.8 | 2.7 / 25.3 | 2.6 / 24.0 |
+
+**Tiers (ORCA thresholds for all):**
+
+| | CRITICAL | HIGH | MEDIUM | LOW | NEGLIGIBLE |
+|---|---|---|---|---|---|
+| A, legacy (seeds 1–3) | 0–1 | 1–2 | 6–13 | 36–45 | 145–180 |
+| B_iso | 0 | 0 | 15–37 | ~6,200–6,770 | 0–9 |
+| B_ric | 0 | 471–576 | 322–451 | 214–271 | 5,205–5,707 |
+
+**Kendall τ (miss vs Pc ranking):** A 0.87 · B_iso 0.41 · B_ric 0.34.
+
+**Reading:**
+- **End-to-end recall of ORCA as built is ~0.1 %:** 6–8 of ~6,500 encounters below 10 km in 24 h are reported. Its reported miss distances are off by ~90 km (median), and about 1 in 8 of its TCAs fall outside the forecast window.
+  - Exp 2b (sampling), Exp 3 (refinement) and Exp 1 (propagator) each explain part of this.
+  - The corrected pipeline B costs ~9× more time (24 s vs 2.6 s for 2,000 objects and 24 h, single process). It reproduces the dense reference encounter set to within 1 event per seed.
+- **Tiers depend mainly on the assumed covariance, not on the pipeline.** With identical encounters and the same Foster formula, B_iso puts no encounter above MEDIUM. B_ric, with the measured elongated shape, puts ~470–580 per seed in HIGH.
+  - TLEs carry no covariance, so **the risk tier is the least defensible output of any TLE-only pipeline.** The paper should present tiers as conditional on a stated covariance model, not as findings.
+  - That is also the strongest argument for finishing Exp 1's horizon fit, which needs more snapshots.
+
+**Caveats:**
+- B is "corrected" relative to the specific faults measured in Exp 1–4. It is not validated against operational data such as conjunction data messages (CDMs).
+- B_ric's floor and ratio are assumptions, informed by one horizon bin.
+- A and B both use 2,000-object subsets, so absolute counts scale with N²; the ratios are what carry over.
+
+### Monte Carlo convergence (F5)
+
+**Setup:**
+- The three highest-Pc encounters of Exp 4, seed 1, one per pair. All are Starlink–Starlink with Foster Pc ≈ 1.17–1.18 × 10⁻⁶ under ORCA's covariance.
+- 2D Monte Carlo at 10³ to 10⁸ samples; each count is an independent run with a 95 % Clopper-Pearson interval.
+- Output: `benchmarks/results/mc_convergence_seed1/`.
+
+**Result:**
+- Up to 10⁵ samples, and at 10⁶ for one case, there are no hits, so the estimate is 0.
+- At 10⁷ samples the estimate is still within a factor of ~2 of Foster.
+- At 10⁸ samples all three are within ±15 % (ratios 0.86, 0.93, 1.12).
+- Foster lies inside the 95 % interval in 22 of 24 runs, consistent with the 5 % expected miss rate.
+
+This confirms Section 1, row 8: at Pc ~ 10⁻⁶, Monte Carlo needs ~10⁸ samples, and v1's 10³–10⁵ would return zero.
+
+### Exp 1 with three snapshots, and Exp 4 and 5 with the measured covariance
+
+**Exp 1 setup:**
+- A third snapshot, `catalog_20261014T174434Z`: Celestrak `active`, fetched 8.6 h after S2, median epoch 2026-10-14 03:19.
+- `propagation_accuracy.py --snapshots` compares every earlier TLE of each object with every later one. Run in the project `.venv` (Python 3.12, numpy 2.5.2, scipy 1.18.0, sgp4 2.27, the same versions as all earlier results).
+- Output: `benchmarks/results/propagation_20261014T064759Z_to_20261014T174434Z_3snap/`.
+
+**Measured robust σ, LEO, SGP4 TLE-to-TLE** (radial / in-track / cross-track, km; bins with n ≥ 100):
+
+| Horizon (median) | Non-Starlink | n | Starlink | n |
+|---|---|---|---|---|
+| 0.33 d | 0.014 / 0.16 / 0.014 | 3,196 | 0.11 / 2.66 / 0.079 | 3,473 |
+| 0.7 d | 0.030 / 0.31 / 0.044 | 770 | 0.15 / 7.26 / 0.11 | 4,721 |
+| 1.05 d | (n = 39, not used) | | 0.28 / 20.3 / 0.13 | 183 |
+| 6.3 d | 0.14 / 14.6 / 0.21 | 8,350 | 3.92 / 172 / 0.49 | 17,961 |
+
+**Reading:**
+- The growth is strongly non-linear: non-Starlink in-track goes 0.16 → 0.31 → 14.6 km. The straight-line fit stored in the json is therefore *not* used. `benchmarks/covariance.py` interpolates the bins in log-log space and holds the end values outside the measured range.
+- ORCA's assumption (0.5 km + 2 km/day, every axis) is about **3× too wide in-track and ~35× too wide radially** for a fresh non-Starlink TLE. At 6 days it is about right in-track and ~90× too wide radially.
+- Starlink TLEs are ~15× worse in-track than other LEO objects at the same age.
+
+**Exp 4, Foster with the measured covariance** (seeds 1/2/3; outputs `pc_n2000_h24_ref10s_seed{1,2,3}_measured/`):
+
+| | HIGH | MEDIUM | LOW | NEGLIGIBLE | Kendall τ vs miss | Top-100 overlap |
+|---|---|---|---|---|---|---|
+| Foster, ORCA's isotropic σ | 0 | 15–37 | ~6,200–6,750 | 0–7 | 0.41–0.43 | 6–11 % |
+| Foster, assumed A = 10 | 0 | 25–61 | 5,400–5,940 | 725–784 | 0.22–0.23 | 0–1 % |
+| **Foster, measured** | **0–2** | **26–49** | **2,770–3,100** | **3,400–3,840** | **0.30–0.31** | **3–4 %** |
+
+**Exp 5, B_measured** (outputs `end_to_end_n2000_h24_ref10s_seed{1,2,3}_measured/`): HIGH 1–3, MEDIUM 27–62, NEGLIGIBLE 3,421–3,839 per seed.
+
+The **B_ric assumption** from Section 10, Exp 5 (in-track = ORCA's σ, radial = max(σ/100, 0.1 km)) had produced 471–576 HIGH. **The measurement does not support it.** Real TLE uncertainty is much smaller than ORCA's for young TLEs. That makes most km-scale misses confidently safe: about half of all encounters below 10 km become NEGLIGIBLE, and only 0–3 per seed stay HIGH.
+
+**Conclusion for the paper:** the tier distribution swings from "~500 HIGH" to "~2 HIGH" between two plausible covariance assumptions. The tier outcome is set by the covariance model. A measured model gives the defensible answer, which is that almost none of these encounters is high-risk.
+
+**Caveats:**
+- Three snapshots over one day.
+- Non-Starlink objects have no usable 1–5 day bin, so interpolation spans 0.7 → 6.3 days.
+- The TLE-to-TLE spread includes the newer TLE's own error.
+- Run `benchmarks/refresh_measured.ps1` daily to tighten this.
+
+### Literature verification (2026-10-14): effect on the results
+
+See `MD/literature_verification.md` for the full log and `MD/references.bib` for the entries.
+
+- **The measured covariance is probably too tight at short ages.**
+  - TLE-to-TLE comparison "does underestimate [the error] near the epoch" [kelso2007validation].
+  - Flohrer et al. give LEO at-epoch uncertainty of 0.10 / 0.47 / 0.13 km [flohrer2009improving], 3–9× our 0.33-day values.
+  - So the measured-covariance tiers (0–3 HIGH) are likely optimistic. Add a variant floored at the Flohrer values before stating them.
+- **Starlink.** CelesTrak's comparison puts the public Starlink elements a median 6.8 km from operator-derived elements at a median age of 0.6 d. Published work attributes Starlink prediction error to low-thrust propulsion. Our B* result is consistent with this, but "B* absorbs thrust" is not proven anywhere.
+- **Prior work is closer than assumed.** George & Harvey 2011, Medhin & Servadio 2026, Sonawane 2026 and Auman et al. 2025 all overlap with this paper. The novelty claim is narrowed to:
+  - the recall-vs-time-step sweep on public TLEs;
+  - stage-by-stage attribution in one open pipeline;
+  - the audit of a working tool's Pc formula;
+  - the tier swing between assumed and measured covariance.
+
+  k-d tree screening, Pc from TLEs, and covariance estimated from TLE history (COVGEN) are prior art.
+- **External ground truth available:** the Auman/Aerospace screening answer key (CC0) could validate Exp 2b.
+
+### Exp 4/5 with the measured covariance floored at ESA's at-epoch values
+
+**Why:** Kelso 2007 says TLE-to-TLE comparison underestimates error near epoch. So each measured σ is bounded below by Flohrer et al. 2009's LEO at-epoch values of 0.102 / 0.471 / 0.126 km (`--covariance-floor 0.102 0.471 0.126`).
+
+**Outputs:** `pc_*_measured_floor/` and `end_to_end_*_measured_floor/`.
+
+| Seed | Exp 4 (Foster, measured + floor): HIGH / MEDIUM / LOW / NEGLIGIBLE | Kendall τ | Exp 5 B_measured+floor: HIGH / MEDIUM |
+|---|---|---|---|
+| 1 | 1 / 27 / 3,104 / 3,436 | 0.307 | 1 / 28 |
+| 2 | 0 / 49 / 2,898 / 3,839 | 0.310 | 4 / 61 |
+| 3 | 1 / 44 / 2,768 / 3,401 | 0.303 | 1 / 44 |
+
+**Reading:**
+- The result barely moves (0–4 HIGH; about half NEGLIGIBLE), because in this window most TLEs are 2–9 days old at TCA. At those ages the measured σ already exceeds the floor in-track, and the floor binds only some radial and cross-track values.
+- So the near-epoch underestimate does not drive the "almost nothing is HIGH" conclusion *for this window*.
+- With fresher TLEs, ages under 1 day, the floor would matter. The production engine (v2) applies it by default.
+- The conclusion stands as: under a measured, floored covariance, only a handful of the ~6,500 encounters per 2,000 objects per day reach HIGH. Under the assumed shapes the count ranges from 0 to ~500. **The covariance model, not the geometry, decides the tier.**
