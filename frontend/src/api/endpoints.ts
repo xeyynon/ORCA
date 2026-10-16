@@ -1,6 +1,6 @@
 import { apiFetch } from './client'
 import type {
-  CatalogSummaryResponse, ConjunctionEvent, Health, OrbitPathResponse, PairAssessment,
+  CatalogSummaryResponse, ConjunctionMethod, ConjunctionSearchResult, Health, OrbitPathResponse, PairAssessment,
   PositionsResponse, StatisticsResponse, TleRecord, UpdateTlesResponse,
 } from './types'
 
@@ -30,10 +30,12 @@ export const getTle = (id: string, o: Opt = {}) => apiFetch<TleRecord>(`/api/tle
 export const getOrbitPath = (id: string, hoursOffset: number, o: Opt = {}) =>
   apiFetch<OrbitPathResponse>(`/api/orbit-path/${encodeURIComponent(id)}?hours_offset=${hoursOffset}`, o)
 
-export interface ConjunctionQuery { horizonDays: number; stepHours: number; limit: number }
+/** The screening step is fixed by the server (so no approach can fall between steps); only the horizon and list length are chosen. */
+export interface ConjunctionQuery { horizonDays: number; limit: number }
 export const getConjunctions = (q: ConjunctionQuery, o: Opt = {}) =>
-  apiFetch<ConjunctionEvent[]>(
-    `/api/conjunctions?time_horizon_days=${q.horizonDays}&search_step_hours=${q.stepHours}&limit=${q.limit}`, o)
+  apiFetch<ConjunctionSearchResult>(`/api/conjunctions?time_horizon_days=${q.horizonDays}&limit=${q.limit}`, o)
+
+export const getConjunctionMethod = (o: Opt = {}) => apiFetch<ConjunctionMethod>('/api/conjunctions/method', o)
 
 export const getPairAssessment = (a: string, b: string, o: Opt = {}) =>
   apiFetch<PairAssessment>(`/api/conjunction-pair/${encodeURIComponent(a)}/${encodeURIComponent(b)}`, o)

@@ -26,7 +26,7 @@ from parser_pipeline import CelestrackClient, TLEDatabase, TLE
 from orbit_mech_engine import OrbitalElement, SGP4Propagator, CoordinateTransform, _julian_day, _gmst
 from sgp4.api import Satrec, SatrecArray, jday
 import numpy as np
-from conjunction_detection import ConjunctionDetector, ConjunctionSearch, ConjunctionEvent
+from conjunction_detection import ConjunctionDetector, ConjunctionSearch, ConjunctionEvent, method_description
 from Analytics import OrbitalAnalytics, ExportUtils, OBJECT_TYPES, REGIMES, classify_object_type, classify_regime
 
 
@@ -197,7 +197,24 @@ class ConjunctionResponse(BaseModel):
     probability_of_collision: float
     risk_level: str
     relative_velocity_kms: float = 0.0
- 
+    tle_age_days: float = 0.0
+    uncertainty_km: float = 0.0
+    long_encounter: bool = False
+
+
+class ConjunctionSearchResponse(BaseModel):
+    """The most probable events plus counts over everything found, so a short list is never mistaken for all."""
+    events: List[ConjunctionResponse]
+    total_events: int
+    tier_counts: Dict[str, int]
+    long_encounters: int
+    window_start: str
+    window_end: str
+    objects: int
+    report_km: float
+    step_s: float
+    runtime_s: float
+
  
 class CatalogStatsResponse(BaseModel):
     """Catalog statistics response"""
@@ -419,10 +436,13 @@ async def propagate_satellite(
     # Propagate
     oe = tle.to_orbital_element()
     prop = SGP4Propagator(oe)
-    
+
     t_prop = oe.epoch + timedelta(hours=hours_ahead)
-    state = prop.propagate(t_prop)
-    
+    try:
+        state = prop.propagate(t_prop)
+    except ValueError as e:  # SGP4 rejects the element set at that time, e.g. a decayed orbit
+        raise HTTPException(status_code=422, detail=f"SGP4 cannot propagate {norad_id}: {e}")
+
     return StateVectorResponse(
         x=state.r[0],
         y=state.r[1],
@@ -437,6 +457,7 @@ async def propagate_satellite(
  
  
 PROPAGATOR_LABEL = "SGP4 (sgp4 library, TEME frame)"
+EXPORT_MAX_EVENTS = 10_000
 MAX_REQUESTED_IDS = 50
 _RE_KM = 6371.0  # the Earth radius the engine uses (orbit_mech_engine.RE)
 
@@ -694,14 +715,25 @@ async def get_orbital_elements(norad_id: str):
 # CONJUNCTION DETECTION ENDPOINTS
 # ============================================================================
  
-@app.get("/api/conjunctions", response_model=List[ConjunctionResponse])
+@app.get("/api/conjunctions/method")
+def conjunction_method():
+    """How conjunctions are found and scored, and the limits of the result (shown next to the numbers)."""
+    return method_description()
+
+
+@app.get("/api/conjunctions", response_model=ConjunctionSearchResponse)
 def search_conjunctions(  # sync on purpose: runs in FastAPI's threadpool so /health stays responsive during a search
-    time_horizon_days: int = Query(7, ge=1, le=30),
+    time_horizon_days: int = Query(1, ge=1, le=7),
     limit: int = Query(100, ge=1, le=1000),
-    search_step_hours: float = Query(2.0, ge=0.5, le=12)
+    search_step_hours: Optional[float] = Query(None, description="Ignored (kept for old clients): the step is "
+                                                                 "fixed so screening cannot miss an approach"),
 ):
-    """Search for conjunctions across catalog"""
-    
+    """
+    Every approach closer than the report distance (10 km) in the horizon, most probable first. Returns the
+    first `limit` events and counts over all of them. Runtime grows with catalog size and horizon
+    (about 1.5 min per day of horizon for ~16,000 objects on a laptop).
+    """
+
     # Load catalog
     all_tles = db.get_all_tles()
     
@@ -712,30 +744,42 @@ def search_conjunctions(  # sync on purpose: runs in FastAPI's threadpool so /he
     for tle in all_tles:
         orbital_elements[tle.norad_cat_id] = (tle.to_orbital_element(), tle.object_name)
     
-    # Search
-    detector = ConjunctionDetector(
-        time_horizon_days=time_horizon_days,
-        search_step_hours=search_step_hours
-    )
+    detector = ConjunctionDetector(time_horizon_days=time_horizon_days)
     search = ConjunctionSearch(detector)
-    conjunctions = search.search_catalog(orbital_elements)
-    
-    # Return top results
-    return [
-        ConjunctionResponse(
-            sat1_id=c.sat1_id,
-            sat1_name=c.sat1_name,
-            sat2_id=c.sat2_id,
-            sat2_name=c.sat2_name,
-            tca=c.tca.isoformat(),
-            min_distance_km=c.min_distance,
-            probability_of_collision=c.probability_of_collision,
-            risk_level=c.risk_level,
-            relative_velocity_kms=c.relative_velocity_kms,
-        )
-        for c in conjunctions[:limit]
-    ]
- 
+    started = datetime.utcnow()
+    conjunctions = search.search_catalog(orbital_elements, top=limit)
+    stats = search.last_stats
+    window_start, window_end = search.last_window
+
+    return ConjunctionSearchResponse(
+        events=[
+            ConjunctionResponse(
+                sat1_id=c.sat1_id,
+                sat1_name=c.sat1_name,
+                sat2_id=c.sat2_id,
+                sat2_name=c.sat2_name,
+                tca=c.tca.isoformat(),
+                min_distance_km=c.min_distance,
+                probability_of_collision=c.probability_of_collision,
+                risk_level=c.risk_level,
+                relative_velocity_kms=c.relative_velocity_kms,
+                tle_age_days=c.tle_age_days,
+                uncertainty_km=c.uncertainty_km,
+                long_encounter=c.long_encounter,
+            )
+            for c in conjunctions
+        ],
+        total_events=stats.get("total_events", 0),
+        tier_counts=stats.get("tier_counts", {}),
+        long_encounters=stats.get("long_encounters", 0),
+        window_start=window_start.isoformat(),
+        window_end=window_end.isoformat(),
+        objects=len(orbital_elements),
+        report_km=detector.report_km,
+        step_s=detector.step_s,
+        runtime_s=(datetime.utcnow() - started).total_seconds(),
+    )
+
  
 @app.get("/api/conjunction-pair/{id1}/{id2}")
 async def assess_conjunction_pair(id1: str, id2: str):
@@ -747,8 +791,8 @@ async def assess_conjunction_pair(id1: str, id2: str):
     if not tle1 or not tle2:
         raise HTTPException(status_code=404, detail="One or both TLEs not found")
     
-    detector = ConjunctionDetector(time_horizon_days=7, search_step_hours=1.0)
-    
+    detector = ConjunctionDetector(time_horizon_days=7)
+
     event = detector.assess_pair(
         tle1.to_orbital_element(),
         tle2.to_orbital_element(),
@@ -758,7 +802,8 @@ async def assess_conjunction_pair(id1: str, id2: str):
     )
     
     if not event:
-        return {"status": "no_risk", "message": "No conjunction event detected"}
+        return {"status": "no_risk",
+                "message": f"No approach closer than {detector.report_km:g} km in the next 7 days"}
     
     return event.to_dict()
 
@@ -793,7 +838,7 @@ async def catalog_statistics():
  
 @app.get("/api/export/conjunctions")
 def export_conjunctions(format: str = Query("json", regex="^(json|csv)$")):
-    """Export conjunction results (3-day horizon from now).
+    """Export conjunction results: 1-day horizon from now, the EXPORT_MAX_EVENTS most probable events.
 
     A plain `def`, not `async def`: the catalog search is minutes of CPU work, so FastAPI runs it in its thread
     pool instead of blocking the event loop. The file goes in a fresh temp directory (portable, and two
@@ -805,9 +850,9 @@ def export_conjunctions(format: str = Query("json", regex="^(json|csv)$")):
     for tle in all_tles:
         orbital_elements[tle.norad_cat_id] = (tle.to_orbital_element(), tle.object_name)
 
-    detector = ConjunctionDetector(time_horizon_days=3, search_step_hours=2.0)
+    detector = ConjunctionDetector(time_horizon_days=1)
     search = ConjunctionSearch(detector)
-    conjunctions = search.search_catalog(orbital_elements)
+    conjunctions = search.search_catalog(orbital_elements, top=EXPORT_MAX_EVENTS)
 
     output_dir = Path(tempfile.mkdtemp(prefix="orca-export-"))
     if format == "json":
