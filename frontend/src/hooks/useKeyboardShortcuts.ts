@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { pressesFocusedControl } from '@/lib/shortcuts'
 
 export type Bindings = Record<string, () => void>
 
@@ -14,6 +15,7 @@ function isTyping(el: EventTarget | null): boolean {
  *  - skip events another widget already handled (defaultPrevented)
  *  - skip Ctrl/Meta/Alt chords so browser and OS shortcuts keep working
  *  - never fire while typing; Esc inside a text box only blurs it
+ *  - leave Space and Enter to a focused button or link (a Space shortcut must not stop Play being pressed)
  * Bindings live in a ref so handlers can change without rebinding the listener.
  */
 export function useKeyboardShortcuts(bindings: Bindings, enabled = true) {
@@ -28,6 +30,7 @@ export function useKeyboardShortcuts(bindings: Bindings, enabled = true) {
         if (e.key === 'Escape') (e.target as HTMLElement).blur()
         return
       }
+      if (e.target instanceof HTMLElement && pressesFocusedControl(e.key, e.target.tagName, e.target.getAttribute('role'))) return
       const fn = ref.current[e.key.length === 1 ? e.key.toLowerCase() : e.key]
       if (fn) { e.preventDefault(); fn() }
     }
