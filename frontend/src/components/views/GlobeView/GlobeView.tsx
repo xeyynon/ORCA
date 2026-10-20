@@ -11,6 +11,7 @@ import { usePlayback } from '@/hooks/usePlayback'
 import { usePositions } from '@/hooks/usePositions'
 import { useTleById } from '@/hooks/useTleById'
 import { countBy } from '@/lib/countBy'
+import { plural } from '@/lib/format'
 import { EARTH_RADIUS_KM } from '@/lib/coords'
 import type { CameraGeo, Vec3 } from '@/lib/coords'
 import { filterObjects } from '@/lib/globePrefs'
@@ -180,16 +181,16 @@ export function GlobeView({ catalog, totalCount, selection, focus, conjunction, 
         {positions.status === 'error' && !positions.data ? (
           <EmptyState kind="error" title="Could not load positions" action={<Button onClick={positions.reload}>Retry</Button>}>{positions.error.message}</EmptyState>
         ) : null}
-        {positions.status === 'loading' && !positions.data ? <EmptyState kind="awaiting" title="Propagating catalog…" /> : null}
-        {positions.status === 'error' && positions.data ? <FieldNote>Position refresh failed ({positions.error.message}). Showing the last good snapshot; it is extrapolated for at most two minutes.</FieldNote> : null}
+        {positions.status === 'loading' && !positions.data ? <EmptyState kind="awaiting" title="Calculating positions…" /> : null}
+        {positions.status === 'error' && positions.data ? <FieldNote>Could not refresh positions ({positions.error.message}). Showing the last positions received, moved forward for at most two minutes.</FieldNote> : null}
         {positions.data && positions.data.objects.length === 0 ? (
           totalCount === 0
             ? <EmptyCatalog cause={whyCatalogEmpty(lastFetch)} onGoData={onGoData} />
-            : <EmptyState kind="none" title="No positions returned">No element set in the catalog could be propagated.</EmptyState>
+            : <EmptyState kind="none" title="No positions to show">None of the TLEs in the catalog could be used to calculate a position.</EmptyState>
         ) : null}
-        {positions.data && positions.data.skipped > 0 ? <FieldNote>{positions.data.skipped} object(s) could not be propagated and are not drawn.</FieldNote> : null}
-        {notDrawn.length > 0 ? <FieldNote>{notDrawn.map(nameOf).join(', ')} could not be drawn: it is not in the catalog, or SGP4 cannot propagate it (decayed or invalid elements).</FieldNote> : null}
-        {failed.length > 0 ? <FieldNote>Orbit path unavailable for {failed.map(nameOf).join(', ')}.</FieldNote> : null}
+        {positions.data && positions.data.skipped > 0 ? <FieldNote>{plural(positions.data.skipped, 'object')} could not be calculated and {positions.data.skipped === 1 ? 'is' : 'are'} not shown.</FieldNote> : null}
+        {notDrawn.length > 0 ? <FieldNote>{notDrawn.map(nameOf).join(', ')} can't be shown. {notDrawn.length === 1 ? 'It' : 'They'} may not be in the catalog, or the TLE can't produce a position (for example, the object has decayed).</FieldNote> : null}
+        {failed.length > 0 ? <FieldNote>No orbit path available for {failed.map(nameOf).join(', ')}.</FieldNote> : null}
 
       </aside>
     </div>

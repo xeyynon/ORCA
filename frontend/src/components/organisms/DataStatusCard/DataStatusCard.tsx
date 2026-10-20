@@ -24,20 +24,20 @@ export function DataStatusCard({ count, lastUpdate, lastFetch, newestAgeDays, ol
       <Label>Catalog status</Label>
       <div className="data-status__grid">
         <FactRow label="Objects stored"><Mono>{integer(count)}</Mono></FactRow>
-        <FactRow label="Last refresh via API">
-          {lastUpdate ? <Mono>{formatUtc(lastUpdate)}</Mono> : <Mono muted>{count ? 'Not refreshed through the API' : 'Never'}</Mono>}
+        <FactRow label="Last refresh">
+          {lastUpdate ? <Mono>{formatUtc(lastUpdate)}</Mono> : <Mono muted>{count ? 'Not refreshed from this app' : 'Never'}</Mono>}
         </FactRow>
         <FactRow label="Last Celestrak fetch">
           {lastFetch ? <Mono>{lastFetch.status === 'ok' ? 'ok' : lastFetch.detail} ({formatUtc(lastFetch.at)})</Mono> : <Mono muted>None since the server started</Mono>}
         </FactRow>
-        <FactRow label="Newest element set">
+        <FactRow label="Newest TLE">
           {newestAgeDays !== null ? <TleAgeChip ageDays={newestAgeDays} /> : <Mono muted>—</Mono>}
         </FactRow>
-        <FactRow label="Oldest element set">
+        <FactRow label="Oldest TLE">
           {oldestAgeDays !== null ? <Mono>{days(oldestAgeDays)}</Mono> : <Mono muted>—</Mono>}
         </FactRow>
       </div>
-      <FieldNote>“Last refresh” is when this API last stored a Celestrak fetch. It is not the age of the orbital data, which is the TLE epoch shown beside it.</FieldNote>
+      <FieldNote>“Last refresh” is when ORCA last saved a download from Celestrak. It says nothing about how old the orbital data is: each TLE has its own date, shown under Newest and Oldest TLE.</FieldNote>
     </section>
   )
 }

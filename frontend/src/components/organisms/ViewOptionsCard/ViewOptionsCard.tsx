@@ -17,7 +17,7 @@ const NO_CONJUNCTION = 'No conjunction is active. Use “Show both objects on th
 export function ViewOptionsCard({ prefs, onChange, conjunctionActive }: Props) {
   return (
     <Panel title="View options">
-      <CheckboxRow label="Show satellites" checked={prefs.showSatellites} onChange={(v) => onChange({ showSatellites: v })} title="Draw the catalog objects. Selected objects are always drawn." />
+      <CheckboxRow label="Show objects" checked={prefs.showSatellites} onChange={(v) => onChange({ showSatellites: v })} title="Draw the catalog objects. Selected objects are always drawn." />
       <CheckboxRow label="Show orbital paths" checked={prefs.showOrbits} onChange={(v) => onChange({ showOrbits: v })} title="One full orbit for each selected object" />
       <CheckboxRow label="Show conjunction" checked={prefs.showConjunction} onChange={(v) => onChange({ showConjunction: v })} disabled={!conjunctionActive} title={conjunctionActive ? undefined : NO_CONJUNCTION} />
       <CheckboxRow label="Label selected objects" checked={prefs.labelSelected} onChange={(v) => onChange({ labelSelected: v })} />

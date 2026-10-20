@@ -53,8 +53,8 @@ export function ObjectCard({ tle, position, now, onClose }: Props) {
           </>
         ) : null}
       </div>
-      {!position ? <FieldNote>This object is not in the loaded position subset, so there is no live position for it.</FieldNote> : null}
-      <FieldNote>Size and shape here are derived from the TLE mean motion (rev/day → rad/s, then Kepler's third law), not read from a stored field.</FieldNote>
+      {!position ? <FieldNote>No live position is loaded for this object.</FieldNote> : null}
+      <FieldNote>Altitude, period and the other orbit figures are calculated from the TLE's mean motion. The catalog does not store them.</FieldNote>
     </aside>
   )
 }

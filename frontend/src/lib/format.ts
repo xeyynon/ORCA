@@ -11,6 +11,11 @@ export function integer(v: number | null | undefined): string {
   return isMissing(v) ? NO_DATA : Math.round(v).toLocaleString('en-US')
 }
 
+/** "1 day", "7 days": a count with its noun, so copy never says "day(s)". */
+export function plural(n: number, one: string, many: string = `${one}s`): string {
+  return `${integer(n)} ${n === 1 ? one : many}`
+}
+
 /** Pc spans many decades, so it is always scientific. Zero prints as 0. */
 export function pc(v: number | null | undefined): string {
   const parts = pcParts(v)

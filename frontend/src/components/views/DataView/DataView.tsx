@@ -42,10 +42,10 @@ export function DataView({ health, apiStatus, summary, update }: Props) {
         <Label>API</Label>
         <div className="data-view__api-grid">
           <FactRow label="Status"><StatusIndicator tone={tone} label={label} /></FactRow>
-          <FactRow label="Base URL"><Mono>{API_BASE || 'same origin'}</Mono></FactRow>
-          <FactRow label="Interactive docs"><a className="data-view__link" href={`${API_BASE}/docs`} target="_blank" rel="noreferrer">/docs (Swagger)</a></FactRow>
+          <FactRow label="Address"><Mono>{API_BASE || 'same origin'}</Mono></FactRow>
+          <FactRow label="Documentation"><a className="data-view__link" href={`${API_BASE}/docs`} target="_blank" rel="noreferrer">Open the API docs</a></FactRow>
         </div>
-        <FieldNote>The dashboard and this app read the same SQLite file through the API. Refreshing here changes what every view shows.</FieldNote>
+        <FieldNote>Every page reads this one catalog through the API, so a refresh here changes what all of them show.</FieldNote>
       </section>
     </PageLayout>
   )

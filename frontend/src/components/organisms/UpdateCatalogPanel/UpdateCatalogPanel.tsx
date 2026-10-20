@@ -37,19 +37,19 @@ export function UpdateCatalogPanel({ phase, before, after, error, apiOnline, gro
       </div>
 
       {phase === 'waiting' ? (
-        <EmptyState kind="awaiting" title="Fetch started">Waiting for the stored object count to change. This can take a minute.</EmptyState>
+        <EmptyState kind="awaiting" title="Refresh started">Waiting for new objects to be saved. This can take a minute.</EmptyState>
       ) : null}
       {phase === 'changed' ? (
         <EmptyState kind="none" title="Catalog updated">Objects stored: {integer(before)} → {integer(after)}.</EmptyState>
       ) : null}
       {phase === 'unchanged' ? (
-        <EmptyState kind="error" title={`No change observed after ${UPDATE_GIVE_UP_MS / 1000} s`}>
-          The stored count stayed at {integer(after)}. No fetch result was reported either, so the fetch may still be running. Check again in a minute.
+        <EmptyState kind="error" title={`Nothing changed after ${UPDATE_GIVE_UP_MS / 1000} s`}>
+          The count is still {integer(after)} and no result came back, so the refresh may still be running. Check again in a minute.
         </EmptyState>
       ) : null}
       {phase === 'refused' ? (
         <EmptyState kind="error" title="Celestrak did not provide new data">
-          {error} The stored catalog was left as it was ({integer(after)} objects).
+          {error} The catalog was left unchanged ({integer(after)} objects).
         </EmptyState>
       ) : null}
       {phase === 'failed' ? <EmptyState kind="error" title="Could not start the refresh">{error}</EmptyState> : null}
