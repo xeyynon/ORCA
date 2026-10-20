@@ -13,10 +13,16 @@ export function integer(v: number | null | undefined): string {
 
 /** Pc spans many decades, so it is always scientific. Zero prints as 0. */
 export function pc(v: number | null | undefined): string {
-  if (isMissing(v)) return NO_DATA
-  if (v === 0) return '0'
-  const [mant, exp] = v.toExponential(2).split('e')
-  return `${mant} × 10^${Number(exp)}`
+  const parts = pcParts(v)
+  if (parts === null) return isMissing(v) ? NO_DATA : '0'
+  return `${parts.mantissa} × 10^${parts.exponent}`
+}
+
+/** Pc split for display with a real superscript: 2.5e-7 -> { mantissa: '2.50', exponent: -7 }. null for zero or a missing value. */
+export function pcParts(v: number | null | undefined): { mantissa: string; exponent: number } | null {
+  if (isMissing(v) || v === 0) return null
+  const [mantissa, exp] = v.toExponential(2).split('e')
+  return { mantissa, exponent: Number(exp) }
 }
 
 /**

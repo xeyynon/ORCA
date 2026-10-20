@@ -121,6 +121,7 @@ export function Workspace({ username, onSignOut, theme, onToggleTheme: toggleThe
           onSelect={(id) => setSelection(id ? [id] : [])}
           onOpenGlobe={(id) => showOnGlobe([id])}
           onGoData={() => go('data')}
+          lastFetch={health?.database.last_fetch}
           now={now}
         />
       ) : null}
@@ -138,11 +139,13 @@ export function Workspace({ username, onSignOut, theme, onToggleTheme: toggleThe
           onCamera={setCamera}
           onClearConjunction={() => setConjunction(null)}
           onViewConjunctions={() => go('conjunctions')}
+          lastFetch={health?.database.last_fetch}
+          onGoData={() => go('data')}
         />
         </Suspense>
       ) : null}
       {view === 'conjunctions' ? <ConjunctionsView now={now} catalogSize={health?.database.tles_count ?? catalog.data?.length ?? null} onShowOnGlobe={showOnGlobe} /> : null}
-      {view === 'analytics' ? <AnalyticsView catalog={catalog} stats={stats} totalCount={health?.database.tles_count ?? null} now={now} /> : null}
+      {view === 'analytics' ? <AnalyticsView catalog={catalog} stats={stats} totalCount={health?.database.tles_count ?? null} lastFetch={health?.database.last_fetch} onGoData={() => go('data')} now={now} /> : null}
       {view === 'data' ? <DataView health={health} apiStatus={apiStatus} summary={summary} update={update} /> : null}
 
       <StatusBar items={status} />

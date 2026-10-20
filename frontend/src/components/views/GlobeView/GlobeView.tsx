@@ -1,5 +1,6 @@
 import { useMemo, useRef, useState } from 'react'
-import type { ConjunctionEvent, ObjectType, TleRecord } from '@/api/types'
+import type { ConjunctionEvent, FetchOutcome, ObjectType, TleRecord } from '@/api/types'
+import { whyCatalogEmpty } from '@/lib/catalogState'
 import type { Snapshot } from '@/globe/EarthScene'
 import { useCatalogSummary } from '@/hooks/useCatalogSummary'
 import { useFullscreen } from '@/hooks/useFullscreen'
@@ -23,6 +24,7 @@ import { EmptyState } from '../../molecules/EmptyState/EmptyState'
 import { FieldNote } from '../../molecules/FieldNote/FieldNote'
 import { CatalogSummaryCard } from '../../organisms/CatalogSummaryCard/CatalogSummaryCard'
 import { ConjunctionCard } from '../../organisms/ConjunctionCard/ConjunctionCard'
+import { EmptyCatalog } from '../../organisms/EmptyCatalog/EmptyCatalog'
 import { FiltersCard } from '../../organisms/FiltersCard/FiltersCard'
 import { GlobeCanvas } from '../../organisms/GlobeCanvas/GlobeCanvas'
 import type { FocusRequest } from '../../organisms/GlobeCanvas/GlobeCanvas'
@@ -49,10 +51,13 @@ type Props = {
   onCamera: (geo: CameraGeo) => void
   onClearConjunction: () => void
   onViewConjunctions: () => void
+  /** The API's record of its last Celestrak fetch, so an empty catalog is explained by what actually happened. */
+  lastFetch: FetchOutcome | null | undefined
+  onGoData: () => void
 }
 
 /** Three panels: what is in the catalog and how to filter it; the globe with its playback bar; what is selected. */
-export function GlobeView({ catalog, totalCount, selection, focus, conjunction, theme, now, onSelect, onCamera, onClearConjunction, onViewConjunctions }: Props) {
+export function GlobeView({ catalog, totalCount, selection, focus, conjunction, theme, now, onSelect, onCamera, onClearConjunction, onViewConjunctions, lastFetch, onGoData }: Props) {
   const [prefs, setPrefs] = useGlobePrefs()
   const playback = usePlayback()
   const [autoRotate, setAutoRotate] = useState(true)
@@ -177,7 +182,11 @@ export function GlobeView({ catalog, totalCount, selection, focus, conjunction, 
         ) : null}
         {positions.status === 'loading' && !positions.data ? <EmptyState kind="awaiting" title="Propagating catalog…" /> : null}
         {positions.status === 'error' && positions.data ? <FieldNote>Position refresh failed ({positions.error.message}). Showing the last good snapshot; it is extrapolated for at most two minutes.</FieldNote> : null}
-        {positions.data && positions.data.objects.length === 0 ? <EmptyState kind="none" title="No positions returned">The catalog is empty or no element set could be propagated.</EmptyState> : null}
+        {positions.data && positions.data.objects.length === 0 ? (
+          totalCount === 0
+            ? <EmptyCatalog cause={whyCatalogEmpty(lastFetch)} onGoData={onGoData} />
+            : <EmptyState kind="none" title="No positions returned">No element set in the catalog could be propagated.</EmptyState>
+        ) : null}
         {positions.data && positions.data.skipped > 0 ? <FieldNote>{positions.data.skipped} object(s) could not be propagated and are not drawn.</FieldNote> : null}
         {notDrawn.length > 0 ? <FieldNote>{notDrawn.map(nameOf).join(', ')} could not be drawn: it is not in the catalog, or SGP4 cannot propagate it (decayed or invalid elements).</FieldNote> : null}
         {failed.length > 0 ? <FieldNote>Orbit path unavailable for {failed.map(nameOf).join(', ')}.</FieldNote> : null}

@@ -1,12 +1,13 @@
 import { useMemo, useState } from 'react'
 import type { ConjunctionEvent } from '@/api/types'
 import { formatRelative, formatUtc } from '@/lib/time'
-import { fixed, pc } from '@/lib/format'
+import { fixed } from '@/lib/format'
 import { riskRank } from '@/lib/risk'
 import { sortBy } from '@/lib/sort'
 import { pairKey } from '@/lib/pair'
 import { Badge } from '../../atoms/Badge/Badge'
 import { Mono } from '../../atoms/Mono/Mono'
+import { PcValue } from '../../molecules/PcValue/PcValue'
 import { RiskBadge } from '../../molecules/RiskBadge/RiskBadge'
 import { ValueUnit } from '../../molecules/ValueUnit/ValueUnit'
 import type { SortDir } from '../../molecules/SortHeader/SortHeader'
@@ -46,7 +47,7 @@ export function ConjunctionTable({ events, selectedKey, onSelect, compact = fals
       ),
     },
     { id: 'pair', label: 'Pair', render: (e) => <span>{e.sat1_name} <Mono muted>×</Mono> {e.sat2_name}</span> },
-    { id: 'pc', label: 'Pc', sortable: true, align: 'right', render: (e) => <Mono>{pc(e.probability_of_collision)}</Mono> },
+    { id: 'pc', label: 'Pc', sortable: true, align: 'right', render: (e) => <PcValue value={e.probability_of_collision} /> },
     { id: 'miss', label: 'Miss distance', sortable: true, align: 'right', render: (e) => <ValueUnit value={fixed(e.min_distance_km, 3)} unit="km" /> },
     {
       id: 'unc', label: 'Uncertainty (1 sigma)', sortable: true, align: 'right',

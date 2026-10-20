@@ -1,7 +1,8 @@
 import { useMemo } from 'react'
-import type { StatisticsResponse, TleRecord } from '@/api/types'
+import type { FetchOutcome, StatisticsResponse, TleRecord } from '@/api/types'
 import type { AsyncResult } from '@/hooks/useAsync'
 import { deriveSeries, summarizeCatalog } from '@/lib/catalog'
+import { whyCatalogEmpty } from '@/lib/catalogState'
 import { AGE_TONE_COLOR, ALTITUDE_BAND_COLOR, catColor, INCLINATION_COLOR } from '@/lib/chartColors'
 import { countBy } from '@/lib/countBy'
 import { fixed, integer } from '@/lib/format'
@@ -18,6 +19,7 @@ import { SectionHeader } from '../../molecules/SectionHeader/SectionHeader'
 import { BarList } from '../../organisms/BarList/BarList'
 import { ChartCard } from '../../organisms/ChartCard/ChartCard'
 import { ChartLegend } from '../../organisms/ChartLegend/ChartLegend'
+import { EmptyCatalog } from '../../organisms/EmptyCatalog/EmptyCatalog'
 import { Histogram } from '../../organisms/Histogram/Histogram'
 import { HeatmapChart } from '../../organisms/HeatmapChart/HeatmapChart'
 import { KpiRow } from '../../organisms/KpiRow/KpiRow'
@@ -25,7 +27,15 @@ import { PageLayout } from '../../organisms/PageLayout/PageLayout'
 import { RegimeBreakdown } from '../../organisms/RegimeBreakdown/RegimeBreakdown'
 import './AnalyticsView.css'
 
-type Props = { catalog: AsyncResult<TleRecord[]>; stats: AsyncResult<StatisticsResponse>; totalCount: number | null; now: Date }
+type Props = {
+  catalog: AsyncResult<TleRecord[]>
+  stats: AsyncResult<StatisticsResponse>
+  totalCount: number | null
+  /** The API's record of its last Celestrak fetch, so an empty catalog is explained by what actually happened. */
+  lastFetch: FetchOutcome | null | undefined
+  onGoData: () => void
+  now: Date
+}
 
 const BAND_LABEL = { LEO: 'LEO (<2,000 km)', MEO: 'MEO (2,000–35,300 km)', GEO: 'GEO (≈35,786 km)', BEYOND: 'Beyond GEO' } as const
 const AGE_ORDER: readonly TleAgeTone[] = ['ok', 'warn', 'bad']
@@ -42,7 +52,7 @@ const HEAT_SPEC: GridSpec = { xMin: 0, xMax: 180, xBins: 36, yMin: 100, yMax: 1_
 const mid = (b: { x0: number; x1: number }) => (b.x0 + b.x1) / 2
 const geoMid = (b: { x0: number; x1: number }) => Math.sqrt(b.x0 * b.x1)
 
-export function AnalyticsView({ catalog, stats, totalCount, now }: Props) {
+export function AnalyticsView({ catalog, stats, totalCount, lastFetch, onGoData, now }: Props) {
   const rows = catalog.data
 
   // Each chart type is chosen for the data it shows (see the ChartCard notes):
@@ -82,7 +92,7 @@ export function AnalyticsView({ catalog, stats, totalCount, now }: Props) {
     return (
       <PageLayout>
         <SectionHeader title="Analytics" />
-        <EmptyState kind="none" title="Nothing to analyse">The catalog is empty. Load TLEs from the Data view.</EmptyState>
+        <EmptyCatalog cause={whyCatalogEmpty(lastFetch)} onGoData={onGoData} />
       </PageLayout>
     )
   }
