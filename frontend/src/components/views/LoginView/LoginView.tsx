@@ -43,10 +43,16 @@ export function LoginView({ configured, notice, busy, failure, onSubmit, corner 
         {notice ? <Callout tone="warn" title="Signed out">{notice}</Callout> : null}
 
         {configured === false ? (
-          <Callout tone="warn" title="No operator credential is set up yet">
-            The server refuses all data until one exists. In the project folder, run <code className="login-view__code">python auth.py set-password</code> and
-            then reload this page.
-          </Callout>
+          import.meta.env.DEV ? (
+            <Callout tone="warn" title="No operator credential is set up yet">
+              The server refuses all data until one exists. In the project folder, run <code className="login-view__code">python auth.py set-password</code> and
+              then reload this page.
+            </Callout>
+          ) : (
+            <Callout tone="warn" title="Sign-in is unavailable">
+              The service is not accepting sign-ins right now. Please try again later.
+            </Callout>
+          )
         ) : (
           <LoginForm initialUsername="admin" busy={busy} failure={failure} prefill={prefill} onSubmit={onSubmit} />
         )}

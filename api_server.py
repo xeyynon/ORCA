@@ -337,6 +337,8 @@ async def health_check():
             # Outcome of the most recent Celestrak fetch (ok | empty | rate_limited | not_found | http_error |
             # network_error), or None if no fetch has run since this field was added.
             "last_fetch": _last_fetch_status(),
+            # Which Celestrak group POST /api/update-tles pulls (ORCA_TLE_GROUP), so a client can name it truthfully.
+            "tle_group": TLE_GROUP,
         }
     }
  

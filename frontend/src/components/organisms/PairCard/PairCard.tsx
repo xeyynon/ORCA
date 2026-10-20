@@ -1,11 +1,12 @@
 import type { ApiError } from '@/api/client'
 import type { ConjunctionEvent, PairAssessment } from '@/api/types'
 import { formatRelative, formatUtc } from '@/lib/time'
-import { fixed, pc } from '@/lib/format'
+import { fixed } from '@/lib/format'
 import { Button } from '../../atoms/Button/Button'
 import { Icon } from '../../atoms/Icon/Icon'
 import { IconButton } from '../../atoms/IconButton/IconButton'
 import { Mono } from '../../atoms/Mono/Mono'
+import { PcValue } from '../../molecules/PcValue/PcValue'
 import { Spinner } from '../../atoms/Spinner/Spinner'
 import { FactRow } from '../../molecules/FactRow/FactRow'
 import { FieldNote } from '../../molecules/FieldNote/FieldNote'
@@ -39,7 +40,7 @@ export function PairCard({ event, assessment, assessing, assessError, onShowOnGl
       </div>
 
       <div className="pair-card__grid">
-        <FactRow label="Probability of collision"><Mono>{pc(event.probability_of_collision)}</Mono></FactRow>
+        <FactRow label="Probability of collision"><PcValue value={event.probability_of_collision} /></FactRow>
         <FactRow label="Miss distance"><ValueUnit value={fixed(event.min_distance_km, 3)} unit="km" /></FactRow>
         <FactRow label="Position uncertainty (1 sigma)"><ValueUnit value={fixed(event.uncertainty_km, 2)} unit="km" /></FactRow>
         <FactRow label="Relative velocity"><ValueUnit value={fixed(event.relative_velocity_kms, event.relative_velocity_kms < 0.1 ? 4 : 2)} unit="km/s" /></FactRow>
@@ -61,7 +62,7 @@ export function PairCard({ event, assessment, assessing, assessError, onShowOnGl
       {full && full.tca !== event.tca ? (
         <FieldNote>
           Over the next 7 days this pair comes closest on a different pass: <Mono>{fixed(full.min_distance_km, 3)}</Mono> km
-          at <Mono>{formatUtc(full.tca)}</Mono> (Pc <Mono>{pc(full.probability_of_collision)}</Mono>).
+          at <Mono>{formatUtc(full.tca)}</Mono> (Pc <PcValue value={full.probability_of_collision} />).
         </FieldNote>
       ) : null}
       {event.long_encounter ? (

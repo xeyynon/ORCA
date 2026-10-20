@@ -47,7 +47,10 @@ export async function apiFetch<T>(path: string, init: Init = {}): Promise<T> {
     res = await fetch(`${API_BASE}${path}`, { ...rest, headers })
   } catch (err) {
     if (err instanceof DOMException && err.name === 'AbortError') throw new ApiError('aborted', 'Cancelled')
-    throw new ApiError('network', 'Cannot reach the ORCA API. Is uvicorn running on port 8000?')
+    // The developer hint (the port) is for a local run only; a visitor to the hosted site gets a plain sentence.
+    throw new ApiError('network', import.meta.env.DEV
+      ? 'Cannot reach the ORCA API. Is uvicorn running on port 8000?'
+      : 'Cannot reach the ORCA service right now. Check your connection and try again in a moment.')
   }
   if (!res.ok) {
     let body: unknown = null

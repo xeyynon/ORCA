@@ -1,5 +1,5 @@
 import type { ConjunctionEvent } from '@/api/types'
-import { fixed, pc } from '@/lib/format'
+import { fixed } from '@/lib/format'
 import { isCoMoving } from '@/lib/pair'
 import { offsetForTca } from '@/lib/playback'
 import { formatRelative, formatUtc, parseUtc } from '@/lib/time'
@@ -8,6 +8,7 @@ import { Button } from '../../atoms/Button/Button'
 import { Icon } from '../../atoms/Icon/Icon'
 import { IconButton } from '../../atoms/IconButton/IconButton'
 import { Mono } from '../../atoms/Mono/Mono'
+import { PcValue } from '../../molecules/PcValue/PcValue'
 import { FactRow } from '../../molecules/FactRow/FactRow'
 import { FieldNote } from '../../molecules/FieldNote/FieldNote'
 import { Panel } from '../../molecules/Panel/Panel'
@@ -58,7 +59,7 @@ export function ConjunctionCard({ event, nowMs, onJumpToTca, onViewDetails, onCl
           <ValueUnit value={fixed(event.relative_velocity_kms, event.relative_velocity_kms < 0.1 ? 4 : 2)} unit="km/s" />
           {coMoving ? <> <Badge tone="accent" title="Relative speed under 50 m/s at closest approach">Co-moving</Badge></> : null}
         </FactRow>
-        <FactRow label="Probability of collision"><Mono>{pc(event.probability_of_collision)}</Mono></FactRow>
+        <FactRow label="Probability of collision"><PcValue value={event.probability_of_collision} /></FactRow>
         <FactRow label="Position uncertainty (1 sigma)"><ValueUnit value={fixed(event.uncertainty_km, 2)} unit="km" /></FactRow>
         <FactRow label="Older TLE's age"><ValueUnit value={fixed(event.tle_age_days, 1)} unit="days" /></FactRow>
       </div>

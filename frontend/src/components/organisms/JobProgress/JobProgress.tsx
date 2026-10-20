@@ -18,9 +18,10 @@ export function JobProgress({ title, detail, elapsedSeconds, onCancel }: Props) 
       <div className="job-progress__text">
         <div className="job-progress__title">{title}</div>
         <div className="job-progress__detail">{detail}</div>
+        <div className="job-progress__detail">Stopping only ends the wait in this window. The server may carry on with the search.</div>
       </div>
       <Mono>{mm}:{ss}</Mono>
-      <Button size="sm" onClick={onCancel}>Cancel</Button>
+      <Button size="sm" onClick={onCancel}>Stop waiting</Button>
     </div>
   )
 }

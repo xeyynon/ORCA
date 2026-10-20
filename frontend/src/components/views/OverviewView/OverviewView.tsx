@@ -1,12 +1,14 @@
 import { useMemo } from 'react'
-import type { TleRecord } from '@/api/types'
+import type { FetchOutcome, TleRecord } from '@/api/types'
 import type { AsyncResult } from '@/hooks/useAsync'
 import { deriveSeries } from '@/lib/catalog'
+import { whyCatalogEmpty } from '@/lib/catalogState'
 import type { CatalogSummary } from '@/lib/catalog'
 import { days, fixed, integer } from '@/lib/format'
 import { Button } from '../../atoms/Button/Button'
 import { EmptyState } from '../../molecules/EmptyState/EmptyState'
 import { SectionHeader } from '../../molecules/SectionHeader/SectionHeader'
+import { EmptyCatalog } from '../../organisms/EmptyCatalog/EmptyCatalog'
 import { CatalogTable } from '../../organisms/CatalogTable/CatalogTable'
 import { ChartCard } from '../../organisms/ChartCard/ChartCard'
 import { KpiRow } from '../../organisms/KpiRow/KpiRow'
@@ -26,6 +28,8 @@ type Props = {
   onSelect: (id: string | null) => void
   onOpenGlobe: (id: string) => void
   onGoData: () => void
+  /** The API's record of its last Celestrak fetch, so an empty catalog is explained by what actually happened. */
+  lastFetch: FetchOutcome | null | undefined
   now: Date
 }
 
@@ -34,7 +38,7 @@ function loadedHint(summary: CatalogSummary, totalCount: number | null): string 
   return summary.unclassified ? `${integer(summary.unclassified)} could not be classified` : 'all classified'
 }
 
-export function OverviewView({ catalog, summary, totalCount, selectedId, onSelect, onOpenGlobe, onGoData, now }: Props) {
+export function OverviewView({ catalog, summary, totalCount, selectedId, onSelect, onOpenGlobe, onGoData, lastFetch, now }: Props) {
   const rows = catalog.data
   const selected = rows?.find((t) => t.norad_cat_id === selectedId) ?? null
   const ranks = useMemo<CatalogRanks | null>(() => {
@@ -50,11 +54,7 @@ export function OverviewView({ catalog, summary, totalCount, selectedId, onSelec
   } else if (!rows) {
     body = <EmptyState kind="awaiting" title="Loading catalog…" />
   } else if (rows.length === 0) {
-    body = (
-      <EmptyState kind="none" title="The catalog is empty" action={<Button variant="primary" onClick={onGoData}>Go to Data</Button>}>
-        No TLEs are stored. This is what an empty database looks like, and also what a failed Celestrak fetch looks like, because the API reports both as an empty list.
-      </EmptyState>
-    )
+    body = <EmptyCatalog cause={whyCatalogEmpty(lastFetch)} onGoData={onGoData} />
   } else {
     body = (
       <>

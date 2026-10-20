@@ -5,7 +5,7 @@
 export interface Health {
   status: string
   timestamp: string
-  database: { tles_count: number; last_update: string | null; last_fetch?: FetchOutcome | null }
+  database: { tles_count: number; last_update: string | null; last_fetch?: FetchOutcome | null; tle_group?: string }
 }
 
 /** Outcome of the API's most recent Celestrak fetch. Absent or null until a fetch has run since the field existed. */

@@ -25,10 +25,10 @@ export function DataStatusCard({ count, lastUpdate, lastFetch, newestAgeDays, ol
       <div className="data-status__grid">
         <FactRow label="Objects stored"><Mono>{integer(count)}</Mono></FactRow>
         <FactRow label="Last refresh via API">
-          {lastUpdate ? <Mono>{formatUtc(lastUpdate)}</Mono> : <Mono muted>never (seeded outside the API)</Mono>}
+          {lastUpdate ? <Mono>{formatUtc(lastUpdate)}</Mono> : <Mono muted>{count ? 'Not refreshed through the API' : 'Never'}</Mono>}
         </FactRow>
         <FactRow label="Last Celestrak fetch">
-          {lastFetch ? <Mono>{lastFetch.status === 'ok' ? 'ok' : lastFetch.detail} ({formatUtc(lastFetch.at)})</Mono> : <Mono muted>none recorded</Mono>}
+          {lastFetch ? <Mono>{lastFetch.status === 'ok' ? 'ok' : lastFetch.detail} ({formatUtc(lastFetch.at)})</Mono> : <Mono muted>None since the server started</Mono>}
         </FactRow>
         <FactRow label="Newest element set">
           {newestAgeDays !== null ? <TleAgeChip ageDays={newestAgeDays} /> : <Mono muted>—</Mono>}

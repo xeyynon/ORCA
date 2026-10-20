@@ -1,7 +1,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { parseUtc, formatUtc, formatRelative, formatSimTime, NO_DATA } from './time.ts'
-import { pc, fixed, integer, formatLat, formatLon } from './format.ts'
+import { pc, pcParts, fixed, integer, formatLat, formatLon } from './format.ts'
 import { riskRank, countByRisk, RISK_ORDER } from './risk.ts'
 import { deriveOrbit, classifyRegime } from './orbit.ts'
 import { toCsv } from './csv.ts'
@@ -27,6 +27,14 @@ test('pc is scientific and never fabricates', () => {
   assert.equal(pc(0), '0')
   assert.equal(pc(NaN), NO_DATA)
   assert.equal(pc(undefined), NO_DATA)
+})
+
+test('pcParts splits for a real superscript and returns null where there is nothing to split', () => {
+  assert.deepEqual(pcParts(2.5e-7), { mantissa: '2.50', exponent: -7 })
+  assert.deepEqual(pcParts(0.000123), { mantissa: '1.23', exponent: -4 })
+  assert.equal(pcParts(0), null)
+  assert.equal(pcParts(NaN), null)
+  assert.equal(pcParts(null), null)
 })
 
 test('fixed / integer show an em dash for missing values', () => {

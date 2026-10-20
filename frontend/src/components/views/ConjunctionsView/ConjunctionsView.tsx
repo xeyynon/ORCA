@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { getConjunctionMethod } from '@/api/endpoints'
 import type { ConjunctionQuery } from '@/api/endpoints'
 import type { ConjunctionEvent } from '@/api/types'
+import { isSmallCatalog } from '@/lib/catalogState'
 import { useAsync } from '@/hooks/useAsync'
 import { useConjunctionSearch } from '@/hooks/useConjunctionSearch'
 import { useElapsed } from '@/hooks/useElapsed'
@@ -76,6 +77,7 @@ export function ConjunctionsView({ catalogSize, now, onShowOnGlobe }: Props) {
       <EmptyState kind="none" title="No close approaches found">
         No two objects come closer than {result?.report_km ?? reportKm ?? '…'} km over the {search.query?.horizonDays}-day horizon. The screening
         distance covers the gap between steps, so an approach closer than that cannot be missed: this is a result, not an error.
+        {isSmallCatalog(catalogSize) ? ` The catalog holds only ${integer(catalogSize)} objects, so a quiet result is expected. The full public catalog has about 16,000.` : ''}
       </EmptyState>
     )
   } else {

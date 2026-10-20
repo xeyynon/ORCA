@@ -3,6 +3,7 @@ import type { Health } from '@/api/types'
 import type { UpdatePhase } from '@/hooks/useCatalogUpdate'
 import type { ApiStatus } from '@/hooks/useHealth'
 import type { CatalogSummary } from '@/lib/catalog'
+import { groupLabel } from '@/lib/catalogState'
 import { Mono } from '../../atoms/Mono/Mono'
 import { Label } from '../../atoms/Label/Label'
 import { FactRow } from '../../molecules/FactRow/FactRow'
@@ -35,7 +36,7 @@ export function DataView({ health, apiStatus, summary, update }: Props) {
           newestAgeDays={summary?.newestAgeDays ?? null}
           oldestAgeDays={summary?.oldestAgeDays ?? null}
         />
-        <UpdateCatalogPanel phase={update.phase} before={update.before} after={update.after} error={update.error} apiOnline={apiStatus === 'online'} onStart={update.start} />
+        <UpdateCatalogPanel phase={update.phase} before={update.before} after={update.after} error={update.error} apiOnline={apiStatus === 'online'} group={groupLabel(health?.database.tle_group)} onStart={update.start} />
       </div>
       <section className="data-view__api">
         <Label>API</Label>
