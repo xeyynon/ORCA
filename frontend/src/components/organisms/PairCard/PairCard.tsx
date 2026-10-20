@@ -42,40 +42,40 @@ export function PairCard({ event, assessment, assessing, assessError, onShowOnGl
       <div className="pair-card__grid">
         <FactRow label="Probability of collision"><PcValue value={event.probability_of_collision} /></FactRow>
         <FactRow label="Miss distance"><ValueUnit value={fixed(event.min_distance_km, 3)} unit="km" /></FactRow>
-        <FactRow label="Position uncertainty (1 sigma)"><ValueUnit value={fixed(event.uncertainty_km, 2)} unit="km" /></FactRow>
+        <FactRow label="Position uncertainty (1 sigma)" hint="The assumed error in each object's position at closest approach. About two thirds of the time the true position is within this distance."><ValueUnit value={fixed(event.uncertainty_km, 2)} unit="km" /></FactRow>
         <FactRow label="Relative velocity"><ValueUnit value={fixed(event.relative_velocity_kms, event.relative_velocity_kms < 0.1 ? 4 : 2)} unit="km/s" /></FactRow>
-        <FactRow label="Older TLE's age at closest approach"><ValueUnit value={fixed(event.tle_age_days, 1)} unit="days" /></FactRow>
+        <FactRow label="Age of the older TLE at closest approach"><ValueUnit value={fixed(event.tle_age_days, 1)} unit="days" /></FactRow>
         <FactRow label="Time of closest approach">
           <Mono>{formatUtc(event.tca)}</Mono> <Mono muted>({formatRelative(event.tca)})</Mono>
         </FactRow>
-        <FactRow label="Mahalanobis distance">
+        <FactRow label="Mahalanobis distance" hint="The miss distance measured in standard deviations of the combined position uncertainty. Smaller means the objects are closer than the uncertainty can rule out.">
           {full ? <ValueUnit value={fixed(full.mahalanobis_distance, 3)} unit="σ" /> : <Mono muted>—</Mono>}
         </FactRow>
-        <FactRow label="Combined hard-body radius">
+        <FactRow label="Combined hard-body radius" hint="The two objects' physical radii added together. If they pass within this distance they touch.">
           {full ? <ValueUnit value={fixed(full.combined_hbr_km * 1000, 1)} unit="m" /> : <Mono muted>—</Mono>}
         </FactRow>
       </div>
 
-      {assessing ? <div className="pair-card__state"><Spinner /> <span>Re-assessing this pair…</span></div> : null}
-      {assessError ? <FieldNote>Pair re-assessment failed: {assessError.message}. The values above are from the search result.</FieldNote> : null}
-      {noRisk ? <FieldNote>Pair re-assessment: {noRisk.message}.</FieldNote> : null}
+      {assessing ? <div className="pair-card__state"><Spinner /> <span>Checking this pair again…</span></div> : null}
+      {assessError ? <FieldNote>Could not check this pair again: {assessError.message}. The values above come from the search.</FieldNote> : null}
+      {noRisk ? <FieldNote>Checking this pair again: {noRisk.message}.</FieldNote> : null}
       {full && full.tca !== event.tca ? (
         <FieldNote>
-          Over the next 7 days this pair comes closest on a different pass: <Mono>{fixed(full.min_distance_km, 3)}</Mono> km
+          Looking 7 days ahead, this pair gets closest on a different pass: <Mono>{fixed(full.min_distance_km, 3)}</Mono> km
           at <Mono>{formatUtc(full.tca)}</Mono> (Pc <PcValue value={full.probability_of_collision} />).
         </FieldNote>
       ) : null}
       {event.long_encounter ? (
         <FieldNote>
-          Long encounter: the two pass slower than 0.1 km/s and stay close for a long time. The probability assumes a fast, straight-line
-          pass and can be several times too low here.
+          Long encounter: these two drift past each other slower than 0.1 km/s and stay close for a long while. The probability model
+          assumes a quick, straight-line pass, so here it can come out several times too low.
         </FieldNote>
       ) : null}
 
       <FieldNote>
-        Pc assumes the position uncertainty above, measured from successive public TLEs, because TLEs carry no covariance. A different
-        assumption can move the tier by orders of magnitude. It is a research estimate, not an operational one, and must not drive a
-        manoeuvre decision.
+        TLEs come with no error estimate, so Pc rests on the position uncertainty shown above, measured from successive public TLEs. A
+        different assumption can shift the tier by orders of magnitude. Treat it as a research estimate, never as a basis for a
+        manoeuvre.
       </FieldNote>
 
       <Button variant="primary" onClick={onShowOnGlobe}>Show both objects on the globe</Button>

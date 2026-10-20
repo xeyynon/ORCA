@@ -10,7 +10,7 @@ import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { usePairAssessment } from '@/hooks/usePairAssessment'
 import { resultHeadline, tierCounts } from '@/lib/conjunctionSummary'
 import { downloadConjunctionsCsv, downloadConjunctionsJson } from '@/lib/exportConjunctions'
-import { integer } from '@/lib/format'
+import { integer, plural } from '@/lib/format'
 import { countPast, pairKey } from '@/lib/pair'
 import { formatUtc } from '@/lib/time'
 import { Button } from '../../atoms/Button/Button'
@@ -60,12 +60,12 @@ export function ConjunctionsView({ catalogSize, now, onShowOnGlobe }: Props) {
 
   let results
   if (search.phase === 'idle') {
-    results = <EmptyState kind="idle" title="No search run yet">Choose a horizon, then run. The search screens the whole stored catalog and can take a few minutes.</EmptyState>
+    results = <EmptyState kind="idle" title="No search yet">Choose how many days ahead to look, then press Run search. It checks the whole catalog and can take a few minutes.</EmptyState>
   } else if (running) {
     results = (
       <JobProgress
-        title="Searching for conjunctions…"
-        detail={`${query.horizonDays}-day horizon over ${integer(catalogSize)} objects, every object propagated every ${stepS ?? '…'} s. The API reports no stage or percentage, so only elapsed time is shown.`}
+        title="Searching for close approaches…"
+        detail={`Checking ${plural(catalogSize ?? 0, 'object')} over the next ${plural(query.horizonDays, 'day')}, calculating positions every ${stepS ?? '…'} s. Progress is not reported, so the timer shows time elapsed.`}
         elapsedSeconds={elapsed}
         onCancel={search.cancel}
       />
@@ -75,9 +75,9 @@ export function ConjunctionsView({ catalogSize, now, onShowOnGlobe }: Props) {
   } else if (!result || result.total_events === 0) {
     results = (
       <EmptyState kind="none" title="No close approaches found">
-        No two objects come closer than {result?.report_km ?? reportKm ?? '…'} km over the {search.query?.horizonDays}-day horizon. The screening
-        distance covers the gap between steps, so an approach closer than that cannot be missed: this is a result, not an error.
-        {isSmallCatalog(catalogSize) ? ` The catalog holds only ${integer(catalogSize)} objects, so a quiet result is expected. The full public catalog has about 16,000.` : ''}
+        No two objects come closer than {result?.report_km ?? reportKm ?? '…'} km in the next {plural(search.query?.horizonDays ?? query.horizonDays, 'day')}. Positions
+        are sampled finely enough that nothing closer can slip between two steps.
+        {isSmallCatalog(catalogSize) ? ` This catalog holds only ${plural(catalogSize, 'object')}, so a quiet result is normal. The full public catalog has about 16,000.` : ''}
       </EmptyState>
     )
   } else {
@@ -86,27 +86,27 @@ export function ConjunctionsView({ catalogSize, now, onShowOnGlobe }: Props) {
       <>
         {pastCount > 0 ? (
           <Callout tone="warn" title={pastCount === search.events.length ? 'Every event below is already in the past' : `${pastCount} of ${search.events.length} events are already in the past`}>
-            The search window started when it ran ({formatUtc(result.window_start)}). Approaches between then and now are no longer a forecast.
-            Run the search again for a fresh one.
+            The search covered the time after it ran ({formatUtc(result.window_start)}). Approaches that have gone by since are no longer a forecast.
+            Run the search again for current results.
           </Callout>
         ) : null}
         {result.long_encounters > 0 ? (
           <Callout tone="warn" title={`${integer(result.long_encounters)} long encounter${result.long_encounters === 1 ? '' : 's'}`}>
-            These pairs pass slower than {method.data?.long_encounter_kms ?? 0.1} km/s, so they stay close for a long time. The probability assumes a fast,
-            straight-line pass and can be several times too low for them. They are marked in the table.
+            These pairs drift past each other slower than {method.data?.long_encounter_kms ?? 0.1} km/s and stay close for a long while. The probability model
+            assumes a quick, straight-line pass, so for them it can come out several times too low. They are marked “Long” in the table.
           </Callout>
         ) : null}
         {counts ? (
-          <ChartCard title="Every approach found, by risk tier" note={`${integer(result.total_events)} approaches closer than ${result.report_km} km. Tiers depend on the assumed position uncertainty: TLEs carry none (see the method above).`}>
+          <ChartCard title="Every approach found, by risk tier" note={`${integer(result.total_events)} approaches closer than ${result.report_km} km. TLEs come with no error estimate, so the tiers rest on an assumed position uncertainty (see the method above).`}>
             <RiskSummaryBar counts={counts} />
           </ChartCard>
         ) : null}
-        <ChartCard title="When, and how risky" note="The rows in the table: time on x, probability of collision on a log y axis, colour by risk tier. The dashed line is now; hover a dot for the pair.">
+        <ChartCard title="When, and how risky" note="Each dot is one row of the table: when the closest approach happens (across) against its collision probability (up, on a log scale), coloured by risk tier. The dashed line marks now. Hover a dot to see the pair.">
           <EventTimeline events={search.events} now={now} />
         </ChartCard>
         <div className="conj-view__bar">
           <span className="conj-view__meta">
-            {headline} · {search.query?.horizonDays} d horizon · {integer(result.objects)} objects · ran {search.finishedAt ? formatUtc(search.finishedAt.toISOString()) : '—'} in {Math.round(result.runtime_s)} s
+            {headline} · {search.query?.horizonDays}-day window · {integer(result.objects)} objects · ran {search.finishedAt ? formatUtc(search.finishedAt.toISOString()) : '—'} in {Math.round(result.runtime_s)} s
           </span>
           <div className="conj-view__actions">
             <Button size="sm" onClick={() => downloadConjunctionsCsv(search.events)}><Icon name="download" size={14} /> CSV</Button>
@@ -132,7 +132,7 @@ export function ConjunctionsView({ catalogSize, now, onShowOnGlobe }: Props) {
 
   return (
     <PageLayout>
-      <SectionHeader title="Conjunction screening" subtitle="Close approaches between catalog objects, forecast from public TLEs. Educational and research use only." />
+      <SectionHeader title="Conjunction screening" subtitle="Close approaches between catalog objects, forecast from public TLEs. For research and learning, not for operational decisions." />
       <ConjunctionControls query={query} catalogSize={catalogSize} stepS={stepS} reportKm={reportKm} running={running} onChange={setQuery} onRun={run} />
       <ConjunctionMethod method={method.data} error={method.status === 'error' ? method.error.message : null} />
       {results}

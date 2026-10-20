@@ -27,7 +27,7 @@ export function GlobeLegend({ colorBy, shown, total, showOrbit, hasConjunction, 
       {hasSelection ? <LegendItem shape="circle" color="var(--text-primary)" label="Selected" /> : null}
       {showOrbit ? <LegendItem color="var(--globe-orbit)" label="Orbit of selected, one period" /> : null}
       {hasConjunction ? <LegendItem color="var(--risk-high)" label="Closest approach (dashed line)" /> : null}
-      {total !== null && total > shown ? <div className="globe-legend__cap">Drawing {integer(shown)} of {integer(total)} objects (filters and the request cap apply).</div> : null}
+      {total !== null && total > shown ? <div className="globe-legend__cap">Showing {integer(shown)} of {integer(total)} objects. Your filters and the server's limit apply.</div> : null}
     </div>
   )
 }

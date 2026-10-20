@@ -1,7 +1,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { parseUtc, formatUtc, formatRelative, formatSimTime, NO_DATA } from './time.ts'
-import { pc, pcParts, fixed, integer, formatLat, formatLon } from './format.ts'
+import { pc, pcParts, plural, fixed, integer, formatLat, formatLon } from './format.ts'
 import { riskRank, countByRisk, RISK_ORDER } from './risk.ts'
 import { deriveOrbit, classifyRegime } from './orbit.ts'
 import { toCsv } from './csv.ts'
@@ -27,6 +27,14 @@ test('pc is scientific and never fabricates', () => {
   assert.equal(pc(0), '0')
   assert.equal(pc(NaN), NO_DATA)
   assert.equal(pc(undefined), NO_DATA)
+})
+
+test('plural puts the count and the right noun together', () => {
+  assert.equal(plural(1, 'day'), '1 day')
+  assert.equal(plural(7, 'day'), '7 days')
+  assert.equal(plural(0, 'object'), '0 objects')
+  assert.equal(plural(1500, 'object'), '1,500 objects')
+  assert.equal(plural(2, 'match', 'matches'), '2 matches')
 })
 
 test('pcParts splits for a real superscript and returns null where there is nothing to split', () => {

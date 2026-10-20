@@ -1,6 +1,6 @@
 import type { ConjunctionQuery } from '@/api/endpoints'
 import { expectedRuntimeMinutes } from '@/lib/conjunctionSummary'
-import { integer } from '@/lib/format'
+import { integer, plural } from '@/lib/format'
 import { Button } from '../../atoms/Button/Button'
 import { NumberField } from '../../molecules/NumberField/NumberField'
 import { FieldNote } from '../../molecules/FieldNote/FieldNote'
@@ -37,12 +37,11 @@ export function ConjunctionControls({ query, catalogSize, stepS, reportKm, runni
         </div>
       </div>
       {tooSmall ? (
-        <FieldNote>A search needs at least 2 objects and the catalog has {integer(catalogSize)}. Load TLEs from the Data view first.</FieldNote>
+        <FieldNote>A search needs at least two objects, and the catalog has {integer(catalogSize)}. Add more on the Data page.</FieldNote>
       ) : (
         <FieldNote>
-          Every object is propagated with SGP4 every {stepS ?? '…'} s and every approach closer than {reportKm ?? '…'} km is found:
-          the screening distance is wide enough that none can pass between two steps. Counts cover everything found; the table shows
-          the most probable rows.{minutes !== null ? ` Expect about ${minutes < 1 ? 'a minute or less' : `${Math.round(minutes)} min`} for ${integer(catalogSize)} objects over ${query.horizonDays} day${query.horizonDays === 1 ? '' : 's'} (measured on a laptop).` : ''}
+          Every object's position is calculated every {stepS ?? '…'} s, and every approach closer than {reportKm ?? '…'} km is kept. The
+          counts cover everything found; the table shows the rows most likely to be collisions.{minutes !== null ? ` Expect about ${minutes < 1 ? 'a minute or less' : `${Math.round(minutes)} min`} for ${plural(catalogSize ?? 0, 'object')} over ${plural(query.horizonDays, 'day')} on a laptop.` : ''}
         </FieldNote>
       )}
     </div>

@@ -91,7 +91,7 @@ export function Workspace({ username, onSignOut, theme, onToggleTheme: toggleThe
     { label: 'API', value: apiStatus === 'online' ? 'online' : apiStatus === 'offline' ? 'unreachable' : 'checking', tone: apiStatus === 'online' ? 'ok' : apiStatus === 'offline' ? 'bad' : 'warn', dotOnly: apiStatus === 'online' },
     { label: 'Objects', value: health ? integer(health.database.tles_count) : null },
     { label: 'Oldest TLE', value: summary?.oldestAgeDays != null ? days(summary.oldestAgeDays) : null, title: 'Age of the oldest element set in the catalog' },
-    { label: 'Last API refresh', value: health?.database.last_update ? formatUtc(health.database.last_update) : null, title: 'When the API last stored a Celestrak fetch' },
+    { label: 'Catalog updated', value: health?.database.last_update ? formatUtc(health.database.last_update) : null, title: 'When ORCA last saved a download from Celestrak' },
     ...(view === 'globe' ? [
       { label: 'Camera lat', value: camera ? formatLat(camera.latDeg) : null },
       { label: 'Lon', value: camera ? formatLon(camera.lonDeg) : null },

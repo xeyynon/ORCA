@@ -34,8 +34,8 @@ type Props = {
 }
 
 function loadedHint(summary: CatalogSummary, totalCount: number | null): string {
-  if (totalCount !== null && totalCount > summary.count) return `${integer(summary.count)} loaded here (API returns up to 5,000)`
-  return summary.unclassified ? `${integer(summary.unclassified)} could not be classified` : 'all classified'
+  if (totalCount !== null && totalCount > summary.count) return `${integer(summary.count)} loaded in this view`
+  return summary.unclassified ? `${integer(summary.unclassified)} not classified` : 'all classified'
 }
 
 export function OverviewView({ catalog, summary, totalCount, selectedId, onSelect, onOpenGlobe, onGoData, lastFetch, now }: Props) {
@@ -62,10 +62,10 @@ export function OverviewView({ catalog, summary, totalCount, selectedId, onSelec
           <KpiRow
             items={[
               { label: 'Objects', value: integer(totalCount ?? summary.count), hint: loadedHint(summary, totalCount) },
-              { label: 'Newest TLE', value: summary.newestAgeDays === null ? '—' : days(summary.newestAgeDays), hint: summary.futureEpochs > 0 ? `${integer(summary.futureEpochs)} epoch(s) ahead of this clock excluded` : 'age of the freshest element set' },
-              { label: 'Median TLE age', value: summary.medianAgeDays === null ? '—' : days(summary.medianAgeDays), hint: 'typical element-set age' },
-              { label: 'Oldest TLE', value: summary.oldestAgeDays === null ? '—' : days(summary.oldestAgeDays), hint: 'older sets propagate less accurately' },
-              { label: 'Median altitude', value: fixed(summary.medianAltKm, 0), unit: 'km', hint: 'derived from mean motion' },
+              { label: 'Newest TLE', value: summary.newestAgeDays === null ? '—' : days(summary.newestAgeDays), hint: summary.futureEpochs > 0 ? `${integer(summary.futureEpochs)} dated in the future, left out` : 'the most recent TLE' },
+              { label: 'Median TLE age', value: summary.medianAgeDays === null ? '—' : days(summary.medianAgeDays), hint: 'a typical TLE in the catalog' },
+              { label: 'Oldest TLE', value: summary.oldestAgeDays === null ? '—' : days(summary.oldestAgeDays), hint: 'older TLEs give less accurate positions' },
+              { label: 'Median altitude', value: fixed(summary.medianAltKm, 0), unit: 'km', hint: 'worked out from orbital period' },
             ]}
           />
         ) : null}
@@ -82,7 +82,7 @@ export function OverviewView({ catalog, summary, totalCount, selectedId, onSelec
               </>
             ) : null}
             {summary ? (
-              <ChartCard title="Whole catalog by regime" note={`Classified from perigee/apogee altitude and eccentricity. Derived, not stored.${totalCount !== null && totalCount > rows.length ? ` Counts cover the ${integer(rows.length)} loaded objects.` : ''}`}>
+              <ChartCard title="Objects by orbit regime" note={`Each object's regime is worked out from its lowest and highest altitude and its eccentricity.${totalCount !== null && totalCount > rows.length ? ` Counts cover the ${integer(rows.length)} objects loaded in this view.` : ''}`}>
                 <RegimeBreakdown counts={summary.regimes} />
               </ChartCard>
             ) : null}
@@ -94,7 +94,7 @@ export function OverviewView({ catalog, summary, totalCount, selectedId, onSelec
 
   return (
     <PageLayout>
-      <SectionHeader title="Catalog overview" subtitle="Orbital element sets stored by the API, with their age." />
+      <SectionHeader title="Catalog overview" subtitle="Every object in the catalog, with the age of its TLE (the orbital data it is tracked from)." />
       {body}
     </PageLayout>
   )

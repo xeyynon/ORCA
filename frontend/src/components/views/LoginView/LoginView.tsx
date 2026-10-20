@@ -38,7 +38,7 @@ export function LoginView({ configured, notice, busy, failure, onSubmit, corner 
       <div className="login-view__card">
         <div className="login-view__brand"><Brand size="card" /></div>
         <h1 className="login-view__title">Sign in</h1>
-        <p className="login-view__sub">Space situational awareness: orbits, conjunctions and catalog health.</p>
+        <p className="login-view__sub">Satellite orbits, close approaches and catalog health.</p>
 
         {notice ? <Callout tone="warn" title="Signed out">{notice}</Callout> : null}
 

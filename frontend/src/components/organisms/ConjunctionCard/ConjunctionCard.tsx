@@ -26,7 +26,7 @@ type Props = {
 
 const REASON = {
   past: 'This closest approach is already in the past. Positions can only be shown from now to 7 days ahead.',
-  beyond: 'This closest approach is more than 7 days ahead, beyond what positions can be shown for.',
+  beyond: 'This closest approach is more than 7 days away, further ahead than the globe can show.',
 } as const
 
 /** The conjunction shown on the globe: when, how close, how fast, how risky, and a way to see it happen. */
@@ -61,12 +61,12 @@ export function ConjunctionCard({ event, nowMs, onJumpToTca, onViewDetails, onCl
         </FactRow>
         <FactRow label="Probability of collision"><PcValue value={event.probability_of_collision} /></FactRow>
         <FactRow label="Position uncertainty (1 sigma)"><ValueUnit value={fixed(event.uncertainty_km, 2)} unit="km" /></FactRow>
-        <FactRow label="Older TLE's age"><ValueUnit value={fixed(event.tle_age_days, 1)} unit="days" /></FactRow>
+        <FactRow label="Age of the older TLE"><ValueUnit value={fixed(event.tle_age_days, 1)} unit="days" /></FactRow>
       </div>
 
       {coMoving ? <FieldNote>These two are flying together (a formation or a shared launch). A small miss distance between co-moving objects is expected and is not a crossing encounter.</FieldNote> : null}
-      {event.long_encounter ? <FieldNote>Long encounter (under 0.1 km/s): the probability assumes a fast pass and can be several times too low.</FieldNote> : null}
-      <FieldNote>Pc assumes the position uncertainty above (TLEs carry none): a research estimate, not an operational probability.</FieldNote>
+      {event.long_encounter ? <FieldNote>Long encounter (under 0.1 km/s): the probability model assumes a quick pass, so it can come out several times too low.</FieldNote> : null}
+      <FieldNote>TLEs come with no error estimate, so Pc rests on the position uncertainty above. It is a research estimate, not an operational probability.</FieldNote>
 
       <div className="conjunction-card__actions">
         <Button size="sm" disabled={!canJump} title={canJump ? 'Move the globe to the moment of closest approach' : REASON[(jump as { reason: 'past' | 'beyond' }).reason]} onClick={onJumpToTca}>Jump to closest approach</Button>

@@ -28,7 +28,7 @@ export function EvaluatorAccess({ credential, lastCopy, onCopy, onUse }: Props) 
   return (
     <section className="evaluator" aria-labelledby={titleId}>
       <h2 id={titleId} className="evaluator__title">Evaluator access</h2>
-      <p className="evaluator__note">For evaluation only.</p>
+      <p className="evaluator__note">A shared login for reviewers of this project.</p>
       <div className="evaluator__box">
         <CredentialRow label="Username" value={credential.username}
           copied={lastCopy?.key === 'username' && lastCopy.ok} onCopy={() => onCopy('username', credential.username)} />

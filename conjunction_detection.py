@@ -46,21 +46,26 @@ _CHUNK = 120                  # grid steps propagated per batch (memory: objects
 _ESTIMATE_MARGIN_KM = 5.0     # the parabola locates TCA well but its minimum value is approximate: cut late
 
 METHOD = {
-    "propagator": "SGP4 (sgp4 package, reference code of Vallado et al. 2006), TEME frame",
-    "screening": "KD-tree on every object every {step:g} s; screening radius = report distance + v_max × step / 2, "
-                 "so no approach closer than the report distance falls between samples",
-    "closest_approach": "parabola through d² at the three grid samples around each local minimum, then exact "
-                        "SGP4 states and one range-rate correction at that time",
-    "collision_probability": "Foster 2D: Gaussian relative position over the combined hard-body disc in the "
-                             "encounter plane (closed small-radius form; quadrature when the radius is not small)",
-    "uncertainty": "per object, radial / in-track / cross-track, by TLE age: measured from successive public TLEs "
-                   "(LEO, 2026-10-14) and floored at ESA's published at-epoch TLE uncertainties",
-    "risk_tiers": "CRITICAL > 1e-4, HIGH > 1e-5, MEDIUM > 1e-6, LOW > 1e-7, else NEGLIGIBLE "
-                  "(NASA CA Handbook 2020 recommends mitigation above 1e-4)",
+    "propagator": "SGP4, the standard model for public TLEs (the sgp4 package, which follows Vallado et al. 2006). "
+                  "Positions are in the TEME reference frame.",
+    "screening": "Every object's position is calculated every {step:g} s and nearby pairs are picked out with a KD-tree. "
+                 "The search radius is the report distance plus how far a fast object can move in half a step, so no "
+                 "approach closer than the report distance can slip between two samples.",
+    "closest_approach": "For each close pair, a parabola fitted to the squared distance at the three samples around the "
+                        "minimum gives the time of closest approach. SGP4 is then run exactly at that time, with one "
+                        "correction for how fast the distance is still changing.",
+    "collision_probability": "Foster's 2D method: the chance that the objects' uncertain (Gaussian) relative position falls "
+                             "inside their combined hard-body disc, seen in the plane of the encounter. A closed-form "
+                             "formula is used when the disc is small, numerical integration otherwise.",
+    "uncertainty": "Each object gets a radial, in-track and cross-track position uncertainty that grows with TLE age. The "
+                   "values are measured from successive public TLEs (LEO, 2026-10-14) and never fall below ESA's "
+                   "published uncertainty at TLE epoch.",
+    "risk_tiers": "CRITICAL above 1e-4, HIGH above 1e-5, MEDIUM above 1e-6, LOW above 1e-7, otherwise NEGLIGIBLE. "
+                  "NASA's CA Handbook (2020) recommends mitigation above 1e-4.",
     "limits": [
-        "TLEs carry no covariance: every Pc and tier depends on the assumed uncertainty above.",
+        "TLEs come with no error estimate, so every Pc and tier depends on the assumed uncertainty above.",
         "NASA does not recommend TLE-based conjunction assessment for operational decisions.",
-        "Encounters slower than {long:g} km/s are long encounters; their 2D Pc is unreliable and they are flagged.",
+        "Encounters slower than {long:g} km/s are long encounters. Their 2D Pc is unreliable, so they are flagged.",
         "Public Starlink TLEs are about 15 times less accurate in-track than other LEO TLEs of the same age.",
     ],
 }
