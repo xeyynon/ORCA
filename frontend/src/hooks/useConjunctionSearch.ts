@@ -15,6 +15,7 @@ export function useConjunctionSearch() {
   const [phase, setPhase] = useState<SearchPhase>('idle')
   const [result, setResult] = useState<ConjunctionSearchResult | null>(null)
   const [error, setError] = useState<ApiError | null>(null)
+  /** The query that produced `result`. It changes only when a result arrives, so cancelling a newer search never labels the older result with the newer horizon. */
   const [query, setQuery] = useState<ConjunctionQuery | null>(null)
   const [finishedAt, setFinishedAt] = useState<Date | null>(null)
   const ctlRef = useRef<AbortController | null>(null)
@@ -25,11 +26,11 @@ export function useConjunctionSearch() {
     ctlRef.current = ctl
     setPhase('running')
     setError(null)
-    setQuery(q)
     getConjunctions(q, { signal: ctl.signal }).then(
       (res) => {
         if (ctl.signal.aborted) return
         setResult(res)
+        setQuery(q)
         setFinishedAt(new Date())
         setPhase('done')
       },
