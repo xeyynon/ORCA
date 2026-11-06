@@ -82,6 +82,7 @@ const VIEW_ALIASES: Record<ViewId, readonly string[]> = {
   conjunctions: ['conjunctions', 'conjunction', 'conjunctions page', 'conjunction search page'],
   analytics: ['analytics', 'charts', 'statistics', 'stats', 'graphs'],
   data: ['data', 'data page', 'api status', 'api', 'health', 'system status'],
+  reports: ['reports', 'report', 'reports page', 'pdf', 'make a report', 'generate a report', 'print'],
 }
 
 /** Starter chips for the first-open greeting, picked for what the current view is about. */
@@ -92,6 +93,7 @@ const STARTERS: Record<ViewId, readonly string[]> = {
   conjunctions: ['Any close approaches?', 'What is Pc?', 'What is TCA?', 'Explore the saved example'],
   analytics: ['How many objects by orbit?', 'How old is the data?', 'What is SGP4?', 'Open the globe'],
   data: ['How old is the data?', 'How many objects are there?', 'What is a TLE?', 'Keyboard shortcuts'],
+  reports: ['Any close approaches?', 'How old is the data?', 'What is Pc?', 'What is TCA?'],
 }
 
 const UNKNOWN_CHIPS: readonly string[] = ['What can you do?', 'How many objects are there?', 'Is the data fresh?', 'What is Pc?']
