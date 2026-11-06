@@ -29,8 +29,8 @@ export const TOUR_STEPS: readonly TourStep[] = [
   {
     id: 'views',
     target: '.appbar__center',
-    title: 'Five views, one row',
-    body: 'Overview lists the catalog, Globe shows it in 3D, Conjunctions looks for close approaches, Analytics charts it, and Data says where it comes from. The ORCA logo brings you back to this page. On a keyboard, 1 to 5 open the views and H comes home.',
+    title: 'Six views, one row',
+    body: 'Overview lists the catalog, Globe shows it in 3D, Conjunctions looks for close approaches, Analytics charts it, Data says where it comes from, and Reports turns it into a PDF. The ORCA logo brings you back to this page. On a keyboard, 1 to 6 open the views and H comes home.',
   },
   {
     id: 'search',

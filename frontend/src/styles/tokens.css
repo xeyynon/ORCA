@@ -69,6 +69,20 @@
   --cat-3: #f472b6;
   --cat-4: #22d3ee;
   --cat-5: #fb923c;
+  /* Report paper (Reports view, and the printed PDF): always white paper with dark ink, in both themes, because it is
+     a document to print and share. Checked by the contrast test like every other surface. */
+  --paper-bg: #ffffff;
+  --paper-ink: #0f172a;
+  --paper-ink-2: #334155;
+  --paper-ink-3: #526074;
+  --paper-rule: #d5dce5;
+  --paper-fill: #f3f5f8;
+  --paper-accent: #2f4ac0;
+  --paper-risk-critical: #b91c1c;
+  --paper-risk-high: #c2410c;
+  --paper-risk-medium: #a16207;
+  --paper-risk-low: #0f766e;
+  --paper-risk-negligible: #64748b;
   /* sequential ramp for density (heatmap): low -> mid -> high, dark to bright on the dark canvas */
   --heat-0: #312e81;
   --heat-1: #c026d3;

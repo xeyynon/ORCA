@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { loadSavedRun, SAVED_RUN_QUERY } from '@/api/savedRun'
-import type { ConjunctionEvent, ConjunctionSearchResult } from '@/api/types'
+import type { ConjunctionEvent, ConjunctionSearchResult, RiskLevel } from '@/api/types'
 import type { ConjunctionSearch } from './useConjunctionSearch'
 import type { HookRun } from '@/lib/homeHook'
 
@@ -20,6 +20,10 @@ export interface HomeRun {
   run: HookRun
   /** The run's real events (the most probable ones the API returned), for the home preview table. */
   events: readonly ConjunctionEvent[]
+  /** Every risk tier's count over the whole run (not just the returned events). */
+  tierCounts: Partial<Record<RiskLevel, number>>
+  windowEnd: string
+  objects: number
 }
 
 export type HomeRunState = { status: 'loading' } | { status: 'failed' } | ({ status: 'ready' } & HomeRun)
@@ -41,8 +45,8 @@ export function useHomeRun(search: ConjunctionSearch): HomeRunState {
   }, [current, example])
 
   return useMemo<HomeRunState>(() => {
-    if (current) return { status: 'ready', run: toHookRun(current, search.query?.horizonDays ?? SAVED_RUN_QUERY.horizonDays, search.source === 'saved'), events: current.events }
-    if (example) return { status: 'ready', run: toHookRun(example, SAVED_RUN_QUERY.horizonDays, true), events: example.events }
+    if (current) return { status: 'ready', run: toHookRun(current, search.query?.horizonDays ?? SAVED_RUN_QUERY.horizonDays, search.source === 'saved'), events: current.events, tierCounts: current.tier_counts, windowEnd: current.window_end, objects: current.objects }
+    if (example) return { status: 'ready', run: toHookRun(example, SAVED_RUN_QUERY.horizonDays, true), events: example.events, tierCounts: example.tier_counts, windowEnd: example.window_end, objects: example.objects }
     return failed ? { status: 'failed' } : { status: 'loading' }
   }, [current, example, failed, search.query, search.source])
 }

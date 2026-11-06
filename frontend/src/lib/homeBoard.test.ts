@@ -15,6 +15,8 @@ test('every run figure names its run, and the pair count is pairs within the dis
   assert.doesNotMatch(k.map((x) => `${x.label} ${x.context}`).join(' '), /live|real-time|collisions? found/i)
   assert.equal(homeKpis(15970, { ...run, saved: false })[1].context, 'Pairs within 10 km in your latest search')
   assert.equal(runName({ saved: false }), 'your latest search')
+  assert.equal(homeKpis(15970, { ...run, saved: false })[2].context, 'Flagged in your latest search')
+  assert.equal(runName({ saved: true }), 'the stored example run')
 })
 
 test('figures that are not there yet are null (a skeleton), never 0', () => {

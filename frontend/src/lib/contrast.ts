@@ -60,6 +60,9 @@ export const MIN_RATIO: Record<PairKind, number> = { text: 4.5, faint: 3, mark: 
 const SURFACES = ['--bg-canvas', '--bg-panel', '--bg-card'] as const
 const TEXT = ['--text-primary', '--text-secondary', '--text-tertiary', '--accent-ink', '--risk-critical-ink', '--risk-high-ink',
   '--risk-medium-ink', '--risk-low-ink', '--risk-negligible-ink', '--ok-ink', '--warn-ink', '--bad-ink'] as const
+/** The report paper (always white, both themes): its text and the risk marks drawn on it. */
+const PAPER_TEXT = ['--paper-ink', '--paper-ink-2', '--paper-ink-3', '--paper-accent'] as const
+const PAPER_MARKS = ['--paper-risk-critical', '--paper-risk-high', '--paper-risk-medium', '--paper-risk-low', '--paper-risk-negligible'] as const
 const MARKS = ['--accent', '--risk-critical', '--risk-high', '--risk-medium', '--risk-low', '--ok', '--warn', '--bad', '--cat-1', '--cat-2', '--cat-3', '--cat-4', '--cat-5'] as const
 
 /** Every text/surface and mark/surface pair the interface actually draws. */
@@ -70,6 +73,9 @@ export function tokenPairs(): Pair[] {
     pairs.push({ fg: '--text-faint', bg, kind: 'faint' })
     for (const fg of MARKS) pairs.push({ fg, bg, kind: 'mark' })
   }
+  for (const fg of PAPER_TEXT) pairs.push({ fg, bg: '--paper-bg', kind: 'text' })
+  for (const fg of PAPER_TEXT) pairs.push({ fg, bg: '--paper-fill', kind: 'text' })
+  for (const fg of PAPER_MARKS) pairs.push({ fg, bg: '--paper-bg', kind: 'mark' })
   return pairs
 }
 
