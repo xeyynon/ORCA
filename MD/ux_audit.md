@@ -156,3 +156,39 @@ Every change must follow [rules.md](rules.md): one component per file, tokens on
 
 Screenshots in [ux_audit/](ux_audit/): [01 login](ux_audit/01-login.png), [02 overview](ux_audit/02-overview.png), [17 object detail](ux_audit/17-overview-detail.png), [05 globe](ux_audit/05-globe-final.png), [14](ux_audit/14-conj-results.png) and [15 conjunction results](ux_audit/15-conj-results-scrolled.png), [08 analytics](ux_audit/08-analytics.png), [09 data](ux_audit/09-data.png), [12 light theme](ux_audit/12-light-conj.png), [11](ux_audit/11-mobile-conj.png) and [18](ux_audit/18-mobile-globe.png) phone.
 Note: screenshot 01 was taken before the password was typed, and 14 is a full-page capture of a scroll container, so it cuts off at the viewport; 15 shows the results.
+
+---
+
+## 10. Status after the first upgrade pass (2026-11-06, branch `ui/audit-fixes`)
+
+What was done about each finding, and how it was checked. "Verified" means seen in a real browser or measured; "tested" means a unit or rule test; anything not either is said so.
+
+| # | Finding | Status | How |
+|---|---|---|---|
+| F1 | Layout broken below ~1000 px | **Fixed** | App bar is two rows under 1100 px; search kept on every width; Globe puts the globe first with its playback bar over its foot. Verified at 390 px (screenshots [04](ux_audit/after-04-mobile-conj.png), [05](ux_audit/after-05-mobile-globe.png)) and no horizontal overflow or clipped tab on all five views by DOM measurement. Not verified: a real phone, the light theme on a phone (the browser window was occluded, so screenshots stopped working; a DOM check passed) |
+| F2 | Search destroyed on leaving the view | **Fixed** | State lifted to `Workspace`. Verified: select a point, "Show on globe", return: result and selection intact; a live search keeps running while on another view, shows a "Search running" pill, and its timer stays correct |
+| F3 | Time to first result | **Partly** | Skeleton counts instead of `0` on the Globe; honest message while positions compute; a **saved example run** (a real 262 s search, 37 KB, its own chunk) opens the result page instantly and is labelled on every screen. **Not done:** the Globe still takes 20-60 s on first load (needs streaming or a cached first frame, a larger change) |
+| F4 | Answer buried under the method | **Fixed** | Answer sentence first ("No critical approaches; 29 high-risk in the next 24 hours"), one caveats box instead of three, method folded after the first run. Verified ([02](ux_audit/after-02-conj-saved.png), [03](ux_audit/after-03-conj-saved-scrolled.png)) |
+| F5 | Analytics disagreed with itself | **Fixed for the donut and labelled elsewhere** | Regime donut now uses whole-catalog server counts (LEO 95.0 %, matching the Globe); every other chart says "First 5,000 of 15,970 objects (by name, not a random sample)" in its caption. **Not done:** server-side distributions for the other charts (a backend change) |
+| F6 | Jargon with no plain layer | **Fixed in the main places** | Plain paragraph above the method; `GlossaryTerm` (hover and keyboard focus) on SGP4, TLE, Pc, TCA, miss distance. Not every term in the table headers (a focusable tooltip cannot sit inside a sort button) |
+| F7 | Stale data not acted on | **Fixed** | One banner with a button to the Data page, dismissible per week of age; row chips are a neutral number. Verified; band logic tested |
+| F8 | Copy leaks and errors | **Fixed** | All five lines corrected |
+| F9 | `…` placeholders in prose | **Fixed** | "Loading how the search works…" until the numbers arrive |
+| F10 | Titles, h1, skip link | **Fixed** | `Conjunctions \| ORCA`; one `h1` per view; skip link; focus moves to the content after a view change. Verified |
+| F11 | Table row semantics | **Fixed** | `role="grid"` on selectable tables, Space activates |
+| F12 | Small targets | **Fixed for touch** | 44 px (40 small) under `pointer: coarse`. Not measured on a real touch device |
+| F13 | Contrast | **Fixed and now enforced** | `npm run contrast` restores the missing script's job: 156 pairs, 7 light-theme pairs were just under 3:1 and were darkened; all pass; a rule test keeps it so |
+| F14 | Chart text too large | **Fixed** | Plot capped at 1000 px wide |
+| F15 | Scatter points not actionable | **Fixed** | Points are buttons that select the pair (keyboard: Enter or Space). Verified |
+| F16 | Evaluator password panel | **Not changed** | Owner's decision |
+| F17 | No filter on the Overview table | **Not done** | |
+| F18 | Globe legend | **Not done** | `GlobeLegend` is still unused; the filter list carries the colours |
+| F19 | Shortcut keys on touch | **Fixed** | Keys hidden on narrow screens; shortcuts button hidden on touch |
+
+**Logo (2026-11-07):** the light theme showed the logo on a dark box, because the one logo file has silver lettering and was put on a dark chip. There is now a second transparent file with dark navy lettering made from the same artwork (`frontend/public/logo-320-light.png`, `logo-640-light.png`); `Brand` renders both and `tokens.css` shows one per theme, so no chip, no filter and no theme logic in the component. Verified in the browser in both themes ([screenshot](ux_audit/after-10-light-logo.png)); the sign-in page stays on the dark artwork because its scene is always dark.
+
+**From the sibling projects' guides** (see `MD/rules.md` sections 10 and 11): rules are now checks (`frontend/src/lib/rules.test.ts`, each mutation-checked: it found four literal colours the earlier manual grep had missed); held keys are ignored; the browser toolbar follows the theme; a missing chunk reloads once instead of blanking the app; the build commit is shown on the Data page.
+
+**Not covered** (same list as before, still true): screen reader, keyboard-only walk of the 3D canvas, a real touch device, text at 1.3x (sizes are in px), the Data page "Fetch" flow.
+
+**Tests:** 116 pass (was 94), `tsc` clean, production build passes, `npm run contrast` 156/156.
