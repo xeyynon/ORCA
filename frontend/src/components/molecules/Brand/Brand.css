@@ -4,3 +4,4 @@
 .brand--on-light { display: var(--logo-on-light-display); }
 .brand--bar { height: 38px; width: auto; }
 .brand--card { width: min(280px, 100%); height: auto; }
+.brand-link { display: inline-flex; flex: none; border-radius: var(--radius-sm); }

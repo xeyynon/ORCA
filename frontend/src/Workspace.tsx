@@ -16,11 +16,15 @@ import { summarizeCatalog } from '@/lib/catalog'
 import { days, formatLat, formatLon, integer } from '@/lib/format'
 import { formatUtc } from '@/lib/time'
 import { staleBand, staleNotice } from '@/lib/staleness'
-import { VIEWS, VIEW_LABEL } from '@/lib/views'
+import { VIEWS, VIEW_HOTKEY, VIEW_LABEL } from '@/lib/views'
+import type { ViewId } from '@/lib/views'
+import { breadcrumbTrail } from '@/lib/breadcrumbs'
+import { pairKey } from '@/lib/pair'
 import { Brand } from '@/components/molecules/Brand/Brand'
 import type { Theme } from '@/lib/theme'
 import { AppBar } from '@/components/organisms/AppBar/AppBar'
 import { AppMenu } from '@/components/organisms/AppMenu/AppMenu'
+import { Breadcrumbs } from '@/components/organisms/Breadcrumbs/Breadcrumbs'
 import { ObjectSearch } from '@/components/organisms/ObjectSearch/ObjectSearch'
 import { PrimaryNav } from '@/components/organisms/PrimaryNav/PrimaryNav'
 import { SkipLink } from '@/components/molecules/SkipLink/SkipLink'
@@ -34,6 +38,7 @@ import { LoadingScreen } from '@/components/views/LoadingScreen/LoadingScreen'
 import { AnalyticsView } from '@/components/views/AnalyticsView/AnalyticsView'
 import { ConjunctionsView } from '@/components/views/ConjunctionsView/ConjunctionsView'
 import { DataView } from '@/components/views/DataView/DataView'
+import { HomeView } from '@/components/views/HomeView/HomeView'
 import { OverviewView } from '@/components/views/OverviewView/OverviewView'
 import './Workspace.css'
 
@@ -99,16 +104,25 @@ export function Workspace({ username, onSignOut, theme, onToggleTheme: toggleThe
 
   // Esc is the last rung of the ladder: modals and detail panes close themselves first (they prevent default).
   useKeyboardShortcuts({
-    '1': () => go(VIEWS[0]),
-    '2': () => go(VIEWS[1]),
-    '3': () => go(VIEWS[2]),
-    '4': () => go(VIEWS[3]),
-    '5': () => go(VIEWS[4]),
+    ...Object.fromEntries(VIEWS.map((v) => [VIEW_HOTKEY[v], () => go(v)])),
     t: toggleTheme,
     '?': () => setHelpOpen(true),
     '/': () => searchRef.current?.focus(),
     Escape: () => setSelection((s) => (s.length ? [] : s)),
   }, !helpOpen)
+
+  // The trail's deepest level: the selected object (by name) or the conjunction pair on screen.
+  const selectedName = selection[0] ? (catalog.data?.find((t) => t.norad_cat_id === selection[0])?.object_name ?? selection[0]) : null
+  const pairOnScreen = view === 'globe' ? conjunction : view === 'conjunctions' ? (conjSearch.events.find((e) => pairKey(e) === conjKey) ?? null) : null
+  const trail = breadcrumbTrail({ view, objectName: selectedName, pairLabel: pairOnScreen ? `${pairOnScreen.sat1_name} × ${pairOnScreen.sat2_name}` : null })
+  const onCrumb = (target: ViewId, clearSelection: boolean) => {
+    if (clearSelection) {
+      if (target === 'conjunctions') setConjKey(null)
+      else if (target === 'globe' && conjunction) setConjunction(null)
+      else setSelection([])
+    }
+    go(target)
+  }
 
   const status: StatusItem[] = [
     { label: 'API', value: apiStatus === 'online' ? 'online' : apiStatus === 'offline' ? 'unreachable' : 'checking', tone: apiStatus === 'online' ? 'ok' : apiStatus === 'offline' ? 'bad' : 'warn', dotOnly: apiStatus === 'online' },
@@ -129,16 +143,19 @@ export function Workspace({ username, onSignOut, theme, onToggleTheme: toggleThe
     <div className="app">
       <SkipLink targetId="main-content">Skip to content</SkipLink>
       <AppBar
-        left={<><Brand /><ObjectSearch inputRef={searchRef} query={query} onQueryChange={setQuery} results={search.results} loading={search.loading} degraded={search.degraded} onPick={(id) => showOnGlobe([id])} /></>}
+        left={<><Brand href="#/home" onNavigate={() => go('home')} /><ObjectSearch inputRef={searchRef} query={query} onQueryChange={setQuery} results={search.results} loading={search.loading} degraded={search.degraded} onPick={(id) => showOnGlobe([id])} /></>}
         center={<PrimaryNav view={view} onChange={go} />}
         right={<AppMenu username={username} theme={theme} onToggleTheme={toggleTheme} onShowShortcuts={() => setHelpOpen(true)} onSignOut={onSignOut} />}
       />
+
+      <Breadcrumbs trail={trail} onNavigate={onCrumb} />
 
       {/* Not on Conjunctions: its result carries the same fact as one of its caveats, and one home per fact. Not on Globe/Data: the canvas stays clear, and Data explains it. */}
       {stale && staleDismissedBand !== currentStaleBand && (view === 'overview' || view === 'analytics') ? (
         <StaleDataBanner notice={stale} onGoData={() => go('data')} onDismiss={() => setStaleDismissedBand(currentStaleBand)} />
       ) : null}
 
+      {view === 'home' ? <HomeView onGo={go} /> : null}
       {view === 'overview' ? (
         <OverviewView
           catalog={catalog}
