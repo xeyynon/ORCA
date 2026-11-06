@@ -1,4 +1,8 @@
-.timeline__svg { display: block; width: 100%; height: auto; }
+/* Capped so the chart text (set in viewBox units) never scales far past the UI's own 13 px. */
+.timeline__svg { display: block; width: 100%; max-width: 1000px; height: auto; margin: 0 auto; }
+.timeline__dot--pick { cursor: pointer; }
+.timeline__dot--selected { stroke: var(--text-primary); stroke-width: 2; fill-opacity: 1; }
+.timeline__dot:focus-visible { outline: none; stroke: var(--focus-ring); stroke-width: 2.5; }
 .timeline__plot { fill: var(--bg-input); stroke: var(--border-strong); stroke-width: 1; }
 .timeline__grid { stroke: var(--chart-grid); stroke-width: 1; }
 .timeline__tick { fill: var(--text-tertiary); font: 10px var(--font-mono); }

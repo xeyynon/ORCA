@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { Mono } from '../../atoms/Mono/Mono'
 import { Swatch } from '../../atoms/Swatch/Swatch'
 import './CheckboxRow.css'
@@ -7,7 +8,7 @@ type Props = {
   checked: boolean
   onChange: (checked: boolean) => void
   /** A count shown at the right edge. */
-  count?: string
+  count?: ReactNode
   /** A colour chip before the label (a token reference), for filters that match a colour in the legend. */
   swatch?: string
   disabled?: boolean

@@ -1,0 +1,2 @@
+.stale-banner { flex: none; padding: var(--gap-2) var(--gap-4) 0; }
+.stale-banner__action { display: inline-flex; flex-wrap: wrap; gap: var(--gap-2); margin-left: var(--gap-3); vertical-align: middle; }

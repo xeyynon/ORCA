@@ -1,5 +1,6 @@
 .conj-method { border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--bg-panel); padding: var(--gap-3) var(--gap-4); }
 .conj-method__summary { cursor: pointer; color: var(--text-primary); font-weight: 600; }
+.conj-method__plain { margin: var(--gap-3) 0 0; max-width: 90ch; color: var(--text-primary); line-height: 1.6; }
 .conj-method__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: var(--gap-3) var(--gap-5); margin-top: var(--gap-3); color: var(--text-secondary); }
 .conj-method__limits { margin: var(--gap-3) 0 0; padding-left: var(--gap-4); color: var(--text-secondary); }
 .conj-method__limits li + li { margin-top: var(--gap-1); }

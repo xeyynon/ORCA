@@ -24,3 +24,23 @@ export function expectedRuntimeMinutes(objects: number, horizonDays: number): nu
   const perObjectDay = 2.0 / 16000
   return Math.max(0.1, objects * horizonDays * perObjectDay)
 }
+
+export type AnswerTone = 'alert' | 'watch' | 'calm'
+export interface ResultAnswer { tone: AnswerTone; headline: string; detail: string }
+
+const window = (days: number) => (days === 1 ? 'the next 24 hours' : `the next ${days} days`)
+
+/**
+ * The one-sentence answer a reader wants before any table: how many approaches need attention. It counts over EVERY
+ * approach found (tier counts), not the rows shown, and it names the window so "none" is never read as "none ever".
+ */
+export function resultAnswer(counts: Record<RiskLevel, number>, total: number, horizonDays: number, reportKm: number): ResultAnswer {
+  const c = counts.CRITICAL
+  const h = counts.HIGH
+  const w = window(horizonDays)
+  const minor = counts.LOW + counts.NEGLIGIBLE
+  const detail = `${integer(total)} ${total === 1 ? 'approach' : 'approaches'} closer than ${reportKm} km found in all; ${integer(minor)} of them rank low or negligible.`
+  if (c > 0) return { tone: 'alert', headline: `${integer(c)} critical and ${integer(h)} high-risk ${c + h === 1 ? 'approach' : 'approaches'} in ${w}`, detail }
+  if (h > 0) return { tone: 'watch', headline: `No critical approaches; ${integer(h)} high-risk in ${w}`, detail }
+  return { tone: 'calm', headline: `No critical or high-risk approaches in ${w}`, detail }
+}

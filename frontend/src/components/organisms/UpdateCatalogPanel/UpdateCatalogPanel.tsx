@@ -52,7 +52,7 @@ export function UpdateCatalogPanel({ phase, before, after, error, apiOnline, onS
       ) : null}
       {phase === 'failed' ? <EmptyState kind="error" title="Could not start the refresh">{error}</EmptyState> : null}
 
-      <FieldNote>This pulls Celestrak's “active” group (about 10,000 objects). Repeated requests in a short window are rate-limited by Celestrak.</FieldNote>
+      <FieldNote>This pulls Celestrak's whole “active” group, which is many thousands of objects. Repeated requests in a short window are rate-limited by Celestrak.</FieldNote>
     </section>
   )
 }
