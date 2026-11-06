@@ -1,0 +1,5 @@
+.regime-tile__bar { display: flex; gap: 2px; height: 12px; overflow: hidden; border-radius: var(--radius-sm); background: var(--bg-hover); }
+/* A regime with any objects stays visible as a sliver; its exact share is in the text beside it. */
+.regime-tile__seg { flex-basis: 0; min-width: 3px; }
+.regime-tile__legend { display: grid; gap: var(--gap-2); }
+.regime-tile__note { margin: 0; color: var(--text-tertiary); font-size: var(--text-sm); }

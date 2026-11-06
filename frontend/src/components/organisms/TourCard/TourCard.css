@@ -1,0 +1,49 @@
+/*
+ * A dialog-level surface (Material level 4): the overlay surface and the deepest shadow, an ordinary border, no tint and
+ * no accent stripe (rules.md 11.18). It slides and fades in once; each new step's text fades in. Transform and opacity
+ * only, and none of it under reduced motion.
+ */
+.tour-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-3);
+  width: 340px;
+  max-width: calc(100vw - 2 * var(--gap-3));
+  padding: var(--gap-4);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  background: var(--surface-3);
+  box-shadow: var(--elev-4);
+  color: var(--text-primary);
+  animation: tour-card-in var(--dur-2) var(--ease-emphasized) both;
+}
+.tour-card:focus { outline: none; }
+.tour-card:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+
+.tour-card--sheet {
+  width: 100%;
+  max-width: none;
+  border-width: 1px 0 0;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  padding-bottom: calc(var(--gap-4) + env(safe-area-inset-bottom, 0px));
+  animation-name: tour-sheet-in;
+}
+
+.tour-card__progress { display: flex; align-items: center; justify-content: space-between; gap: var(--gap-3); }
+.tour-card__count { color: var(--text-tertiary); font-size: var(--text-sm); }
+
+.tour-card__text { display: flex; flex-direction: column; gap: var(--gap-2); animation: tour-text-in var(--dur-2) var(--ease-standard) both; }
+.tour-card__title { margin: 0; font-size: var(--text-lg); font-weight: 600; }
+.tour-card__body { margin: 0; color: var(--text-secondary); font-size: var(--text-md); line-height: 1.5; }
+
+.tour-card__actions { display: flex; align-items: center; justify-content: space-between; gap: var(--gap-2); margin-top: var(--gap-1); }
+.tour-card__nav { display: inline-flex; gap: var(--gap-2); }
+.tour-card__primary { display: inline-flex; }
+
+@keyframes tour-card-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@keyframes tour-sheet-in { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: none; } }
+@keyframes tour-text-in { from { opacity: 0; } to { opacity: 1; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .tour-card, .tour-card__text { animation: none; }
+}

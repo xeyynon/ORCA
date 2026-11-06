@@ -13,18 +13,20 @@ type Props = {
   theme: Theme
   onToggleTheme: () => void
   onShowShortcuts: () => void
+  /** Replays the first-run tour. */
+  onStartTour?: () => void
   onSignOut: () => void
 }
 
 /**
- * The account and preferences menu: who is signed in, the keyboard shortcuts, the theme and Sign out, behind one
+ * The account and preferences menu: who is signed in, the keyboard shortcuts, the tour, the theme and Sign out, behind one
  * hamburger button instead of four controls in the header. Each row shows the key that does the same with the menu closed.
  *
  * ARIA menu pattern: the button has aria-haspopup and aria-expanded; focus moves to the first item on open; Up/Down wrap,
  * Home/End jump; Tab closes; focus returns to the button on close. Esc closes the menu and is swallowed (preventDefault),
  * so the app-wide Esc does not also fire: one press undoes one step. Outside clicks close it.
  */
-export function AppMenu({ username, theme, onToggleTheme, onShowShortcuts, onSignOut }: Props) {
+export function AppMenu({ username, theme, onToggleTheme, onShowShortcuts, onStartTour, onSignOut }: Props) {
   const [open, setOpen] = useState(false)
   const rootRef = useRef<HTMLDivElement>(null)
   const popRef = useRef<HTMLDivElement>(null)
@@ -60,7 +62,7 @@ export function AppMenu({ username, theme, onToggleTheme, onShowShortcuts, onSig
   const nextTheme = theme === 'dark' ? 'light' : 'dark'
 
   return (
-    <div className="app-menu" ref={rootRef} onKeyDown={onKeyDown}>
+    <div className="app-menu" ref={rootRef} onKeyDown={onKeyDown} data-tour="menu">
       <IconButton label="Menu" popup="menu" expanded={open} onClick={() => setOpen((o) => !o)}>
         <Icon name="menu" />
       </IconButton>
@@ -69,6 +71,8 @@ export function AppMenu({ username, theme, onToggleTheme, onShowShortcuts, onSig
           <div className="app-menu__who" role="presentation">Signed in as <span className="app-menu__user">{username}</span></div>
           <div className="app-menu__sep" role="separator" />
           <FineOnly><MenuItem label="Keyboard shortcuts" hint="?" icon={<Icon name="keyboard" />} onSelect={choose(onShowShortcuts, false)} /></FineOnly>
+          {/* Focus goes back to the menu button first, so the tour returns it there when it closes. */}
+          {onStartTour ? <MenuItem label="Take the tour" icon={<Icon name="info" />} onSelect={choose(onStartTour, true)} /> : null}
           <MenuItem label={`Switch to ${nextTheme} theme`} hint="T" icon={<Icon name={theme === 'dark' ? 'sun' : 'moon'} />} onSelect={choose(onToggleTheme, true)} />
           <div className="app-menu__sep" role="separator" />
           <MenuItem label="Sign out" icon={<Icon name="logout" />} onSelect={choose(onSignOut, false)} />

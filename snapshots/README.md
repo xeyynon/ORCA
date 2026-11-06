@@ -56,3 +56,10 @@ Rule from here on: each UI milestone adds a folder in the same sitting (`MD/rule
 | [02-conjunctions-quiet-callouts-light.png](04-quiet-notices-2026-11-07/02-conjunctions-quiet-callouts-light.png) | Saved-run note and caveats with no tint or icon |
 
 Not kept: two captures that only show the throttled browser (a stalled frame) and duplicates of the ones above.
+
+## 05-mission-control-2026-11-07
+
+| File | What it shows |
+|---|---|
+| [01-home-desktop-light.png](05-mission-control-2026-11-07/01-home-desktop-light.png) | Mission control (bento): hero story tile, freshness, conjunctions (saved example labelled), globe entry |
+| [02-home-desktop-dark-scrolled.png](05-mission-control-2026-11-07/02-home-desktop-dark-scrolled.png) | Dark theme, lower tiles: orbit regimes, system, New here? with the tour and glossary |

@@ -1,0 +1,28 @@
+/*
+ * The tour's layer sits above the menu (50) and below Modal (100), which cannot open while the tour has the keys.
+ * The dimming is the spotlight's own spread shadow, so the cut-out is a real hole with a ring, not a second mask.
+ */
+.tour-overlay { position: fixed; inset: 0; z-index: 90; }
+.tour-overlay__block { position: absolute; inset: 0; }
+
+.tour-overlay__spot {
+  position: absolute;
+  left: 0;
+  top: 0;
+  border-radius: var(--radius-md);
+  box-shadow: 0 0 0 2px var(--accent), 0 0 0 9999px var(--scrim);
+  pointer-events: none;
+}
+
+.tour-overlay__place { position: absolute; left: 0; top: 0; }
+.tour-overlay__place--sheet { top: auto; right: 0; bottom: 0; }
+
+/* After the first frame: the spotlight glides to the next target and the card follows. */
+.tour-overlay--ready .tour-overlay__spot {
+  transition: transform var(--dur-3) var(--ease-emphasized), width var(--dur-3) var(--ease-emphasized), height var(--dur-3) var(--ease-emphasized);
+}
+.tour-overlay--ready .tour-overlay__place:not(.tour-overlay__place--sheet) { transition: transform var(--dur-2) var(--ease-emphasized); }
+
+@media (prefers-reduced-motion: reduce) {
+  .tour-overlay--ready .tour-overlay__spot, .tour-overlay--ready .tour-overlay__place { transition: none; }
+}

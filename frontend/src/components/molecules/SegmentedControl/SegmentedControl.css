@@ -1,4 +1,40 @@
-.segmented { display: inline-flex; padding: 2px; gap: 2px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg-input); }
-.segmented__btn { height: 24px; padding: 0 10px; border: 0; border-radius: 3px; background: transparent; color: var(--text-secondary); font-size: 12px; font-weight: 500; }
+/*
+ * Tactile control (MD/design_system_v2.md, Neumorphism row): each segment is a small raised key on the --neu-surface;
+ * the chosen one (aria-pressed) sits inset AND shows accent text with a firmer border, so the choice never rests on
+ * shadow alone. Every segment keeps a 1px border and the base.css focus ring.
+ * Interaction layer (Material row): hover, focus and pressed are a translucent --state-* layer under the label;
+ * pressing a segment also sinks it (the inset shadow), which is a state, not motion.
+ */
+.segmented { display: inline-flex; padding: 3px; gap: 4px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--neu-surface); }
+.segmented__btn {
+  position: relative;
+  isolation: isolate;
+  height: 24px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  background: var(--neu-surface);
+  box-shadow: -1px -1px 2px var(--neu-light), 1px 1px 3px var(--neu-dark);
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 500;
+  transition: box-shadow var(--dur-1) var(--ease-standard);
+}
+.segmented__btn::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--state-hover);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--dur-1) var(--ease-standard);
+}
 .segmented__btn:hover { color: var(--text-primary); }
-.segmented__btn--on { background: var(--bg-elevated); color: var(--text-primary); box-shadow: 0 0 0 1px var(--border-strong); }
+.segmented__btn:hover::before { opacity: 1; }
+.segmented__btn:focus-visible::before { background: var(--state-focus); opacity: 1; }
+.segmented__btn:active::before { background: var(--state-pressed); opacity: 1; }
+.segmented__btn:active,
+.segmented__btn--on { box-shadow: inset 1px 1px 3px var(--neu-dark), inset -1px -1px 2px var(--neu-light); }
+.segmented__btn--on, .segmented__btn--on:hover { border-color: var(--border-strong); color: var(--accent-ink); }

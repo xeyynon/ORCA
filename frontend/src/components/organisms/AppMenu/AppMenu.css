@@ -11,7 +11,12 @@
   border-radius: var(--radius-lg);
   background: var(--bg-elevated);
   box-shadow: var(--shadow);
+  animation: app-menu-pop var(--dur-2) var(--ease-standard);
 }
+/* Microinteraction (MD/design_system_v2.md): the menu settles in as it opens (opacity + 4px rise, transform/opacity
+   only), confirming the click. It is mounted on open, so the animation runs each time. base.css turns it off under
+   prefers-reduced-motion; closing is instant on purpose, so focus never waits on an exit. */
+@keyframes app-menu-pop { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
 .app-menu__who { padding: var(--gap-2) var(--gap-3); color: var(--text-tertiary); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .app-menu__user { color: var(--text-primary); font-family: var(--font-mono); }
 .app-menu__sep { height: 1px; margin: var(--gap-1) 0; background: var(--border); }

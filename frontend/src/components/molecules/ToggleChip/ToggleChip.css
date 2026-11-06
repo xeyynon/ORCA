@@ -1,4 +1,12 @@
+/*
+ * Interaction layer (MD/design_system_v2.md, Material row): hover, focus and pressed are a translucent --state-* layer
+ * (::before, under the label) over the chip's fill, so an "on" chip keeps its accent fill under the pointer. The
+ * border still firms up on hover as the affordance. Pressed shrinks it by 2% (--dur-1), dropped under reduced motion.
+ * On/off is aria-pressed plus fill and text colour, never the layer alone.
+ */
 .chip {
+  position: relative;
+  isolation: isolate;
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -10,9 +18,26 @@
   color: var(--text-secondary);
   font-size: 12px;
   font-weight: 500;
+  transition: transform var(--dur-1) var(--ease-standard);
+}
+.chip::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--state-hover);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--dur-1) var(--ease-standard);
 }
 .chip:hover { border-color: var(--border-strong); color: var(--text-primary); }
-.chip--on { border-color: var(--accent); background: var(--accent-bg); color: var(--accent-ink); }
+.chip:hover::before { opacity: 1; }
+.chip:focus-visible::before { background: var(--state-focus); opacity: 1; }
+.chip:active::before { background: var(--state-pressed); opacity: 1; }
+.chip:active { transform: scale(0.98); }
+.chip--on, .chip--on:hover { border-color: var(--accent); background: var(--accent-bg); color: var(--accent-ink); }
 .chip__count { color: var(--text-tertiary); font-variant-numeric: tabular-nums; }
 .chip--on .chip__count { color: var(--accent-ink); }
+@media (prefers-reduced-motion: reduce) { .chip:active { transform: none; } }
 @media (pointer: coarse) { .chip { height: 44px; padding: 0 14px; } }

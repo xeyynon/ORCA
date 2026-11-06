@@ -32,6 +32,9 @@ type Props = {
   now: Date
 }
 
+/** The KPI captions, shown with skeletons while the catalog loads. Same order and words as the loaded row below. */
+const KPI_CAPTIONS = ['Objects', 'Newest TLE', 'Median TLE age', 'Oldest TLE', 'Median altitude'] as const
+
 function loadedHint(summary: CatalogSummary, totalCount: number | null): string {
   if (totalCount !== null && totalCount > summary.count) return `${integer(summary.count)} loaded here (API returns up to 5,000)`
   return summary.unclassified ? `${integer(summary.unclassified)} could not be classified` : 'all classified'
@@ -55,7 +58,13 @@ export function OverviewView({ catalog, summary, totalCount, selectedId, onSelec
   if (!rows && catalog.status === 'error') {
     body = <EmptyState kind="error" title="Could not load the catalog" action={<Button onClick={catalog.reload}>Retry</Button>}>{catalog.error.message}</EmptyState>
   } else if (!rows) {
-    body = <EmptyState kind="awaiting" title="Loading catalog…" />
+    // The figures wait in their own places (skeletons, never 0); the labelled loader below is for the table section.
+    body = (
+      <>
+        <KpiRow loading items={KPI_CAPTIONS.map((label) => ({ label, value: '' }))} />
+        <EmptyState kind="awaiting" title="Loading catalog…" />
+      </>
+    )
   } else if (rows.length === 0) {
     body = (
       <EmptyState kind="none" title="The catalog is empty" action={<Button variant="primary" onClick={onGoData}>Go to Data</Button>}>
