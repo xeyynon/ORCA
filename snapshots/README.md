@@ -148,5 +148,6 @@ The Reports view (MD/design_system_v2.md §6).
 | [03-phone-builder.png](12-reports-2026-11-07/03-phone-builder.png) | Phone: the builder first |
 | [04-phone-preview.png](12-reports-2026-11-07/04-phone-preview.png) | Phone: the preview keeps its paper width and scrolls sideways in its own frame; the page does not |
 | [05-reports-light.png](12-reports-2026-11-07/05-reports-light.png) | Light theme: the paper is the same white in both themes |
-| [06-sample-report.pdf](12-reports-2026-11-07/06-sample-report.pdf) | A generated report (all four sections, stored example run): 3 A4 pages |
-| [07-header-no-stripe.png](12-reports-2026-11-07/07-header-no-stripe.png) | The report header after the owner banned coloured side stripes (rules.md §11.21): the educational-use notice is a Scope line (small label, key phrase in bold, full-width rules above and below), no box, no tint, no blue bar; the contents list is flush with the title |
+| [06-sample-report.pdf](12-reports-2026-11-07/06-sample-report.pdf) | A generated report (all four sections, stored example run): 3 A4 pages, each with the marking and a page number. (The copy pushed before 2026-11-07 21:15 was mistakenly the screen layout: the test browser was left forced to screen media.) |
+| [07-header-marking.png](12-reports-2026-11-07/07-header-marking.png) | The report opens with its handling marking, EDUCATIONAL USE ONLY · NOT FOR OPERATIONAL DECISIONS, in centred spaced capitals, the way official documents mark their use. No box, no tint, no side stripe (rules.md §11.21) |
+| [08-printed-page-2.png](12-reports-2026-11-07/08-printed-page-2.png) | A printed page: the marking at the head of every page, the table header repeated after a page break, "Page 2 of 3" at the foot |
