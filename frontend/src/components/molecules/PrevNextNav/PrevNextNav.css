@@ -1,0 +1,2 @@
+.prev-next { display: flex; align-items: center; justify-content: space-between; gap: var(--gap-2); margin: calc(-1 * var(--gap-2)) calc(-1 * var(--gap-2)) 0; }
+.prev-next__pos { font-size: var(--text-sm); }

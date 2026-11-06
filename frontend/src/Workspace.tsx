@@ -13,6 +13,11 @@ import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { useNow } from '@/hooks/useNow'
 import { useObjectSearch } from '@/hooks/useObjectSearch'
 import { useTour } from '@/hooks/useTour'
+import { useAskOrca } from '@/hooks/useAskOrca'
+import { loadSavedRun, SAVED_RUN_QUERY } from '@/api/savedRun'
+import { Icon } from '@/components/atoms/Icon/Icon'
+import { IconButton } from '@/components/atoms/IconButton/IconButton'
+import { AskOrcaPanel } from '@/components/organisms/AskOrcaPanel/AskOrcaPanel'
 import { summarizeCatalog } from '@/lib/catalog'
 import { days, formatLat, formatLon, integer } from '@/lib/format'
 import { formatUtc } from '@/lib/time'
@@ -106,12 +111,31 @@ export function Workspace({ username, onSignOut, theme, onToggleTheme: toggleThe
     go('globe')
   }, [go])
 
+  // Ask ORCA: a docked panel, not a modal. Its actions call the same functions as the rest of the app.
+  const [askOpen, setAskOpen] = useState(false)
+  const askInputRef = useRef<HTMLInputElement>(null)
+  const askButtonRef = useRef<HTMLSpanElement>(null)
+  const closeAsk = useCallback(() => { setAskOpen(false); askButtonRef.current?.querySelector('button')?.focus() }, [])
+  const ask = useAskOrca({
+    open: askOpen, view, theme, health, summary, loaded: catalog.data ?? [], conjSearch, inputRef: askInputRef,
+    handlers: {
+      go,
+      showObject: (id) => showOnGlobe([id]),
+      runSearch: (horizonDays) => { const q = { ...conjQuery, horizonDays }; setConjQuery(q); conjSearch.run(q); go('conjunctions') },
+      openSavedExample: () => loadSavedRun().then((res) => { const ok = conjSearch.loadSaved(res, SAVED_RUN_QUERY); if (ok) setConjQuery(SAVED_RUN_QUERY); go('conjunctions'); return ok }),
+      setTheme: (t) => { if (t !== theme) toggleTheme() },
+      startTour: () => { closeAsk(); tour.start() },
+      showShortcuts: () => setHelpOpen(true),
+    },
+  })
+
   // Esc is the last rung of the ladder: modals and detail panes close themselves first (they prevent default).
   useKeyboardShortcuts({
     ...Object.fromEntries(VIEWS.map((v) => [VIEW_HOTKEY[v], () => go(v)])),
     t: toggleTheme,
     '?': () => setHelpOpen(true),
     '/': () => searchRef.current?.focus(),
+    '.': () => { if (askOpen) askInputRef.current?.focus(); else setAskOpen(true) },
     Escape: () => setSelection((s) => (s.length ? [] : s)),
   }, !helpOpen)
 
@@ -149,7 +173,7 @@ export function Workspace({ username, onSignOut, theme, onToggleTheme: toggleThe
       <AppBar
         left={<><Brand href="#/home" onNavigate={() => go('home')} /><ObjectSearch inputRef={searchRef} query={query} onQueryChange={setQuery} results={search.results} loading={search.loading} degraded={search.degraded} onPick={(id) => showOnGlobe([id])} /></>}
         center={<PrimaryNav view={view} onChange={go} />}
-        right={<AppMenu username={username} theme={theme} onToggleTheme={toggleTheme} onShowShortcuts={() => setHelpOpen(true)} onStartTour={tour.start} onSignOut={onSignOut} />}
+        right={<><span ref={askButtonRef}><IconButton label="Ask ORCA (.)" pressed={askOpen} onClick={() => (askOpen ? closeAsk() : setAskOpen(true))}><Icon name="chat" /></IconButton></span><AppMenu username={username} theme={theme} onToggleTheme={toggleTheme} onShowShortcuts={() => setHelpOpen(true)} onStartTour={tour.start} onSignOut={onSignOut} /></>}
       />
 
       <Breadcrumbs trail={trail} onNavigate={onCrumb} />
@@ -208,6 +232,7 @@ export function Workspace({ username, onSignOut, theme, onToggleTheme: toggleThe
       {view === 'data' ? <DataView health={health} apiStatus={apiStatus} summary={summary} update={update} /> : null}
 
       <StatusBar items={status} />
+      {askOpen ? <AskOrcaPanel messages={ask.messages} onSend={ask.send} onPick={ask.pick} onClose={closeAsk} inputRef={askInputRef} footnote={ask.footnote} /> : null}
       {helpOpen ? <ShortcutsHelp onClose={() => setHelpOpen(false)} /> : null}
       {tour.view ? <TourOverlay {...tour.view} /> : null}
     </div>

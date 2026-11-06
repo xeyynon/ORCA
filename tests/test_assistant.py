@@ -60,7 +60,7 @@ def call(app, method, path, body=None, token=None, raw=None):
     return out["status"], parsed, out["headers"]
 
 
-DEFAULT = "llama-3.3-70b-versatile"
+DEFAULT = "openai/gpt-oss-120b"
 
 
 def reply(text="Fourteen events were found in the 24-hour window.", model=DEFAULT, finish_reason="stop"):
@@ -263,8 +263,13 @@ class RequestShapeTests(unittest.TestCase):
     def test_the_body_is_a_chat_completion_with_the_system_prompt_first(self):
         body = assistant.build_request(assistant.validate(ask_body()), DEFAULT)
         self.assertEqual([m["role"] for m in body["messages"]], ["system", "user"])
-        self.assertLessEqual(body["max_tokens"], 1000)
+        self.assertLessEqual(body["max_tokens"], 2048)
         self.assertLessEqual(body["temperature"], 0.5)
+
+    def test_reasoning_effort_is_sent_only_to_models_that_accept_it(self):
+        req = assistant.validate(ask_body())
+        self.assertEqual(assistant.build_request(req, "openai/gpt-oss-120b")["reasoning_effort"], "low")
+        self.assertNotIn("reasoning_effort", assistant.build_request(req, "qwen/qwen3.8-27b"))
 
     def test_no_facts_is_said_out_loud(self):
         req = assistant.validate(ask_body(facts=[]))

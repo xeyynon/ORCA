@@ -27,10 +27,3 @@ button:disabled { cursor: not-allowed; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
 }
-
-
-/* Glass falls back to an opaque surface when the user asks for less transparency (design_system_v2 §1). Components
-   read --glass-bg; redefining it here reaches every one of them. */
-@media (prefers-reduced-transparency: reduce) {
-  :root { --glass-bg: var(--glass-bg-solid); --glass-blur: 0px; }
-}
