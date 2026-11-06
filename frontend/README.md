@@ -16,7 +16,7 @@ npm install
 npm run dev          # http://127.0.0.1:5173, /api and /health are proxied to :8000
 ```
 
-Other scripts: `npm run build` (type-checks, then bundles), `npm test` (unit tests for `src/lib`), `npm run typecheck`.
+Other scripts: `npm run build` (type-checks, then bundles), `npm test` (unit tests for `src/lib`, plus `rules.test.ts`, which turns the standing UI rules into checks), `npm run typecheck`, `npm run contrast` (WCAG contrast of every colour token pair, both themes; exits 1 on a failure).
 
 To point a built bundle at a remote API, set `VITE_API_BASE` at build time and add the frontend's origin to `ORCA_CORS_ORIGINS` on the API.
 
@@ -26,7 +26,7 @@ To point a built bundle at a remote API, set `VITE_API_BASE` at build time and a
 |---|---|---|
 | 1 | Overview | Catalog KPIs, sortable table, object detail, regime breakdown |
 | 2 | Globe | three.js Earth with every object, orbit paths, time scrub up to +7 days |
-| 3 | Conjunctions | Run a screening search (cancellable), risk summary, pair detail, CSV/JSON export |
+| 3 | Conjunctions | Run a screening search (cancellable, keeps running while you look at other views), the answer first, risk summary, pair detail, CSV/JSON export, or open a saved example run |
 | 4 | Analytics | Server statistics plus histograms and a scatter derived in the browser |
 | 5 | Data | Catalog freshness and a Celestrak refresh with honest progress |
 

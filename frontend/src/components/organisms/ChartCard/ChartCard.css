@@ -1,4 +1,6 @@
 .chart-card { display: flex; flex-direction: column; gap: var(--gap-3); min-width: 0; padding: var(--gap-3) var(--gap-4); border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg-card); }
 .chart-card__head { display: flex; align-items: center; justify-content: space-between; gap: var(--gap-2); }
+.chart-card__title { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.chart-card__scope { color: var(--text-tertiary); font-size: 11px; }
 .chart-card__info { display: inline-flex; color: var(--text-tertiary); cursor: help; }
 .chart-card__body { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: var(--gap-3); min-width: 0; }

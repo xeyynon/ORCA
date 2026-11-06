@@ -1,6 +1,6 @@
 # Paper draft: full text, Sections I–VI
 
-> Draft 2, 2026-10-15. Written from `MD/research_paper_brief.md` (Section 10) and the committed files in `benchmarks/results/`. Every number below is traceable to one of those files.
+> Draft 3, 2026-10-29 (adds §IV-D evaluation metrics, candidate reduction in §V-B and the metric summary in §V-F). Draft 2 was 2026-10-15. Written from `MD/research_paper_brief.md` (Section 10) and the committed files in `benchmarks/results/`. Every number below is traceable to one of those files.
 >
 > **Placeholders:**
 > - Citations are keys in [references.bib](references.bib), written as [key]. The verification status of each is in [literature_verification.md](literature_verification.md); keys marked SECONDARY there must be re-checked before submission.
@@ -317,6 +317,22 @@ On each 2,000-object population and window, two pipelines are run:
 
 Each A event is checked against SGP4 within ±10 min of the TCA that A claims. A counts as finding a B encounter if it reports the same pair within ±10 min.
 
+### D. Evaluation metrics
+
+Every experiment is scored with the following measures.
+
+| Metric | Experiment | Definition |
+|---|---|---|
+| Position error | 1 | Distance from the reference position, split into radial, in-track and cross-track; median and robust spread over objects |
+| TCA error | 3, 5 | Time difference from the root-found closest approach (s); median and 95th percentile |
+| Miss-distance error | 3, 5 | Distance difference from the root-found miss distance (m); median and 95th percentile; with the share of true closest approaches found |
+| Runtime | 2a, 3, 5 | Wall-clock time per step or per run, one machine |
+| Speedup | 2a | Ratio of the slower method's runtime to the faster one's |
+| Recall | 2b | Share of reference encounters whose pass the screen flags |
+| Candidate reduction | 2b | All object pairs, n(n−1)/2, divided by the pairs the screen flags in the window. Meaningful only together with recall: flagging nothing reduces candidates without bound |
+| Pc difference | 4 | Ratio of a method's Pc to Foster's on identical inputs; agreement with the closed form and with Monte Carlo (Clopper–Pearson intervals) |
+| Risk classification agreement | 4, 5 | Share of encounters given the same tier (and within one tier) by two methods; HIGH and CRITICAL counts per setting; Kendall τ between each ranking and miss distance |
+
 ---
 
 ## V. RESULTS AND DISCUSSION
@@ -373,6 +389,18 @@ At about 9 ms per step for the full catalog, the spatial search is not ORCA's bo
 - under 1 % above 5 km/s
 
 These values agree with the probability that a straight pass is sampled while inside the radius, about 2r / (v·Δs). For r = 100 km, Δs = 1 h and v = 10 km/s that is 0.56 %.
+
+**Candidate reduction.** Out of 1,999,000 pairs per 2,000-object seed:
+
+| Screen | Pairs flagged | Reduction | Event recall |
+|---|---|---|---|
+| ORCA's 1 h, 100 km | 1,378–1,497 | 1,335–1,451× | 1.0–1.2 % |
+| 5 min, 100 km | 12,248–12,889 | 155–163× | about 10 % |
+| 1 min, 100 km | 29,139–30,751 | 65–69× | 40–42 % |
+| 20 s, 100 km | 56,649–60,109 | 33–35× | 88–90 % |
+| 20 s, 200 km | 193,600–197,688 | about 10× | 100 % |
+
+The screen that discards the most candidates also discards almost every encounter, so reduction is reported only next to recall.
 
 Pair recall, i.e. the pair is flagged at some other time, is 14–15 %. Because the screen catches slow encounters preferentially, ORCA's output is dominated by co-orbital pairs: in its exported top-100 list, 85 are Starlink–Starlink and 21 % have relative velocity below 0.1 km/s.
 
@@ -461,7 +489,26 @@ Because TLEs carry no covariance, the risk tier is the least defensible output o
 - Its miss distances agree to a median of 0.5 mm (6 cm worst case).
 - On the full catalog (15,970 objects, 24 h) it finds about 426,000 approaches closer than 10 km in about 1.5–2 minutes on a laptop: about 30 HIGH and 800 MEDIUM.
 
-### F. What the results do not establish
+### F. Summary of metrics
+
+Two results not stated above:
+- **TCA error in time** follows miss-distance error. Medians over the three seeds: 0.25 s for a 1 s grid, 2.5 s for a 10 s grid, 12 ms for a parabola on d² from a 60 s grid, 0.1 ms for bounded Brent, 2.4 µs for Brent on the range rate.
+- **Tier agreement.** ORCA's tiers match Foster's (same covariance) for 49–50 % of encounters, and for 92–93 % within one tier. None of the 455–550 HIGH and CRITICAL events per seed stays in those tiers under Foster. Foster and the exact closed form agree on the tier for 100 % of encounters.
+
+**Table 6. Summary of evaluation metrics (medians, seeds 1–3).**
+
+| Metric | Result |
+|---|---|
+| Position error | ORCA vs SGP4: 83 km (6 h), 303 km (24 h); with J2: about 11 km at 24 h |
+| TCA error | 0.25 s (1 s grid); 12 ms (parabola); 2.4 µs (range-rate roots) |
+| Miss-distance error | 371 m (1 s grid); 0.89 m (parabola); below 1 mm (roots); 90 km (ORCA as built) |
+| Runtime | KD-tree 8.5 ms per step at 15,913 objects; 2.6 s as built vs 24–25 s corrected (2,000 objects, 24 h) |
+| Candidate reduction | 1,300–1,450× at 1 h / 100 km (1 % recall); 10× at 20 s / 200 km (100 % recall) |
+| Speedup | KD-tree over brute force: 36× (1,000 objects), 173× (15,913) |
+| Pc difference | ORCA = Foster / α²; Foster vs closed form 1e-12 |
+| Tier agreement | ORCA vs Foster: 49–50 % exact, 92–93 % within one tier; Kendall τ 0.87 vs 0.41–0.43 |
+
+### G. What the results do not establish
 
 - No result is validated against operational conjunction data messages.
 - The R2 reference (a later TLE) is itself imperfect, and manoeuvres between the two epochs count as propagation error.

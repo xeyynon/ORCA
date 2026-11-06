@@ -4,6 +4,7 @@ import { integer } from '@/lib/format'
 import { Button } from '../../atoms/Button/Button'
 import { NumberField } from '../../molecules/NumberField/NumberField'
 import { FieldNote } from '../../molecules/FieldNote/FieldNote'
+import { GlossaryTerm } from '../../molecules/GlossaryTerm/GlossaryTerm'
 import './ConjunctionControls.css'
 
 type Props = {
@@ -38,11 +39,14 @@ export function ConjunctionControls({ query, catalogSize, stepS, reportKm, runni
       </div>
       {tooSmall ? (
         <FieldNote>A search needs at least 2 objects and the catalog has {integer(catalogSize)}. Load TLEs from the Data view first.</FieldNote>
+      ) : stepS === null || reportKm === null ? (
+        // The step and distance come from the API. Until they arrive, say so instead of printing a sentence with holes in it.
+        <FieldNote>Loading how the search works…</FieldNote>
       ) : (
         <FieldNote>
-          Every object is propagated with SGP4 every {stepS ?? '…'} s and every approach closer than {reportKm ?? '…'} km is found:
+          Every object is propagated with <GlossaryTerm term="SGP4" /> every {stepS} s and every approach closer than {reportKm} km is found:
           the screening distance is wide enough that none can pass between two steps. Counts cover everything found; the table shows
-          the most probable rows.{minutes !== null ? ` Expect about ${minutes < 1 ? 'a minute or less' : `${Math.round(minutes)} min`} for ${integer(catalogSize)} objects over ${query.horizonDays} day${query.horizonDays === 1 ? '' : 's'} (measured on a laptop).` : ''}
+          the most probable rows.{minutes !== null ? ` Expect about ${minutes < 1 ? 'a minute or less' : `${Math.round(minutes)} min`} for ${integer(catalogSize)} objects over ${query.horizonDays} day${query.horizonDays === 1 ? '' : 's'}, depending on the machine running the API.` : ''}
         </FieldNote>
       )}
     </div>

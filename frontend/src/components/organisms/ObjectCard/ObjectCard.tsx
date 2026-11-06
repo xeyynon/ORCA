@@ -53,7 +53,7 @@ export function ObjectCard({ tle, position, now, onClose }: Props) {
           </>
         ) : null}
       </div>
-      {!position ? <FieldNote>This object is not in the loaded position subset, so there is no live position for it.</FieldNote> : null}
+      {!position ? <FieldNote>No live position is shown for this object. Positions are computed on the Globe view, and an object SGP4 cannot propagate has none.</FieldNote> : null}
       <FieldNote>Size and shape here are derived from the TLE mean motion (rev/day → rad/s, then Kepler's third law), not read from a stored field.</FieldNote>
     </aside>
   )

@@ -1,5 +1,5 @@
-.callout { --callout-ink: var(--warn-ink); --callout-mark: var(--warn); display: flex; gap: var(--gap-3); padding: var(--gap-3) var(--gap-4); border: 1px solid color-mix(in srgb, var(--callout-mark) 55%, var(--border)); border-radius: var(--radius); background: color-mix(in srgb, var(--callout-mark) 9%, var(--bg-card)); }
-.callout--bad { --callout-ink: var(--bad-ink); --callout-mark: var(--bad); }
-.callout__icon { margin-top: 1px; color: var(--callout-ink); }
-.callout__title { font-weight: 600; color: var(--callout-ink); }
-.callout__body { margin-top: 2px; color: var(--text-secondary); max-width: 110ch; }
+.callout { padding: var(--gap-3) var(--gap-4); border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg-card); }
+/* An error is the one case that earns a tinted border; it stays one uniform 1px line, never a stripe. */
+.callout--bad { border-color: color-mix(in srgb, var(--bad) 50%, var(--border)); }
+.callout__title { display: flex; align-items: center; gap: var(--gap-2); font-weight: 600; color: var(--text-primary); }
+.callout__body { margin-top: var(--gap-1); color: var(--text-secondary); max-width: 110ch; }

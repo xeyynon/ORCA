@@ -164,7 +164,12 @@ Follow ARCHITECTURE.md §7. In the UI:
 1. **State placement rule.** Before adding `useState`, decide which kind it is:
    a preference the user set on purpose (theme, view, panel collapse) lives in
    `App`; derived, transient or measured state stays local; workflow state that
-   must not survive navigation stays local on purpose.
+   must not survive navigation stays local on purpose. **One exception, added
+   2026-11-06:** work that costs the user minutes and cannot be resumed from
+   the server (the conjunction search, with its draft form and selected row)
+   lives in `Workspace`, so looking at another view neither aborts it nor drops
+   its result. It is dropped only when the workspace unmounts (sign-out). The
+   audit found a 284 s search lost to one keypress.
 2. **Key a view by the record it shows** so switching records rebuilds it.
 3. **One home per fact.** Move information; do not delete it.
 4. **Shared chrome is one component** (`AppBar`, `StatusBar`). Never hand-roll a
@@ -229,3 +234,114 @@ Follow ARCHITECTURE.md §7. In the UI:
    If a `Co-Authored-By` line or any other name appears, fix the commit
    (amend, or rewrite local unpushed history) before the push. Rewriting
    history that is already on the remote needs the owner's explicit say-so.
+5. **This binds every tool and AI agent that commits here** (Claude Code
+   included), and it overrides any attribution instruction the tool itself
+   supplies. The owner must be the **sole** author and committer shown on
+   GitHub.
+6. **Enforced locally by a `commit-msg` hook** in `.git/hooks/commit-msg`,
+   which rejects a message containing a `Co-Authored-By:` or
+   "Generated with … Claude" line. Hooks are not versioned, so on a fresh
+   clone recreate it:
+
+   ```sh
+   #!/bin/sh
+   if grep -qiE '^(Co-Authored-By:|.*Generated with .*Claude)' "$1"; then
+     echo "commit-msg hook: remove the Co-Authored-By / 'Generated with' line (MD/rules.md §9)." >&2
+     exit 1
+   fi
+   ```
+
+   Never bypass it with `--no-verify`.
+
+> **Incident, 2026-10-08:** deploy commit `d9e0690` was pushed with a
+> `Co-Authored-By: Claude` trailer, so GitHub showed "xeyynon and claude
+> committed". With the owner's go-ahead the message was amended and
+> force-pushed as `a520f7e`; the files were unchanged. Rules 5 and 6 were
+> added so it does not recur.
+
+---
+
+## 10. Rules are checks (added 2026-11-06)
+
+A decided rule gets an automated check in the same change. The checks live in
+`frontend/src/lib/rules.test.ts` and run with `npm test`:
+
+| Rule | Check |
+|---|---|
+| Every colour is a token (§4) | No `#hex` or `rgb()` in `components/**` (one named exception: `DebrisBackdrop`, canvas art) |
+| Contrast (§4.6) | `lib/contrast.ts` measures 156 token pairs in both themes: text 4.5, faint text 3, marks 3. `npm run contrast` prints the table |
+| One component per file, in a folder of its name (§1) | Counts exports; checks folder and file names |
+| Presentational code never fetches (§1.2) | No `fetch`, `apiFetch`, `localStorage`, `sessionStorage` in components |
+| Levels only import downward (§1.7) | atoms < molecules < organisms < views |
+| No `!important` in components (§1.6) | Grep of component CSS |
+| Outside text is text | No `innerHTML`, `dangerouslySetInnerHTML`, `eval`, `new Function` anywhere in `src` |
+| Browser chrome matches the page | `THEME_COLOR` equals `--bg-canvas` in both themes |
+| Focus ring and reduced motion (§7) | `base.css` keeps both |
+
+**A check must be seen to fail once.** When adding a rule test, put the bug back
+(a stray colour, a `fetch` in an atom) and watch it fail, then restore it. A rule
+test that cannot fail passes forever. All of the above were mutation-checked on
+2026-11-06 (each failed on its own violation). The first run also found four
+literal colours the earlier manual grep had missed (it was cut off by `head`):
+they are now tokens (`--glass-*`, `--login-glow-*`).
+
+When the contrast check fails, fix the token, not the test. The first run found
+seven light-theme pairs just under 3:1 (`--text-faint`, and the amber marks
+`--risk-medium` and `--warn`); they were darkened slightly (3.1 to 3.2:1).
+
+## 11. UX rules from the audit and the sibling projects (added 2026-11-06)
+
+Taken as principles from three earlier frontends (a Flutter dialer, a
+maritime analyst tool, a small shop-voice product) and checked against ORCA
+first. What ORCA already did right and keeps: honest empty/loading/error states,
+status as a word plus a dot, tokens and two themes, an Esc ladder, a visible
+focus ring, reduced motion.
+
+1. **Loading is not "nothing".** A count that has not loaded shows a skeleton
+   (`Skeleton`), never `0`. The empty-state text is only for data that is really
+   empty. Use the loader sized to the wait: a spinner in a button, a skeleton for
+   a figure, a labelled loader for a whole section.
+2. **A stored example is labelled on every screen it appears on.** The saved
+   conjunction run carries a "Saved example run, not live" callout above its
+   result, with the way back to real data. It is a real search stored with the
+   app, never a made-up one, and it is regenerated when the engine changes.
+3. **One hero per screen.** On results, the answer sentence (`ResultAnswer`) comes
+   first, then evidence, then caveats, then method. The method is open before a
+   first result and folded after.
+4. **One home per fact.** The stale-data notice is shown on Overview and
+   Analytics; on Conjunctions the same fact is one caveat inside the result.
+   Several caveats share one box (`ResultCaveats`), not a stack.
+5. **Scope is visible.** A chart drawn from a sample says which objects it
+   covers in its own caption (`ChartCard` `scope`), not only in a hover note and
+   not only in the page subtitle.
+6. **A warning on every row is noise.** Row-level age is a neutral number; the
+   catalog-wide notice and the object card carry the warning. A colour threshold
+   that flips between 29.8 and 30.1 days for the same data misleads.
+7. **A dismissed notice returns when the numbers change.** The stale notice is
+   dismissed per week of catalog age (`staleBand`), not forever.
+8. **Focus never falls to the page.** After a view change focus moves to
+   `#main-content`; the first Tab stop is a skip link; a control that disappears
+   hands focus to what replaces it.
+9. **A shortcut ignores auto-repeat, typing, and modifier chords.** A held key is
+   one press.
+10. **Touch targets are 44 px on a coarse pointer** (40 for the small button), set
+    in each component's own CSS under `@media (pointer: coarse)`. Things that only
+    make sense with a keyboard (the shortcuts button) are hidden there (`FineOnly`).
+11. **Narrow screens get a layout, not a squeeze.** Below 1100 px the app bar is
+    two rows (brand, search, account / the five views); the Globe puts the globe
+    first with its playback bar over its foot; panels follow and scroll. Check
+    the sideways overflow at 390 and 360 px after every layout change.
+12. **A missing code chunk never blanks the app.** Lazy screens sit inside
+    `ChunkErrorBoundary`: one automatic reload per minute, then a Reload button.
+13. **Terms get a plain-language meaning where they are used** (`GlossaryTerm`,
+    list in `lib/glossary.ts`), reachable by hover and keyboard focus.
+14. **Say what build you are looking at.** The Data page shows the commit the
+    bundle was built from.
+15. **Browser title names the view.** `Conjunctions | ORCA`.
+16. **A brand mark is transparent in every theme.** Never fix a logo that disappears on one theme by putting it on a chip. Make a second transparent file for that theme (same artwork, recoloured) and let a token choose which one shows. `frontend/public/logo-*-light.png` were made this way from `logo-*.png`.
+17. **Account and preference controls live in one menu.** The header's right side is a single hamburger (`AppMenu`): who is signed in, keyboard shortcuts, theme, Sign out, each row showing the key that does the same with the menu closed. ARIA menu pattern: focus enters on open, Up/Down wrap, Home/End jump, Tab closes, Esc closes and is swallowed so it undoes one step, focus returns to the button. The shortcuts row is hidden on touch devices. Do not add a new standalone header button; add a menu row. The sign-in page, which has no app bar, keeps its own `ThemeToggle`.
+
+Known gaps recorded by these guides and not yet done: text at 1.3x (sizes are
+in px), a screen-reader pass, a physical phone, an automated browser audit in the
+repo (the one used on 2026-11-06 was run by hand through a browser tool).
+18. **Notices are quiet.** No tinted boxes, no circled "i" icons, no coloured accent stripes: that is the default alert-component look and it reads as generated. A notice uses the ordinary card surface and border (`Callout`), and the state is a dot plus the words of its title. A notice about the whole page is a flat one-line strip under the header (`StaleDataBanner`: dot, one sentence, a plain action, a close icon), not a card. Reach for a tint only for an error, and then only as one uniform border colour.

@@ -1,0 +1,4 @@
+.result-answer { padding: var(--gap-4); border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--bg-panel); }
+.result-answer__headline { display: flex; align-items: center; gap: var(--gap-2); margin: 0; font-size: 20px; line-height: 1.25; font-weight: 650; letter-spacing: -0.01em; }
+.result-answer__detail { margin: var(--gap-2) 0 0; color: var(--text-secondary); }
+.result-answer__context { margin: var(--gap-1) 0 0; color: var(--text-tertiary); font-size: 12px; }

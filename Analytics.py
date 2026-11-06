@@ -4,7 +4,7 @@ Orbital statistics, 3D plots, ground tracks, risk visualizations
 """
 import numpy as np
 import math 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import List, Dict, Tuple, Optional
 import json
 from sgp4.api import Satrec
@@ -67,6 +67,27 @@ def classify_regime(mean_motion_rev_per_day: float, eccentricity: float) -> Opti
     if apogee < 2000:
         return "LEO"
     return "MEO"
+
+
+def catalog_columns(tles) -> Dict[str, object]:
+    """
+    The five per-object fields the Analytics charts need, as parallel columns (one entry per object, same order),
+    for the WHOLE catalog. Nothing is binned or derived here: the browser derives altitude from mean motion and
+    bins with its tested lib functions (histogram.ts, heatmap.ts, groups.ts), so there is one copy of that logic.
+    Units are in the field names. Values are rounded to the precision a TLE carries, which keeps the payload small:
+    epoch to whole seconds (UTC), inclination 4 dp, eccentricity 7 dp, mean motion 8 dp.
+    """
+    cols: Dict[str, list] = {"name": [], "epoch_unix_s": [], "inclination_deg": [], "eccentricity": [], "mean_motion_rev_per_day": []}
+    for t in tles:
+        epoch = t.epoch
+        if epoch.tzinfo is not None:
+            epoch = epoch.astimezone(timezone.utc).replace(tzinfo=None)
+        cols["name"].append(t.object_name)
+        cols["epoch_unix_s"].append(int(round((epoch - datetime(1970, 1, 1)).total_seconds())))
+        cols["inclination_deg"].append(round(float(t.inclination), 4))
+        cols["eccentricity"].append(round(float(t.eccentricity), 7))
+        cols["mean_motion_rev_per_day"].append(round(float(t.mean_motion), 8))
+    return {"count": len(cols["name"]), **cols}
 
 
 # ============================================================================

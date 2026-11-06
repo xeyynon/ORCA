@@ -13,3 +13,7 @@
 .nav-tab:hover { background: var(--bg-hover); color: var(--text-primary); }
 .nav-tab--active { background: var(--accent-bg); border-color: var(--border-strong); color: var(--text-primary); }
 .nav-tab__key { display: inline-flex; opacity: 0.7; }
+
+/* Narrow (the app bar's second row): equal-width tabs; the number keys are for a keyboard, so they go. */
+@media (max-width: 1100px) { .nav-tab { flex: 1 1 0; min-width: 0; padding: 0 4px; gap: 0; justify-content: center; } .nav-tab__key { display: none; } }
+@media (pointer: coarse) { .nav-tab { height: 44px; } }

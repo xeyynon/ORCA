@@ -1,4 +1,5 @@
 import { useCallback, useLayoutEffect, useState } from 'react'
+import { applyThemeColor } from '@/lib/theme'
 import type { Theme } from '@/lib/theme'
 
 const KEY = 'orca:theme'
@@ -18,6 +19,7 @@ export function useTheme() {
 
   useLayoutEffect(() => {
     document.documentElement.dataset.theme = theme
+    applyThemeColor(theme)
     try { localStorage.setItem(KEY, theme) } catch { /* storage unavailable: theme still applies for this session */ }
   }, [theme])
 
