@@ -149,3 +149,4 @@ The Reports view (MD/design_system_v2.md §6).
 | [04-phone-preview.png](12-reports-2026-11-07/04-phone-preview.png) | Phone: the preview keeps its paper width and scrolls sideways in its own frame; the page does not |
 | [05-reports-light.png](12-reports-2026-11-07/05-reports-light.png) | Light theme: the paper is the same white in both themes |
 | [06-sample-report.pdf](12-reports-2026-11-07/06-sample-report.pdf) | A generated report (all four sections, stored example run): 3 A4 pages |
+| [07-header-no-stripe.png](12-reports-2026-11-07/07-header-no-stripe.png) | The report header after the owner banned coloured side stripes (rules.md §11.21): the educational-use notice is a plain sentence, no box, no blue bar; the contents list is flush with the title |
