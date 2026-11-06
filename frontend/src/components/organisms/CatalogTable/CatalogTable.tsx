@@ -19,6 +19,8 @@ type Props = {
   now: Date
   /** Objects stored by the API, when more than `rows` were loaded. */
   totalCount?: number | null
+  /** True when `rows` is already a filtered subset: the cap line then counts matching objects, not the whole load. */
+  filtered?: boolean
   /** Render cap. Rows are sorted first, so the cap shows the top of the chosen order, and the cap is stated. */
   maxRows?: number
 }
@@ -32,7 +34,7 @@ const SORT_KEYS: Record<string, (t: TleRecord) => number | string> = {
   age: (t) => -Date.parse(t.epoch),
 }
 
-export function CatalogTable({ rows, selectedId, onSelect, now, totalCount = null, maxRows = 250 }: Props) {
+export function CatalogTable({ rows, selectedId, onSelect, now, totalCount = null, filtered = false, maxRows = 250 }: Props) {
   const [sortId, setSortId] = useState('name')
   const [sortDir, setSortDir] = useState<SortDir>('asc')
 
@@ -71,7 +73,11 @@ export function CatalogTable({ rows, selectedId, onSelect, now, totalCount = nul
         onSort={onSort}
       />
       {rows.length > maxRows ? (
-        <div className="catalog-table__cap">Showing the first {integer(maxRows)} of {integer(rows.length)} loaded objects in this order{totalCount !== null && totalCount > rows.length ? ` (${integer(totalCount)} are stored; the API returns at most 5,000 per request; the search box at the top covers all of them)` : ''}.</div>
+        <div className="catalog-table__cap">
+          {filtered
+            ? `Showing the first ${integer(maxRows)} of ${integer(rows.length)} matching objects in this order. Narrow the filter to see the rest.`
+            : `Showing the first ${integer(maxRows)} of ${integer(rows.length)} loaded objects in this order${totalCount !== null && totalCount > rows.length ? ` (${integer(totalCount)} are stored; the API returns at most 5,000 per request; the search box at the top covers all of them)` : ''}.`}
+        </div>
       ) : null}
     </div>
   )

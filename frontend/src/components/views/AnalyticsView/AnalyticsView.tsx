@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { useCatalogDistributions } from '@/hooks/useCatalogDistributions'
 import { useCatalogSummary } from '@/hooks/useCatalogSummary'
 import type { StatisticsResponse, TleRecord } from '@/api/types'
 import type { AsyncResult } from '@/hooks/useAsync'
@@ -47,14 +48,19 @@ export function AnalyticsView({ catalog, stats, totalCount, now }: Props) {
   const rows = catalog.data
   // Whole-catalog counts from the server, so the regime share is not computed from the loaded slice alone.
   const server = useCatalogSummary(totalCount)
+  // Every object, as raw columns. The charts are drawn from these when they arrive; until then (or if the request
+  // fails) they fall back to the loaded rows, which are only the first N by name, and every chart's caption says which.
+  const whole = useCatalogDistributions(totalCount)
+  const chartRows = whole.rows && whole.rows.length > 0 ? whole.rows : rows
+  const wholeCatalog = chartRows !== null && chartRows === whole.rows
 
   // Each chart type is chosen for the data it shows (see the ChartCard notes):
   //  regime share -> donut | constellation sizes -> bar | freshness, altitude, inclination, eccentricity -> histograms
   //  (altitude and eccentricity on log axes) | inclination x altitude -> heatmap (density, not an overplotted scatter).
   const model = useMemo(() => {
-    if (!rows || rows.length === 0) return null
-    const s = deriveSeries(rows, now)
-    const summary = summarizeCatalog(rows, now)
+    if (!chartRows || chartRows.length === 0) return null
+    const s = deriveSeries(chartRows, now)
+    const summary = summarizeCatalog(chartRows, now)
     const maxAge = s.ageDays.length ? Math.max(...s.ageDays) : 1
     return {
       summary,
@@ -69,7 +75,7 @@ export function AnalyticsView({ catalog, stats, totalCount, now }: Props) {
       eccCounts: countBy(s.ecc, ECC_ORDER, eccClass),
       heat: binGrid(s.points, HEAT_SPEC),
     }
-  }, [rows, now])
+  }, [chartRows, now])
 
   if (!rows) {
     return (
@@ -96,17 +102,27 @@ export function AnalyticsView({ catalog, stats, totalCount, now }: Props) {
   // Every chart except the regime donut is drawn from the loaded rows, which are the first ones the API returns (by name),
   // not a random sample. Say so on each chart, in view, rather than once in the page subtitle.
   const sampleScope = partial ? `First ${integer(rows.length)} of ${integer(totalCount)} objects (by name, not a random sample)` : `All ${integer(rows.length)} objects`
+  const chartScope = wholeCatalog ? `All ${integer(chartRows.length)} objects` : sampleScope
+  const wholeFailed = partial && !wholeCatalog && (whole.status === 'error' || whole.malformed)
   const regimeCounts = server.data ? server.data.by_regime : model.summary.regimes
-  const regimeScope = server.data ? `All ${integer(server.data.total)} objects` : sampleScope
+  const regimeScope = server.data ? `All ${integer(server.data.total)} objects` : chartScope
 
   return (
     <PageLayout>
       <SectionHeader
         title="Analytics"
-        subtitle={partial
-          ? `The API returns at most ${integer(rows.length)} objects at a time, so each chart says which objects it covers. The figures at the top cover all ${integer(totalCount)}.`
-          : `${integer(rows.length)} objects.`}
+        subtitle={wholeCatalog
+          ? `All ${integer(chartRows.length)} stored objects.`
+          : partial
+            ? `The charts below are drawn from the first ${integer(rows.length)} objects only, so each says which objects it covers. The figures at the top cover all ${integer(totalCount)}.`
+            : `${integer(rows.length)} objects.`}
       />
+
+      {wholeFailed ? (
+        <EmptyState kind="error" title="Whole-catalog charts unavailable" action={<Button onClick={whole.reload}>Retry</Button>}>
+          {whole.malformed ? 'The server sent columns that do not line up, so they were not drawn' : whole.error?.message}. The charts below use only the first {integer(rows.length)} of {integer(totalCount)} objects (by name, not a random sample).
+        </EmptyState>
+      ) : null}
 
       {hasStats ? (
         <KpiRow
@@ -128,31 +144,31 @@ export function AnalyticsView({ catalog, stats, totalCount, now }: Props) {
           <RegimeBreakdown counts={regimeCounts} />
         </ChartCard>
 
-        <ChartCard title="Largest constellations" scope={sampleScope} note="Grouped by the first word of the object name: a naming heuristic, not an ownership record. Comparing categories, so bars.">
+        <ChartCard title="Largest constellations" scope={chartScope} note="Grouped by the first word of the object name: a naming heuristic, not an ownership record. Comparing categories, so bars.">
           <BarList
             ariaLabel="Objects by constellation name"
             items={model.groups.map((g, i) => ({ label: g.label, value: g.count, color: g.label === 'Other' || g.label === UNNAMED ? 'var(--text-tertiary)' : catColor(i) }))}
           />
         </ChartCard>
 
-        <ChartCard title="How fresh is the catalog" scope={sampleScope} note="Age of each element set, coloured as the TLE age chips are. Older sets propagate less accurately.">
+        <ChartCard title="How fresh is the catalog" scope={chartScope} note="Age of each element set, coloured as the TLE age chips are. Older sets propagate less accurately.">
           <Histogram bins={model.age.bins} unit="days since TLE epoch" ariaLabel="Histogram of TLE age" colorOf={(b) => AGE_TONE_COLOR[tleAgeTone(mid(b))]} />
           <ChartLegend items={AGE_ORDER.map((t) => ({ label: AGE_LABEL[t], color: AGE_TONE_COLOR[t], value: integer(model.ageCounts[t]) }))} />
         </ChartCard>
 
-        <ChartCard title="Altitude" scope={sampleScope} note="Log axis: altitude runs from about 170 km to over 200,000 km, which a linear axis would crush into one bar. Derived from mean motion.">
+        <ChartCard title="Altitude" scope={chartScope} note="Log axis: altitude runs from about 170 km to over 200,000 km, which a linear axis would crush into one bar. Derived from mean motion.">
           <Histogram bins={model.alt.bins} unit="mean altitude (km, log scale)" ariaLabel="Histogram of mean altitude on a log axis" colorOf={(b) => ALTITUDE_BAND_COLOR[altitudeBand(geoMid(b))]} />
           <ChartLegend items={ALTITUDE_BANDS.map((b) => ({ label: BAND_LABEL[b], color: ALTITUDE_BAND_COLOR[b], value: integer(model.altCounts[b]) }))} />
         </ChartCard>
 
-        <ChartCard title="Inclination" scope={sampleScope} note="Read directly from the TLE. The tall spikes are constellations: Starlink near 53°, sun-synchronous orbits near 97–98°, GEO near 0°.">
+        <ChartCard title="Inclination" scope={chartScope} note="Read directly from the TLE. The tall spikes are constellations: Starlink near 53°, sun-synchronous orbits near 97–98°, GEO near 0°.">
           <Histogram bins={model.incl.bins} unit="inclination (°)" ariaLabel="Histogram of inclination" colorOf={(b) => INCLINATION_COLOR[inclinationClass(mid(b))]} formatTick={(v) => `${Math.round(v)}°`} />
           <ChartLegend items={INCLINATION_CLASSES.map((c) => ({ label: c.label, color: INCLINATION_COLOR[c.id], value: integer(model.inclCounts[c.id]) }))} />
         </ChartCard>
 
         <ChartCard
           title="Eccentricity"
-          scope={sampleScope}
+          scope={chartScope}
           note={`Log axis: nearly every orbit is close to circular.${model.ecc.unplottable > 0 ? ` ${integer(model.ecc.unplottable)} object(s) have e = 0 exactly and cannot be placed on a log axis.` : ''}`}
         >
           <Histogram bins={model.ecc.bins} unit="eccentricity (log scale)" ariaLabel="Histogram of eccentricity on a log axis" colorOf={(b) => ECC_COLOR[eccClass(geoMid(b))]} formatTick={(v) => v.toExponential(0).replace('e+', 'e')} />
@@ -162,7 +178,7 @@ export function AnalyticsView({ catalog, stats, totalCount, now }: Props) {
         <div className="analytics__wide">
           <ChartCard
             title="Where objects live: inclination × altitude"
-            scope={sampleScope}
+            scope={chartScope}
             note={`Density heatmap, because thousands of points overplot in a scatter. Brighter = more objects per cell (log colour scale). ${integer(model.heat.total)} plotted${model.heat.outside > 0 ? `, ${integer(model.heat.outside)} outside the 100 km to 1,000,000 km range` : ''}${model.heat.unplottable > 0 ? `, ${integer(model.heat.unplottable)} not placeable` : ''}.`}
           >
             <HeatmapChart grid={model.heat} spec={HEAT_SPEC} xUnit="inclination (°)" yUnit="mean altitude (km, log)" ariaLabel="Density heatmap of inclination against mean altitude" />
