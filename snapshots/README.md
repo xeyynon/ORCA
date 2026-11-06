@@ -63,3 +63,4 @@ Not kept: two captures that only show the throttled browser (a stalled frame) an
 |---|---|
 | [01-home-desktop-light.png](05-mission-control-2026-11-07/01-home-desktop-light.png) | Mission control (bento): hero story tile, freshness, conjunctions (saved example labelled), globe entry |
 | [02-home-desktop-dark-scrolled.png](05-mission-control-2026-11-07/02-home-desktop-dark-scrolled.png) | Dark theme, lower tiles: orbit regimes, system, New here? with the tour and glossary |
+| [03-home-compact-desktop-dark.png](05-mission-control-2026-11-07/03-home-compact-desktop-dark.png) | After "tiles are unnecessarily big": three rows, less padding, smaller story type, smaller globe art; the whole page fits one laptop screen |
