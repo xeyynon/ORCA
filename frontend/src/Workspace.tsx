@@ -15,8 +15,6 @@ import { useObjectSearch } from '@/hooks/useObjectSearch'
 import { useTour } from '@/hooks/useTour'
 import { useAskOrca } from '@/hooks/useAskOrca'
 import { loadSavedRun, SAVED_RUN_QUERY } from '@/api/savedRun'
-import { Icon } from '@/components/atoms/Icon/Icon'
-import { IconButton } from '@/components/atoms/IconButton/IconButton'
 import { AskOrcaPanel } from '@/components/organisms/AskOrcaPanel/AskOrcaPanel'
 import { summarizeCatalog } from '@/lib/catalog'
 import { days, formatLat, formatLon, integer } from '@/lib/format'
@@ -32,6 +30,11 @@ import { AppBar } from '@/components/organisms/AppBar/AppBar'
 import { AppMenu } from '@/components/organisms/AppMenu/AppMenu'
 import { Breadcrumbs } from '@/components/organisms/Breadcrumbs/Breadcrumbs'
 import { ObjectSearch } from '@/components/organisms/ObjectSearch/ObjectSearch'
+import { SearchPopover } from '@/components/organisms/SearchPopover/SearchPopover'
+import { HelpMenu } from '@/components/organisms/HelpMenu/HelpMenu'
+import { NotificationsMenu } from '@/components/organisms/NotificationsMenu/NotificationsMenu'
+import { buildNotices } from '@/lib/notices'
+import { useSearchChord } from '@/hooks/useSearchChord'
 import { PrimaryNav } from '@/components/organisms/PrimaryNav/PrimaryNav'
 import { SkipLink } from '@/components/molecules/SkipLink/SkipLink'
 import { ChunkErrorBoundary } from '@/components/organisms/ChunkErrorBoundary/ChunkErrorBoundary'
@@ -112,6 +115,10 @@ export function Workspace({ username, onSignOut, theme, onToggleTheme: toggleThe
   }, [go])
 
   // Ask ORCA: a docked panel, not a modal. Its actions call the same functions as the rest of the app.
+  // Search is an icon that expands into a floating field (it no longer sits in the bar): "/", Ctrl/Cmd+K or the icon.
+  const [searchOpen, setSearchOpen] = useState(false)
+  const closeSearch = useCallback(() => { setSearchOpen(false); setQuery('') }, [])
+  useSearchChord(() => setSearchOpen(true))
   const [askOpen, setAskOpen] = useState(false)
   const askInputRef = useRef<HTMLInputElement>(null)
   const askButtonRef = useRef<HTMLSpanElement>(null)
@@ -134,7 +141,7 @@ export function Workspace({ username, onSignOut, theme, onToggleTheme: toggleThe
     ...Object.fromEntries(VIEWS.map((v) => [VIEW_HOTKEY[v], () => go(v)])),
     t: toggleTheme,
     '?': () => setHelpOpen(true),
-    '/': () => searchRef.current?.focus(),
+    '/': () => setSearchOpen(true),
     '.': () => { if (askOpen) askInputRef.current?.focus(); else setAskOpen(true) },
     Escape: () => setSelection((s) => (s.length ? [] : s)),
   }, !helpOpen)
@@ -151,6 +158,9 @@ export function Workspace({ username, onSignOut, theme, onToggleTheme: toggleThe
     }
     go(target)
   }
+
+  // The bell lists only real, current conditions (lib/notices.ts).
+  const notices = buildNotices({ apiStatus, stale, searchPhase: conjSearch.phase, searchSource: conjSearch.source })
 
   const status: StatusItem[] = [
     { label: 'API', value: apiStatus === 'online' ? 'online' : apiStatus === 'offline' ? 'unreachable' : 'checking', tone: apiStatus === 'online' ? 'ok' : apiStatus === 'offline' ? 'bad' : 'warn', dotOnly: apiStatus === 'online' },
@@ -171,9 +181,16 @@ export function Workspace({ username, onSignOut, theme, onToggleTheme: toggleThe
     <div className="app">
       <SkipLink targetId="main-content">Skip to content</SkipLink>
       <AppBar
-        left={<><Brand href="#/home" onNavigate={() => go('home')} /><ObjectSearch inputRef={searchRef} query={query} onQueryChange={setQuery} results={search.results} loading={search.loading} degraded={search.degraded} onPick={(id) => showOnGlobe([id])} /></>}
+        left={<Brand href="#/home" onNavigate={() => go('home')} />}
         center={<PrimaryNav view={view} onChange={go} />}
-        right={<><span ref={askButtonRef}><IconButton label="Ask ORCA (.)" pressed={askOpen} onClick={() => (askOpen ? closeAsk() : setAskOpen(true))}><Icon name="chat" /></IconButton></span><AppMenu username={username} theme={theme} onToggleTheme={toggleTheme} onShowShortcuts={() => setHelpOpen(true)} onStartTour={tour.start} onSignOut={onSignOut} /></>}
+        right={<>
+          <SearchPopover open={searchOpen} onOpen={() => setSearchOpen(true)} onClose={closeSearch} inputRef={searchRef}>
+            <ObjectSearch inputRef={searchRef} query={query} onQueryChange={setQuery} results={search.results} loading={search.loading} degraded={search.degraded} onPick={(id) => { closeSearch(); showOnGlobe([id]) }} />
+          </SearchPopover>
+          <NotificationsMenu notices={notices} onGo={go} />
+          <span ref={askButtonRef}><HelpMenu onAsk={() => setAskOpen(true)} onShortcuts={() => setHelpOpen(true)} onTour={tour.start} /></span>
+          <AppMenu username={username} theme={theme} onToggleTheme={toggleTheme} onSignOut={onSignOut} />
+        </>}
       />
 
       <Breadcrumbs trail={trail} onNavigate={onCrumb} />

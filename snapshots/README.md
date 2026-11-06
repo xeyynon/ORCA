@@ -85,3 +85,13 @@ After the owner: "too much clutter; a newcomer has no hook and will leave". The 
 | [04-globe-desktop-light.png](07-ask-orca-glass-gestures-2026-11-07/04-globe-desktop-light.png) | Globe in the light theme (glass alpha raised to 0.99 there for contrast) |
 | [05-globe-bottom-sheet-collapsed-phone.png](07-ask-orca-glass-gestures-2026-11-07/05-globe-bottom-sheet-collapsed-phone.png) | Phone: selection details in a bottom sheet, collapsed |
 | [06-globe-bottom-sheet-expanded-phone.png](07-ask-orca-glass-gestures-2026-11-07/06-globe-bottom-sheet-expanded-phone.png) | Phone: the sheet dragged up (a button does the same), playback bar still reachable |
+
+## 08-top-bar-2026-11-07
+
+The owner's three-section top bar: logo left, views centred, search and utilities right.
+
+| File | What it shows |
+|---|---|
+| [01-top-bar-desktop-dark.png](08-top-bar-2026-11-07/01-top-bar-desktop-dark.png) | Logo alone at the left; six icon+label views centred (offset 0 px measured), blue underline on the active one; search, notifications (1 real notice), help, account at the right. Conjunctions icon replaced after this shot |
+| [02-search-open-before-fix.png](08-top-bar-2026-11-07/02-search-open-before-fix.png) | Search open, BEFORE the fix: the field covered the Data tab and the results drew behind the hero. Fixed: the field is capped to the right section and the bar is layered above the page (measured clear of the nav at 1180-1920 px) |
+| [03-top-bar-phone-390.png](08-top-bar-2026-11-07/03-top-bar-phone-390.png) | Phone: logo and four icons on the first row, views with icons scroll on the second |
