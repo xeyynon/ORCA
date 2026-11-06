@@ -7,6 +7,12 @@ import { RISK_ORDER } from './risk'
  * can be generated, its file name). The document itself is components/organisms/ReportDocument.
  */
 
+/**
+ * The report's handling marking: centred capitals at the head of the report and, in print, of every page. Keep it in
+ * step with the @top-center content in components/views/ReportsView/ReportsView.css (CSS cannot import it).
+ */
+export const REPORT_MARKING = 'Educational use only · Not for operational decisions'
+
 export type ReportSectionId = 'summary' | 'approaches' | 'pair' | 'quality'
 
 export const REPORT_SECTIONS: ReadonlyArray<{ id: ReportSectionId; title: string; about: string }> = [
