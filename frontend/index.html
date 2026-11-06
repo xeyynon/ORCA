@@ -4,11 +4,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="color-scheme" content="dark light" />
+    <meta name="theme-color" content="#0b0f14" />
     <title>ORCA</title>
     <link rel="icon" type="image/png" href="/favicon-64.png" />
     <script>
       // Apply the saved theme before first paint so there is no flash.
-      try { var t = localStorage.getItem('orca:theme'); if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t } catch (e) {}
+      try { var t = localStorage.getItem('orca:theme'); if (t === 'light' || t === 'dark') { document.documentElement.dataset.theme = t; document.querySelector('meta[name="theme-color"]').setAttribute('content', t === 'light' ? '#eef1f5' : '#0b0f14') } } catch (e) {}
     </script>
     <style>
       #boot { position: fixed; inset: 0; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; background: #070a0e; color: #b4bfcd; font: 13px/1.4 system-ui, sans-serif; }

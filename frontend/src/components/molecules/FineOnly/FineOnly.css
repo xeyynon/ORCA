@@ -1,0 +1,2 @@
+.fine-only { display: contents; }
+@media (pointer: coarse) { .fine-only { display: none; } }

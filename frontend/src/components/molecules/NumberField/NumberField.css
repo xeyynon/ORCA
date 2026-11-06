@@ -13,3 +13,4 @@
   font-variant-numeric: tabular-nums;
 }
 .number-field__input:hover { border-color: var(--border-strong); }
+@media (pointer: coarse) { .number-field__input { height: 44px; } }

@@ -6,6 +6,7 @@ import { useFullscreen } from '@/hooks/useFullscreen'
 import { useGlobePrefs } from '@/hooks/useGlobePrefs'
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { useOrbitPaths } from '@/hooks/useOrbitPaths'
+import { useElapsed } from '@/hooks/useElapsed'
 import { usePlayback } from '@/hooks/usePlayback'
 import { usePositions } from '@/hooks/usePositions'
 import { useTleById } from '@/hooks/useTleById'
@@ -17,6 +18,7 @@ import { ALTITUDE_BANDS, altitudeBand } from '@/lib/orbit'
 import { offsetForTca } from '@/lib/playback'
 import { riskTone } from '@/lib/risk'
 import { parseUtc } from '@/lib/time'
+import { positionsWaitNote } from '@/lib/waitNote'
 import type { Theme } from '@/lib/theme'
 import { Button } from '../../atoms/Button/Button'
 import { EmptyState } from '../../molecules/EmptyState/EmptyState'
@@ -24,6 +26,7 @@ import { FieldNote } from '../../molecules/FieldNote/FieldNote'
 import { CatalogSummaryCard } from '../../organisms/CatalogSummaryCard/CatalogSummaryCard'
 import { ConjunctionCard } from '../../organisms/ConjunctionCard/ConjunctionCard'
 import { FiltersCard } from '../../organisms/FiltersCard/FiltersCard'
+import { GlobeLegend } from '../../organisms/GlobeLegend/GlobeLegend'
 import { GlobeCanvas } from '../../organisms/GlobeCanvas/GlobeCanvas'
 import type { FocusRequest } from '../../organisms/GlobeCanvas/GlobeCanvas'
 import { ObjectCard } from '../../organisms/ObjectCard/ObjectCard'
@@ -31,7 +34,16 @@ import { PlaybackBar } from '../../organisms/PlaybackBar/PlaybackBar'
 import { ViewOptionsCard } from '../../organisms/ViewOptionsCard/ViewOptionsCard'
 import './GlobeView.css'
 
-/** The server caps one request at this many objects (selected ids are always added on top). */
+/**
+ * The server caps one request at this many objects (selected ids are always added on top).
+ *
+ * One request, deliberately, not a small first request followed by the full one. Measured against the running API
+ * (2026-11-07, gzip off): limit=500 0.27 s, 2000 0.35-0.39 s, 20000 1.5-1.7 s; through gzip and the dev proxy
+ * 2.4-3.7 s. The server runs SGP4 over every object whatever `limit` is (limit only trims the JSON), and the cold
+ * cache build is 0.5 s, so a small first request would not return earlier on a cold start. And the first N rows are
+ * database order, not a sample: the first 2,000 hold 23% GEO-or-higher objects against 3.8% of the full set, so a
+ * partial picture would misstate the catalog. The wait is therefore stated (useElapsed + positionsWaitNote).
+ */
 const POSITION_LIMIT = 20000
 const HOUR_MS = 3_600_000
 const NO_PATHS: ReadonlyMap<string, Vec3[]> = new Map()
@@ -65,6 +77,8 @@ export function GlobeView({ catalog, totalCount, selection, focus, conjunction, 
   const summary = useCatalogSummary(totalCount)
   // Selected ids are always requested, so a selected object is drawn even beyond the request cap.
   const positions = usePositions(POSITION_LIMIT, playback.snapOffset, selection)
+  const waiting = positions.status === 'loading' && !positions.data
+  const waitNote = positionsWaitNote(useElapsed(waiting) * 1000)
   const { paths, failed } = useOrbitPaths(selection, playback.snapOffset)
 
   const activeConj = conjunction && prefs.showConjunction ? conjunction : null
@@ -116,11 +130,11 @@ export function GlobeView({ catalog, totalCount, selection, focus, conjunction, 
   const simMs = nowMs + playback.offsetH * HOUR_MS
 
   return (
-    <div className="globe-view">
+    <main className="globe-view" id="main-content" tabIndex={-1} aria-label="Globe">
       <aside className="globe-view__side globe-view__side--left" aria-label="Catalog and filters">
         <CatalogSummaryCard summary={summary.data} error={summary.status === 'error' ? summary.error.message : null} onRetry={summary.reload} />
         <ViewOptionsCard prefs={prefs} onChange={setPrefs} conjunctionActive={conjunction !== null} />
-        <FiltersCard prefs={prefs} onChange={setPrefs} summary={summary.data} bandCounts={bandCounts} conjunctionActive={conjunction !== null} />
+        <FiltersCard prefs={prefs} onChange={setPrefs} summary={summary.data} bandCounts={bandCounts} countsReady={loaded !== undefined} conjunctionActive={conjunction !== null} />
       </aside>
 
       <div className="globe-view__center">
@@ -139,6 +153,16 @@ export function GlobeView({ catalog, totalCount, selection, focus, conjunction, 
             nameOf={nameOf}
             onPick={(id) => onSelect(id ? [id] : [])}
             onCamera={onCamera}
+          />
+        </div>
+        <div className="globe-view__legend">
+          <GlobeLegend
+            colorBy={prefs.colorBy}
+            shown={drawn.length}
+            total={loaded ? summary.data?.total ?? null : null}
+            showOrbit={prefs.showOrbits && selection.length > 0}
+            hasConjunction={activeConj !== null}
+            hasSelection={selection.length > 0}
           />
         </div>
         <div className="globe-view__bar">
@@ -175,7 +199,11 @@ export function GlobeView({ catalog, totalCount, selection, focus, conjunction, 
         {positions.status === 'error' && !positions.data ? (
           <EmptyState kind="error" title="Could not load positions" action={<Button onClick={positions.reload}>Retry</Button>}>{positions.error.message}</EmptyState>
         ) : null}
-        {positions.status === 'loading' && !positions.data ? <EmptyState kind="awaiting" title="Propagating catalog…" /> : null}
+        {waiting ? (
+          <EmptyState kind="awaiting" title={waitNote.title} action={waitNote.canRetry ? <Button onClick={positions.reload}>Try again</Button> : undefined}>
+            {waitNote.body}
+          </EmptyState>
+        ) : null}
         {positions.status === 'error' && positions.data ? <FieldNote>Position refresh failed ({positions.error.message}). Showing the last good snapshot; it is extrapolated for at most two minutes.</FieldNote> : null}
         {positions.data && positions.data.objects.length === 0 ? <EmptyState kind="none" title="No positions returned">The catalog is empty or no element set could be propagated.</EmptyState> : null}
         {positions.data && positions.data.skipped > 0 ? <FieldNote>{positions.data.skipped} object(s) could not be propagated and are not drawn.</FieldNote> : null}
@@ -183,6 +211,6 @@ export function GlobeView({ catalog, totalCount, selection, focus, conjunction, 
         {failed.length > 0 ? <FieldNote>Orbit path unavailable for {failed.map(nameOf).join(', ')}.</FieldNote> : null}
 
       </aside>
-    </div>
+    </main>
   )
 }

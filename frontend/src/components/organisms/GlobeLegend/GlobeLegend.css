@@ -1,2 +1,2 @@
-.globe-legend { display: flex; flex-direction: column; gap: 6px; }
+.globe-legend { display: flex; flex-direction: column; gap: 4px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; background: color-mix(in srgb, var(--bg-panel) 88%, transparent); font-size: 12px; }
 .globe-legend__cap { color: var(--text-tertiary); font-size: 11px; }

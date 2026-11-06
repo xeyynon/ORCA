@@ -52,6 +52,16 @@ export interface CatalogSummaryResponse {
   type_basis: string
 }
 
+/** GET /api/catalog-distributions: parallel columns (same order) for the WHOLE stored catalog. Raw values, not bins. */
+export interface CatalogColumns {
+  count: number
+  name: string[]
+  epoch_unix_s: number[] // UTC seconds since 1970
+  inclination_deg: number[]
+  eccentricity: number[]
+  mean_motion_rev_per_day: number[]
+}
+
 export type RiskLevel = 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW' | 'NEGLIGIBLE'
 
 export interface ConjunctionEvent {
