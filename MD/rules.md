@@ -339,6 +339,7 @@ focus ring, reduced motion.
     bundle was built from.
 15. **Browser title names the view.** `Conjunctions | ORCA`.
 16. **A brand mark is transparent in every theme.** Never fix a logo that disappears on one theme by putting it on a chip. Make a second transparent file for that theme (same artwork, recoloured) and let a token choose which one shows. `frontend/public/logo-*-light.png` were made this way from `logo-*.png`.
+17. **Account and preference controls live in one menu.** The header's right side is a single hamburger (`AppMenu`): who is signed in, keyboard shortcuts, theme, Sign out, each row showing the key that does the same with the menu closed. ARIA menu pattern: focus enters on open, Up/Down wrap, Home/End jump, Tab closes, Esc closes and is swallowed so it undoes one step, focus returns to the button. The shortcuts row is hidden on touch devices. Do not add a new standalone header button; add a menu row. The sign-in page, which has no app bar, keeps its own `ThemeToggle`.
 
 Known gaps recorded by these guides and not yet done: text at 1.3x (sizes are
 in px), a screen-reader pass, a physical phone, an automated browser audit in the
