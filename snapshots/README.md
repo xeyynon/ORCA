@@ -121,3 +121,33 @@ Second pass on the home page: the hero is the page's front (MD/design_system_v2.
 | [05-after-light.png](10-home-redesign-2026-11-07/05-after-light.png) | Light theme |
 | [06-after-phone-390.png](10-home-redesign-2026-11-07/06-after-phone-390.png) | Phone: full-width actions, the figures as rows (figure left, words right), the steps stacked |
 | [07-stat-hover.png](10-home-redesign-2026-11-07/07-stat-hover.png) | Hovering a figure: a neutral state layer and an arrow, the whole figure is the button to its view |
+
+## 11-command-centre-home-2026-11-07
+
+The owner's "Space Command Centre" brief (MD/ORCA_Homepage_Redesign_Context.md), built as written with the number kept as the headline (MD/design_system_v2.md §5.2).
+
+| File | What it shows |
+|---|---|
+| [01-hero-kpis-1440.png](11-command-centre-home-2026-11-07/01-hero-kpis-1440.png) | Mission overview (60/40, medium Earth, Explore Globe / View Conjunctions, data snapshot line) and the four KPI cards, each naming its run |
+| [02-approaches-panels-status-1440.png](11-command-centre-home-2026-11-07/02-approaches-panels-status-1440.png) | The five worst approaches from the stored example run (real rows, provenance under the table), orbit regimes beside data quality, system status |
+| [03-1920.png](11-command-centre-home-2026-11-07/03-1920.png) | 1080p: the Earth drawn at 400 px |
+| [04-phone-top.png](11-command-centre-home-2026-11-07/04-phone-top.png) | Phone: text first, then a smaller Earth (spec §7) |
+| [05-phone-kpis-table.png](11-command-centre-home-2026-11-07/05-phone-kpis-table.png) | Phone: KPIs in two columns; the table scrolls inside its own box, the page does not |
+| [06-phone-panels.png](11-command-centre-home-2026-11-07/06-phone-panels.png) | Phone: the two panels stacked |
+| [07-light-1440.png](11-command-centre-home-2026-11-07/07-light-1440.png) | Light theme, top |
+| [08-light-lower.png](11-command-centre-home-2026-11-07/08-light-lower.png) | Light theme: table, panels, status |
+
+## 12-reports-2026-11-07
+
+The Reports view (MD/design_system_v2.md §6).
+
+| File | What it shows |
+|---|---|
+| [01-reports-1440.png](12-reports-2026-11-07/01-reports-1440.png) | Six views in the bar (nav still centred, 0 px off); the builder on the left, the A4 preview on the right |
+| [02-pair-analysis-preview.png](12-reports-2026-11-07/02-pair-analysis-preview.png) | The single pair analysis in the preview |
+| [03-phone-builder.png](12-reports-2026-11-07/03-phone-builder.png) | Phone: the builder first |
+| [04-phone-preview.png](12-reports-2026-11-07/04-phone-preview.png) | Phone: the preview keeps its paper width and scrolls sideways in its own frame; the page does not |
+| [05-reports-light.png](12-reports-2026-11-07/05-reports-light.png) | Light theme: the paper is the same white in both themes |
+| [06-sample-report.pdf](12-reports-2026-11-07/06-sample-report.pdf) | A generated report (all four sections, stored example run): 3 A4 pages, each with the marking and a page number. (The copy pushed before 2026-11-07 21:15 was mistakenly the screen layout: the test browser was left forced to screen media.) |
+| [07-header-marking.png](12-reports-2026-11-07/07-header-marking.png) | The report opens with its handling marking, EDUCATIONAL USE ONLY · NOT FOR OPERATIONAL DECISIONS, in centred spaced capitals, the way official documents mark their use. No box, no tint, no side stripe (rules.md §11.21) |
+| [08-printed-page-2.png](12-reports-2026-11-07/08-printed-page-2.png) | A printed page: the marking at the head of every page, the table header repeated after a page break, "Page 2 of 3" at the foot |

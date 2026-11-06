@@ -46,6 +46,7 @@ import { LoadingScreen } from '@/components/views/LoadingScreen/LoadingScreen'
 import { AnalyticsView } from '@/components/views/AnalyticsView/AnalyticsView'
 import { ConjunctionsView } from '@/components/views/ConjunctionsView/ConjunctionsView'
 import { DataView } from '@/components/views/DataView/DataView'
+import { ReportsView } from '@/components/views/ReportsView/ReportsView'
 import { HomeView } from '@/components/views/HomeView/HomeView'
 import { OverviewView } from '@/components/views/OverviewView/OverviewView'
 import './Workspace.css'
@@ -198,7 +199,7 @@ export function Workspace({ username, onSignOut, theme, onToggleTheme: toggleThe
         <StaleDataBanner notice={stale} onGoData={() => go('data')} onDismiss={() => setStaleDismissedBand(currentStaleBand)} />
       ) : null}
 
-      {view === 'home' ? <HomeView catalog={catalog} summary={summary} health={health} apiStatus={apiStatus} conjSearch={conjSearch} onConjQueryChange={setConjQuery} onGo={go} onStartTour={tour.start} /> : null}
+      {view === 'home' ? <HomeView catalog={catalog} summary={summary} health={health} apiStatus={apiStatus} conjSearch={conjSearch} onConjQueryChange={setConjQuery} onSelectConjunction={setConjKey} onGo={go} onStartTour={tour.start} now={now} /> : null}
       {view === 'overview' ? (
         <OverviewView
           catalog={catalog}
@@ -245,8 +246,10 @@ export function Workspace({ username, onSignOut, theme, onToggleTheme: toggleThe
       ) : null}
       {view === 'analytics' ? <AnalyticsView catalog={catalog} stats={stats} totalCount={health?.database.tles_count ?? null} now={now} /> : null}
       {view === 'data' ? <DataView health={health} apiStatus={apiStatus} summary={summary} update={update} /> : null}
+      {view === 'reports' ? <ReportsView summary={summary} health={health} conjSearch={conjSearch} selectedConjKey={conjKey} username={username} now={now} /> : null}
 
-      <StatusBar items={status} />
+      {/* On the home page these readings are a readable "System status" section instead (homepage spec, Section 05). */}
+      {view !== 'home' ? <StatusBar items={status} /> : null}
       {askOpen ? <AskOrcaPanel messages={ask.messages} onSend={ask.send} onPick={ask.pick} onClose={closeAsk} inputRef={askInputRef} footnote={ask.footnote} /> : null}
       {helpOpen ? <ShortcutsHelp onClose={() => setHelpOpen(false)} /> : null}
       {tour.view ? <TourOverlay {...tour.view} /> : null}

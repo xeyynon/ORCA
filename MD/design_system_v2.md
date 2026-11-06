@@ -87,3 +87,31 @@ The owner still found the page short of "perfect". What was wrong with the first
 | Steps were paragraphs, and "Understand" led to "Browse the catalog" | One plain line each, no jargon; each step is its own way in and matches it: Open the globe, Run a search, See the ranked approaches |
 
 Measured: one screen with no scroll at 1280×720, 1366×768, 1440×900 and 1920×1080; no sideways scroll at 390 px; the Earth 0 px off its column's centre at every size; contrast 156/156. Snapshots: `snapshots/10-home-redesign-2026-11-07/`.
+
+### 5.2 Third pass: the command centre (2026-11-07)
+
+The owner wrote the brief `MD/ORCA_Homepage_Redesign_Context.md` (Space Command Centre) and chose to build it as written, accepting a page that scrolls (this supersedes "the whole home on one screen" from 5 and 5.1). One deviation, the owner's call: the headline keeps the real object count ("15,970 objects are circling Earth right now.") instead of the spec's generic line; the spec's line about what ORCA does is the supporting copy.
+
+| Spec section | Built as | Data, and how it is labelled |
+|---|---|---|
+| 01 Mission overview | `HomeHero`: 60/40, medium Earth (340 px, 400 on 1080p) on one soft glow, Explore Globe / View Conjunctions, the tour, `DATA SNAPSHOT · <last refresh> UTC` | Object count from the stored catalogue; snapshot is the API's last stored refresh |
+| 02 Orbital intelligence | `HomeKpis`: four cards (catalogued objects, close pairs, high-risk, critical), each the button to its view | Run figures always name their run: "Pairs within 10 km in the stored example run" (`lib/homeBoard.ts`, tested). Never "conjunctions" or "collisions" |
+| 03 Close approach intelligence | `ApproachPreview`: the run's five worst rows on the existing `DataTable` (sortable), `RiskBadge` dot + word; a row opens that pair's full analysis on Conjunctions | Real rows from the run on screen or the stored example; a provenance line under the table; skeleton, error and "found nothing" states |
+| 04 Distribution + data quality | `OrbitDistribution` (whole catalogue by regime, count and share printed) beside `DataQuality` (median TLE age with "Indicative only", newest set, source, last fetch outcome) | The median is measured over the loaded subset, and the panel says so. Data age and refresh time are kept apart |
+| 05 System status | `SystemStatus`: API connection, catalogue size, oldest TLE, last successful refresh, time now; the bottom strip is hidden on this page only | A note says a connected API does not mean fresh data |
+| §6 Track / Screen / Understand | Moved into the tour as its first step, "How ORCA works" (home only) | |
+
+Checked: a row click lands on Conjunctions with that pair selected (breadcrumb shows it); no page overflow at 390 px (the table scrolls in its own box); light theme; contrast 156/156. Snapshots: `snapshots/11-command-centre-home-2026-11-07/`.
+
+## 6. Reports (2026-11-07)
+
+The owner asked for a place to generate reports, and chose: a sixth view in the top bar, all four kinds of content, and a printable PDF (no new dependencies).
+
+- **Reports view** (`views/ReportsView`): the builder on the left (`ReportBuilder`: four section checkboxes, how many approaches to list, which pair to analyse, Generate PDF), the live preview on the right on a recessed desk. Key 6, in the tour and in Ask ORCA ("open reports").
+- **The document** (`ReportDocument`): A4 paper, white with dark ink in both themes (`--paper-*` tokens, 26 more contrast pairs, all passing). Header with reference (`ORCA-YYYYMMDD-HHMM`), generation time, who prepared it, the data snapshot, the run it quotes and the educational-use notice; numbered sections; hairline tables with tabular figures; risk as a dot and a word; Pc typeset as 2.83 × 10<sup>−5</sup>.
+- **Sections**: situation summary (headline figures and the regime table), close approaches (all five tier counts for the whole run plus the top 10/25/50/100), single pair analysis (a plain-language paragraph and the assessment table with the tier threshold and the long-encounter caveat), data quality and method (ages, refresh vs fetch, source, the method rows and limits straight from `/api/conjunctions/method`).
+- **Handling marking**: `EDUCATIONAL USE ONLY · NOT FOR OPERATIONAL DECISIONS` heads the report in centred spaced capitals and, in print, the top margin of every page (CSS `@page` margin boxes), with "ORCA · Space situational awareness report" and "Page X of Y" at each foot. It replaced a notice box with a blue side stripe that the owner banned (rules.md §11.21).
+- **Generate**: the same document is rendered a second time into a print-only layer at the end of `<body>`; in print everything else is hidden, so a long report flows over as many pages as it needs. The document title becomes `ORCA-report-YYYY-MM-DD-HHMM-UTC` while printing, so the saved file gets that name. Verified by printing to PDF: 3 A4 pages with all four sections, white margins in the dark theme.
+- **Guards** (`lib/report.ts`, tested): Generate is disabled, with the reason shown, when no section is chosen, when a run-based section's run has not loaded, or when the pair section has no pair.
+
+Snapshots: `snapshots/12-reports-2026-11-07/` (includes a sample PDF).

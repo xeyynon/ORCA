@@ -1,4 +1,4 @@
-export const VIEWS = ['home', 'overview', 'globe', 'conjunctions', 'analytics', 'data'] as const
+export const VIEWS = ['home', 'overview', 'globe', 'conjunctions', 'analytics', 'data', 'reports'] as const
 export type ViewId = (typeof VIEWS)[number]
 
 /** One name per view, used by the page title, breadcrumbs and the skip target, so they cannot disagree. */
@@ -9,6 +9,7 @@ export const VIEW_LABEL: Record<ViewId, string> = {
   conjunctions: 'Conjunctions',
   analytics: 'Analytics',
   data: 'Data',
+  reports: 'Reports',
 }
 
 /** The nav tab's short label. Mission control is "Home" in the tab row, where space is tight on a phone. */
@@ -25,6 +26,7 @@ export const VIEW_HOTKEY: Record<ViewId, string> = {
   conjunctions: '3',
   analytics: '4',
   data: '5',
+  reports: '6',
 }
 
 /**

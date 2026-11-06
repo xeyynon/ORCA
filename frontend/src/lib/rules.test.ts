@@ -56,6 +56,13 @@ test('no !important in component styles (rules.md §1.6)', () => {
   assert.deepEqual(offenders(inComponents(/\.css$/), /!important/), [])
 })
 
+/** A thick coloured bar down one side of a box (border or inset shadow): banned by the owner (rules.md §11.21). */
+const SIDE_STRIPE = /border-(left|right|inline-start|inline-end)\s*:\s*([2-9]|\d{2,})px|box-shadow\s*:[^;]*inset\s+-?([2-9]|\d{2,})px\s+0/
+
+test('no coloured side stripes on boxes (rules.md §11.21)', () => {
+  assert.deepEqual(offenders(inComponents(/\.css$/), SIDE_STRIPE), [])
+})
+
 test('one component per file (rules.md §1)', () => {
   const bad = inComponents(/\.tsx$/).filter((f) => (read(f).match(/^export (default )?(function|class) [A-Z]/gm) ?? []).length > 1).map(rel)
   assert.deepEqual(bad, [])

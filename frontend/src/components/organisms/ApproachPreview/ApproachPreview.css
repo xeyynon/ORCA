@@ -1,0 +1,15 @@
+/* A compact, precise table on one surface: small risk labels (dot + word), mono figures, no oversized badges. The table
+   scrolls inside its own box on a narrow screen; the page never does. */
+.approach { display: flex; flex-direction: column; gap: var(--gap-3); min-width: 0; }
+.approach__all { padding: 0; border: 0; background: none; color: var(--accent-ink); font-weight: 500; }
+.approach__all::after { content: '\2192'; display: inline-block; margin-left: 6px; transition: transform var(--dur-2) var(--ease-standard); }
+.approach__all:hover::after { transform: translateX(3px); }
+.approach__table .data-table__scroll { border-radius: var(--radius-lg); background: var(--surface-1); }
+.approach__table .data-table__cell { padding: 10px 16px; }
+.approach__table thead .data-table__cell, .approach__table th { padding-top: 10px; padding-bottom: 10px; }
+.approach__table tbody tr:last-child .data-table__cell { border-bottom: 0; }
+.approach__pair { color: var(--text-primary); font-weight: 500; }
+.approach__loading { display: grid; gap: 14px; padding: var(--gap-4); border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface-1); }
+.approach__provenance { margin: 0; color: var(--text-tertiary); font-size: var(--text-sm); }
+@media (pointer: coarse) { .approach__all { min-height: 44px; } }
+@media (prefers-reduced-motion: reduce) { .approach__all::after { transition: none; } }

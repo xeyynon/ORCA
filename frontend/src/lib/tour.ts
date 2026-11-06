@@ -20,10 +20,17 @@ export type TourStep = {
  */
 export const TOUR_STEPS: readonly TourStep[] = [
   {
+    // Moved here from the home page (homepage spec §6): what ORCA does, in the order it does it. Home only.
+    id: 'how',
+    target: '.home-hero',
+    title: 'How ORCA works',
+    body: 'Track: every catalogued object is placed from public orbit data on a 3D Earth. Screen: every pair is checked for close passes over the coming days. Understand: each approach is ranked by its chance of collision, in plain words.',
+  },
+  {
     id: 'views',
     target: '.appbar__center',
-    title: 'Five views, one row',
-    body: 'Overview lists the catalog, Globe shows it in 3D, Conjunctions looks for close approaches, Analytics charts it, and Data says where it comes from. The ORCA logo brings you back to this page. On a keyboard, 1 to 5 open the views and H comes home.',
+    title: 'Six views, one row',
+    body: 'Overview lists the catalog, Globe shows it in 3D, Conjunctions looks for close approaches, Analytics charts it, Data says where it comes from, and Reports turns it into a PDF. The ORCA logo brings you back to this page. On a keyboard, 1 to 6 open the views and H comes home.',
   },
   {
     id: 'search',

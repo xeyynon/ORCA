@@ -1,4 +1,2 @@
-.page-layout { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow-y: auto; }
-.page-layout__inner { display: flex; flex-direction: column; gap: var(--gap-4); width: 100%; max-width: 1500px; margin: 0 auto; padding: var(--gap-5) var(--gap-4); }
-/* Grows to the visible height but may still grow past it (then the page scrolls as usual). */
-.page-layout__inner--fill { flex: 1 0 auto; }
+.page-layout { flex: 1; min-height: 0; overflow-y: auto; }
+.page-layout__inner { display: flex; flex-direction: column; gap: var(--gap-4); max-width: 1500px; margin: 0 auto; padding: var(--gap-5) var(--gap-4); }
