@@ -198,7 +198,7 @@ export function Workspace({ username, onSignOut, theme, onToggleTheme: toggleThe
         <StaleDataBanner notice={stale} onGoData={() => go('data')} onDismiss={() => setStaleDismissedBand(currentStaleBand)} />
       ) : null}
 
-      {view === 'home' ? <HomeView catalog={catalog} summary={summary} health={health} apiStatus={apiStatus} conjSearch={conjSearch} onConjQueryChange={setConjQuery} onGo={go} onStartTour={tour.start} /> : null}
+      {view === 'home' ? <HomeView catalog={catalog} summary={summary} health={health} apiStatus={apiStatus} conjSearch={conjSearch} onConjQueryChange={setConjQuery} onSelectConjunction={setConjKey} onGo={go} onStartTour={tour.start} now={now} /> : null}
       {view === 'overview' ? (
         <OverviewView
           catalog={catalog}
@@ -246,7 +246,8 @@ export function Workspace({ username, onSignOut, theme, onToggleTheme: toggleThe
       {view === 'analytics' ? <AnalyticsView catalog={catalog} stats={stats} totalCount={health?.database.tles_count ?? null} now={now} /> : null}
       {view === 'data' ? <DataView health={health} apiStatus={apiStatus} summary={summary} update={update} /> : null}
 
-      <StatusBar items={status} />
+      {/* On the home page these readings are a readable "System status" section instead (homepage spec, Section 05). */}
+      {view !== 'home' ? <StatusBar items={status} /> : null}
       {askOpen ? <AskOrcaPanel messages={ask.messages} onSend={ask.send} onPick={ask.pick} onClose={closeAsk} inputRef={askInputRef} footnote={ask.footnote} /> : null}
       {helpOpen ? <ShortcutsHelp onClose={() => setHelpOpen(false)} /> : null}
       {tour.view ? <TourOverlay {...tour.view} /> : null}

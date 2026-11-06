@@ -1,0 +1,53 @@
+/* Four aligned cards: navy surface, hairline border, large tabular numerals, small muted labels, one restrained blue
+   icon. No heavy shadow; hover is a neutral state layer and a brighter border, plus an arrow. */
+.home-kpis__title { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.home-kpis__list { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--gap-4); margin: 0; padding: 0; list-style: none; }
+.home-kpis__item { min-width: 0; }
+.home-kpis__card {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--gap-1);
+  width: 100%;
+  height: 100%;
+  padding: var(--gap-4) var(--gap-5) var(--gap-4) var(--gap-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface-1);
+  color: inherit;
+  text-align: left;
+  transition: border-color var(--dur-1) var(--ease-standard);
+}
+.home-kpis__card::before { content: ''; position: absolute; z-index: -1; inset: 0; border-radius: inherit; background: var(--state-hover); opacity: 0; transition: opacity var(--dur-1) var(--ease-standard); }
+.home-kpis__card:hover { border-color: var(--border-strong); }
+.home-kpis__card:hover::before, .home-kpis__card:focus-visible::before { opacity: 1; }
+.home-kpis__card::after {
+  content: '\2192';
+  position: absolute;
+  top: var(--gap-4);
+  right: var(--gap-4);
+  color: var(--accent-ink);
+  opacity: 0;
+  transform: translateX(-4px);
+  transition: opacity var(--dur-1) var(--ease-standard), transform var(--dur-2) var(--ease-standard);
+}
+.home-kpis__card:hover::after, .home-kpis__card:focus-visible::after { opacity: 1; transform: none; }
+.home-kpis__head { display: inline-flex; align-items: center; gap: var(--gap-2); }
+.home-kpis__icon { display: inline-flex; color: var(--accent-ink); }
+.home-kpis__label { color: var(--text-secondary); font-size: var(--text-md); font-weight: 500; }
+.home-kpis__value {
+  margin-top: var(--gap-1);
+  color: var(--text-primary);
+  font-size: 30px;
+  line-height: 1.1;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+.home-kpis__context { color: var(--text-tertiary); font-size: var(--text-sm); line-height: 1.4; }
+
+@media (max-width: 960px) { .home-kpis__list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--gap-3); } }
+@media (max-width: 420px) { .home-kpis__value { font-size: 24px; } .home-kpis__card { padding: var(--gap-3); } }
+@media (prefers-reduced-motion: reduce) { .home-kpis__card::after { transform: none; } }

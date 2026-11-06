@@ -1,0 +1,18 @@
+/* The panel surface, the same rules as OrbitDistribution.css (the two panels are one pair; kept in both so neither
+   depends on the other's stylesheet being loaded). */
+.home-panel { display: flex; flex-direction: column; gap: var(--gap-4); min-width: 0; padding: var(--gap-5); border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface-1); }
+.home-panel .block-header__title { font-size: var(--text-lg); }
+.home-panel__link { padding: 0; border: 0; background: none; color: var(--accent-ink); font-weight: 500; }
+.home-panel__link::after { content: '\2192'; display: inline-block; margin-left: 6px; }
+.home-panel__note { margin: 0; color: var(--text-tertiary); font-size: var(--text-sm); line-height: 1.45; }
+@media (pointer: coarse) { .home-panel__link { min-height: 44px; } }
+.data-quality__list { display: flex; flex-direction: column; gap: var(--gap-2); margin: 0; }
+.data-quality__row { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--gap-1) var(--gap-4); padding: var(--gap-2) 0; border-top: 1px solid var(--border); }
+.data-quality__row--lead { padding-top: 0; border-top: 0; }
+.data-quality__row dt { color: var(--text-secondary); }
+.data-quality__row dd { display: inline-flex; align-items: baseline; gap: var(--gap-3); margin: 0; color: var(--text-primary); font-variant-numeric: tabular-nums; text-align: right; }
+.data-quality__figure { font-size: 26px; font-weight: 650; letter-spacing: -0.02em; }
+.data-quality__word { display: inline-flex; align-items: center; gap: var(--gap-1); color: var(--text-secondary); }
+.data-quality__when { color: var(--text-tertiary); font-family: var(--font-mono); font-size: var(--text-sm); }
+.data-quality__missing { color: var(--text-tertiary); font-size: var(--text-sm); }
+.data-quality__explain { margin-top: calc(-1 * var(--gap-1)); }
