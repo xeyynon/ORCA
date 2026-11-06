@@ -45,9 +45,9 @@ export const TOUR_STEPS: readonly TourStep[] = [
   },
   {
     id: 'menu',
-    target: '[data-tour="help"]',
+    target: '[data-tour="menu"]',
     title: 'Your menu',
-    body: 'Theme, keyboard shortcuts and Sign out live here. Choose Take the tour in this menu to see these steps again.',
+    body: 'Everything else lives here: notifications, Ask ORCA, keyboard shortcuts, the theme and Sign out. Choose Take the tour in this menu to see these steps again.',
   },
 ]
 

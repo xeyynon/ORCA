@@ -31,8 +31,6 @@ import { AppMenu } from '@/components/organisms/AppMenu/AppMenu'
 import { Breadcrumbs } from '@/components/organisms/Breadcrumbs/Breadcrumbs'
 import { ObjectSearch } from '@/components/organisms/ObjectSearch/ObjectSearch'
 import { SearchPopover } from '@/components/organisms/SearchPopover/SearchPopover'
-import { HelpMenu } from '@/components/organisms/HelpMenu/HelpMenu'
-import { NotificationsMenu } from '@/components/organisms/NotificationsMenu/NotificationsMenu'
 import { buildNotices } from '@/lib/notices'
 import { useSearchChord } from '@/hooks/useSearchChord'
 import { PrimaryNav } from '@/components/organisms/PrimaryNav/PrimaryNav'
@@ -185,11 +183,11 @@ export function Workspace({ username, onSignOut, theme, onToggleTheme: toggleThe
         center={<PrimaryNav view={view} onChange={go} />}
         right={<>
           <SearchPopover open={searchOpen} onOpen={() => setSearchOpen(true)} onClose={closeSearch} inputRef={searchRef}>
-            <ObjectSearch inputRef={searchRef} query={query} onQueryChange={setQuery} results={search.results} loading={search.loading} degraded={search.degraded} onPick={(id) => { closeSearch(); showOnGlobe([id]) }} />
+            <ObjectSearch bare inputRef={searchRef} query={query} onQueryChange={setQuery} results={search.results} loading={search.loading} degraded={search.degraded} onPick={(id) => { closeSearch(); showOnGlobe([id]) }} />
           </SearchPopover>
-          <NotificationsMenu notices={notices} onGo={go} />
-          <span ref={askButtonRef}><HelpMenu onAsk={() => setAskOpen(true)} onShortcuts={() => setHelpOpen(true)} onTour={tour.start} /></span>
-          <AppMenu username={username} theme={theme} onToggleTheme={toggleTheme} onSignOut={onSignOut} />
+          <span ref={askButtonRef}>
+            <AppMenu username={username} theme={theme} notices={notices} onGo={go} onAsk={() => setAskOpen(true)} onShortcuts={() => setHelpOpen(true)} onTour={tour.start} onToggleTheme={toggleTheme} onSignOut={onSignOut} />
+          </span>
         </>}
       />
 
