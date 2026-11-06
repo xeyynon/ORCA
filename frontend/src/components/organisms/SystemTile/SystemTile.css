@@ -1,2 +1,0 @@
-.system-tile__facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: var(--gap-2) var(--gap-4); }
-.system-tile__note { margin: 0; color: var(--text-tertiary); font-size: var(--text-sm); }
