@@ -220,7 +220,7 @@
   --font-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
   --radius: 4px;            /* a precision tool, not a friendly app */
   --radius-lg: 8px;
-  --appbar-h: 48px;
+  --appbar-h: 56px;
   --statusbar-h: 28px;
   --gap-1: 4px;
   --gap-2: 8px;

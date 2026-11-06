@@ -2,6 +2,6 @@
 /* Which of the two logo files shows is a token, so the component never asks which theme it is in. */
 .brand--on-dark { display: var(--logo-on-dark-display); }
 .brand--on-light { display: var(--logo-on-light-display); }
-.brand--bar { height: 38px; width: auto; }
+.brand--bar { height: 30px; width: auto; } /* breathing room inside the 44 px logo capsule */
 .brand--card { width: min(280px, 100%); height: auto; }
 .brand-link { display: inline-flex; flex: none; border-radius: var(--radius-sm); }
