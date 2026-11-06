@@ -1,0 +1,31 @@
+.pop-menu { position: relative; display: inline-flex; }
+.pop-menu__popover {
+  position: absolute;
+  z-index: 50;
+  right: 0;
+  top: calc(100% + 6px);
+  min-width: 260px;
+  max-width: calc(100vw - 2 * var(--gap-3));
+  padding: var(--gap-1);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  background: var(--surface-2);
+  box-shadow: var(--elev-3);
+  animation: pop-menu-in var(--dur-2) var(--ease-standard);
+}
+@keyframes pop-menu-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+/* A count, not a colour: the number is the information; the accent only draws the eye. */
+.pop-menu__badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  min-width: 15px;
+  height: 15px;
+  padding: 0 4px;
+  border-radius: var(--radius-pill);
+  background: var(--accent);
+  color: var(--bg-canvas);
+  font: 600 10px/15px var(--font-mono);
+  text-align: center;
+  pointer-events: none;
+}

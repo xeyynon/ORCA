@@ -27,7 +27,7 @@ export const TOUR_STEPS: readonly TourStep[] = [
   },
   {
     id: 'search',
-    target: '.object-search',
+    target: '[data-tour="search"]',
     title: 'Find any object',
     body: 'Type a name or a NORAD id and pick a result to see it on the globe. Press / to jump here from anywhere.',
   },
@@ -45,7 +45,7 @@ export const TOUR_STEPS: readonly TourStep[] = [
   },
   {
     id: 'menu',
-    target: '[data-tour="menu"]',
+    target: '[data-tour="help"]',
     title: 'Your menu',
     body: 'Theme, keyboard shortcuts and Sign out live here. Choose Take the tour in this menu to see these steps again.',
   },
