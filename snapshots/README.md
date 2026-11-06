@@ -107,3 +107,17 @@ The owner's three-section top bar: logo left, views centred, search and utilitie
 |---|---|
 | [01-home-no-home-tab-1440.png](09-home-page-2026-11-07/01-home-no-home-tab-1440.png) | No Home tab: five views in the bar, the logo goes home. The Earth is centred in the hero (0 px off, measured at 1280x720 to 1920x1080 and on a phone); the three sections share the same edges (130 to 1310 px) |
 | [02-home-1366x768.png](09-home-page-2026-11-07/02-home-1366x768.png) | 1366x768: still one screen, Earth centred |
+
+## 10-home-redesign-2026-11-07
+
+Second pass on the home page: the hero is the page's front (MD/design_system_v2.md §5.1).
+
+| File | What it shows |
+|---|---|
+| [01-before-1440.png](10-home-redesign-2026-11-07/01-before-1440.png) | BEFORE: three look-alike cards, a 240 px Earth in a half-empty column, small buttons, an empty band at the bottom |
+| [02-after-1440x900.png](10-home-redesign-2026-11-07/02-after-1440x900.png) | AFTER: the hero on the page itself, a 400 px Earth on a glow and orbit ring, 42 px actions, three big live figures, a light three-step strip, one line of fine print; one screen |
+| [03-after-1920x1080.png](10-home-redesign-2026-11-07/03-after-1920x1080.png) | 1080p: the Earth drawn at 480 px, the group centred in the height (106 px above and below, measured) |
+| [04-after-1280x720.png](10-home-redesign-2026-11-07/04-after-1280x720.png) | 1280x720: still one screen, no scroll (measured) |
+| [05-after-light.png](10-home-redesign-2026-11-07/05-after-light.png) | Light theme |
+| [06-after-phone-390.png](10-home-redesign-2026-11-07/06-after-phone-390.png) | Phone: full-width actions, the figures as rows (figure left, words right), the steps stacked |
+| [07-stat-hover.png](10-home-redesign-2026-11-07/07-stat-hover.png) | Hovering a figure: a neutral state layer and an arrow, the whole figure is the button to its view |

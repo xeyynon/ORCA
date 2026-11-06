@@ -71,3 +71,19 @@ A dashboard answers "what is the status?" for a returning user. A first visit ne
 3. **Right now** (`HomeFacts`): three short facts (where they orbit, how fresh the data is, close approaches), each with a link.
 
 Status detail (API, build, refresh times, age breakdowns) lives on the Data page. Rule: a landing page leads with one hook and at most two actions; anything a newcomer cannot act on goes further down or to its own view.
+
+### 5.1 Second pass: the hero is the page's front (2026-11-07)
+
+The owner still found the page short of "perfect". What was wrong with the first version, and what changed:
+
+| Problem | Change |
+|---|---|
+| Hero, steps and facts were all the same grey bordered card, so nothing read as the front | The hero sits on the page itself, no card; the steps are a light strip under a hairline; the facts moved into the hero |
+| The Earth was 240 px in a half-empty column | Drawn at 400 px (480 on 1080p and up, a real size, not an upscale) on a soft accent glow with one faint dashed orbit ring |
+| The strongest figures were buried in a sentence and a bottom strip | Three big tabular figures under the actions: 29 high-risk approaches (none critical), 95% in low Earth orbit, 30 days median data age (Indicative only). Each figure is the button to its view |
+| 30 px toolbar buttons as the call to action | A `lg` button size (42 px, 44 on touch) for a page's main actions; the primary carries an arrow |
+| An underlined blue tour link and the fine print crowded the hero | The tour is a quiet text button with a small play mark; the source and "educational tool" line is one line at the foot of the page |
+| About 150 px of empty screen below the content, more at 1080p | The page fills the screen (`PageLayout fill`) and the group is centred in its height, spare space split evenly above and below |
+| Steps were paragraphs, and "Understand" led to "Browse the catalog" | One plain line each, no jargon; each step is its own way in and matches it: Open the globe, Run a search, See the ranked approaches |
+
+Measured: one screen with no scroll at 1280×720, 1366×768, 1440×900 and 1920×1080; no sideways scroll at 390 px; the Earth 0 px off its column's centre at every size; contrast 156/156. Snapshots: `snapshots/10-home-redesign-2026-11-07/`.
