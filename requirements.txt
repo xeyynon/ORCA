@@ -7,3 +7,5 @@ plotly>=5.20.0
 pandas>=2.2.0
 sgp4>=2.23
 pydantic>=2.0.0
+
+# The optional "Ask ORCA" AI answers use Groq through `requests` (above): no extra package. Set GROQ_API_KEY in .env.
