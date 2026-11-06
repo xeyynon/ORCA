@@ -108,8 +108,28 @@ Interactive docs at `/docs` (Swagger) and `/redoc`.
 | GET | `/api/conjunction-pair/{id1}/{id2}` | The pair's closest approach under 10 km in the next 7 days, or `no_risk` |
 | GET | `/api/statistics` | Apogee, perigee, period and inclination summary |
 | GET | `/api/export/conjunctions` | Server-side export (`format=json` or `csv`): 1-day horizon from now, the 10,000 most probable events. The frontend exports in the browser instead |
+| GET | `/api/assistant/status` | Whether the optional AI answers (Groq) are on: `{enabled, model, reason}` |
+| POST | `/api/assistant/ask` | `{question, context: {view, facts}}` to `{answer, model, label: "AI-generated"}`. 503 when off, 400 bad input, 429 over the per-user limit, 502 when Groq fails |
 
 CORS defaults to the Vite dev origins. Set `ORCA_CORS_ORIGINS="https://a.example,https://b.example"` to allow others.
+
+### Ask ORCA assistant (optional AI answers, off by default)
+
+"Ask ORCA" answers from the loaded data and a fixed set of intents with no key and no network call. A server operator can also let free-text questions it does not recognise go to **Groq** (an OpenAI-compatible API). ORCA never needs this: it is an opt-in extra, in line with "no paid keys for core function" ([intent.md](intent.md)). No extra package is needed: the call uses `requests`.
+
+To turn it on, put the key in the git-ignored **`.env`** file next to `api_server.py` (a template is in `.env.example`), then restart the API. Never put it in `frontend/.env*`: anything there is baked into the public bundle.
+
+```bash
+# .env  (read once at API start by envfile.py; a variable already in the real environment wins)
+GROQ_API_KEY=gsk_...                          # enables the feature; empty = off, /api/assistant/ask answers 503
+# ORCA_ASSISTANT_MODEL=openai/gpt-oss-120b     # optional; the default. Groq retires models: see console.groq.com/docs/models
+# ORCA_ASSISTANT_LIMIT=20                      # optional; questions per signed-in user per window
+# ORCA_ASSISTANT_WINDOW_S=600                  # optional; window length in seconds
+```
+
+- **What is sent:** the question, the name of the current view and up to 30 short facts the page already shows (aggregate figures from public TLEs). No credential, database file or other server data is sent.
+- **The key** stays on the server. It is never returned by the API and never logged; the log line per question has only the provider, model, an outcome code and the latency.
+- **In the UI** every AI answer is labelled "AI · <model>", with a note that it may be wrong and the facts it was given. The system prompt tells the model to answer only from those facts and general orbital mechanics, to say when the facts do not hold the answer, and never to invent catalog numbers, positions or collision probabilities. It is not for operational decisions.
 
 **Hosted copy:** https://orca-vitap.vercel.app (frontend on Vercel, API on an Oracle Cloud Always Free VM). Every push to `main` redeploys it. See [deployment.md](deployment.md). As of 2026-10-15 the hosted copy still runs the original engine: the v2 work is on the branch `fix/honest-conjunctions`, not yet merged or pushed.
 

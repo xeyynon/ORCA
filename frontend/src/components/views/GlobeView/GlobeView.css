@@ -5,18 +5,44 @@
 .globe-view__side { position: absolute; z-index: 2; top: var(--gap-3); display: flex; flex-direction: column; gap: var(--gap-2); max-height: calc(100% - 2 * var(--gap-3)); overflow-y: auto; scrollbar-width: none; }
 .globe-view__side--left { left: var(--gap-3); width: 260px; }
 .globe-view__side--right { right: var(--gap-3); width: 340px; max-height: calc(100% - 140px); }
-.globe-view__bar { position: absolute; z-index: 2; right: var(--gap-3); width: 340px; bottom: var(--gap-3); border: 1px solid var(--border); border-radius: 10px; background: color-mix(in srgb, var(--bg-panel) 92%, transparent); }
+/* The foot holds the playback bar (and, on a phone, the details sheet above it). It lets clicks through to the globe. */
+.globe-view__foot { position: absolute; z-index: 2; right: var(--gap-3); bottom: var(--gap-3); width: 340px; display: flex; flex-direction: column; pointer-events: none; }
+
+/*
+ * Glass (MD/design_system_v2.md, Glassmorphism): only the chrome over the globe, never a data panel. The alpha in
+ * --glass-bg is measured so its text keeps 4.5:1 over the brightest / darkest globe pixel (lib/glassContrast.test.ts).
+ * Opaque where backdrop-filter is missing or the user asks for less transparency (also set here, not only through the
+ * token: the theme blocks in tokens.css out-rank base.css's :root override).
+ */
+.globe-view__bar {
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  backdrop-filter: blur(var(--glass-blur));
+  box-shadow: var(--elev-2);
+  pointer-events: auto;
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .globe-view__bar { background: var(--glass-bg-solid); }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .globe-view__bar { background: var(--glass-bg-solid); -webkit-backdrop-filter: none; backdrop-filter: none; }
+}
 
 /* The legend sits at the foot of the stage, clear of the left panel (260 px) and the playback bar (right). */
 .globe-view__legend { position: absolute; z-index: 1; left: calc(260px + 2 * var(--gap-3)); bottom: var(--gap-3); max-width: 280px; pointer-events: none; }
 
-/* Narrow: the globe first, with its playback bar laid over its foot; what is selected next, filters last, all scrolling. */
+/* Narrow: the globe first, with its playback bar laid over its foot; what is selected next, filters last, all scrolling.
+   A selection becomes a bottom sheet in the space between the top of the globe and the bar; the sheet clips to it. */
 @media (max-width: 1000px) {
   .globe-view { overflow-y: auto; display: flex; flex-direction: column; }
   .globe-view__center { position: relative; inset: auto; height: 68dvh; min-height: 360px; flex: none; order: 0; }
-  .globe-view__bar { position: absolute; left: var(--gap-2); right: var(--gap-2); bottom: var(--gap-2); width: auto; margin: 0; }
+  .globe-view__foot { top: var(--gap-2); left: var(--gap-2); right: var(--gap-2); bottom: var(--gap-2); width: auto; justify-content: flex-end; gap: var(--gap-2); }
+  .globe-view__sheet { position: relative; flex: 1; min-height: 0; overflow: hidden; border-radius: var(--radius-lg); }
   .globe-view__legend { left: var(--gap-2); top: var(--gap-2); bottom: auto; max-width: calc(100% - 2 * var(--gap-2)); }
   .globe-view__side { position: static; width: auto; max-height: none; overflow: visible; padding: var(--gap-3); }
   .globe-view__side--right { order: 1; }
   .globe-view__side--left { order: 2; }
+  .globe-view__side--right:empty { display: none; }
 }

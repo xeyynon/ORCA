@@ -1,19 +1,43 @@
+/*
+ * A quiet tab: icon and label, no pill. Hover is a Material state layer; the active page alone gets the accent,
+ * as its label colour and a 2px underline (the only blue in the bar besides focus).
+ */
 .nav-tab {
+  position: relative;
+  isolation: isolate;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  height: 30px;
+  gap: 6px;
+  height: 34px;
   padding: 0 10px;
-  border: 1px solid transparent;
-  border-radius: var(--radius);
+  border: 0;
+  border-radius: var(--radius-md);
   background: transparent;
   color: var(--text-secondary);
   font-weight: 500;
+  white-space: nowrap;
 }
-.nav-tab:hover { background: var(--bg-hover); color: var(--text-primary); }
-.nav-tab--active { background: var(--accent-bg); border-color: var(--border-strong); color: var(--text-primary); }
-.nav-tab__key { display: inline-flex; opacity: 0.7; }
+.nav-tab::before { content: ''; position: absolute; z-index: -1; inset: 0; border-radius: inherit; background: var(--state-hover); opacity: 0; transition: opacity var(--dur-1) var(--ease-standard); }
+.nav-tab:hover { color: var(--text-primary); }
+.nav-tab:hover::before { opacity: 1; }
+.nav-tab:focus-visible::before { background: var(--state-focus); opacity: 1; }
+.nav-tab__icon { display: inline-flex; opacity: 0.85; }
+.nav-tab--active { color: var(--accent-ink); }
+.nav-tab--active .nav-tab__icon { opacity: 1; }
+.nav-tab::after {
+  content: '';
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: -4px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transition: transform var(--dur-2) var(--ease-standard);
+}
+.nav-tab--active::after { transform: scaleX(1); }
 
-/* Narrow (the app bar's second row): equal-width tabs; the number keys are for a keyboard, so they go. */
-@media (max-width: 1100px) { .nav-tab { flex: 1 1 0; min-width: 0; padding: 0 4px; gap: 0; justify-content: center; } .nav-tab__key { display: none; } }
+/* Narrow: tabs keep their natural width and the row scrolls sideways. */
+@media (max-width: 1100px) { .nav-tab { flex: none; } .nav-tab::after { bottom: -4px; } }
 @media (pointer: coarse) { .nav-tab { height: 44px; } }

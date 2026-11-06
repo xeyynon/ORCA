@@ -1,4 +1,11 @@
+/*
+ * Interaction layer (MD/design_system_v2.md, Material row): hover and keyboard focus are a translucent --state-* layer
+ * (::before, under the row's content) on the menu's own surface, and pressing deepens it. Rows fill the menu's width,
+ * so there is no shrink on press. Keyboard focus keeps its inset ring as well as the layer.
+ */
 .menu-item {
+  position: relative;
+  isolation: isolate;
   display: flex;
   align-items: center;
   gap: var(--gap-3);
@@ -11,7 +18,20 @@
   color: var(--text-primary);
   text-align: left;
 }
-.menu-item:hover, .menu-item:focus-visible { background: var(--bg-hover); }
+.menu-item::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--state-hover);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--dur-1) var(--ease-standard);
+}
+.menu-item:hover::before { opacity: 1; }
+.menu-item:focus-visible::before { background: var(--state-focus); opacity: 1; }
+.menu-item:active::before { background: var(--state-pressed); opacity: 1; }
 .menu-item:focus-visible { outline-offset: -2px; }
 .menu-item__icon { display: inline-flex; color: var(--text-secondary); }
 .menu-item__label { flex: 1; min-width: 0; }

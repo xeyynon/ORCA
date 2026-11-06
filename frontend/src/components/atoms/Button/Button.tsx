@@ -4,7 +4,8 @@ import './Button.css'
 
 type Props = {
   variant?: 'primary' | 'secondary' | 'ghost'
-  size?: 'sm' | 'md'
+  /** `lg` is for a page's main call to action (the home hero), not for toolbars. */
+  size?: 'sm' | 'md' | 'lg'
   type?: 'button' | 'submit'
   disabled?: boolean
   title?: string

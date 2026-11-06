@@ -1,0 +1,21 @@
+/*
+ * Microinteraction (MD/design_system_v2.md): on a successful copy the "Copy" face lifts out and the "Copied" face
+ * settles in (opacity + 4px translate, --dur-2, --ease-standard). Both faces share one grid cell, so the button never
+ * changes width. Under prefers-reduced-motion base.css cuts the transition and the faces simply swap. The motion
+ * carries nothing the words do not: the face says "Copied" and the status region announces it.
+ */
+.copy-btn { display: inline-flex; flex-wrap: wrap; align-items: center; gap: var(--gap-2); }
+.copy-btn__faces { display: inline-grid; }
+.copy-btn__face {
+  grid-area: 1 / 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: opacity var(--dur-2) var(--ease-standard), transform var(--dur-2) var(--ease-standard);
+}
+.copy-btn__face--done { opacity: 0; transform: translateY(4px); }
+.copy-btn[data-state='copied'] .copy-btn__face--idle { opacity: 0; transform: translateY(-4px); }
+.copy-btn[data-state='copied'] .copy-btn__face--done { opacity: 1; transform: none; }
+.copy-btn__status { color: var(--text-secondary); font-size: 12px; }
+/* Success is already on the button's face: announce it without showing it twice. */
+.copy-btn__status--hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }

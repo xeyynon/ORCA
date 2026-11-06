@@ -10,14 +10,16 @@ type Props = {
   ariaLabel: string
   /** Shortcut key shown at the right edge (recognition over recall). */
   hint?: string
+  /** No box of its own: for a field that sits inside another surface (the search capsule), which shows the focus. */
+  bare?: boolean
   onChange: (value: string) => void
   onFocus?: () => void
   onKeyDown?: (key: string) => void
 }
 
-export function SearchField({ inputRef, value, placeholder, ariaLabel, hint, onChange, onFocus, onKeyDown }: Props) {
+export function SearchField({ inputRef, value, placeholder, ariaLabel, hint, bare = false, onChange, onFocus, onKeyDown }: Props) {
   return (
-    <div className="search-field">
+    <div className={bare ? 'search-field search-field--bare' : 'search-field'}>
       <span className="search-field__icon"><Icon name="search" size={14} /></span>
       <input
         ref={inputRef}

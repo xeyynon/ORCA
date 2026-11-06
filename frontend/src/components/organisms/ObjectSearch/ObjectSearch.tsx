@@ -13,11 +13,13 @@ type Props = {
   loading: boolean
   /** The server search failed; `results` come from the loaded subset only. */
   degraded: boolean
+  /** Inside the search capsule: the field draws no box of its own. */
+  bare?: boolean
   onPick: (id: string) => void
 }
 
 /** Find any stored object by name or NORAD id. Enter picks the highlighted result; Esc clears. Data comes in as props. */
-export function ObjectSearch({ inputRef, query, onQueryChange, results, loading, degraded, onPick }: Props) {
+export function ObjectSearch({ inputRef, query, onQueryChange, results, loading, degraded, onPick, bare = false }: Props) {
   const [open, setOpen] = useState(false)
   const [active, setActive] = useState(0)
   const q = query.trim()
@@ -39,6 +41,7 @@ export function ObjectSearch({ inputRef, query, onQueryChange, results, loading,
         placeholder="Search name or NORAD id"
         ariaLabel="Search objects"
         hint="/"
+        bare={bare}
         onChange={(v) => { onQueryChange(v); setActive(0); setOpen(true) }}
         onFocus={() => setOpen(true)}
         onKeyDown={onKey}
