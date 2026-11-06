@@ -19,7 +19,9 @@ type Props = {
 export function CheckboxRow({ label, checked, onChange, count, swatch, disabled, title }: Props) {
   return (
     <label className={disabled ? 'checkbox-row checkbox-row--disabled' : 'checkbox-row'} title={title}>
-      <input className="checkbox-row__input" type="checkbox" checked={checked} disabled={disabled} onChange={(e) => onChange(e.target.checked)} />
+      <span className="checkbox-row__box">
+        <input className="checkbox-row__input" type="checkbox" checked={checked} disabled={disabled} onChange={(e) => onChange(e.target.checked)} />
+      </span>
       {swatch ? <Swatch color={swatch} shape="circle" /> : null}
       <span className="checkbox-row__label">{label}</span>
       {count !== undefined ? <Mono muted>{count}</Mono> : null}

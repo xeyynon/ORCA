@@ -1,4 +1,15 @@
+/*
+ * Interaction layer (MD/design_system_v2.md, Material row): hover, focus and pressed are a translucent --state-* layer
+ * (::before, under the icon), laid over whatever fill the button has, so the "on" fill stays readable while hovered.
+ * Pressed shrinks it by 2% (--dur-1), dropped under prefers-reduced-motion. The base.css focus ring stays.
+ *
+ * Tactile variant (Neumorphism row): only for the Globe playback transport. Raised on the --neu-* surface; pressed,
+ * or on (aria-pressed), sinks to an inset shadow AND turns the icon accent, so the state is never shadow alone.
+ * It always keeps a 1px border and the normal focus ring.
+ */
 .icon-btn {
+  position: relative;
+  isolation: isolate;
   display: inline-grid;
   place-items: center;
   width: 30px;
@@ -7,8 +18,40 @@
   border-radius: var(--radius);
   background: transparent;
   color: var(--text-secondary);
+  transition: transform var(--dur-1) var(--ease-standard), box-shadow var(--dur-1) var(--ease-standard);
 }
-.icon-btn:hover:not(:disabled) { background: var(--bg-hover); color: var(--text-primary); }
+.icon-btn::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--state-hover);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--dur-1) var(--ease-standard);
+}
+.icon-btn:hover:not(:disabled) { color: var(--text-primary); }
+.icon-btn:hover:not(:disabled)::before { opacity: 1; }
+.icon-btn:focus-visible::before { background: var(--state-focus); opacity: 1; }
+.icon-btn:active:not(:disabled)::before { background: var(--state-pressed); opacity: 1; }
+.icon-btn:active:not(:disabled) { transform: scale(0.98); }
 .icon-btn--on { background: var(--accent-bg); color: var(--accent-ink); border-color: var(--border-strong); }
+.icon-btn--on:hover:not(:disabled) { color: var(--accent-ink); }
 .icon-btn:disabled { opacity: 0.4; }
+
+.icon-btn--tactile {
+  border-color: var(--border);
+  background: var(--neu-surface);
+  box-shadow: -1px -1px 2px var(--neu-light), 1px 1px 3px var(--neu-dark);
+}
+.icon-btn--tactile:active:not(:disabled),
+.icon-btn--tactile.icon-btn--on {
+  box-shadow: inset 1px 1px 3px var(--neu-dark), inset -1px -1px 2px var(--neu-light);
+}
+.icon-btn--tactile.icon-btn--on { border-color: var(--border-strong); background: var(--neu-surface); color: var(--accent-ink); }
+/* The inset shadow is the press; no shrink on top of it. */
+.icon-btn--tactile:active:not(:disabled) { transform: none; }
+
+@media (prefers-reduced-motion: reduce) { .icon-btn:active:not(:disabled) { transform: none; } }
 @media (pointer: coarse) { .icon-btn { width: 44px; height: 44px; } }

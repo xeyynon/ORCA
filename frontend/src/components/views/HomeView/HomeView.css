@@ -1,0 +1,6 @@
+/* Layout only: hero, steps strip and fine print are one group, centred in the screen's height (spare space splits
+   evenly above and below instead of opening a gap between the hero and the steps). Fits one screen from 1280×720 up. */
+.home { display: flex; flex: 1; flex-direction: column; justify-content: center; gap: var(--gap-6); max-width: 1180px; width: 100%; margin: 0 auto; }
+.home__fineprint { margin: 0; color: var(--text-tertiary); font-size: var(--text-sm); }
+@media (min-height: 1000px) and (min-width: 1600px) { .home { max-width: 1320px; gap: var(--gap-7); } }
+@media (max-height: 820px) and (min-width: 861px) { .home { gap: var(--gap-4); } }

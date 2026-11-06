@@ -1,5 +1,6 @@
 import type { ApiError } from '@/api/client'
 import type { ConjunctionEvent, PairAssessment } from '@/api/types'
+import { useSwipe } from '@/hooks/useSwipe'
 import { formatRelative, formatUtc } from '@/lib/time'
 import { fixed, pc } from '@/lib/format'
 import { Button } from '../../atoms/Button/Button'
@@ -9,6 +10,7 @@ import { Mono } from '../../atoms/Mono/Mono'
 import { Spinner } from '../../atoms/Spinner/Spinner'
 import { FactRow } from '../../molecules/FactRow/FactRow'
 import { FieldNote } from '../../molecules/FieldNote/FieldNote'
+import { PrevNextNav } from '../../molecules/PrevNextNav/PrevNextNav'
 import { RiskBadge } from '../../molecules/RiskBadge/RiskBadge'
 import { ValueUnit } from '../../molecules/ValueUnit/ValueUnit'
 import './PairCard.css'
@@ -20,17 +22,26 @@ type Props = {
   assessError: ApiError | null
   /** The result on screen is the stored example run: show its values only, no live re-assessment. */
   saved?: boolean
+  /** Neighbours in the list's order; null at that end. Also reached by a sideways swipe on touch. */
+  onPrev: (() => void) | null
+  onNext: (() => void) | null
+  /** 1-based position of this pair in that order, and the count. */
+  index?: number
+  total?: number
   onShowOnGlobe: () => void
   onClose: () => void
 }
 
 /** Detail for one selected conjunction. The table row is the search result; the assessment is a second, finer look at the pair. */
-export function PairCard({ event, assessment, assessing, assessError, saved = false, onShowOnGlobe, onClose }: Props) {
+export function PairCard({ event, assessment, assessing, assessError, saved = false, onPrev, onNext, index, total, onShowOnGlobe, onClose }: Props) {
+  // Finger left = next, right = previous; the Previous/Next buttons above are the same thing without a gesture.
+  const swipe = useSwipe((step) => (step === 1 ? onNext : onPrev)?.())
   const full = assessment && 'mahalanobis_distance' in assessment ? assessment : null
   const noRisk = assessment && 'status' in assessment ? assessment : null
 
   return (
-    <aside className="pair-card" aria-label="Conjunction detail">
+    <aside className="pair-card" aria-label="Conjunction detail" {...swipe}>
+      <PrevNextNav noun="pair" index={index} total={total} onPrev={onPrev} onNext={onNext} />
       <div className="pair-card__head">
         <div>
           <RiskBadge level={event.risk_level} />
