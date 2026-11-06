@@ -1,2 +1,20 @@
-.globe-legend { display: flex; flex-direction: column; gap: 4px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; background: color-mix(in srgb, var(--bg-panel) 88%, transparent); font-size: 12px; }
+/* Glass, as the playback bar (GlobeView.css): chrome over the globe; alpha measured in lib/glassContrast.test.ts. */
+.globe-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 10px;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  backdrop-filter: blur(var(--glass-blur));
+  font-size: 12px;
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .globe-legend { background: var(--glass-bg-solid); }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .globe-legend { background: var(--glass-bg-solid); -webkit-backdrop-filter: none; backdrop-filter: none; }
+}
 .globe-legend__cap { color: var(--text-tertiary); font-size: 11px; }

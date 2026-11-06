@@ -12,6 +12,8 @@ import { resultAnswer, resultHeadline, tierCounts } from '@/lib/conjunctionSumma
 import { downloadConjunctionsCsv, downloadConjunctionsJson } from '@/lib/exportConjunctions'
 import { integer } from '@/lib/format'
 import { countPast, pairKey } from '@/lib/pair'
+import { sortBy } from '@/lib/sort'
+import { stepIndex } from '@/lib/swipe'
 import { formatUtc } from '@/lib/time'
 import { Button } from '../../atoms/Button/Button'
 import { Icon } from '../../atoms/Icon/Icon'
@@ -56,6 +58,14 @@ export function ConjunctionsView({ catalogSize, now, search, query, onQueryChang
     () => search.events.find((e) => pairKey(e) === selectedKey) ?? null,
     [search.events, selectedKey],
   )
+  // Previous/next pair follow the table's default order (Pc, highest first). The table sorts internally, so a re-sorted
+  // table is not followed: exposing its order would mean lifting its sort state out of ConjunctionTable.
+  const ordered = useMemo(() => sortBy(search.events, (e) => e.probability_of_collision, 'desc'), [search.events])
+  const at = selected ? ordered.indexOf(selected) : -1
+  const neighbour = (step: -1 | 1) => {
+    const i = stepIndex(at, step, ordered.length)
+    return i === null ? null : () => onSelectKey(pairKey(ordered[i]))
+  }
   const saved = search.source === 'saved'
   // A saved example is a stored snapshot: re-assessing its pairs against the live catalog would mix two different datasets.
   const pair = usePairAssessment(saved ? null : selected)
@@ -149,6 +159,10 @@ export function ConjunctionsView({ catalogSize, now, search, query, onQueryChang
               assessing={pair.loading}
               assessError={pair.error}
               saved={saved}
+              onPrev={neighbour(-1)}
+              onNext={neighbour(1)}
+              index={at >= 0 ? at + 1 : undefined}
+              total={ordered.length}
               onShowOnGlobe={() => onShowOnGlobe([selected.sat1_id, selected.sat2_id], selected)}
               onClose={() => onSelectKey(null)}
             />

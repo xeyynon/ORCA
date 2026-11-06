@@ -21,6 +21,7 @@ export const SHORTCUT_GROUPS: readonly ShortcutGroup[] = [
     items: [
       { keys: ['T'], description: 'Toggle light / dark theme' },
       { keys: ['?'], description: 'Show this help' },
+      { keys: ['.'], description: 'Ask ORCA (find, show and explain by typing)' },
     ],
   },
   {

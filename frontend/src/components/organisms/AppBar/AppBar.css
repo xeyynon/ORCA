@@ -23,5 +23,6 @@
     gap: var(--gap-2) var(--gap-3);
     padding: var(--gap-2) var(--gap-3);
   }
-  .appbar__center { justify-content: stretch; }
+  .appbar__center { justify-content: flex-start; overflow-x: auto; scrollbar-width: none; scroll-padding-inline: var(--gap-3); }
+  .appbar__center::-webkit-scrollbar { display: none; }
 }

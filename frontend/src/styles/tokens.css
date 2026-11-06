@@ -116,7 +116,7 @@
   --state-focus: rgba(157, 185, 250, 0.12);
   --state-pressed: rgba(157, 185, 250, 0.16);
   /* glass: only for chrome floating over the globe; text on it is checked against the worst case behind it */
-  --glass-bg: rgba(17, 22, 29, 0.66);
+  --glass-bg: rgba(17, 22, 29, 0.9);
   --glass-bg-solid: #11161d;
   --glass-border: rgba(255, 255, 255, 0.10);
   --glass-blur: 14px;
@@ -205,7 +205,7 @@
   --state-hover: rgba(59, 91, 219, 0.06);
   --state-focus: rgba(59, 91, 219, 0.10);
   --state-pressed: rgba(59, 91, 219, 0.14);
-  --glass-bg: rgba(255, 255, 255, 0.74);
+  --glass-bg: rgba(255, 255, 255, 0.99);
   --glass-bg-solid: #ffffff;
   --glass-border: rgba(15, 23, 42, 0.10);
   --glass-blur: 14px;
@@ -252,4 +252,10 @@
   --text-xl: 20px;
   --text-2xl: 28px;
   --text-hero: 40px;
+}
+
+/* Glass falls back to an opaque surface when the user asks for less transparency (design_system_v2 §1). It lives here,
+   after both theme blocks and with the same selectors, so it wins over them; in base.css it lost to the themes. */
+@media (prefers-reduced-transparency: reduce) {
+  :root, :root[data-theme="dark"], :root[data-theme="light"], .login-view { --glass-bg: var(--glass-bg-solid); --glass-blur: 0px; }
 }
