@@ -7,16 +7,20 @@
   z-index: 60;
   top: 50%;
   right: 0;
-  width: min(360px, 100%);
-  padding: var(--gap-1);
+  width: min(380px, 100%);
+  padding: var(--gap-1) var(--gap-2) var(--gap-1) var(--gap-3);
   border: 1px solid var(--border-strong);
-  border-radius: var(--radius-md);
+  border-right: 0;
+  /* The same shape as the utility capsule it grows out of: flush with the right edge, rounded on the left. */
+  border-radius: var(--radius-pill) 0 0 var(--radius-pill);
   background: var(--surface-2);
   box-shadow: var(--elev-3);
   transform: translateY(-50%);
   transform-origin: right center;
   animation: search-pop-grow var(--dur-2) var(--ease-emphasized);
 }
+/* The capsule is the focus indicator for the bare field inside it. */
+.search-pop__panel:focus-within { border-color: var(--focus-ring); box-shadow: var(--elev-3), 0 0 0 1px var(--focus-ring); }
 @keyframes search-pop-grow {
   from { opacity: 0; transform: translateY(-50%) scaleX(0.6); }
   to { opacity: 1; transform: translateY(-50%) scaleX(1); }
