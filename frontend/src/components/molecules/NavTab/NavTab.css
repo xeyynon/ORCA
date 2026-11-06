@@ -1,4 +1,11 @@
+/*
+ * Interaction layer (MD/design_system_v2.md, Material row): hover, focus and pressed are a translucent --state-* layer
+ * (::before, under the label), so the active tab's fill stays visible under the pointer instead of being swapped for
+ * the hover grey. Tabs sit in a row, so pressing uses the layer only, with no shrink. The base.css focus ring stays.
+ */
 .nav-tab {
+  position: relative;
+  isolation: isolate;
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -10,7 +17,21 @@
   color: var(--text-secondary);
   font-weight: 500;
 }
-.nav-tab:hover { background: var(--bg-hover); color: var(--text-primary); }
+.nav-tab::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--state-hover);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--dur-1) var(--ease-standard);
+}
+.nav-tab:hover { color: var(--text-primary); }
+.nav-tab:hover::before { opacity: 1; }
+.nav-tab:focus-visible::before { background: var(--state-focus); opacity: 1; }
+.nav-tab:active::before { background: var(--state-pressed); opacity: 1; }
 .nav-tab--active { background: var(--accent-bg); border-color: var(--border-strong); color: var(--text-primary); }
 .nav-tab__key { display: inline-flex; opacity: 0.7; }
 

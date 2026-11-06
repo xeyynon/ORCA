@@ -1,0 +1,21 @@
+.globe-tile__art { display: flex; justify-content: center; }
+.globe-tile__art svg { width: 100%; max-width: 300px; height: auto; max-height: 160px; overflow: visible; }
+
+.globe-tile__earth { fill: var(--bg-hover); stroke: var(--text-faint); stroke-width: 1; }
+.globe-tile__grid { fill: none; stroke: var(--border-strong); stroke-width: 0.8; }
+.globe-tile__ring { fill: none; stroke: var(--border-strong); stroke-width: 1; }
+.globe-tile__ring--geo { stroke-dasharray: 2 4; }
+
+.globe-tile__obj--leo { fill: var(--cat-1); }
+.globe-tile__obj--meo { fill: var(--cat-2); }
+.globe-tile__obj--geo { fill: var(--cat-3); }
+
+/* Each ring turns about the Earth's centre (view-box units). Transform only; none at all under reduced motion. */
+.globe-tile__spin { transform-origin: 120px 70px; animation: globe-tile-spin linear infinite; }
+.globe-tile__spin--leo { animation-duration: 16s; }
+.globe-tile__spin--meo { animation-duration: 40s; }
+.globe-tile__spin--geo { animation-duration: 90s; }
+@keyframes globe-tile-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .globe-tile__spin { animation: none; } }
+
+.globe-tile__text { margin: 0; color: var(--text-secondary); }
