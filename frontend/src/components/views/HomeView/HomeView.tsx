@@ -9,11 +9,9 @@ import { useCountUp } from '@/hooks/useCountUp'
 import { useElapsed } from '@/hooks/useElapsed'
 import type { ApiStatus } from '@/hooks/useHealth'
 import type { CatalogSummary } from '@/lib/catalog'
-import { OBJECT_TYPE_COLOR } from '@/lib/chartColors'
 import { resultAnswer, resultHeadline, tierCounts } from '@/lib/conjunctionSummary'
 import { integer } from '@/lib/format'
-import { asSentence, catalogStory, storyScope } from '@/lib/homeStory'
-import { OBJECT_TYPES, OBJECT_TYPE_LABEL } from '@/lib/objectTypes'
+import { catalogStory, storyScope } from '@/lib/homeStory'
 import { formatUtc } from '@/lib/time'
 import type { ViewId } from '@/lib/views'
 import { SectionHeader } from '../../molecules/SectionHeader/SectionHeader'
@@ -62,7 +60,6 @@ export function HomeView({ catalog, summary, health, apiStatus, conjSearch, onCo
   const scope = storyScope({ wholeCounts: whole !== null, loaded, total })
   const partial = loaded !== null && total !== null && loaded < total
   const apiDown = apiStatus === 'offline' && total === null
-  const types = whole ? OBJECT_TYPES.map((t) => ({ label: OBJECT_TYPE_LABEL[t], value: whole.by_type[t] ?? 0, color: OBJECT_TYPE_COLOR[t] })) : null
 
   const catalogWaiting = catalog.status === 'loading' && !summary
   const catalogFailed = catalog.status === 'error' && !summary ? `The catalog could not be loaded: ${catalog.error.message}` : null
@@ -99,8 +96,6 @@ export function HomeView({ catalog, summary, health, apiStatus, conjSearch, onCo
           shownTotal={shownTotal}
           story={story}
           scope={scope}
-          types={types}
-          typeBasis={whole ? asSentence(`Types ${whole.type_basis}`) : null}
           loading={total === null && !apiDown}
           unavailable={apiDown ? 'The API did not answer, so the catalog cannot be counted yet.' : null}
           onShowOnGlobe={() => onGo('globe')}
@@ -115,7 +110,6 @@ export function HomeView({ catalog, summary, health, apiStatus, conjSearch, onCo
           unavailable={catalogFailed ?? (summary ? 'No element set has an age to measure.' : null)}
         />
         <ConjunctionTile state={conjState} onOpen={() => onGo('conjunctions')} onExploreSaved={exploreSaved} loadingSaved={openingSaved} />
-        <GlobeTile />
         <RegimeTile
           counts={regimes}
           total={regimeTotal}
@@ -124,6 +118,7 @@ export function HomeView({ catalog, summary, health, apiStatus, conjSearch, onCo
           loading={!regimes && (server.status === 'loading' || catalogWaiting)}
           unavailable={catalogFailed}
         />
+        <GlobeTile />
         <SystemTile apiStatus={apiStatus} storedCount={stored} lastRefresh={health?.database.last_update ?? null} build={__ORCA_BUILD__} />
         <LearnTile onStartTour={onStartTour} />
       </BentoGrid>

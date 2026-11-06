@@ -76,5 +76,5 @@ export function ConjunctionTile({ state, onOpen, onExploreSaved, loadingSaved }:
       </>
     )
   }
-  return <BentoTile title="Conjunctions" span={7}>{body}</BentoTile>
+  return <BentoTile title="Conjunctions" span={6}>{body}</BentoTile>
 }

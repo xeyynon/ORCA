@@ -27,7 +27,7 @@ export function RegimeTile({ counts, total, unclassified, scope, loading, unavai
   const shares = counts && total ? regimeShares(counts, total) : null
   const said = shares?.map((s) => `${s.regime} ${integer(s.count)} (${sharePercent(s.count, total)})`).join(', ')
   return (
-    <BentoTile title="Orbit regimes" span={5} busy={loading && !shares} link={{ label: 'Charts on Analytics', href: '#/analytics' }}>
+    <BentoTile title="Orbit regimes" span={3} busy={loading && !shares} link={{ label: 'Charts on Analytics', href: '#/analytics' }}>
       {shares ? (
         <>
           <div className="regime-tile__bar" role="img" aria-label={`Objects by orbit regime: ${said}`}>

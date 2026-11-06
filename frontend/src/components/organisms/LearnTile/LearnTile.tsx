@@ -17,7 +17,7 @@ const TERMS: readonly GlossaryTermKey[] = ['TLE', 'TCA', 'Pc']
 /** For a first visit: what ORCA is, a way into the tour, and the three terms that unlock the rest. */
 export function LearnTile({ onStartTour }: Props) {
   return (
-    <BentoTile title="New here?" span={3}>
+    <BentoTile title="New here?" span={6}>
       <p className="learn-tile__text">ORCA maps what is in orbit from public data and screens it for close approaches. Educational use, not operations.</p>
       {onStartTour ? <div><Button onClick={onStartTour}>Take the tour</Button></div> : null}
       <dl className="learn-tile__terms">
