@@ -5,7 +5,7 @@
  *
  * Marks (--risk-*) are for graphics on a canvas: dots, bars, globe points.
  * Ink   (--risk-*-ink) are for TEXT on a panel and must reach 4.5:1.
- * Measured ratios live in contrast.md-style comments below (see scripts/contrast.mjs).
+ * Measured by `npm run contrast` (scripts/contrast.ts, lib/contrast.ts), and enforced by src/lib/rules.test.ts.
  */
 :root,
 :root[data-theme="dark"],
@@ -82,12 +82,23 @@
   --globe-object: #cbd5e1;
 
   /* focus + scrim */
-  /* The logo is transparent with silver lettering, made for dark surfaces. On dark it sits directly; on light it sits on a dark chip. */
-  --logo-backdrop: transparent;
-  --logo-pad: 0;
+  /* Two transparent logo files: silver lettering for dark surfaces, dark navy for light ones (made from the same artwork).
+     Each theme shows one of them; no chip, no filter, no component branching on theme. */
+  --logo-on-dark-display: block;
+  --logo-on-light-display: none;
 
   --focus-ring: #9db9fa;
   --scrim: rgba(3, 6, 10, 0.62);
+
+  /* sign-in scene: always dark (the .login-view selector keeps these in the light theme too) */
+  --login-glow-1: rgba(122, 162, 247, 0.22);
+  --login-glow-2: rgba(239, 68, 68, 0.14);
+  --glass-edge: rgba(255, 255, 255, 0.14);
+  --glass-fill-1: rgba(255, 255, 255, 0.10);
+  --glass-fill-2: rgba(255, 255, 255, 0.02);
+  --glass-sheen: rgba(255, 255, 255, 0.18);
+  --glass-input: rgba(255, 255, 255, 0.05);
+  --glass-input-edge: rgba(255, 255, 255, 0.16);
   --shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
 }
 
@@ -107,7 +118,7 @@
   --text-primary: #0f172a;
   --text-secondary: #334155;
   --text-tertiary: #526074;
-  --text-faint: #8392a5;
+  --text-faint: #7b8a9d;
 
   --accent: #3b5bdb;
   --accent-ink: #2f4ac0;
@@ -115,7 +126,7 @@
 
   --risk-critical: #dc2626;
   --risk-high: #ea580c;
-  --risk-medium: #ca8a04;
+  --risk-medium: #b87d03;
   --risk-low: #0d9488;
   --risk-negligible: #64748b;
   --risk-critical-ink: #b91c1c;
@@ -126,7 +137,7 @@
 
   --ok: #059669;
   --ok-ink: #047857;
-  --warn: #d97706;
+  --warn: #cc6f05;
   --warn-ink: #92400e;
   --bad: #dc2626;
   --bad-ink: #b91c1c;
@@ -152,8 +163,8 @@
   --globe-orbit: #d9480f;
   --globe-object: #1e293b;
 
-  --logo-backdrop: #070a0e;
-  --logo-pad: 4px 10px;
+  --logo-on-dark-display: none;
+  --logo-on-light-display: block;
 
   --focus-ring: #3b5bdb;
   --scrim: rgba(15, 23, 42, 0.35);

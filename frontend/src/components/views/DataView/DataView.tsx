@@ -43,9 +43,10 @@ export function DataView({ health, apiStatus, summary, update }: Props) {
           <FactRow label="Status"><StatusIndicator tone={tone} label={label} /></FactRow>
           <FactRow label="Base URL"><Mono>{API_BASE || 'same origin'}</Mono></FactRow>
           <FactRow label="Health check"><a className="data-view__link" href={`${API_BASE}/health`} target="_blank" rel="noreferrer">/health (JSON)</a></FactRow>
+          <FactRow label="App build"><Mono>{__ORCA_BUILD__}</Mono></FactRow>
           <FactRow label="Interactive docs"><a className="data-view__link" href={`${API_BASE}/docs`} target="_blank" rel="noreferrer">/docs (Swagger)</a></FactRow>
         </div>
-        <FieldNote>The dashboard and this app read the same SQLite file through the API. Refreshing here changes what every view shows.</FieldNote>
+        <FieldNote>Every view reads the same stored catalog through the API. Refreshing here changes what they all show.</FieldNote>
       </section>
     </PageLayout>
   )

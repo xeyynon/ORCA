@@ -1,0 +1,27 @@
+.term { position: relative; cursor: help; border-bottom: 1px dotted var(--text-tertiary); }
+.term__tip {
+  display: none;
+  position: absolute;
+  z-index: 30;
+  left: 0;
+  top: 100%;
+  margin-top: 6px;
+  width: min(300px, 75vw);
+  padding: 8px 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--bg-elevated);
+  box-shadow: var(--shadow);
+  color: var(--text-primary);
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 1.45;
+  text-align: left;
+  text-transform: none;
+  white-space: normal;
+}
+.term__tip[data-align='right'] { left: auto; right: 0; }
+.term__tip[data-open='true'] { display: block; }
+/* Bridges the gap to the term so the pointer can travel onto the tooltip without it closing. */
+.term__tip::before { content: ''; position: absolute; left: 0; right: 0; top: -7px; height: 7px; }

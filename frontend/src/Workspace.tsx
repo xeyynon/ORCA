@@ -1,9 +1,12 @@
-import { lazy, Suspense, useCallback, useMemo, useRef, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { getStatistics, getTles } from '@/api/endpoints'
+import type { ConjunctionQuery } from '@/api/endpoints'
 import type { ConjunctionEvent } from '@/api/types'
 import type { CameraGeo } from '@/lib/coords'
 import { useAsync } from '@/hooks/useAsync'
 import { useCatalogUpdate } from '@/hooks/useCatalogUpdate'
+import { useConjunctionSearch } from '@/hooks/useConjunctionSearch'
+import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 import { useHashView } from '@/hooks/useHashView'
 import { useHealth } from '@/hooks/useHealth'
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
@@ -12,16 +15,17 @@ import { useObjectSearch } from '@/hooks/useObjectSearch'
 import { summarizeCatalog } from '@/lib/catalog'
 import { days, formatLat, formatLon, integer } from '@/lib/format'
 import { formatUtc } from '@/lib/time'
-import { VIEWS } from '@/lib/views'
-import { Icon } from '@/components/atoms/Icon/Icon'
-import { IconButton } from '@/components/atoms/IconButton/IconButton'
+import { staleBand, staleNotice } from '@/lib/staleness'
+import { VIEWS, VIEW_LABEL } from '@/lib/views'
 import { Brand } from '@/components/molecules/Brand/Brand'
-import { SessionControl } from '@/components/molecules/SessionControl/SessionControl'
-import { ThemeToggle } from '@/components/molecules/ThemeToggle/ThemeToggle'
 import type { Theme } from '@/lib/theme'
 import { AppBar } from '@/components/organisms/AppBar/AppBar'
+import { AppMenu } from '@/components/organisms/AppMenu/AppMenu'
 import { ObjectSearch } from '@/components/organisms/ObjectSearch/ObjectSearch'
 import { PrimaryNav } from '@/components/organisms/PrimaryNav/PrimaryNav'
+import { SkipLink } from '@/components/molecules/SkipLink/SkipLink'
+import { ChunkErrorBoundary } from '@/components/organisms/ChunkErrorBoundary/ChunkErrorBoundary'
+import { StaleDataBanner } from '@/components/organisms/StaleDataBanner/StaleDataBanner'
 import { ShortcutsHelp } from '@/components/organisms/ShortcutsHelp/ShortcutsHelp'
 import { StatusBar } from '@/components/organisms/StatusBar/StatusBar'
 import type { StatusItem } from '@/components/organisms/StatusBar/StatusBar'
@@ -60,11 +64,30 @@ export function Workspace({ username, onSignOut, theme, onToggleTheme: toggleThe
   const [conjunction, setConjunction] = useState<ConjunctionEvent | null>(null)
   const [camera, setCamera] = useState<CameraGeo | null>(null)
   const [helpOpen, setHelpOpen] = useState(false)
+  // A conjunction search takes minutes, so it lives here with its form and selected row: leaving the Conjunctions view
+  // (to look at the globe, say) must not abort it or drop its result. All of it goes when the workspace does (sign-out).
+  const conjSearch = useConjunctionSearch()
+  const [conjQuery, setConjQuery] = useState<ConjunctionQuery>({ horizonDays: 1, limit: 100 })
+  const [conjKey, setConjKey] = useState<string | null>(null)
+  // The week of catalog age at which the stale notice was dismissed; it returns when the data ages into a later week.
+  const [staleDismissedBand, setStaleDismissedBand] = useState<number | null>(null)
+  useDocumentTitle(VIEW_LABEL[view])
   const [query, setQuery] = useState('')
   const search = useObjectSearch(query, catalog.data ?? [])
   const focusNonce = useRef(0)
 
   const summary = useMemo(() => (catalog.data ? summarizeCatalog(catalog.data, now) : null), [catalog.data, now])
+  const stale = summary ? staleNotice(summary.medianAgeDays, summary.oldestAgeDays) : null
+  const currentStaleBand = staleBand(summary?.medianAgeDays ?? null)
+
+  // After a view change, put focus on the new content so a keyboard or screen-reader user lands in it, not on a nav tab
+  // that is still there or on <body>. Not on first load (the skip link is the first Tab stop then).
+  const shownView = useRef(view) // compared, not a "first run" flag: StrictMode runs effects twice on mount
+  useEffect(() => {
+    if (shownView.current === view) return
+    shownView.current = view
+    document.getElementById('main-content')?.focus({ preventScroll: true })
+  }, [view])
 
   // `event` is the conjunction being shown (its dashed closest-approach line and card); a plain object pick has none.
   const showOnGlobe = useCallback((ids: string[], event?: ConjunctionEvent) => {
@@ -97,20 +120,24 @@ export function Workspace({ username, onSignOut, theme, onToggleTheme: toggleThe
       { label: 'Lon', value: camera ? formatLon(camera.lonDeg) : null },
       { label: 'Alt', value: camera ? `${integer(camera.altKm)} km` : null },
     ] : []),
+    ...(conjSearch.phase === 'running' ? [{ label: 'Search', value: 'running', tone: 'warn' as const, title: 'A conjunction search is running. It continues while you look at other views.' }]
+      : conjSearch.phase === 'done' && conjSearch.source === 'live' && view !== 'conjunctions' ? [{ label: 'Search', value: 'result ready', tone: 'ok' as const, title: 'A conjunction search result is waiting on the Conjunctions view.' }] : []),
     { label: 'UTC', value: formatUtc(now.toISOString()).replace(' UTC', '') },
   ]
 
   return (
     <div className="app">
+      <SkipLink targetId="main-content">Skip to content</SkipLink>
       <AppBar
         left={<><Brand /><ObjectSearch inputRef={searchRef} query={query} onQueryChange={setQuery} results={search.results} loading={search.loading} degraded={search.degraded} onPick={(id) => showOnGlobe([id])} /></>}
         center={<PrimaryNav view={view} onChange={go} />}
-        right={<>
-          <IconButton label="Keyboard shortcuts (?)" onClick={() => setHelpOpen(true)}><Icon name="keyboard" /></IconButton>
-          <ThemeToggle theme={theme} onToggle={toggleTheme} />
-          <SessionControl username={username} onSignOut={onSignOut} />
-        </>}
+        right={<AppMenu username={username} theme={theme} onToggleTheme={toggleTheme} onShowShortcuts={() => setHelpOpen(true)} onSignOut={onSignOut} />}
       />
+
+      {/* Not on Conjunctions: its result carries the same fact as one of its caveats, and one home per fact. Not on Globe/Data: the canvas stays clear, and Data explains it. */}
+      {stale && staleDismissedBand !== currentStaleBand && (view === 'overview' || view === 'analytics') ? (
+        <StaleDataBanner notice={stale} onGoData={() => go('data')} onDismiss={() => setStaleDismissedBand(currentStaleBand)} />
+      ) : null}
 
       {view === 'overview' ? (
         <OverviewView
@@ -125,6 +152,7 @@ export function Workspace({ username, onSignOut, theme, onToggleTheme: toggleThe
         />
       ) : null}
       {view === 'globe' ? (
+        <ChunkErrorBoundary>
         <Suspense fallback={<LoadingScreen fill="area" message="Loading the globe" />}>
         <GlobeView
           catalog={catalog.data}
@@ -140,8 +168,21 @@ export function Workspace({ username, onSignOut, theme, onToggleTheme: toggleThe
           onViewConjunctions={() => go('conjunctions')}
         />
         </Suspense>
+        </ChunkErrorBoundary>
       ) : null}
-      {view === 'conjunctions' ? <ConjunctionsView now={now} catalogSize={health?.database.tles_count ?? catalog.data?.length ?? null} onShowOnGlobe={showOnGlobe} /> : null}
+      {view === 'conjunctions' ? (
+        <ConjunctionsView
+          now={now}
+          catalogSize={health?.database.tles_count ?? catalog.data?.length ?? null}
+          search={conjSearch}
+          query={conjQuery}
+          onQueryChange={setConjQuery}
+          selectedKey={conjKey}
+          onSelectKey={setConjKey}
+          medianTleAgeDays={summary?.medianAgeDays ?? null}
+          onShowOnGlobe={showOnGlobe}
+        />
+      ) : null}
       {view === 'analytics' ? <AnalyticsView catalog={catalog} stats={stats} totalCount={health?.database.tles_count ?? null} now={now} /> : null}
       {view === 'data' ? <DataView health={health} apiStatus={apiStatus} summary={summary} update={update} /> : null}
 

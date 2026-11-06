@@ -15,9 +15,14 @@
 .btn--sm { height: 24px; padding: 0 8px; font-size: 12px; }
 .btn:hover:not(:disabled) { background: var(--bg-hover); }
 .btn:disabled { opacity: 0.45; }
+/* A disabled primary keeps legible text: it is often the control being watched ("Searching…"), so it goes neutral instead of faint. */
+.btn--primary:disabled { opacity: 1; background: var(--bg-hover); border-color: var(--border-strong); color: var(--text-secondary); }
 
 .btn--primary { background: var(--accent); border-color: var(--accent); color: var(--bg-canvas); font-weight: 600; }
 .btn--primary:hover:not(:disabled) { background: var(--accent-ink); border-color: var(--accent-ink); }
 
 .btn--ghost { background: transparent; border-color: transparent; color: var(--text-secondary); }
 .btn--ghost:hover:not(:disabled) { background: var(--bg-hover); color: var(--text-primary); }
+
+/* Touch: 44 px (40 for the small size) so a thumb can hit it. */
+@media (pointer: coarse) { .btn--md { height: 44px; } .btn--sm { height: 40px; padding: 0 12px; } }

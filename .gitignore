@@ -78,3 +78,6 @@ benchmarks/data/*.tle
 benchmarks/results/tca_*/local.csv
 # Per-object propagation errors (~5 MB per run); regenerate with benchmarks/propagation_accuracy.py
 benchmarks/results/propagation_*/errors.csv
+
+# Playwright MCP scratch output
+.playwright-mcp/

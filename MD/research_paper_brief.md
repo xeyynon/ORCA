@@ -552,6 +552,24 @@ See `MD/literature_verification.md` for the full log and `MD/references.bib` for
   k-d tree screening, Pc from TLEs, and covariance estimated from TLE history (COVGEN) are prior art.
 - **External ground truth available:** the Auman/Aerospace screening answer key (CC0) could validate Exp 2b.
 
+### Evaluation metrics: candidate reduction, TCA time error, tier agreement (2026-10-29)
+
+Computed from committed results; no experiment was re-run.
+
+**Candidate reduction** (`screening_recall_*/recall.csv`, columns `candidate_pairs`, `total_pairs`). Reduction = total_pairs / candidate_pairs, with total_pairs = 1,999,000:
+- 1 h / 100 km: 1,378–1,497 pairs flagged, 1,335–1,451× reduction, event recall 1.0–1.2 %
+- 1 min / 100 km: 29,139–30,751 pairs, 65–69×, recall 40–42 %
+- 20 s / 200 km: 193,600–197,688 pairs, about 10×, recall 100 %
+
+**TCA error in time** (`tca_*/local_summary.csv`, column `tca_err_s_median`, band `all`, median of the three seeds): grid 1 s 0.25 s; grid 10 s 2.5 s; parabola from 60 s 12 ms; bounded Brent 0.1 ms; Brent on range rate 2.4 µs.
+
+**Tier agreement** (`pc_*/events_pc.csv`, `tier_legacy` vs `tier_foster_iso`):
+- exact agreement 48.8 / 50.4 / 49.2 % (seeds 1/2/3); within one tier 91.7 / 93.4 / 92.9 %
+- legacy HIGH + CRITICAL: 550 / 460 / 455; of these, HIGH or CRITICAL under Foster: 0 / 0 / 0
+- `tier_foster_iso` vs `tier_exact_iso`: 100 % agreement
+
+All eight metrics now appear in the paper: definitions in §IV-D (Evaluation Metrics) and values in Table V (Summary of Metrics).
+
 ### Exp 4/5 with the measured covariance floored at ESA's at-epoch values
 
 **Why:** Kelso 2007 says TLE-to-TLE comparison underestimates error near epoch. So each measured σ is bounded below by Flohrer et al. 2009's LEO at-epoch values of 0.102 / 0.471 / 0.126 km (`--covariance-floor 0.102 0.471 0.126`).

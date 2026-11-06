@@ -27,7 +27,7 @@ from orbit_mech_engine import OrbitalElement, SGP4Propagator, CoordinateTransfor
 from sgp4.api import Satrec, SatrecArray, jday
 import numpy as np
 from conjunction_detection import ConjunctionDetector, ConjunctionSearch, ConjunctionEvent, method_description
-from Analytics import OrbitalAnalytics, ExportUtils, OBJECT_TYPES, REGIMES, classify_object_type, classify_regime
+from Analytics import OrbitalAnalytics, ExportUtils, OBJECT_TYPES, REGIMES, catalog_columns, classify_object_type, classify_regime
 
 
 
@@ -626,6 +626,25 @@ def catalog_summary():
     }
     _summary_cache["key"] = key
     _summary_cache["value"] = value
+    return value
+
+
+_distributions_cache: Dict[str, object] = {}
+
+
+@app.get("/api/catalog-distributions")
+def catalog_distributions():
+    """
+    Per-object columns (name, epoch, inclination, eccentricity, mean motion) for the WHOLE stored catalog, so the
+    Analytics charts are not drawn from the first 5,000 rows only. Raw values, not bins: the browser derives and bins
+    them with its tested lib code. Cached per catalog version, like /api/catalog-summary.
+    """
+    key = f"{db.count_tles()}|{db.get_cache('tle_update_time')}"
+    if _distributions_cache.get("key") == key:
+        return _distributions_cache["value"]
+    value = catalog_columns(db.get_all_tles())
+    _distributions_cache["key"] = key
+    _distributions_cache["value"] = value
     return value
 
 
