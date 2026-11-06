@@ -4,7 +4,8 @@
   position: absolute;
   z-index: 30;
   left: 0;
-  top: calc(100% + 6px);
+  top: 100%;
+  margin-top: 6px;
   width: min(300px, 75vw);
   padding: 8px 10px;
   border: 1px solid var(--border-strong);
@@ -20,4 +21,7 @@
   text-transform: none;
   white-space: normal;
 }
-.term:hover .term__tip, .term:focus .term__tip { display: block; }
+.term__tip[data-align='right'] { left: auto; right: 0; }
+.term__tip[data-open='true'] { display: block; }
+/* Bridges the gap to the term so the pointer can travel onto the tooltip without it closing. */
+.term__tip::before { content: ''; position: absolute; left: 0; right: 0; top: -7px; height: 7px; }

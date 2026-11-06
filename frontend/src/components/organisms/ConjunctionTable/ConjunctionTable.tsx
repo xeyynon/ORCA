@@ -5,6 +5,7 @@ import { fixed, pc } from '@/lib/format'
 import { riskRank } from '@/lib/risk'
 import { sortBy } from '@/lib/sort'
 import { pairKey } from '@/lib/pair'
+import { GLOSSARY } from '@/lib/glossary'
 import { Badge } from '../../atoms/Badge/Badge'
 import { Mono } from '../../atoms/Mono/Mono'
 import { RiskBadge } from '../../molecules/RiskBadge/RiskBadge'
@@ -46,13 +47,13 @@ export function ConjunctionTable({ events, selectedKey, onSelect, compact = fals
       ),
     },
     { id: 'pair', label: 'Pair', render: (e) => <span>{e.sat1_name} <Mono muted>×</Mono> {e.sat2_name}</span> },
-    { id: 'pc', label: 'Pc', sortable: true, align: 'right', render: (e) => <Mono>{pc(e.probability_of_collision)}</Mono> },
-    { id: 'miss', label: 'Miss distance', sortable: true, align: 'right', render: (e) => <ValueUnit value={fixed(e.min_distance_km, 3)} unit="km" /> },
+    { id: 'pc', label: 'Pc', hint: GLOSSARY.Pc, sortable: true, align: 'right', render: (e) => <Mono>{pc(e.probability_of_collision)}</Mono> },
+    { id: 'miss', label: 'Miss distance', hint: GLOSSARY['miss distance'], sortable: true, align: 'right', render: (e) => <ValueUnit value={fixed(e.min_distance_km, 3)} unit="km" /> },
     {
-      id: 'unc', label: 'Uncertainty (1 sigma)', sortable: true, align: 'right',
+      id: 'unc', label: 'Uncertainty (1 sigma)', hint: GLOSSARY.uncertainty, sortable: true, align: 'right',
       render: (e) => <span title="Position uncertainty at closest approach, and the age of the older TLE"><ValueUnit value={fixed(e.uncertainty_km, 2)} unit="km" /> <Mono muted>· {fixed(e.tle_age_days, 1)} d TLE</Mono></span>,
     },
-    { id: 'tca', label: 'TCA', sortable: true, render: (e) => <span><Mono>{formatUtc(e.tca)}</Mono> <Mono muted>({formatRelative(e.tca)})</Mono></span> },
+    { id: 'tca', label: 'TCA', hint: GLOSSARY.TCA, sortable: true, render: (e) => <span><Mono>{formatUtc(e.tca)}</Mono> <Mono muted>({formatRelative(e.tca)})</Mono></span> },
   ]
 
   const shown = compact ? columns.filter((c) => c.id !== 'unc') : columns

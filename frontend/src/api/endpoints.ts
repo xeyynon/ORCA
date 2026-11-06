@@ -1,6 +1,6 @@
 import { apiFetch } from './client'
 import type {
-  CatalogSummaryResponse, ConjunctionMethod, ConjunctionSearchResult, Health, OrbitPathResponse, PairAssessment,
+  CatalogColumns, CatalogSummaryResponse, ConjunctionMethod, ConjunctionSearchResult, Health, OrbitPathResponse, PairAssessment,
   PositionsResponse, StatisticsResponse, TleRecord, UpdateTlesResponse,
 } from './types'
 
@@ -13,6 +13,9 @@ export const getTles = (limit: number, o: Opt = {}) =>
 
 /** Counts over the WHOLE stored catalog (the browser only holds the first 5,000 objects). */
 export const getCatalogSummary = (o: Opt = {}) => apiFetch<CatalogSummaryResponse>('/api/catalog-summary', o)
+
+/** Per-object columns for the WHOLE stored catalog (about 230 KB gzipped), for the Analytics charts. */
+export const getCatalogDistributions = (o: Opt = {}) => apiFetch<CatalogColumns>('/api/catalog-distributions', o)
 
 export const getStatistics = (o: Opt = {}) => apiFetch<StatisticsResponse>('/api/statistics', o)
 

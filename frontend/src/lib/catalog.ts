@@ -3,6 +3,9 @@ import { ageDays } from './time'
 import { deriveOrbit, REGIMES } from './orbit'
 import type { Regime } from './orbit'
 
+/** The fields the chart code reads. The loaded rows and the whole-catalog columns (lib/distributions) both satisfy it. */
+export type ChartRow = Pick<TleRecord, 'object_name' | 'epoch' | 'inclination' | 'eccentricity' | 'mean_motion'>
+
 export interface CatalogSummary {
   /** Objects in this summary: the LOADED subset, which can be smaller than the stored catalog. */
   count: number
@@ -30,7 +33,7 @@ export interface CatalogSeries {
 }
 
 /** Column-wise series for the Analytics charts, derived once per catalog change. */
-export function deriveSeries(tles: readonly TleRecord[], now: Date): CatalogSeries {
+export function deriveSeries(tles: readonly ChartRow[], now: Date): CatalogSeries {
   const s: CatalogSeries = { altKm: [], ecc: [], inclDeg: [], ageDays: [], points: [], names: [] }
   for (const t of tles) {
     s.inclDeg.push(t.inclination)
@@ -53,7 +56,7 @@ function median(sorted: readonly number[]): number | null {
 }
 
 /** One pass over the catalog for the Overview KPIs. Nothing is invented for objects that cannot be derived: they are counted as unclassified. */
-export function summarizeCatalog(tles: readonly TleRecord[], now: Date): CatalogSummary {
+export function summarizeCatalog(tles: readonly ChartRow[], now: Date): CatalogSummary {
   const regimes = Object.fromEntries(REGIMES.map((r) => [r, 0])) as Record<Regime, number>
   const ages: number[] = []
   const alts: number[] = []
