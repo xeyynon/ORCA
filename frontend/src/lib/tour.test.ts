@@ -20,7 +20,8 @@ test('the storage key is versioned', () => {
 test('the copy names the keys the app really binds', () => {
   const views = TOUR_STEPS.find((s) => s.id === 'views')!.body
   assert.match(views, /\bH\b/)
-  assert.match(views, /1 to 5/)
+  assert.match(views, /1 to 6/)
+  assert.match(views, /Reports/)
   assert.match(TOUR_STEPS.find((s) => s.id === 'search')!.body, /Press \//)
   assert.match(TOUR_STEPS.find((s) => s.id === 'conjunctions')!.body, /saved example run/)
   assert.match(TOUR_STEPS.find((s) => s.id === 'menu')!.body, /Take the tour/)
