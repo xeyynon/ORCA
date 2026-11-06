@@ -12,7 +12,7 @@ test('old data raises one notice that states the median and the oldest', () => {
   const n = staleNotice(30.1, 80.6)
   assert.ok(n)
   assert.equal(n.title, 'Element sets are a median 30 days old')
-  assert.match(n.body, /oldest 81 days/)
+  assert.match(n.body, /The oldest is 81 days/)
   assert.match(n.body, /indicative/)
 })
 
