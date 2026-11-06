@@ -35,7 +35,7 @@ export function HomeHero({ lines, onWatch, onApproaches, approachesBusy, onStart
         )}
       </div>
       <div className="home-hero__visual" aria-hidden="true">
-        <LoadingMark size={300} />
+        <LoadingMark size={240} />
       </div>
     </section>
   )

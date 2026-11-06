@@ -100,3 +100,10 @@ The owner's three-section top bar: logo left, views centred, search and utilitie
 | [06-search-capsule.png](08-top-bar-2026-11-07/06-search-capsule.png) | Search opens as a capsule of the same shape with a borderless field, growing left, clear of the views |
 | [07-bar-light.png](08-top-bar-2026-11-07/07-bar-light.png) | Light theme: three white shapes on the grey page (ring on the search icon is focus returning after Esc) |
 | [08-bar-phone-390.png](08-top-bar-2026-11-07/08-bar-phone-390.png) | Phone: both capsules on the first row, the views as a scrolling band below |
+
+## 09-home-page-2026-11-07
+
+| File | What it shows |
+|---|---|
+| [01-home-no-home-tab-1440.png](09-home-page-2026-11-07/01-home-no-home-tab-1440.png) | No Home tab: five views in the bar, the logo goes home. The Earth is centred in the hero (0 px off, measured at 1280x720 to 1920x1080 and on a phone); the three sections share the same edges (130 to 1310 px) |
+| [02-home-1366x768.png](09-home-page-2026-11-07/02-home-1366x768.png) | 1366x768: still one screen, Earth centred |
