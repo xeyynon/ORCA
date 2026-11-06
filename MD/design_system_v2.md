@@ -102,3 +102,15 @@ The owner wrote the brief `MD/ORCA_Homepage_Redesign_Context.md` (Space Command 
 | §6 Track / Screen / Understand | Moved into the tour as its first step, "How ORCA works" (home only) | |
 
 Checked: a row click lands on Conjunctions with that pair selected (breadcrumb shows it); no page overflow at 390 px (the table scrolls in its own box); light theme; contrast 156/156. Snapshots: `snapshots/11-command-centre-home-2026-11-07/`.
+
+## 6. Reports (2026-11-07)
+
+The owner asked for a place to generate reports, and chose: a sixth view in the top bar, all four kinds of content, and a printable PDF (no new dependencies).
+
+- **Reports view** (`views/ReportsView`): the builder on the left (`ReportBuilder`: four section checkboxes, how many approaches to list, which pair to analyse, Generate PDF), the live preview on the right on a recessed desk. Key 6, in the tour and in Ask ORCA ("open reports").
+- **The document** (`ReportDocument`): A4 paper, white with dark ink in both themes (`--paper-*` tokens, 26 more contrast pairs, all passing). Header with reference (`ORCA-YYYYMMDD-HHMM`), generation time, who prepared it, the data snapshot, the run it quotes and the educational-use notice; numbered sections; hairline tables with tabular figures; risk as a dot and a word; Pc typeset as 2.83 × 10<sup>−5</sup>.
+- **Sections**: situation summary (headline figures and the regime table), close approaches (all five tier counts for the whole run plus the top 10/25/50/100), single pair analysis (a plain-language paragraph and the assessment table with the tier threshold and the long-encounter caveat), data quality and method (ages, refresh vs fetch, source, the method rows and limits straight from `/api/conjunctions/method`).
+- **Generate**: the same document is rendered a second time into a print-only layer at the end of `<body>`; in print everything else is hidden, so a long report flows over as many pages as it needs. The document title becomes `ORCA-report-YYYY-MM-DD-HHMM-UTC` while printing, so the saved file gets that name. Verified by printing to PDF: 3 A4 pages with all four sections, white margins in the dark theme.
+- **Guards** (`lib/report.ts`, tested): Generate is disabled, with the reason shown, when no section is chosen, when a run-based section's run has not loaded, or when the pair section has no pair.
+
+Snapshots: `snapshots/12-reports-2026-11-07/` (includes a sample PDF).

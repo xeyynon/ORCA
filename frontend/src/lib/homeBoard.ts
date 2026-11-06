@@ -10,9 +10,9 @@ import { STALE_MEDIAN_DAYS } from './staleness'
  * ever presented as live monitoring.
  */
 
-/** Which run a figure comes from, in words for a label. */
+/** Which run a figure comes from, in words for a label, with its article ("the stored example run"). */
 export function runName(run: Pick<HookRun, 'saved'>): string {
-  return run.saved ? 'stored example run' : 'your latest search'
+  return run.saved ? 'the stored example run' : 'your latest search'
 }
 
 export type KpiId = 'objects' | 'pairs' | 'high' | 'critical'
@@ -38,10 +38,10 @@ export function homeKpis(objects: number | null, run: HookRun | null): HomeKpi[]
       id: 'pairs',
       label: 'Close pairs',
       value: run ? integer(run.totalEvents) : null,
-      context: run ? `Pairs within ${run.reportKm} km in the ${where}` : 'Pairs within the report distance',
+      context: run ? `Pairs within ${run.reportKm} km in ${where}` : 'Pairs within the report distance',
     },
-    { id: 'high', label: 'High-risk approaches', value: run ? integer(run.highRisk) : null, context: where ? `Flagged in the ${where}` : 'Flagged by screening' },
-    { id: 'critical', label: 'Critical approaches', value: run ? integer(run.critical) : null, context: where ? `In the ${where}` : 'Flagged by screening' },
+    { id: 'high', label: 'High-risk approaches', value: run ? integer(run.highRisk) : null, context: where ? `Flagged in ${where}` : 'Flagged by screening' },
+    { id: 'critical', label: 'Critical approaches', value: run ? integer(run.critical) : null, context: where ? `In ${where}` : 'Flagged by screening' },
   ]
 }
 

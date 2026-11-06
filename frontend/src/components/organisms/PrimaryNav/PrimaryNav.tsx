@@ -6,7 +6,7 @@ import type { ViewId } from '@/lib/views'
 
 type Props = { view: ViewId; onChange: (v: ViewId) => void }
 
-const ICON: Record<ViewId, IconName> = { home: 'home', overview: 'list', globe: 'globe', conjunctions: 'orbit', analytics: 'chart', data: 'database' }
+const ICON: Record<ViewId, IconName> = { home: 'home', overview: 'list', globe: 'globe', conjunctions: 'orbit', analytics: 'chart', data: 'database', reports: 'file' }
 
 /** One tab per view except Home (the logo goes home), each a simple icon with its label; the key is in the tooltip. */
 export function PrimaryNav({ view, onChange }: Props) {

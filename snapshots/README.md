@@ -136,3 +136,16 @@ The owner's "Space Command Centre" brief (MD/ORCA_Homepage_Redesign_Context.md),
 | [06-phone-panels.png](11-command-centre-home-2026-11-07/06-phone-panels.png) | Phone: the two panels stacked |
 | [07-light-1440.png](11-command-centre-home-2026-11-07/07-light-1440.png) | Light theme, top |
 | [08-light-lower.png](11-command-centre-home-2026-11-07/08-light-lower.png) | Light theme: table, panels, status |
+
+## 12-reports-2026-11-07
+
+The Reports view (MD/design_system_v2.md §6).
+
+| File | What it shows |
+|---|---|
+| [01-reports-1440.png](12-reports-2026-11-07/01-reports-1440.png) | Six views in the bar (nav still centred, 0 px off); the builder on the left, the A4 preview on the right |
+| [02-pair-analysis-preview.png](12-reports-2026-11-07/02-pair-analysis-preview.png) | The single pair analysis in the preview |
+| [03-phone-builder.png](12-reports-2026-11-07/03-phone-builder.png) | Phone: the builder first |
+| [04-phone-preview.png](12-reports-2026-11-07/04-phone-preview.png) | Phone: the preview keeps its paper width and scrolls sideways in its own frame; the page does not |
+| [05-reports-light.png](12-reports-2026-11-07/05-reports-light.png) | Light theme: the paper is the same white in both themes |
+| [06-sample-report.pdf](12-reports-2026-11-07/06-sample-report.pdf) | A generated report (all four sections, stored example run): 3 A4 pages |
