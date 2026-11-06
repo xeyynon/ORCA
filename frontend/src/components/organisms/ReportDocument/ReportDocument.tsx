@@ -88,7 +88,10 @@ export function ReportDocument(p: Props) {
           <div><dt>Data snapshot</dt><dd>{p.quality.lastUpdate ? formatUtc(p.quality.lastUpdate) : 'Not refreshed through the API'}</dd></div>
         </dl>
         {runLine ? <p className="report__run">{runLine}</p> : null}
-        <p className="report__notice">Educational and research tool built on public TLEs. Not for operational decisions.</p>
+        <p className="report__notice">
+          <span className="report__notice-label">Scope</span>
+          <span>Educational and research tool built on public TLEs. <strong>Not for operational decisions.</strong></span>
+        </p>
         {ids.length > 1 ? (
           <ol className="report__contents" aria-label="Contents">
             {ids.map((id) => <li key={id}>{titleOf(id)}</li>)}
