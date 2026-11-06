@@ -6,6 +6,7 @@ export const SHORTCUT_GROUPS: readonly ShortcutGroup[] = [
   {
     title: 'Navigate',
     items: [
+      { keys: ['H'], description: 'Mission control (home)' },
       { keys: ['1'], description: 'Overview' },
       { keys: ['2'], description: 'Globe' },
       { keys: ['3'], description: 'Conjunctions' },
