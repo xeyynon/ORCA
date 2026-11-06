@@ -1,5 +1,5 @@
 .globe-tile__art { display: flex; justify-content: center; }
-.globe-tile__art svg { width: 100%; max-width: 300px; height: auto; max-height: 160px; overflow: visible; }
+.globe-tile__art svg { width: 100%; max-width: 200px; height: auto; max-height: 96px; overflow: visible; }
 
 .globe-tile__earth { fill: var(--bg-hover); stroke: var(--text-faint); stroke-width: 1; }
 .globe-tile__grid { fill: none; stroke: var(--border-strong); stroke-width: 0.8; }

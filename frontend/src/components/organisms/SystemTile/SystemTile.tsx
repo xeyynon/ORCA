@@ -26,7 +26,7 @@ export function SystemTile({ apiStatus, storedCount, lastRefresh, build }: Props
   const waiting = apiStatus === 'checking' && storedCount === null
   const missing = (v: string) => (waiting ? <Skeleton width="10ch" /> : <Mono>{v}</Mono>)
   return (
-    <BentoTile title="System" span={4} busy={waiting}>
+    <BentoTile title="System" span={6} busy={waiting}>
       <div className="system-tile__facts">
         <FactRow label="API"><StatusIndicator tone={TONE[apiStatus]} label={WORD[apiStatus]} /></FactRow>
         <FactRow label="Objects stored">{missing(integer(storedCount))}</FactRow>

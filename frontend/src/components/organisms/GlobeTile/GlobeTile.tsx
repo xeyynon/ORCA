@@ -9,7 +9,7 @@ import './GlobeTile.css'
  */
 export function GlobeTile() {
   return (
-    <BentoTile title="Globe" span={5} link={{ label: 'Open the globe', href: '#/globe' }}>
+    <BentoTile title="Globe" span={3} link={{ label: 'Open the globe', href: '#/globe' }}>
       <div className="globe-tile__art">
         <svg viewBox="0 0 240 140" aria-hidden="true" focusable="false">
           <circle className="globe-tile__ring" cx="120" cy="70" r="34" />
