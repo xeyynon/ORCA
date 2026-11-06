@@ -68,7 +68,7 @@ Celestrak TLEs ──► parser_pipeline.py ──► orbit_mech_engine.py ─�
 | `orbit_mech_engine.py` | Foundation layer: orbital elements, Kepler solver, SGP4 propagator (`SGP4Propagator`), ECI/ECEF/geographic transforms. Imports no other project module |
 | `conjunction_detection.py` | Gap-free screening, exact TCA, Foster Pc with a measured uncertainty model, risk tiers, and the method description served to the UI |
 | `benchmarks/` | The research benchmarks behind the engine (results in `benchmarks/results/`, figures in `benchmarks/figures/`) |
-| `paper/` | The conference paper (`main.tex`, compiled `main.pdf`) |
+| `paper/` | The conference paper (`main.tex`, compiled `main.pdf`); `paper/figures_named/` has titled copies of the figures and the tables as images |
 | `Analytics.py` | Catalog statistics, Plotly figures, export helpers |
 | `api_server.py` | REST API |
 | `frontend/` | React + TypeScript + Vite + three.js app, one component per UI piece ([frontend/README.md](../frontend/README.md)) |

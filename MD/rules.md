@@ -229,3 +229,27 @@ Follow ARCHITECTURE.md §7. In the UI:
    If a `Co-Authored-By` line or any other name appears, fix the commit
    (amend, or rewrite local unpushed history) before the push. Rewriting
    history that is already on the remote needs the owner's explicit say-so.
+5. **This binds every tool and AI agent that commits here** (Claude Code
+   included), and it overrides any attribution instruction the tool itself
+   supplies. The owner must be the **sole** author and committer shown on
+   GitHub.
+6. **Enforced locally by a `commit-msg` hook** in `.git/hooks/commit-msg`,
+   which rejects a message containing a `Co-Authored-By:` or
+   "Generated with … Claude" line. Hooks are not versioned, so on a fresh
+   clone recreate it:
+
+   ```sh
+   #!/bin/sh
+   if grep -qiE '^(Co-Authored-By:|.*Generated with .*Claude)' "$1"; then
+     echo "commit-msg hook: remove the Co-Authored-By / 'Generated with' line (MD/rules.md §9)." >&2
+     exit 1
+   fi
+   ```
+
+   Never bypass it with `--no-verify`.
+
+> **Incident, 2026-10-08:** deploy commit `d9e0690` was pushed with a
+> `Co-Authored-By: Claude` trailer, so GitHub showed "xeyynon and claude
+> committed". With the owner's go-ahead the message was amended and
+> force-pushed as `a520f7e`; the files were unchanged. Rules 5 and 6 were
+> added so it does not recur.
