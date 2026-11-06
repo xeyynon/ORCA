@@ -1,0 +1,332 @@
+% ====================================================================
+%  ORCA paper -- Springer proceedings format (llncs class)
+%  Overleaf setup:
+%    1. Upload this file as main.tex, plus llncs.cls from the Springer
+%       template (and splncs04.bst, not used here but harmless).
+%    2. Upload the "figures" folder with the seven figure files.
+%    3. Compile with pdfLaTeX.
+%  A figure is looked up as figures/<name>.png/.pdf/.jpg or ./<name>...
+%  If none is found, a labelled box is printed so the paper still compiles.
+% ====================================================================
+\documentclass[runningheads]{llncs}
+
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{array}
+
+% Let LaTeX place figures closer to the text (avoids half-empty pages).
+\renewcommand{\topfraction}{0.9}
+\renewcommand{\bottomfraction}{0.8}
+\renewcommand{\textfraction}{0.1}
+\renewcommand{\floatpagefraction}{0.8}
+\setcounter{topnumber}{3}
+\setcounter{totalnumber}{4}
+
+% Figure lookup: tries figures/ and the main folder, png/pdf/jpg.
+\makeatletter
+\newcommand{\tryfig}[1]{\ifx\figfound\@empty\IfFileExists{#1}{\def\figfound{#1}}{}\fi}
+\newcommand{\figfile}[3]{%
+  \def\figfound{}%
+  \tryfig{figures/#1.png}\tryfig{figures/#1.pdf}\tryfig{figures/#1.jpg}%
+  \tryfig{#1.png}\tryfig{#1.pdf}\tryfig{#1.jpg}%
+  \ifx\figfound\@empty
+    \fbox{\parbox[c][3cm][c]{\dimexpr#2-2\fboxsep-2\fboxrule\relax}{\centering\small [#3]}}%
+  \else
+    \includegraphics[width=#2]{\figfound}%
+  \fi}
+\makeatother
+
+\begin{document}
+
+\title{A Stage-wise Accuracy and Runtime Comparison of Conjunction Assessment Methods in Low Earth Orbit Using Public TLE Data}
+\titlerunning{Stage-wise Comparison of Conjunction Assessment Methods}
+
+\author{Aditi Sharma \and Surya Pratik \and Abhinav Pentani \and Shaik Saifuddin \and Ashish Kumar Dalai}
+\authorrunning{A. Sharma et al.}
+
+\institute{Department of Computer Science and Engineering, VIT-AP University, Andhra Pradesh, India\\
+\email{05aditisharma04@gmail.com, pratiksurya1207@gmail.com, abhinavpentani7@gmail.com, shaiksaif1601@gmail.com, asish.d@vitap.ac.in}}
+
+\maketitle
+
+% --------------------------------------------------------------------
+\begin{abstract}
+Conjunction assessment for a public catalogue of nearly 16,000 objects must examine about 127.5 million object pairs at every time step. This paper compares established methods at each stage of an open-source pipeline built on CelesTrak two-line element (TLE) data, on accuracy and runtime: propagation, screening, time of closest approach (TCA) refinement and collision probability ($P_c$). After 24 hours, the two-body propagator with drag deviated from SGP4 by about 300~km, but by only about 11~km when J2 secular terms were added. The k-d tree ran about 173 times faster than brute force while returning identical pairs, yet a one-hour screening step missed about 99\% of encounters below 10~km found by the reference screening. Brent refinement reached a median miss-distance error below 0.1~mm in about 12 evaluations, against about 300~m for a 1~s grid using about 120. The legacy-to-Foster $P_c$ ratio followed $1/\alpha^2$, where $\alpha$ is the miss distance divided by the combined position uncertainty, so the legacy formula overstated risk by up to four orders of magnitude for $\alpha < 1$. Monte Carlo sampling required $10^{7}$--$10^{8}$ samples to match Foster's method at $P_c \approx 10^{-6}$. Propagation fidelity and screening time step dominate accuracy, while spatial indexing determines runtime. Because TLEs carry no covariance, it must be assumed, so $P_c$ values support relative risk ranking only.
+
+\keywords{Conjunction assessment \and Collision probability \and Space debris \and Two-line elements \and SGP4 \and k-d tree}
+\end{abstract}
+
+% --------------------------------------------------------------------
+\section{Introduction}
+
+Low Earth Orbit (LEO) is increasingly crowded with active satellites, spent rocket bodies and fragmentation debris. Each collision creates new debris that raises the risk of further collisions~\cite{b1}, and the growth of large constellations has increased the load on the systems that keep spacecraft safe~\cite{b3}. Operators must therefore check routinely which objects may come dangerously close.
+
+This check, called conjunction assessment, has two steps. Screening identifies object pairs that could come close, and analysis determines when each pair is closest, how close it comes, and how likely a collision is~\cite{b7}. In practice, this forms a four-stage pipeline: orbit propagation, conjunction screening, refinement of the time of closest approach (TCA), and estimation of the collision probability ($P_c$). Each stage offers several established methods that trade accuracy against cost.
+
+These choices matter because of scale. A public catalogue of nearly 16,000 objects yields about 127.5 million pairs at every time step. Fast methods make this tractable, but their errors pass to later stages; for example, a coarse screening step can miss short encounters entirely. Public TLE data also carry no uncertainty information, so any $P_c$ depends on an assumed uncertainty model. Prior work (Section~\ref{sec:lit}) has mostly studied one stage at a time, often with proprietary software or non-public data, so it remains unclear how much each method choice affects accuracy and runtime when the full pipeline runs on public data and ordinary hardware.
+
+This paper addresses that question through a stage-wise comparison within an open pipeline built on public CelesTrak TLE data. At each stage, established methods are compared on accuracy against a stated reference and on runtime: two-body versus SGP4 propagation, brute-force versus k-d tree screening, discrete search versus Brent's method for TCA refinement, and analytic versus Monte Carlo $P_c$ estimation. The main contributions are:
+\begin{itemize}
+\item An open, reproducible conjunction assessment pipeline that uses only public TLE data, with interchangeable methods at each stage.
+\item A stage-wise comparison of accuracy and runtime for propagation, screening, TCA refinement and $P_c$ estimation.
+\item A measurement of how the screening time step affects the number of missed close approaches.
+\end{itemize}
+
+This work does not propose a new algorithm and is not an operational collision warning service. Section~\ref{sec:prelim} introduces the preliminaries, Section~\ref{sec:lit} reviews related work, Section~\ref{sec:method} describes the data, pipeline and compared methods, Section~\ref{sec:results} presents and discusses the results, and Section~\ref{sec:conc} concludes the paper.
+
+% --------------------------------------------------------------------
+\section{Preliminaries}
+\label{sec:prelim}
+
+\subsection{Two-Line Element Sets}
+A two-line element (TLE) set describes one catalogued object at a reference time called the epoch. Its elements (inclination, right ascension of the ascending node, eccentricity, argument of perigee, mean anomaly and mean motion) are mean elements intended for propagation with SGP4. The set carries no covariance, so the position uncertainty cannot be obtained from it.
+
+\subsection{Conjunction Definitions}
+A conjunction is a predicted close approach between two catalogued objects, called the primary and the secondary. For objects with inertial positions $\mathbf{r}_1(t)$ and $\mathbf{r}_2(t)$, the separation is
+\begin{equation}
+d(t) = \lVert \mathbf{r}_1(t) - \mathbf{r}_2(t) \rVert .
+\label{eq:dist}
+\end{equation}
+Screening checks whether $d(t)$ falls below a screening threshold at discrete times separated by a step $\Delta t$. For each pair that passes, the TCA is the time at which $d(t)$ reaches a local minimum, and the miss distance is $d(t)$ at the TCA. A catalogue of $N$ objects contains
+\begin{equation}
+N_{\mathrm{pairs}} = \frac{N(N-1)}{2}
+\label{eq:pairs}
+\end{equation}
+distinct pairs, so the number of comparisons per time step grows rapidly with catalogue size~\cite{b9}.
+
+\subsection{Encounter Plane and Collision Probability}
+Short-term collision probability methods assume linear relative motion during the encounter and constant, uncorrelated position uncertainties~\cite{b10}. The two covariances are combined and projected onto the encounter plane, normal to the relative velocity at the TCA, and each object is modelled as a sphere with combined hard-body radius $R$~\cite{b10,b11}. $P_c$ is the integral of the resulting two-dimensional Gaussian density, centred on the miss vector, over a disk of radius $R$~\cite{b11}. The parameter $\alpha$ denotes the ratio of the miss distance to the combined position uncertainty.
+
+% --------------------------------------------------------------------
+\section{Literature Review}
+\label{sec:lit}
+
+Conjunction assessment usually has two steps: screening identifies pairs that could come close, and analysis determines how close they come, when, and how risky the encounter is~\cite{b7}. Prior work has studied each step, but mostly one stage at a time and often with proprietary tools or non-public data. This section reviews that work stage by stage and ends with the gap this paper addresses.
+
+\subsection{Conjunction Screening at Catalogue Scale}
+Hoots et al.~\cite{b12} proposed an analytical method to predict close approaches, the basis of classical filters that remove pairs whose orbits cannot meet. Woodburn et al.~\cite{b14} described filters based on altitude, orbit geometry and timing that greatly reduce the pairs needing detailed checks, although some cases need care to avoid missed encounters. As catalogues grew, attention moved to all-vs-all screening~\cite{b9,b15}: Coppola et al.~\cite{b17} screened the entire catalogue with commercial software on multi-core processors, and Levit and Marshall~\cite{b18} improved TLE-based predictions for large-scale checks, showing that all-vs-all screening is feasible but resource-intensive. The SOCRATES service~\cite{b19} screens active payloads against the public catalogue using public TLEs, SGP4 and the commercial STK/CAT tool, but it is one-vs-all and not open. Stevenson et al.~\cite{b20} showed that deep learning can outperform classical filters at a fixed false-negative rate, but their datasets are not public.
+
+\subsection{Screening with Spatial Indexes}
+Checking every pair at every time step grows with the square of the number of objects~\cite{b9}. Spatial indexing structures such as k-d trees avoid this by comparing only objects that are near each other. However, the speed-up of a k-d tree over brute-force search on a full public catalogue, and the effect of the screening time step on missed encounters, have not been measured openly.
+
+\subsection{Refining the Time of Closest Approach}
+Screening at discrete time steps gives only an approximate TCA. The usual next step is to minimise the separation over a short interval around that time. Brent's method~\cite{b22} combines golden-section search with parabolic interpolation and finds a minimum without derivatives, while a simpler alternative takes the smallest separation on a finer time grid. The accuracy of both depends on the time step, yet they are rarely compared directly in conjunction studies.
+
+\subsection{Short-Term Collision Probability}
+Most short-term $P_c$ methods combine the position uncertainty of the two objects, project it onto the encounter plane, and integrate a two-dimensional Gaussian density over a disk whose radius is the combined size of the objects~\cite{b10}. Patera~\cite{b11} gave a general method for this calculation. Alfano~\cite{b23} compared four analytic $P_c$ methods on about 60,000 test cases; they typically agreed to two or more significant figures, but their runtimes differed by up to an order of magnitude. Li et al.~\cite{b24} noted that Monte Carlo methods are accurate given enough samples but computationally costly, and that the right method depends on the encounter.
+
+\subsection{Research Gap}
+Prior work tends to study one stage in isolation, and usually treats propagation as a fixed input. Screening studies often rely on commercial software or high-performance computing, learned screening uses data that is not public, and $P_c$ comparisons use synthetic test cases. To our knowledge, no open study compares established methods at each of the four pipeline stages on the same public TLE data, for both accuracy and runtime. This paper addresses that gap.
+
+% --------------------------------------------------------------------
+\section{Methodology}
+\label{sec:method}
+
+\subsection{System Architecture}
+The system is a modular pipeline that converts public CelesTrak TLE data into a ranked list of conjunction events (Fig.~\ref{fig:arch}). TLE records are read and validated, and invalid or outdated records are removed. Objects are propagated to a common time grid using two-body or SGP4 propagation. Brute-force or k-d tree screening identifies candidate pairs, and discrete search or Brent's method finds each pair's TCA and miss distance. Foster's method or Monte Carlo simulation estimates the collision probability. Finally, events are classified as Safe, Borderline or High Risk and ranked.
+
+\begin{figure}[htbp]
+\centering
+\figfile{fig_architecture}{\textwidth}{System architecture figure}
+\caption{Overall system architecture.}
+\label{fig:arch}
+\end{figure}
+
+\subsection{Dataset}
+We use a public CelesTrak TLE dataset of 15,968 tracked objects. Records are parsed and checked, and invalid or incomplete ones are discarded before storage in a local SQLite database, which serves as the single input for all stages.
+
+\subsection{Orbit Propagation}
+\paragraph{Two-Body Model.}
+The two-body model treats the Earth as a point mass and ignores perturbations such as drag and higher-order gravity terms. The state is propagated using Kepler's equation~\cite{b25}:
+\begin{equation}
+M = E - e\sin E, \qquad M = M_0 + n\,\Delta t, \qquad n = \sqrt{\mu / a^{3}},
+\label{eq:kepler}
+\end{equation}
+where $M$ is the mean anomaly, $E$ the eccentric anomaly, $e$ the eccentricity, $n$ the mean motion, $\mu$ the Earth's gravitational parameter and $a$ the semi-major axis. Position and velocity are computed in the perifocal frame and rotated into the Earth-Centred Inertial (ECI) frame through three rotations ($\omega$, $i$, $\Omega$). Two variants are also evaluated: one with a drag term, and one with J2 secular terms for the Earth's oblateness.
+
+\paragraph{SGP4.}
+SGP4 models the average effects of drag and the Earth's zonal harmonics. It is the standard propagator for TLE data~\cite{b26} and serves as the reference, although its accuracy is limited for high-precision conjunction assessment~\cite{b18}.
+
+\subsection{Conjunction Screening}
+\paragraph{Brute Force.}
+Brute force evaluates all $N_{\mathrm{pairs}}$ pairs of Eq.~(\ref{eq:pairs}) at each time step, giving $O(N^2)$ complexity~\cite{b9,b14,b17}. Pairs within the screening threshold become candidates~\cite{b14}. The method is exhaustive within the time resolution, but its cost grows quadratically with catalogue size~\cite{b17,b18}.
+
+\paragraph{k-d Tree.}
+A k-d tree indexes object positions in three dimensions, reducing the average search cost to $O(N \log N)$~\cite{b27,b28}. All pairs closer than the threshold (100~km in this paper) are retrieved without evaluating distant pairs.
+
+\subsection{Time of Closest Approach}
+\paragraph{Discrete Search.}
+The separation $d(t)$ of Eq.~(\ref{eq:dist}) is sampled at a constant step, and the smallest sample gives the TCA. Finer steps improve accuracy but increase cost, while coarse steps (e.g., 60~s) can miss the true minimum.
+
+\paragraph{Brent's Method.}
+Brent's method finds a local minimum of $d(t)$ within a narrow window ($\pm 60$~s) around the sampled minimum, combining golden-section search with quadratic interpolation without derivatives~\cite{b22}. It is applied both to the distance and, as a root search, to the range rate. Quadratic interpolation of $d^2$ around the grid minimum is also tested as a lighter refinement.
+
+\subsection{Collision Probability}
+\paragraph{Foster's Method.}
+Foster's method integrates the two-dimensional Gaussian density of the relative position in the encounter plane over a circle whose radius is the combined hard-body radius~\cite{b24,b29}. It assumes linear relative motion and is evaluated numerically~\cite{b30}. It is cheap and widely used, but depends on covariance quality.
+
+\paragraph{Monte Carlo Simulation.}
+Monte Carlo draws $N_{\mathrm{samples}}$ random relative positions from the same distribution and counts the $N_{\mathrm{collision}}$ samples that fall within the combined hard-body radius~\cite{b7,b24}:
+\begin{equation}
+P_c = \frac{N_{\mathrm{collision}}}{N_{\mathrm{samples}}} .
+\label{eq:mc}
+\end{equation}
+The system's original (legacy) $P_c$ formula is also compared with Foster's method on identical inputs.
+
+\subsection{Risk Classification}
+Each conjunction is classified using two thresholds, $T_1$ and $T_2$:
+\begin{equation}
+\mathrm{Risk}(P_c) =
+\begin{cases}
+\text{Safe}, & P_c < T_1,\\
+\text{Borderline}, & T_1 \le P_c < T_2,\\
+\text{High Risk}, & P_c \ge T_2.
+\end{cases}
+\label{eq:risk}
+\end{equation}
+The same thresholds are applied to all $P_c$ methods for a fair comparison.
+
+\subsection{Experimental Trials}
+All methods run on the same input under the same conditions, and each trial varies one stage while the others are held constant (Table~\ref{tab:trials}). Screening results are pooled over three random seeds.
+
+\begin{table}[htbp]
+\centering
+\caption{Summary of experimental trials.}
+\label{tab:trials}
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{>{\raggedright\arraybackslash}p{0.7cm}>{\raggedright\arraybackslash}p{3.1cm}>{\raggedright\arraybackslash}p{3.7cm}>{\raggedright\arraybackslash}p{3.3cm}}
+\hline
+Exp. & Comparison & Setup & Metrics \\
+\hline
+E1 & Two-body variants vs.\ SGP4 & About 15,160 LEO objects, 0--168~h & Position difference \\
+E2 & Brute force vs.\ k-d tree & 1,000--16,000 objects; steps 20~s to 1~h & Runtime, speed-up, missed encounters \\
+E3 & Discrete vs.\ refinement & 6,568 encounters, window $\pm 60$~s & Miss-distance error, evaluations \\
+E4 & Legacy vs.\ Foster vs.\ Monte Carlo & 6,568 encounters; 3 conjunctions at $P_c \approx 10^{-6}$ & $P_c$ ratio, convergence \\
+\hline
+\end{tabular}
+\end{table}
+
+
+
+% --------------------------------------------------------------------
+\section{Results and Discussion}
+\label{sec:results}
+
+\subsection{Propagation}
+Compared with SGP4, the two-body propagator with drag shows a median position difference of about 12~km at epoch, 83~km at 6~hours and 300~km at 24~hours, growing beyond 1,000~km after 72~hours (Fig.~\ref{fig:prop}). With J2 secular terms, the median difference stays between about 8 and 12~km up to 24~hours. The main missing physics in the two-body engine is therefore the Earth's oblateness, not drag.
+
+\begin{figure}[htbp]
+\centering
+\figfile{fig_propagation}{0.46\textwidth}{Propagation figure}
+\caption{Position difference from SGP4 over propagation time (median over about 15,160 LEO objects; band to 90th percentile).}
+\label{fig:prop}
+\end{figure}
+
+\subsection{Screening}
+The k-d tree screened the 16,000-object catalogue in about 8.5~ms per time step, compared with 1,473~ms for brute force, a speed-up of about 173 times, while returning identical pairs at every catalogue size (Fig.~\ref{fig:screen}b). Detection, however, depends on the time step rather than the algorithm (Fig.~\ref{fig:screen}a). At a 1-hour step, only about 23\% of encounters below 10~km with relative speed under 1~km/s were seen, and about 1\% or fewer of faster encounters; across all encounters, about 99\% were missed. At a 20~s step, all encounters slower than 10~km/s and about 79\% of faster ones were seen. Fast pairs are missed because they spend most of each step outside the screening radius.
+
+\begin{figure}[htbp]
+\centering
+\begin{minipage}{0.49\textwidth}\centering
+\figfile{fig_screening_recall}{\linewidth}{Screening recall figure}\\[-1pt]
+{\small (a)}
+\end{minipage}\hfill
+\begin{minipage}{0.49\textwidth}\centering
+\figfile{fig_screening_runtime}{\linewidth}{Screening runtime figure}\\[-1pt]
+{\small (b)}
+\end{minipage}
+\caption{(a) Encounters below 10~km detected versus screening time step, by relative speed; (b) screening runtime of brute force and k-d tree versus catalogue size.}
+\label{fig:screen}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\begin{minipage}{0.47\textwidth}\centering
+\figfile{fig_tca}{0.9\linewidth}{TCA figure}\\[-1pt]
+{\small (a)}
+\end{minipage}\hfill
+\begin{minipage}{0.51\textwidth}\centering
+\figfile{fig_pc_ratio}{\linewidth}{Pc ratio figure}\\[-1pt]
+{\small (b)}
+\end{minipage}
+\caption{(a) Median miss-distance error versus cost of TCA methods (6,568 encounters, window $\pm 60$~s); (b) ratio of legacy to Foster $P_c$ versus $\alpha$.}
+\label{fig:tcapc}
+\end{figure}
+
+\subsection{Time of Closest Approach}
+Figure~\ref{fig:tcapc}a shows the median miss-distance error against the number of pair evaluations per encounter, over 6,568 encounters. Grid search improves only by adding evaluations: a 60~s grid gives errors of about 100~km, and even a 1~s grid leaves about 300~m after about 120 evaluations. Refinement is far more efficient: Brent's method on distance reaches below 0.1~mm in about 12 evaluations, and Brent root search on the range rate reaches about $10^{-7}$~m in about 9.
+
+
+
+\subsection{Collision Probability}
+On identical inputs, the ratio of legacy to Foster $P_c$ follows $1/\alpha^2$ across all 6,568 encounters (Fig.~\ref{fig:tcapc}b). The legacy model overestimates $P_c$ for $\alpha < 1$, by about 100 times at $\alpha = 0.1$ and by up to four orders of magnitude at the smallest $\alpha$, and underestimates it by about a factor of 2 near $\alpha \approx 1.4$. The tight fit to $1/\alpha^2$ shows a systematic difference in formulation rather than random scatter.
+
+For three Starlink conjunctions with Foster $P_c \approx 1.2\times10^{-6}$, Monte Carlo recorded no hits below about $10^{5}$--$10^{6}$ samples and approached Foster's value only at $10^{7}$--$10^{8}$ samples, settling within about 15\% at $10^{8}$ (Fig.~\ref{fig:mc}). At such low probabilities, Monte Carlo is therefore useful as a check, not as a screening-scale method.
+
+
+
+\begin{figure}[htbp]
+\centering
+\figfile{fig_mc}{0.95\textwidth}{Monte Carlo figure}
+\caption{Monte Carlo $P_c$ relative to Foster $P_c$ versus number of samples for three conjunctions (band: 95\% interval).}
+\label{fig:mc}
+\end{figure}
+
+% --------------------------------------------------------------------
+\section{Conclusion and Future Work}
+\label{sec:conc}
+
+This paper compared established methods at each stage of an open conjunction assessment pipeline using public TLE data. Adding J2 secular terms reduced the 24-hour deviation from SGP4 from about 300~km to about 11~km. The k-d tree was about 173 times faster than brute force with identical results, but a one-hour screening step missed about 99\% of close encounters, so the time step matters more than the screening algorithm. Brent refinement reached sub-millimetre accuracy with about a tenth of the evaluations of a fine grid, and the legacy $P_c$ formula deviated from Foster's method by a factor of $1/\alpha^2$. SGP4 serves as the reference rather than ground truth, and the covariance is assumed because TLEs carry none, so $P_c$ values support relative ranking only; the Monte Carlo comparison covers three conjunctions. Future work includes higher-fidelity propagation, adaptive screening time steps, realistic covariance models and larger datasets.
+
+% --------------------------------------------------------------------
+\begin{thebibliography}{22}
+
+\bibitem{b1} Kessler, D.J., Cour-Palais, B.G.: Collision frequency of artificial satellites: the creation of a debris belt. J. Geophys. Res. \textbf{83}(A6), 2637--2646 (1978)
+
+\bibitem{b3} Muelhaupt, T.J., Sorge, M.E., Morin, J., Wilson, R.S.: Space traffic management in the new space era. J. Space Saf. Eng. \textbf{6}(2), 80--87 (2019)
+
+\bibitem{b7} Kerr, E., S\'{a}nchez Ortiz, N.: State of the art and future needs in conjunction analysis methods, processes and software. In: Proc. 8th European Conference on Space Debris (2021)
+
+\bibitem{b9} Saingyen, P., Channumsin, S., Sreesawet, S., Puttasuwan, K., Limna, T.: Performance investigation of the conjunction filter methods and enhancement of computation speed on conjunction assessment analysis with CUDA techniques. Aerospace \textbf{10}(6), 543 (2023)
+
+\bibitem{b10} Alfano, S.: Satellite collision probability enhancements. J. Guid. Control Dyn. \textbf{29}(3), 588--592 (2006)
+
+\bibitem{b11} Patera, R.P.: General method for calculating satellite collision probability. J. Guid. Control Dyn. \textbf{24}(4), 716--722 (2001)
+
+\bibitem{b12} Hoots, F.R., Crawford, L.L., Roehrich, R.L.: An analytic method to determine future close approaches between satellites. Celest. Mech. \textbf{33}, 143--158 (1984)
+
+\bibitem{b14} Woodburn, J., Coppola, V., Stoner, F.: A description of filters for minimizing the time required for orbital conjunction computations. In: AAS/AIAA Astrodynamics Specialist Conference, AAS 09-372 (2009)
+
+\bibitem{b15} Healy, L.M.: Close conjunction detection on parallel computer. J. Guid. Control Dyn. \textbf{18}(4), 824--829 (1995)
+
+\bibitem{b17} Coppola, V.T., Dupont, S., Ring, K., Stoner, F.: Assessing satellite conjunctions for the entire space catalog using COTS multi-core processor hardware. In: AAS/AIAA Astrodynamics Specialist Conference, AAS 09-374 (2009)
+
+\bibitem{b18} Levit, C., Marshall, W.: Improved orbit predictions using two-line elements. Adv. Space Res. \textbf{47}(7), 1107--1115 (2011)
+
+\bibitem{b19} Kelso, T.S., Alfano, S.: Satellite orbital conjunction reports assessing threatening encounters in space (SOCRATES). In: 15th AAS/AIAA Space Flight Mechanics Conference, AAS 05-124 (2005)
+
+\bibitem{b20} Stevenson, E., Rodriguez-Fernandez, V., Urrutxua, H., Camacho, D.: Benchmarking deep learning approaches for all-vs-all conjunction screening. Adv. Space Res. \textbf{72}(7), 2660--2675 (2023)
+
+\bibitem{b22} Brent, R.P.: Algorithms for Minimization without Derivatives. Prentice-Hall, Englewood Cliffs (1973)
+
+\bibitem{b23} Alfano, S.: Review of conjunction probability methods for short-term encounters. In: AAS/AIAA Space Flight Mechanics Meeting, AAS 07-148 (2007)
+
+\bibitem{b24} Li, J.-S., Yang, Z., Luo, Y.-Z.: A review of space-object collision probability computation methods. Astrodynamics \textbf{6}(2), 95--120 (2022)
+
+\bibitem{b25} Vallado, D.A.: Fundamentals of Astrodynamics and Applications, 4th edn. Microcosm Press, Hawthorne (2013)
+
+\bibitem{b26} Vallado, D.A., Crawford, P., Hujsak, R., Kelso, T.S.: Revisiting Spacetrack Report \#3. In: AIAA/AAS Astrodynamics Specialist Conference, AIAA 2006-6753 (2006)
+
+\bibitem{b27} Bentley, J.L.: Multidimensional binary search trees used for associative searching. Commun. ACM \textbf{18}(9), 509--517 (1975)
+
+\bibitem{b28} Mercurio, M., Singla, P.: A tree-based approach for efficient and accurate conjunction analysis. Comput. Model. Eng. Sci. \textbf{111}(3), 229--256 (2016)
+
+\bibitem{b29} Foster, J.L., Estes, H.S.: A parametric analysis of orbital debris collision probability and maneuver rate for space vehicles. NASA Johnson Space Center, Houston (1992)
+
+\bibitem{b30} Patera, R.P.: Collision probability for larger bodies having nonlinear relative motion. J. Guid. Control Dyn. \textbf{29}(6), 1468--1471 (2006)
+
+\end{thebibliography}
+
+\end{document}

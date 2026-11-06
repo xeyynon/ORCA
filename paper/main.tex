@@ -15,6 +15,8 @@
 \usepackage{graphicx}
 \usepackage{booktabs}
 \usepackage{url}
+\usepackage{array}
+\renewcommand{\arraystretch}{1.25}
 
 \begin{document}
 
@@ -23,7 +25,7 @@
 % TODO(authors): confirm order, add department, university and e-mail addresses.
 \author{\IEEEauthorblockN{Surya Pratik, Abhinav Pentani, Shaik Saifuddin, Aditi Sharma}
 \IEEEauthorblockA{\textit{Department (TODO), University (TODO)}\\
-\textit{Supervised by Asish Kumar Dalai}\\
+\textit{Supervised by Ashish Kumar Dalai}\\
 e-mail (TODO)}}
 
 \maketitle
@@ -101,29 +103,37 @@ Screening speed, filter design, tool agreement and $P_c$ formulas in isolation a
 \begin{figure*}[t]
 \centering
 \includegraphics[width=\textwidth]{figures/fig_pipeline.pdf}
-\caption{The pipeline and where each experiment intervenes. Each box gives ORCA's original method and the alternatives compared. Exp.~5 runs both complete pipelines on the same objects and window.}
+\caption{Conjunction-Assessment Pipeline and the Experiment at Each Stage}
 \label{fig:pipeline}
 \end{figure*}
 
 \subsection{ORCA and the Benchmark Harness}
-ORCA is an open conjunction-assessment application (FastAPI back end, React front end) that works only from public TLEs. As built, it propagated with a two-body model plus exponential drag. It screened every 1\,h with a k-d tree at 100\,km and refined each flagged pair with one bounded Brent minimisation over $\pm6$\,h. It then computed a 2D $P_c$ under an isotropic covariance $\sigma=0.5\,\mathrm{km}+2\,\mathrm{km/day}\times$ TLE age and assigned tiers (Fig.~\ref{fig:pipeline}). The harness swaps one stage at a time and calls ORCA's own functions wherever ORCA itself is measured. A frozen copy of the original code keeps that baseline reproducible.
+ORCA is an open conjunction-assessment application (FastAPI back end, React front end) that works only from public TLEs. As built, it propagated with a two-body model plus exponential drag. It screened every 1\,h with a k-d tree at 100\,km and refined each flagged pair with one bounded Brent minimisation over $\pm6$\,h. It then computed a 2D $P_c$ under an isotropic covariance $\sigma=0.5\,\mathrm{km}+2\,\mathrm{km/day}\times$ TLE age and assigned tiers. Fig.~\ref{fig:pipeline} shows this pipeline; each box gives ORCA's original method and the alternatives compared, and Exp.~5 runs both complete pipelines on the same objects and window. The harness swaps one stage at a time and calls ORCA's own functions wherever ORCA itself is measured. A frozen copy of the original code keeps that baseline reproducible.
 
 \subsection{Data and Environment}
 Table~\ref{tab:data} lists the data and environment. Conjunction experiments use three random subsets of 2,000 LEO objects (apogee $\le2000$\,km, TLE at most 7 days old), all over the same 24\,h window.
 
 \begin{table}[t]
-\caption{Data and environment}
+\caption{Dataset and Experimental Environment}
 \label{tab:data}
 \centering
-\begin{tabular}{@{}ll@{}}
-\toprule
+\footnotesize
+\begin{tabular}{|l|l|}
+\hline
+\textbf{Item} & \textbf{Value}\\
+\hline
 Source & CelesTrak GP, group \texttt{active} (payloads)\\
+\hline
 Snapshots & 15,970 / 15,932 / 15,932 TLEs, 2026-10-14\\
+\hline
 Window & 24\,h from 2026-10-10 02:10 UTC\\
+\hline
 Populations & $3\times2{,}000$ LEO objects (seeds 1--3)\\
+\hline
 Software & Python 3.12, SciPy 1.18, sgp4 2.27\\
+\hline
 Hardware & Ryzen 9 5900HS, 15.4\,GB, single process\\
-\bottomrule
+\hline
 \end{tabular}
 \end{table}
 
@@ -141,42 +151,58 @@ Table~\ref{tab:exp} summarises the five experiments.
 \textbf{Exp.~5, end to end.} ORCA as built (A) is run alongside a corrected pipeline (B): SGP4, a 20\,s / 200\,km screen, range-rate root-finding and Foster.
 
 \begin{table}[t]
-\caption{Experiment design}
+\caption{Experiment Design: Methods Compared and Reference}
 \label{tab:exp}
 \centering
-\begin{tabular}{@{}lll@{}}
-\toprule
-Exp. & Compared & Reference\\
-\midrule
+\footnotesize
+\begin{tabular}{|c|l|l|}
+\hline
+\textbf{Exp.} & \textbf{Compared} & \textbf{Reference}\\
+\hline
 1 & 2-body+drag, 2-body+$J_2$, SGP4 & SGP4; next TLE\\
+\hline
 2 & steps 20\,s--1\,h, radii 10--200\,km & 10\,s SGP4 grid\\
+\hline
 3 & grid, $d^2$ fit, Brent, range-rate roots & root to $10^{-6}$\,s\\
+\hline
 4 & ORCA formula, Foster, MC & closed form; MC\\
+\hline
 5 & ORCA as built vs corrected & SGP4 near TCA\\
-\bottomrule
+\hline
 \end{tabular}
 \end{table}
+
+\subsection{Evaluation Metrics}
+Each experiment is scored with the following measures; every one is computed by the benchmark scripts in \texttt{benchmarks/}.
+\begin{itemize}
+\item \textbf{Position error} (Exp.~1): distance between a propagator's position and the reference, as radial, in-track and cross-track components; median and a robust spread over objects.
+\item \textbf{TCA error and miss-distance error} (Exp.~3, 5): time difference and distance difference between a method's closest approach and the root-found reference, in seconds and metres; median and 95th percentile. The share of true closest approaches a method finds is reported alongside.
+\item \textbf{Runtime and speedup} (Exp.~2, 3, 5): wall-clock time per step or per run on one machine, and the ratio of the slower method to the faster.
+\item \textbf{Recall and candidate reduction} (Exp.~2): recall is the share of reference encounters whose pass a screen flags. Candidate reduction is the number of object pairs, $n(n-1)/2$, divided by the number of pairs the screen flags during the window. A screen is useful only if both are high; reduction alone is not, since flagging nothing reduces candidates without bound.
+\item \textbf{$P_c$ difference} (Exp.~4): ratio of one method's $P_c$ to Foster's on identical inputs, and agreement with the closed form and with Monte Carlo (Clopper--Pearson intervals).
+\item \textbf{Risk classification agreement} (Exp.~4, 5): the number of events each $P_c$ setting places in the HIGH and CRITICAL tiers, and Kendall's rank correlation $\tau$ between each method's ranking and miss distance.
+\end{itemize}
 
 % ---------------------------------------------------------------------------------------------------------------------
 \section{Results and Discussion}
 
 \subsection{Propagation}
-Against SGP4 of the same TLE (Fig.~\ref{fig:prop}), ORCA's model drifts 83\,km at 6\,h, 303\,km at 24\,h and 2,920\,km at 7 days (medians over $\sim$15,160 LEO objects). Adding $J_2$ secular rates keeps the difference near 11\,km through 24\,h. Against the next TLE, SGP4's error at 5--7 days for non-Starlink objects has robust RIC spreads of 0.13, 14.6 and 0.21\,km. Along-track is thus about 100 times radial, and ORCA's isotropic 12.5\,km overstates the radial error about 90-fold. With three snapshots, the in-track spread grows from 0.16\,km at 0.3\,days to 14.6\,km at 6.3\,days. Starlink TLEs are about 15 times worse in-track, and SGP4's error for them grows with the fitted drag term B$^*$, consistent with thrust absorbed into the elements~\cite{lang2025starlink}.
+Against SGP4 of the same TLE (Fig.~\ref{fig:prop}, median with a band to the 90th percentile), ORCA's model drifts 83\,km at 6\,h, 303\,km at 24\,h and 2,920\,km at 7 days (medians over $\sim$15,160 LEO objects). Adding $J_2$ secular rates keeps the difference near 11\,km through 24\,h. Against the next TLE, SGP4's error at 5--7 days for non-Starlink objects has robust RIC spreads of 0.13, 14.6 and 0.21\,km. Along-track is thus about 100 times radial, and ORCA's isotropic 12.5\,km overstates the radial error about 90-fold. With three snapshots, the in-track spread grows from 0.16\,km at 0.3\,days to 14.6\,km at 6.3\,days. Starlink TLEs are about 15 times worse in-track, and SGP4's error for them grows with the fitted drag term B$^*$, consistent with thrust absorbed into the elements~\cite{lang2025starlink}.
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=\columnwidth]{figures/fig_propagation_r1.pdf}
-\caption{Position difference from SGP4 of the same TLE (median; band to 90th percentile).}
+\caption{Position Difference from SGP4 over Propagation Time}
 \label{fig:prop}
 \end{figure}
 
 \subsection{Screening}
-Brute force and the k-d tree return identical pair sets at every size. The k-d tree is 36 times faster at 1,000 objects and 173 times faster at 15,913, where it takes 8.5\,ms per step (Fig.~\ref{fig:runtime}). The spatial search is therefore cheap; recall is the problem (Fig.~\ref{fig:recall}).
+Brute force and the k-d tree return identical pair sets at every size. The k-d tree is 36 times faster at 1,000 objects and 173 times faster at 15,913, where it takes 8.5\,ms per step (Fig.~\ref{fig:runtime}; mean $\pm$ s.d. of 5 runs on identical SGP4 snapshots). The spatial search is therefore cheap; recall is the problem. Fig.~\ref{fig:recall} shows, for a 100\,km screen, the share of encounters closer than 10\,km whose pass is sampled, by relative velocity (three seeds pooled). Candidate reduction shows the same trade-off: out of 1,999,000 pairs, a 1\,h / 100\,km screen flags about 1,400 (a 1,300--1,450-fold reduction) yet detects about 1\,\% of encounters, while the 20\,s / 200\,km screen flags about 195,000 (a 10-fold reduction) and misses none.
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=\columnwidth]{figures/fig_screening_runtime.pdf}
-\caption{Time per screening step, brute force against k-d tree, on identical SGP4 snapshots (mean $\pm$ s.d. of 5 runs).}
+\caption{Screening Runtime of Brute Force and k-d Tree}
 \label{fig:runtime}
 \end{figure} Across 6,214--6,803 reference encounters per seed:
 \begin{itemize}
@@ -189,38 +215,38 @@ Recall falls with relative speed: it is 100\,\% below 0.1\,km/s but under 1\,\% 
 \begin{figure}[t]
 \centering
 \includegraphics[width=\columnwidth]{figures/fig_screening_recall.pdf}
-\caption{Share of encounters closer than 10\,km whose pass is sampled by a 100\,km screen, by relative velocity (three seeds pooled).}
+\caption{Screening Recall by Relative Velocity}
 \label{fig:recall}
 \end{figure}
 
 \subsection{Time of Closest Approach}
-Grid search alone is a poor miss-distance estimator (Fig.~\ref{fig:tca}). Even a 1\,s grid errs by a median of 353\,m, because at 10\,km/s half a second is 5\,km. A parabola on $d^2$ from a 60\,s grid gives 0.84\,m with four evaluations. Brent on the range rate is exact to below a microsecond with nine. ORCA's single $\pm6$\,h minimisation finds the closest approach for only 5.4--6.1\,\% of the pairs it flags, because such a window contains about 15 approach minima. Root-finding every minimum finds all of them.
+Grid search alone is a poor miss-distance estimator (Fig.~\ref{fig:tca}; median over 6,568 encounters, window $\pm60$\,s). Even a 1\,s grid errs by a median of 353\,m, because at 10\,km/s half a second is 5\,km. A parabola on $d^2$ from a 60\,s grid gives 0.84\,m with four evaluations. Brent on the range rate is exact to below a microsecond with nine. ORCA's single $\pm6$\,h minimisation finds the closest approach for only 5.4--6.1\,\% of the pairs it flags, because such a window contains about 15 approach minima. Root-finding every minimum finds all of them.
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=\columnwidth]{figures/fig_tca_tradeoff.pdf}
-\caption{Median miss-distance error against cost for TCA methods (6,568 encounters, window $\pm60$\,s).}
+\caption{Miss-Distance Error versus Cost of TCA Methods}
 \label{fig:tca}
 \end{figure}
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=\columnwidth]{figures/fig_pc_ratio.pdf}
-\caption{ORCA's $P_c$ divided by Foster's, against $\alpha$ (same covariance and radii); the dashed line is $1/\alpha^2$.}
+\caption{Ratio of ORCA's $P_c$ to Foster's $P_c$}
 \label{fig:pcratio}
 \end{figure}
 
 \subsection{Collision Probability}
-On identical inputs, ORCA's $P_c$ equals Foster's divided by $\alpha^2$ ($\alpha$ = miss/$\sigma$; Fig.~\ref{fig:pcratio}). Foster matches the closed form to $10^{-12}$ and Monte Carlo in 50 of 50 cases per seed. The consequences:
+On identical inputs, ORCA's $P_c$ equals Foster's divided by $\alpha^2$ ($\alpha$ = miss/$\sigma$). Fig.~\ref{fig:pcratio} plots the ratio against $\alpha$ for the same covariance and radii; the dashed line is $1/\alpha^2$. Foster matches the closed form to $10^{-12}$ and Monte Carlo in 50 of 50 cases per seed. The consequences:
 \begin{itemize}
 \item every one of ORCA's 455--550 CRITICAL and HIGH events per seed is MEDIUM or LOW under Foster;
 \item ORCA's ranking was effectively a miss-distance ranking (Kendall $\tau=0.87$), whereas Foster's is not ($\tau=0.41$--$0.43$);
-\item at $P_c\approx10^{-6}$, Monte Carlo returned no hits up to $10^5$ samples and came within 15\,\% only at $10^8$ (Fig.~\ref{fig:mc}). The original plan of $10^3$--$10^5$ samples would have returned zero.
+\item at $P_c\approx10^{-6}$, Monte Carlo returned no hits up to $10^5$ samples and came within 15\,\% only at $10^8$. Fig.~\ref{fig:mc} shows Monte Carlo $P_c$ divided by Foster's for the three highest-$P_c$ encounters ($P_c\approx1.2\times10^{-6}$), with 95\,\% Clopper--Pearson intervals; the grey region marks fewer than one expected hit. The original plan of $10^3$--$10^5$ samples would have returned zero.
 
 \begin{figure*}[t]
 \centering
 \includegraphics[width=\textwidth]{figures/fig_mc_convergence.pdf}
-\caption{Monte Carlo $P_c$ divided by Foster's for the three highest-$P_c$ encounters ($P_c\approx1.2\times10^{-6}$), with 95\,\% Clopper--Pearson intervals. The grey region marks fewer than one expected hit.}
+\caption{Monte Carlo Convergence of $P_c$}
 \label{fig:mc}
 \end{figure*}
 \end{itemize}
@@ -231,34 +257,73 @@ Within a single pass the straight-line model holds from 0.1\,km/s up; below that
 Table~\ref{tab:e2e} compares the two pipelines. ORCA as built finds 6--8 of about 6,500 encounters per seed and misreports miss distances by a median of about 90\,km. The corrected pipeline reproduces the reference to within one event per seed at nine times the runtime. Table~\ref{tab:tiers} shows that for these \emph{same} encounters the tiers depend on the covariance far more than on the method. It is now ORCA's production engine: on the full catalogue it finds about 426,000 approaches closer than 10\,km in a day, in 1.5--2 minutes.
 
 \begin{table}[t]
-\caption{End to end, seeds 1/2/3}
+\caption{End-to-End Comparison of the As-Built and Corrected Pipelines (Seeds 1/2/3)}
 \label{tab:e2e}
 \centering
-\begin{tabular}{@{}lcc@{}}
-\toprule
-& A: as built & B: corrected\\
-\midrule
+\footnotesize
+\begin{tabular}{|l|c|c|}
+\hline
+\textbf{Measure} & \textbf{A: As Built} & \textbf{B: Corrected}\\
+\hline
 Encounters $<$10\,km found & 8 / 6 / 7 & all\\
+\hline
 Median miss error & 90 / 98 / 85\,km & $<$1\,mm\\
+\hline
 Runtime (2,000 obj., 24\,h) & 2.6\,s & 24--25\,s\\
-\bottomrule
+\hline
 \end{tabular}
 \end{table}
 
 \begin{table}[t]
-\caption{HIGH-tier events per seed under each $P_c$ setting (same encounters)}
+\caption{HIGH and CRITICAL Events per Seed under Each $P_c$ Setting}
 \label{tab:tiers}
 \centering
-\begin{tabular}{@{}lc@{}}
-\toprule
-$P_c$ formula and covariance & HIGH (and CRITICAL)\\
-\midrule
+\footnotesize
+\begin{tabular}{|l|c|}
+\hline
+\textbf{$P_c$ Formula and Covariance} & \textbf{HIGH + CRITICAL}\\
+\hline
 ORCA formula, ORCA isotropic $\sigma$ & 455--550\\
+\hline
 Foster, ORCA isotropic $\sigma$ & 0\\
+\hline
 Foster, assumed in-track-dominant shape & 471--576\\
+\hline
 Foster, measured covariance & 0--3\\
+\hline
 Foster, measured, ESA-floored & 0--4\\
-\bottomrule
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{Summary of Metrics}
+Table~\ref{tab:metrics} gathers the headline value of each metric. Two results have not been stated above. First, TCA error in time follows miss-distance error: the median is 0.25\,s for a 1\,s grid, 12\,ms for a parabola on $d^2$ from a 60\,s grid, and 2.4\,$\mu$s for Brent on the range rate. Second, ORCA's tiers agree with Foster's (same covariance) for only 49--50\,\% of encounters, and for 92--93\,\% when one tier of difference is allowed; none of the 455--550 HIGH and CRITICAL events per seed stays in those tiers.
+
+\begin{table}[t]
+\caption{Summary of Evaluation Metrics (Medians, Seeds 1--3)}
+\label{tab:metrics}
+\centering
+\footnotesize
+\begin{tabular}{|>{\raggedright\arraybackslash}p{2.1cm}|>{\raggedright\arraybackslash}p{5.5cm}|}
+\hline
+\textbf{Metric} & \textbf{Result}\\
+\hline
+Position error & ORCA vs SGP4: 83\,km (6\,h), 303\,km (24\,h); with $J_2$: about 11\,km at 24\,h\\
+\hline
+TCA error & 0.25\,s (1\,s grid); 12\,ms (parabola); 2.4\,$\mu$s (range-rate roots)\\
+\hline
+Miss-distance error & 371\,m (1\,s grid); 0.89\,m (parabola); below 1\,mm (roots); 90\,km (ORCA as built)\\
+\hline
+Runtime & k-d tree 8.5\,ms per step at 15,913 objects; 2.6\,s as built vs 24--25\,s corrected (2,000 objects, 24\,h)\\
+\hline
+Candidate reduction & 1,300--1,450$\times$ at 1\,h / 100\,km (1\,\% recall); 10$\times$ at 20\,s / 200\,km (100\,\% recall)\\
+\hline
+Speedup & k-d tree over brute force: 36$\times$ (1,000 objects), 173$\times$ (15,913)\\
+\hline
+$P_c$ difference & ORCA = Foster$/\alpha^2$; Foster vs closed form $10^{-12}$\\
+\hline
+Tier agreement & ORCA vs Foster: 49--50\,\% exact, 92--93\,\% within one tier; Kendall $\tau$ 0.87 vs 0.41--0.43\\
+\hline
 \end{tabular}
 \end{table}
 
