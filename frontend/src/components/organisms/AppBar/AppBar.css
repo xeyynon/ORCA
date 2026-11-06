@@ -1,3 +1,9 @@
+/*
+ * Three independent sections. The 1fr / auto / 1fr grid keeps the centre on the viewport's centre whatever the widths
+ * of the brand and the utilities; the search field floats (absolute), so opening it never moves the navigation.
+ * On load the brand slides in from the left, the utilities from the right, the navigation fades in (about 260 ms,
+ * no bounce; off under reduced motion via base.css).
+ */
 .appbar {
   display: grid;
   grid-template-columns: 1fr auto 1fr;
@@ -5,16 +11,23 @@
   align-items: center;
   gap: var(--gap-4);
   height: var(--appbar-h);
-  padding: 0 var(--gap-4);
+  padding: 0 var(--gap-5);
   background: var(--bg-panel);
   border-bottom: 1px solid var(--border);
+  /* Its own layer above the page, so a menu or the search results never draw behind page content (the hero's animation). */
+  position: relative;
+  z-index: 30;
 }
-.appbar__left, .appbar__right, .appbar__center { display: flex; align-items: center; gap: var(--gap-2); min-width: 0; }
-.appbar__left { grid-area: left; }
-.appbar__center { grid-area: center; justify-content: center; }
-.appbar__right { grid-area: right; justify-content: flex-end; }
+.appbar__left, .appbar__right, .appbar__center { display: flex; align-items: center; min-width: 0; }
+.appbar__left { grid-area: left; gap: var(--gap-3); animation: appbar-from-left 260ms var(--ease-emphasized) both; }
+.appbar__center { grid-area: center; justify-content: center; gap: 2px; animation: appbar-fade 260ms var(--ease-standard) both; }
+.appbar__right { grid-area: right; justify-content: flex-end; gap: var(--gap-1); position: relative; animation: appbar-from-right 260ms var(--ease-emphasized) both; }
 
-/* Narrow: brand, search and account on the first row; the five views on a full-width second row, so nothing overlaps. */
+@keyframes appbar-from-left { from { opacity: 0; transform: translateX(-16px); } to { opacity: 1; transform: none; } }
+@keyframes appbar-from-right { from { opacity: 0; transform: translateX(16px); } to { opacity: 1; transform: none; } }
+@keyframes appbar-fade { from { opacity: 0; } to { opacity: 1; } }
+
+/* Narrow: brand and utilities on the first row; the views on a full-width second row that scrolls sideways. */
 @media (max-width: 1100px) {
   .appbar {
     grid-template-columns: minmax(0, 1fr) auto;
@@ -23,6 +36,6 @@
     gap: var(--gap-2) var(--gap-3);
     padding: var(--gap-2) var(--gap-3);
   }
-  .appbar__center { justify-content: flex-start; overflow-x: auto; scrollbar-width: none; scroll-padding-inline: var(--gap-3); }
+  .appbar__center { justify-content: flex-start; overflow-x: auto; scrollbar-width: none; padding-bottom: 6px; }
   .appbar__center::-webkit-scrollbar { display: none; }
 }
