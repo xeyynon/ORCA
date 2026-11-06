@@ -344,3 +344,4 @@ focus ring, reduced motion.
 Known gaps recorded by these guides and not yet done: text at 1.3x (sizes are
 in px), a screen-reader pass, a physical phone, an automated browser audit in the
 repo (the one used on 2026-11-06 was run by hand through a browser tool).
+18. **Notices are quiet.** No tinted boxes, no circled "i" icons, no coloured accent stripes: that is the default alert-component look and it reads as generated. A notice uses the ordinary card surface and border (`Callout`), and the state is a dot plus the words of its title. A notice about the whole page is a flat one-line strip under the header (`StaleDataBanner`: dot, one sentence, a plain action, a close icon), not a card. Reach for a tint only for an error, and then only as one uniform border colour.
