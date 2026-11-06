@@ -1,0 +1,6 @@
+.learn-tile__text { margin: 0; color: var(--text-secondary); }
+.learn-tile__terms { display: grid; gap: var(--gap-2); margin: 0; }
+.learn-tile__term { display: grid; grid-template-columns: 4ch 1fr; gap: var(--gap-2); align-items: baseline; }
+.learn-tile__term dt { color: var(--text-primary); font-family: var(--font-mono); font-weight: 600; }
+.learn-tile__term dd { margin: 0; color: var(--text-secondary); }
+.learn-tile__hint { margin: 0; color: var(--text-tertiary); font-size: var(--text-sm); }

@@ -12,6 +12,7 @@ import { useHealth } from '@/hooks/useHealth'
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { useNow } from '@/hooks/useNow'
 import { useObjectSearch } from '@/hooks/useObjectSearch'
+import { useTour } from '@/hooks/useTour'
 import { summarizeCatalog } from '@/lib/catalog'
 import { days, formatLat, formatLon, integer } from '@/lib/format'
 import { formatUtc } from '@/lib/time'
@@ -32,6 +33,7 @@ import { ChunkErrorBoundary } from '@/components/organisms/ChunkErrorBoundary/Ch
 import { StaleDataBanner } from '@/components/organisms/StaleDataBanner/StaleDataBanner'
 import { ShortcutsHelp } from '@/components/organisms/ShortcutsHelp/ShortcutsHelp'
 import { StatusBar } from '@/components/organisms/StatusBar/StatusBar'
+import { TourOverlay } from '@/components/organisms/TourOverlay/TourOverlay'
 import type { StatusItem } from '@/components/organisms/StatusBar/StatusBar'
 import type { FocusRequest } from '@/components/organisms/GlobeCanvas/GlobeCanvas'
 import { LoadingScreen } from '@/components/views/LoadingScreen/LoadingScreen'
@@ -80,6 +82,8 @@ export function Workspace({ username, onSignOut, theme, onToggleTheme: toggleThe
   const [query, setQuery] = useState('')
   const search = useObjectSearch(query, catalog.data ?? [])
   const focusNonce = useRef(0)
+  // First-run tour: starts by itself once per browser; tour.start replays it (menu, Mission control).
+  const tour = useTour()
 
   const summary = useMemo(() => (catalog.data ? summarizeCatalog(catalog.data, now) : null), [catalog.data, now])
   const stale = summary ? staleNotice(summary.medianAgeDays, summary.oldestAgeDays) : null
@@ -145,7 +149,7 @@ export function Workspace({ username, onSignOut, theme, onToggleTheme: toggleThe
       <AppBar
         left={<><Brand href="#/home" onNavigate={() => go('home')} /><ObjectSearch inputRef={searchRef} query={query} onQueryChange={setQuery} results={search.results} loading={search.loading} degraded={search.degraded} onPick={(id) => showOnGlobe([id])} /></>}
         center={<PrimaryNav view={view} onChange={go} />}
-        right={<AppMenu username={username} theme={theme} onToggleTheme={toggleTheme} onShowShortcuts={() => setHelpOpen(true)} onSignOut={onSignOut} />}
+        right={<AppMenu username={username} theme={theme} onToggleTheme={toggleTheme} onShowShortcuts={() => setHelpOpen(true)} onStartTour={tour.start} onSignOut={onSignOut} />}
       />
 
       <Breadcrumbs trail={trail} onNavigate={onCrumb} />
@@ -155,7 +159,7 @@ export function Workspace({ username, onSignOut, theme, onToggleTheme: toggleThe
         <StaleDataBanner notice={stale} onGoData={() => go('data')} onDismiss={() => setStaleDismissedBand(currentStaleBand)} />
       ) : null}
 
-      {view === 'home' ? <HomeView onGo={go} /> : null}
+      {view === 'home' ? <HomeView catalog={catalog} summary={summary} health={health} apiStatus={apiStatus} conjSearch={conjSearch} onConjQueryChange={setConjQuery} onGo={go} onStartTour={tour.start} /> : null}
       {view === 'overview' ? (
         <OverviewView
           catalog={catalog}
@@ -205,6 +209,7 @@ export function Workspace({ username, onSignOut, theme, onToggleTheme: toggleThe
 
       <StatusBar items={status} />
       {helpOpen ? <ShortcutsHelp onClose={() => setHelpOpen(false)} /> : null}
+      {tour.view ? <TourOverlay {...tour.view} /> : null}
     </div>
   )
 }

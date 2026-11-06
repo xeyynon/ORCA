@@ -36,9 +36,9 @@ export function PlaybackBar({ offsetH, playing, speed, simMs, tcaOffsetH, onTogg
   return (
     <div className="playback">
       <div className="playback__buttons">
-        <IconButton label={playing ? 'Pause' : 'Play'} pressed={playing} onClick={onToggle}><Icon name={playing ? 'pause' : 'play'} /></IconButton>
-        <IconButton label="Back 1 hour" onClick={() => onStep(-1)}><Icon name="skip-back" /></IconButton>
-        <IconButton label="Forward 1 hour" onClick={() => onStep(1)}><Icon name="skip-forward" /></IconButton>
+        <IconButton variant="tactile" label={playing ? 'Pause' : 'Play'} pressed={playing} onClick={onToggle}><Icon name={playing ? 'pause' : 'play'} /></IconButton>
+        <IconButton variant="tactile" label="Back 1 hour" onClick={() => onStep(-1)}><Icon name="skip-back" /></IconButton>
+        <IconButton variant="tactile" label="Forward 1 hour" onClick={() => onStep(1)}><Icon name="skip-forward" /></IconButton>
         <SelectField<string> compact ariaLabel="Playback speed" value={String(speed)} options={SPEEDS.map((s) => ({ value: String(s), label: `${s}×` }))} onChange={(v) => onSpeed(Number(v) as Speed)} />
       </div>
 
