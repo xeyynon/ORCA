@@ -1,0 +1,76 @@
+/* The report is paper: white with dark ink in both themes (--paper-* tokens, contrast-checked), A4 proportions on
+   screen, and the same layout in print. Tables are hairline-ruled, figures tabular; risk is a dot and a word. */
+.report {
+  width: 100%;
+  max-width: 794px; /* A4 width at 96 dpi */
+  margin: 0 auto;
+  padding: 56px 60px 40px;
+  background: var(--paper-bg);
+  color: var(--paper-ink);
+  font-size: 12.5px;
+  line-height: 1.5;
+  box-shadow: var(--elev-3);
+}
+.report h2 { margin: 0 0 10px; padding-bottom: 6px; border-bottom: 2px solid var(--paper-ink); color: var(--paper-ink); font-size: 16px; font-weight: 700; break-after: avoid; }
+.report__header { display: flex; flex-direction: column; gap: 10px; padding-bottom: 18px; margin-bottom: 22px; border-bottom: 1px solid var(--paper-rule); }
+.report__brand { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.report__logo { height: 26px; width: auto; }
+.report__kind { color: var(--paper-ink-3); font-size: 10.5px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; }
+.report__title { margin: 6px 0 0; color: var(--paper-ink); font-size: 26px; line-height: 1.15; font-weight: 700; letter-spacing: -0.01em; }
+.report__meta { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px 16px; margin: 4px 0 0; }
+.report__meta dt { color: var(--paper-ink-3); font-size: 10.5px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; }
+.report__meta dd { margin: 0; color: var(--paper-ink); font-variant-numeric: tabular-nums; }
+.report__run { margin: 0; color: var(--paper-ink-2); }
+/* The handling marking: centred, bold, widely spaced capitals, the way official documents mark how they may be used.
+   Emphasis by position and type alone: no box, no tint, no side stripe (MD/rules.md §11.21). */
+.report__marking {
+  margin: -28px 0 22px;
+  color: var(--paper-ink);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-align: center;
+  text-transform: uppercase;
+}
+.report__contents { display: flex; flex-wrap: wrap; gap: 4px 20px; margin: 0; padding-left: 0; list-style-position: inside; color: var(--paper-ink-2); }
+.report__section { margin-bottom: 26px; }
+.report__lead { margin: 0 0 12px; color: var(--paper-ink); }
+.report__pair { margin: 0 0 6px; color: var(--paper-ink); font-size: 14px; }
+.report__sub { margin: 14px 0 6px; color: var(--paper-ink); font-size: 13px; }
+.report__note { margin: 8px 0 0; color: var(--paper-ink-3); font-size: 11.5px; }
+.report__muted { color: var(--paper-ink-3); }
+.report__table { width: 100%; margin: 0 0 14px; border-collapse: collapse; font-variant-numeric: tabular-nums; break-inside: auto; }
+.report__table caption { padding-bottom: 4px; color: var(--paper-ink-2); font-size: 11.5px; font-weight: 600; text-align: left; }
+.report__table th, .report__table td { padding: 5px 8px; border-bottom: 1px solid var(--paper-rule); text-align: left; vertical-align: top; }
+.report__table thead th { background: var(--paper-fill); color: var(--paper-ink-2); font-size: 11px; font-weight: 600; }
+.report__table tr { break-inside: avoid; }
+.report__table .num { text-align: right; white-space: nowrap; }
+.report__table .mono { font-family: var(--font-mono); font-size: 11.5px; white-space: nowrap; }
+.report__table--facts th[scope="row"] { width: 36%; color: var(--paper-ink-2); font-weight: 500; }
+.report__table--tiers th, .report__table--tiers td { text-align: center; }
+.report__risk { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; letter-spacing: 0.03em; white-space: nowrap; }
+.report__dot { width: 7px; height: 7px; border-radius: 50%; flex: none; }
+.report__dot--critical { background: var(--paper-risk-critical); }
+.report__dot--high { background: var(--paper-risk-high); }
+.report__dot--medium { background: var(--paper-risk-medium); }
+.report__dot--low { background: var(--paper-risk-low); }
+.report__dot--negligible { background: var(--paper-risk-negligible); }
+.report__pc { white-space: nowrap; }
+.report__pc sup { font-size: 0.72em; line-height: 0; }
+.report__limits { margin: 0; padding-left: 18px; color: var(--paper-ink-2); }
+.report__limits li + li { margin-top: 3px; }
+.report__footer { margin-top: 28px; padding-top: 8px; border-top: 1px solid var(--paper-rule); color: var(--paper-ink-3); font-size: 10.5px; }
+
+/* Small screens: the preview stays a document (a paper width, scrolled sideways in its frame) instead of half-reflowing.
+   Screen only: the A4 print area is under 720 px wide too, and print must keep the paper layout. */
+@media screen and (max-width: 720px) {
+  .report { min-width: 640px; padding: 32px 28px; }
+}
+
+/* Print: the page is the paper. Colours print as on screen (the dots), no shadow, the browser's own margins. */
+@media print {
+  /* Every printed page carries the marking in its top margin (the @page rule), so the copy in the flow is dropped. */
+  .report__marking { display: none; }
+  .report { max-width: none; padding: 0; box-shadow: none; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .report__section { break-inside: auto; }
+}

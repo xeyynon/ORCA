@@ -35,7 +35,9 @@ test('a pair below its minimum is reported as failing, not skipped', () => {
   // Build a tiny token set where text-primary has almost no contrast against every surface.
   const names = ['--bg-canvas', '--bg-panel', '--bg-card', '--text-primary', '--text-secondary', '--text-tertiary', '--text-faint', '--accent-ink',
     '--risk-critical-ink', '--risk-high-ink', '--risk-medium-ink', '--risk-low-ink', '--risk-negligible-ink', '--ok-ink', '--warn-ink', '--bad-ink',
-    '--accent', '--risk-critical', '--risk-high', '--risk-medium', '--risk-low', '--ok', '--warn', '--bad', '--cat-1', '--cat-2', '--cat-3', '--cat-4', '--cat-5']
+    '--accent', '--risk-critical', '--risk-high', '--risk-medium', '--risk-low', '--ok', '--warn', '--bad', '--cat-1', '--cat-2', '--cat-3', '--cat-4', '--cat-5',
+    '--paper-bg', '--paper-fill', '--paper-ink', '--paper-ink-2', '--paper-ink-3', '--paper-accent',
+    '--paper-risk-critical', '--paper-risk-high', '--paper-risk-medium', '--paper-risk-low', '--paper-risk-negligible']
   const decl = (over: Record<string, string>) => names.map((n) => `${n}: ${over[n] ?? '#ffffff'};`).join(' ')
   const css = `:root,\n:root[data-theme="dark"] {\n ${decl({ '--bg-canvas': '#000000', '--bg-panel': '#000000', '--bg-card': '#000000', '--text-primary': '#010101' })}\n}\n:root[data-theme="light"] {\n --x: #fff;\n}\n`
   const bad = measureTokens(css).filter((m) => m.theme === 'dark' && m.fg === '--text-primary')

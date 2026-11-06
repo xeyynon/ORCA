@@ -4,7 +4,7 @@ import { TOUR_STEPS, TOUR_STORAGE_KEY, availableSteps, moveStep, reconcileStep, 
 import { placeCard, spotlightRect, SHEET_BELOW_PX } from './tourPlacement.ts'
 
 test('the tour has the five steps in order, each with a target and short copy', () => {
-  assert.deepEqual(TOUR_STEPS.map((s) => s.id), ['views', 'search', 'globe', 'conjunctions', 'menu'])
+  assert.deepEqual(TOUR_STEPS.map((s) => s.id), ['how', 'views', 'search', 'globe', 'conjunctions', 'menu'])
   for (const s of TOUR_STEPS) {
     assert.ok(s.target.length > 0 && s.title.length > 0, s.id)
     // one or two sentences (the views step lists the six views in one, then the keys)
@@ -20,7 +20,8 @@ test('the storage key is versioned', () => {
 test('the copy names the keys the app really binds', () => {
   const views = TOUR_STEPS.find((s) => s.id === 'views')!.body
   assert.match(views, /\bH\b/)
-  assert.match(views, /1 to 5/)
+  assert.match(views, /1 to 6/)
+  assert.match(views, /Reports/)
   assert.match(TOUR_STEPS.find((s) => s.id === 'search')!.body, /Press \//)
   assert.match(TOUR_STEPS.find((s) => s.id === 'conjunctions')!.body, /saved example run/)
   assert.match(TOUR_STEPS.find((s) => s.id === 'menu')!.body, /Take the tour/)
@@ -28,8 +29,10 @@ test('the copy names the keys the app really binds', () => {
 
 test('a step whose target is missing is skipped, never pointed at nothing', () => {
   const shown = availableSteps(TOUR_STEPS, (s) => s.id !== 'search')
-  assert.deepEqual(shown.map((s) => s.id), ['views', 'globe', 'conjunctions', 'menu'])
-  assert.equal(stepLabel(1, shown.length), 'Step 2 of 4')
+  assert.deepEqual(shown.map((s) => s.id), ['how', 'views', 'globe', 'conjunctions', 'menu'])
+  assert.equal(stepLabel(1, shown.length), 'Step 2 of 5')
+  // Off the home page the hero is not there, so "How ORCA works" is skipped.
+  assert.deepEqual(availableSteps(TOUR_STEPS, (s) => s.id !== 'how').map((s) => s.id), ['views', 'search', 'globe', 'conjunctions', 'menu'])
   assert.deepEqual(availableSteps(TOUR_STEPS, () => false), [])
 })
 
@@ -46,9 +49,9 @@ test('next and back move one step; next on the last finishes; back on the first 
 test('when the steps on screen change, the current step is kept, or the next one after it, or the last', () => {
   const all = TOUR_STEPS
   const without = (...ids: string[]) => all.filter((s) => !ids.includes(s.id))
-  assert.equal(reconcileStep('globe', all, without('search')), 1)
-  assert.equal(reconcileStep('search', all, without('search')), 1) // globe came next
-  assert.equal(reconcileStep('menu', all, without('menu')), 3) // nothing after it: the last remaining
+  assert.equal(reconcileStep('globe', all, without('search')), 2)
+  assert.equal(reconcileStep('search', all, without('search')), 2) // globe came next
+  assert.equal(reconcileStep('menu', all, without('menu')), 4) // nothing after it: the last remaining
   assert.equal(reconcileStep('views', all, []), null)
 })
 

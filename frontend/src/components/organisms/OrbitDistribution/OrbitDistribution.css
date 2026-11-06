@@ -1,0 +1,15 @@
+/* The two analytical panels (this one and DataQuality) share the .home-panel surface, written identically in both
+   stylesheets: one surface, hairline border, no shadow. */
+.home-panel { display: flex; flex-direction: column; gap: var(--gap-4); min-width: 0; padding: var(--gap-5); border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface-1); }
+.home-panel .block-header__title { font-size: var(--text-lg); }
+.home-panel__link { padding: 0; border: 0; background: none; color: var(--accent-ink); font-weight: 500; }
+.home-panel__link::after { content: '\2192'; display: inline-block; margin-left: 6px; }
+.home-panel__note { margin: 0; color: var(--text-tertiary); font-size: var(--text-sm); line-height: 1.45; }
+.orbit-dist .bar-list { gap: var(--gap-3); }
+/* The panels are the same height side by side; the key sits on the bottom edge rather than leaving a gap under it. */
+.orbit-dist > .home-panel__note { margin-top: auto; }
+.orbit-dist .bar-list__row { grid-template-columns: 56px 1fr auto; }
+.orbit-dist .bar-list__track { height: 10px; border-radius: var(--radius-pill); }
+.orbit-dist .bar-list__fill { border-radius: var(--radius-pill); }
+.orbit-dist__loading { display: grid; gap: 18px; padding: var(--gap-2) 0; }
+@media (pointer: coarse) { .home-panel__link { min-height: 44px; } }

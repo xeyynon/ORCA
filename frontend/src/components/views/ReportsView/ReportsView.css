@@ -1,0 +1,47 @@
+/* Layout: the builder on the left (stays in view while the preview scrolls), the paper on a recessed desk on the right. */
+.reports { display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: var(--gap-5); align-items: start; }
+.reports__builder { position: sticky; top: 0; }
+.reports__preview { min-width: 0; padding: var(--gap-6) var(--gap-5); border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--bg-abyss); }
+@media (max-width: 1000px) {
+  .reports { grid-template-columns: 1fr; }
+  .reports__builder { position: static; }
+  .reports__preview { padding: var(--gap-3); overflow-x: auto; }
+}
+
+/* The print-only copy lives at the end of <body>; on screen it is not there. In print it is the only thing there:
+   the app (bar, nav, builder, preview) is hidden, so long reports flow over as many pages as they need. */
+.report-print { display: none; }
+@media print {
+  /* Every page carries the handling marking at its head and its number at its foot, in the page margins, as official
+     documents do. The marking text is REPORT_MARKING in lib/report.ts: keep the two in step. */
+  @page {
+    size: A4;
+    margin: 20mm 14mm 18mm;
+    @top-center {
+      content: "EDUCATIONAL USE ONLY \00B7  NOT FOR OPERATIONAL DECISIONS";
+      color: var(--paper-ink);
+      font-family: var(--font-ui);
+      font-size: 7.5pt;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+    }
+    @bottom-left {
+      content: "ORCA \00B7  Space situational awareness report";
+      color: var(--paper-ink-3);
+      font-family: var(--font-ui);
+      font-size: 7.5pt;
+    }
+    @bottom-right {
+      content: "Page " counter(page) " of " counter(pages);
+      color: var(--paper-ink-3);
+      font-family: var(--font-ui);
+      font-size: 7.5pt;
+    }
+  }
+  /* :root outranks base.css's html rule, so the page margins print white too; and the dark theme's color-scheme would
+     have the browser paint the margins dark, so print is always a light scheme. */
+  :root, :root[data-theme], :root body { height: auto; overflow: visible; background: var(--paper-bg); color-scheme: light; }
+  /* (0,1,1) specificity: beats the app's own single-class display rules, no override flag needed. */
+  body > :not(.report-print) { display: none; }
+  .report-print { display: block; }
+}
