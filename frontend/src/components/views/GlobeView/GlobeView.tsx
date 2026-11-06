@@ -5,6 +5,7 @@ import { useCatalogSummary } from '@/hooks/useCatalogSummary'
 import { useFullscreen } from '@/hooks/useFullscreen'
 import { useGlobePrefs } from '@/hooks/useGlobePrefs'
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
+import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { useOrbitPaths } from '@/hooks/useOrbitPaths'
 import { useElapsed } from '@/hooks/useElapsed'
 import { usePlayback } from '@/hooks/usePlayback'
@@ -23,6 +24,7 @@ import type { Theme } from '@/lib/theme'
 import { Button } from '../../atoms/Button/Button'
 import { EmptyState } from '../../molecules/EmptyState/EmptyState'
 import { FieldNote } from '../../molecules/FieldNote/FieldNote'
+import { BottomSheet } from '../../organisms/BottomSheet/BottomSheet'
 import { CatalogSummaryCard } from '../../organisms/CatalogSummaryCard/CatalogSummaryCard'
 import { ConjunctionCard } from '../../organisms/ConjunctionCard/ConjunctionCard'
 import { FiltersCard } from '../../organisms/FiltersCard/FiltersCard'
@@ -47,6 +49,8 @@ import './GlobeView.css'
 const POSITION_LIMIT = 20000
 const HOUR_MS = 3_600_000
 const NO_PATHS: ReadonlyMap<string, Vec3[]> = new Map()
+/** Same breakpoint as GlobeView.css: below it the globe comes first and the details become a bottom sheet over it. */
+const NARROW = '(max-width: 1000px)'
 
 type Props = {
   catalog: readonly TleRecord[] | null
@@ -71,6 +75,7 @@ export function GlobeView({ catalog, totalCount, selection, focus, conjunction, 
   const [resetNonce, setResetNonce] = useState(0)
   const stageRef = useRef<HTMLDivElement>(null)
   const toggleFullscreen = useFullscreen(stageRef)
+  const narrow = useMediaQuery(NARROW)
 
   useKeyboardShortcuts({ ' ': () => setAutoRotate((v) => !v) })
 
@@ -129,6 +134,26 @@ export function GlobeView({ catalog, totalCount, selection, focus, conjunction, 
   const tcaOffsetH = tca && 'offsetH' in tca ? tca.offsetH : null
   const simMs = nowMs + playback.offsetH * HOUR_MS
 
+  // What is selected: the side panel on a wide screen, a bottom sheet over the globe's foot on a phone (above the
+  // playback bar, which stays reachable). Single tap on the globe selects; the sheet handle is a button as well as a drag.
+  const details = conjunction || primary || selection.length > 1 ? (
+    <>
+      {conjunction ? (
+        <ConjunctionCard
+          event={conjunction}
+          nowMs={nowMs}
+          onJumpToTca={() => { if (tcaOffsetH !== null) playback.jumpTo(tcaOffsetH) }}
+          onViewDetails={onViewConjunctions}
+          onClose={onClearConjunction}
+        />
+      ) : null}
+      {primary ? <ObjectCard tle={primary} position={posById.get(primary.norad_cat_id) ?? null} now={now} onClose={() => onSelect([])} /> : null}
+      {selection.length > 1 ? <FieldNote>{selection.length} objects selected: {selection.map(nameOf).join(' and ')}.</FieldNote> : null}
+    </>
+  ) : null
+  const sheetTitle = conjunction ? `Conjunction: ${conjunction.sat1_name} × ${conjunction.sat2_name}` : primary ? primary.object_name : `${selection.length} objects selected`
+  const inSheet = narrow && details !== null
+
   return (
     <main className="globe-view" id="main-content" tabIndex={-1} aria-label="Globe">
       <aside className="globe-view__side globe-view__side--left" aria-label="Catalog and filters">
@@ -165,36 +190,29 @@ export function GlobeView({ catalog, totalCount, selection, focus, conjunction, 
             hasSelection={selection.length > 0}
           />
         </div>
-        <div className="globe-view__bar">
-          <PlaybackBar
-            offsetH={playback.offsetH}
-            playing={playback.playing}
-            speed={playback.speed}
-            simMs={simMs}
-            tcaOffsetH={tcaOffsetH}
-            onToggle={playback.toggle}
-            onStep={(d) => playback.step(d)}
-            onSpeed={playback.setSpeed}
-            onScrub={playback.scrub}
-            onLive={playback.toLive}
-            onResetView={() => setResetNonce((n) => n + 1)}
-            onFullscreen={toggleFullscreen}
-          />
+        <div className="globe-view__foot">
+          {inSheet ? <div className="globe-view__sheet"><BottomSheet title={sheetTitle}>{details}</BottomSheet></div> : null}
+          <div className="globe-view__bar">
+            <PlaybackBar
+              offsetH={playback.offsetH}
+              playing={playback.playing}
+              speed={playback.speed}
+              simMs={simMs}
+              tcaOffsetH={tcaOffsetH}
+              onToggle={playback.toggle}
+              onStep={(d) => playback.step(d)}
+              onSpeed={playback.setSpeed}
+              onScrub={playback.scrub}
+              onLive={playback.toLive}
+              onResetView={() => setResetNonce((n) => n + 1)}
+              onFullscreen={toggleFullscreen}
+            />
+          </div>
         </div>
       </div>
 
       <aside className="globe-view__side globe-view__side--right" aria-label="Camera and selection">
-        {conjunction ? (
-          <ConjunctionCard
-            event={conjunction}
-            nowMs={nowMs}
-            onJumpToTca={() => { if (tcaOffsetH !== null) playback.jumpTo(tcaOffsetH) }}
-            onViewDetails={onViewConjunctions}
-            onClose={onClearConjunction}
-          />
-        ) : null}
-        {primary ? <ObjectCard tle={primary} position={posById.get(primary.norad_cat_id) ?? null} now={now} onClose={() => onSelect([])} /> : null}
-        {selection.length > 1 ? <FieldNote>{selection.length} objects selected: {selection.map(nameOf).join(' and ')}.</FieldNote> : null}
+        {inSheet ? null : details}
 
         {positions.status === 'error' && !positions.data ? (
           <EmptyState kind="error" title="Could not load positions" action={<Button onClick={positions.reload}>Retry</Button>}>{positions.error.message}</EmptyState>

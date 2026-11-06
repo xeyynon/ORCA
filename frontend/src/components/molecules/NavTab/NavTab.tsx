@@ -1,15 +1,15 @@
+import type { ReactNode } from 'react'
 import { cx } from '@/lib/cx'
-import { Kbd } from '../../atoms/Kbd/Kbd'
 import './NavTab.css'
 
-type Props = { label: string; hotkey: string; active: boolean; onClick: () => void }
+type Props = { label: string; icon: ReactNode; hotkey: string; active: boolean; onClick: () => void }
 
-/** A top-level view switch. aria-current marks the page; the key is shown in the control. */
-export function NavTab({ label, hotkey, active, onClick }: Props) {
+/** A top-level view switch: a simple icon and its label. aria-current marks the page; the key is in the tooltip. */
+export function NavTab({ label, icon, hotkey, active, onClick }: Props) {
   return (
     <button type="button" className={cx('nav-tab', active && 'nav-tab--active')} aria-current={active ? 'page' : undefined} title={`${label} (${hotkey})`} onClick={onClick}>
-      <span>{label}</span>
-      <span className="nav-tab__key"><Kbd>{hotkey}</Kbd></span>
+      <span className="nav-tab__icon" aria-hidden="true">{icon}</span>
+      <span className="nav-tab__label">{label}</span>
     </button>
   )
 }

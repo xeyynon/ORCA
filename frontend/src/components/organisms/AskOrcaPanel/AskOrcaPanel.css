@@ -1,0 +1,76 @@
+/*
+ * A floating panel (Material level 2): --surface-2 with --elev-2, docked right between the app bar and the status bar.
+ * Quiet (rules.md 11.18): plain surface and border, no gradient, no tint but the user's own messages. It slides in by
+ * transform/opacity only (--dur-2), off under reduced motion. Below 640px it is a full-width bottom sheet.
+ */
+.ask-orca {
+  position: fixed;
+  z-index: 45;
+  top: calc(var(--appbar-h) + var(--gap-3));
+  right: var(--gap-3);
+  bottom: calc(var(--statusbar-h) + var(--gap-3));
+  display: flex;
+  flex-direction: column;
+  width: min(380px, calc(100vw - 2 * var(--gap-3)));
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface-2);
+  box-shadow: var(--elev-2);
+  color: var(--text-primary);
+  animation: ask-orca-in var(--dur-2) var(--ease-emphasized);
+}
+
+.ask-orca__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--gap-2);
+  padding: var(--gap-2) var(--gap-2) var(--gap-2) var(--gap-4);
+  border-bottom: 1px solid var(--border);
+}
+.ask-orca__title { margin: 0; font-size: var(--text-lg); font-weight: 600; }
+
+.ask-orca__log {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-2);
+  padding: var(--gap-3) var(--gap-4);
+}
+
+.ask-orca__foot {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-2);
+  padding: var(--gap-3) var(--gap-4);
+  border-top: 1px solid var(--border);
+}
+.ask-orca__note { margin: 0; color: var(--text-tertiary); font-size: var(--text-xs); }
+
+@keyframes ask-orca-in { from { opacity: 0; transform: translateX(12px); } }
+
+/* The two-row app bar is taller below 1100px; its height is not a token there, so the panel starts lower. */
+@media (max-width: 1100px) {
+  .ask-orca { top: calc(2 * var(--appbar-h) + var(--gap-2)); }
+}
+
+@media (max-width: 640px) {
+  .ask-orca {
+    top: auto;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    width: auto;
+    height: min(72vh, 560px);
+    border-width: 1px 0 0;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    animation-name: ask-orca-up;
+  }
+  .ask-orca__foot { padding-bottom: max(var(--gap-3), env(safe-area-inset-bottom)); }
+}
+@keyframes ask-orca-up { from { opacity: 0; transform: translateY(16px); } }
+
+@media (prefers-reduced-motion: reduce) { .ask-orca { animation: none; } }

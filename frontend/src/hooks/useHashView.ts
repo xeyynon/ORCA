@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState } from 'react'
-import { VIEWS } from '@/lib/views'
+import { DEFAULT_VIEW, VIEWS } from '@/lib/views'
 import type { ViewId } from '@/lib/views'
 
 function fromHash(): ViewId {
   const h = window.location.hash.replace(/^#\/?/, '')
-  return (VIEWS as readonly string[]).includes(h) ? (h as ViewId) : 'overview'
+  return (VIEWS as readonly string[]).includes(h) ? (h as ViewId) : DEFAULT_VIEW
 }
 
 /** The current view lives in the URL hash, so reload and Back/Forward work (no router needed). */

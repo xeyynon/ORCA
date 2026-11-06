@@ -9,6 +9,7 @@ from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.background import BackgroundTask
+from starlette.concurrency import run_in_threadpool
 from pydantic import BaseModel, Field
 from typing import List, Optional, Dict
 from datetime import datetime, timedelta
@@ -20,7 +21,13 @@ import asyncio
 from pathlib import Path
 import logging
  
+import envfile
+
+# Before anything reads its settings: GROQ_API_KEY and friends from the git-ignored .env next to this file.
+envfile.load()
+
 import auth
+import assistant
 from parser_pipeline import CelestrackClient, TLEDatabase, TLE
 
 from orbit_mech_engine import OrbitalElement, SGP4Propagator, CoordinateTransform, _julian_day, _gmst
@@ -141,6 +148,49 @@ def login(body: LoginRequest, request: Request):
 def whoami(request: Request):
     """Guarded by the global dependency: a 200 here means the presented token is valid and unexpired."""
     return {"username": request.state.user}
+
+
+# ============================================================================
+# ASK ORCA ASSISTANT (optional; off unless GROQ_API_KEY is set, in the environment or .env; see assistant.py)
+# ============================================================================
+
+_ask_limiter = assistant.AskLimiter()
+
+
+@app.get("/api/assistant/status")
+def assistant_status():
+    """Whether free-text questions can go to the AI provider (Groq) on this server, and if not, why. Never reveals the key."""
+    return assistant.status()
+
+
+@app.post("/api/assistant/ask")
+async def assistant_ask(request: Request):
+    """
+    Answer one question from the facts the browser sends. 503 when the feature is off, 400 on bad input,
+    429 past the per-user limit, 502 when Groq fails. Body is read by hand so bad input is a 400, not a 422.
+    """
+    state = assistant.status()
+    if not state["enabled"]:
+        raise HTTPException(status_code=503, detail=state["reason"])
+    try:
+        payload = await request.json()
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Send a JSON body.")
+    try:
+        req = assistant.validate(payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+    user = getattr(request.state, "user", None) or "unknown"
+    wait = _ask_limiter.retry_after(user)
+    if wait:
+        minutes = max(1, -(-wait // 60))
+        raise HTTPException(status_code=429, detail=f"Question limit reached. Try again in {minutes} minute(s).", headers={"Retry-After": str(wait)})
+    _ask_limiter.record(user)
+    try:
+        result = await run_in_threadpool(assistant.ask, req)  # the SDK call blocks; keep the event loop free
+    except assistant.UpstreamError as exc:
+        raise HTTPException(status_code=502, detail=str(exc))
+    return {"answer": result["answer"], "model": result["model"], "label": assistant.LABEL}
 
 
 # ============================================================================

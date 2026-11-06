@@ -1,17 +1,5 @@
-.app-menu { position: relative; }
-.app-menu__popover {
-  position: absolute;
-  z-index: 50;
-  right: 0;
-  top: calc(100% + 6px);
-  min-width: 240px;
-  max-width: calc(100vw - 2 * var(--gap-3));
-  padding: var(--gap-1);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-lg);
-  background: var(--bg-elevated);
-  box-shadow: var(--shadow);
-}
 .app-menu__who { padding: var(--gap-2) var(--gap-3); color: var(--text-tertiary); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .app-menu__user { color: var(--text-primary); font-family: var(--font-mono); }
 .app-menu__sep { height: 1px; margin: var(--gap-1) 0; background: var(--border); }
+.app-menu__heading { padding: var(--gap-2) var(--gap-3) 2px; color: var(--text-tertiary); font-size: var(--text-xs); font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; }
+.app-menu__empty { margin: 0; padding: var(--gap-1) var(--gap-3) var(--gap-2); color: var(--text-secondary); }

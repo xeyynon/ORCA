@@ -10,15 +10,17 @@ type Props = {
   popup?: 'menu'
   expanded?: boolean
   disabled?: boolean
+  /** `tactile` is the raised, physical look. Only for the Globe playback transport (MD/design_system_v2.md, Neumorphism). */
+  variant?: 'plain' | 'tactile'
   onClick: () => void
   children: ReactNode
 }
 
-export function IconButton({ label, pressed, popup, expanded, disabled, onClick, children }: Props) {
+export function IconButton({ label, pressed, popup, expanded, disabled, variant = 'plain', onClick, children }: Props) {
   return (
     <button
       type="button"
-      className={cx('icon-btn', pressed && 'icon-btn--on')}
+      className={cx('icon-btn', variant === 'tactile' && 'icon-btn--tactile', pressed && 'icon-btn--on')}
       aria-label={label}
       title={label}
       aria-pressed={pressed}
