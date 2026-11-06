@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { hookLines, riskFact } from './homeHook.ts'
+import { hookLines, riskStat } from './homeHook.ts'
 import type { HookRun } from './homeHook.ts'
 
 const run: HookRun = { totalEvents: 442786, reportKm: 10, horizonDays: 1, highRisk: 29, critical: 0, windowStart: '2026-11-06T18:23:26.126528', saved: true }
@@ -14,9 +14,9 @@ test('the headline quotes the real object count, and still reads before it arriv
 test('with a run, the second sentence quotes its pair count and says where it came from', () => {
   const l = hookLines(15970, run)
   assert.equal(l.sub, 'In one day of their orbits, 442,786 pairs came within 10 km of each other. ORCA finds those close approaches and shows how risky each one is.')
-  assert.match(l.source ?? '', /^Pair count from a stored example run starting 2026-11-06 18:23/)
+  assert.match(l.source ?? '', /^Pair and risk counts from a stored example run starting 2026-11-06 18:23/)
   assert.match(hookLines(15970, { ...run, saved: false, horizonDays: 3 }).sub, /^In 3 days of their orbits/)
-  assert.match(hookLines(15970, { ...run, saved: false }).source ?? '', /^Pair count from your search/)
+  assert.match(hookLines(15970, { ...run, saved: false }).source ?? '', /^Pair and risk counts from your search/)
 })
 
 test('without a run (or an empty one) no figure is quoted and no source is claimed', () => {
@@ -27,8 +27,10 @@ test('without a run (or an empty one) no figure is quoted and no source is claim
   }
 })
 
-test('the risk fact names the tiers that matter, not the alarming total', () => {
-  assert.equal(riskFact(run), '0 critical, 29 high-risk')
-  assert.equal(riskFact(null), null)
-  assert.equal(riskFact({ ...run, totalEvents: 0 }), 'No pairs came within 10 km.')
+test('the risk stat leads with the most severe tier that has any, never the alarming total', () => {
+  assert.deepEqual(riskStat(run), { figure: '29', caption: 'high-risk approaches', note: 'none critical' })
+  assert.deepEqual(riskStat({ ...run, critical: 2 }), { figure: '2', caption: 'critical approaches', note: 'plus 29 high-risk' })
+  assert.deepEqual(riskStat({ ...run, critical: 1, highRisk: 1 }), { figure: '1', caption: 'critical approach', note: 'plus 1 high-risk' })
+  assert.deepEqual(riskStat({ ...run, totalEvents: 0 }), { figure: '0', caption: 'pairs within 10 km', note: null })
+  assert.equal(riskStat(null), null)
 })

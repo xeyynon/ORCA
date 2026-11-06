@@ -42,14 +42,28 @@ export function hookLines(objects: number | null, run: HookRun | null): HookLine
     headline,
     sub: `In ${span} of their orbits, ${integer(run.totalEvents)} ${pairs} came within ${run.reportKm} km of each other. ${WHAT_ORCA_DOES}`,
     source: run.saved
-      ? `Pair count from a stored example run starting ${formatUtc(run.windowStart)}.`
-      : `Pair count from your search starting ${formatUtc(run.windowStart)}.`,
+      ? `Pair and risk counts from a stored example run starting ${formatUtc(run.windowStart)}.`
+      : `Pair and risk counts from your search starting ${formatUtc(run.windowStart)}.`,
   }
 }
 
-/** The short "close approaches" fact: the attention-worthy tiers, never a bare total that sounds alarming. */
-export function riskFact(run: HookRun | null): string | null {
+/** One big figure and the words under it, for the home page's stat row. */
+export interface Stat {
+  figure: string
+  caption: string
+  /** A short second line, quieter than the caption. */
+  note: string | null
+}
+
+/**
+ * The "close approaches" stat: the most severe tier that has any approaches, with the other tier as the note. Never the
+ * bare pair total, which sounds alarming and says nothing about risk.
+ */
+export function riskStat(run: HookRun | null): Stat | null {
   if (!run) return null
-  if (run.totalEvents <= 0) return `No pairs came within ${run.reportKm} km.`
-  return `${integer(run.critical)} critical, ${integer(run.highRisk)} high-risk`
+  if (run.totalEvents <= 0) return { figure: '0', caption: `pairs within ${run.reportKm} km`, note: null }
+  if (run.critical > 0) {
+    return { figure: integer(run.critical), caption: `critical ${run.critical === 1 ? 'approach' : 'approaches'}`, note: `plus ${integer(run.highRisk)} high-risk` }
+  }
+  return { figure: integer(run.highRisk), caption: `high-risk ${run.highRisk === 1 ? 'approach' : 'approaches'}`, note: 'none critical' }
 }

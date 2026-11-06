@@ -41,6 +41,7 @@
 
 .btn--md { height: 30px; padding: 0 12px; }
 .btn--sm { height: 24px; padding: 0 8px; font-size: 12px; }
+.btn--lg { height: 42px; padding: 0 20px; gap: 8px; border-radius: var(--radius-md); font-size: 14px; }
 .btn:disabled { opacity: 0.45; }
 /* A disabled primary keeps legible text: it is often the control being watched ("Searching…"), so it goes neutral instead of faint. */
 .btn--primary:disabled { opacity: 1; background: var(--bg-hover); border-color: var(--border-strong); color: var(--text-secondary); }
@@ -63,4 +64,4 @@
 @media (prefers-reduced-motion: reduce) { .btn:active:not(:disabled) { transform: none; } }
 
 /* Touch: 44 px (40 for the small size) so a thumb can hit it. */
-@media (pointer: coarse) { .btn--md { height: 44px; } .btn--sm { height: 40px; padding: 0 12px; } }
+@media (pointer: coarse) { .btn--md, .btn--lg { height: 44px; } .btn--sm { height: 40px; padding: 0 12px; } }
