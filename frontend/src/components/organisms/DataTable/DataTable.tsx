@@ -28,7 +28,8 @@ type Props<T> = {
 export function DataTable<T>({ caption, columns, rows, rowKey, selectedKey, onSelect, sortId, sortDir, onSort }: Props<T>) {
   return (
     <div className="data-table__scroll">
-      <table className="data-table">
+      {/* A selectable table is a grid: that is what makes aria-selected valid on its rows. */}
+      <table className="data-table" role={onSelect ? 'grid' : undefined}>
         <caption className="data-table__caption">{caption}</caption>
         <thead>
           <tr>
@@ -48,7 +49,7 @@ export function DataTable<T>({ caption, columns, rows, rowKey, selectedKey, onSe
                 aria-selected={onSelect ? selected : undefined}
                 tabIndex={onSelect ? 0 : undefined}
                 onClick={onSelect ? () => onSelect(row) : undefined}
-                onKeyDown={onSelect ? (e) => { if (e.key === 'Enter') onSelect(row) } : undefined}
+                onKeyDown={onSelect ? (e) => { if (e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); onSelect(row) } } : undefined}
               >
                 {columns.map((c) => (
                   <td key={c.id} className={cx('data-table__cell', c.align === 'right' && 'data-table__cell--right')}>{c.render(row)}</td>

@@ -1,13 +1,21 @@
 import { useMemo } from 'react'
 import type { ConjunctionEvent } from '@/api/types'
+import { cx } from '@/lib/cx'
 import { compact, pc } from '@/lib/format'
+import { pairKey } from '@/lib/pair'
 import { riskTone } from '@/lib/risk'
 import { decadeTicks, linearScale, logScale } from '@/lib/scale'
 import { formatShortUtc, formatUtc, parseUtc } from '@/lib/time'
 import { EmptyState } from '../../molecules/EmptyState/EmptyState'
 import './EventTimeline.css'
 
-type Props = { events: readonly ConjunctionEvent[]; now: Date }
+type Props = {
+  events: readonly ConjunctionEvent[]
+  now: Date
+  /** When given, a point is a button that selects its pair (the same selection as a table row). */
+  selectedKey?: string | null
+  onSelect?: (e: ConjunctionEvent) => void
+}
 
 const W = 760
 const H = 220
@@ -18,7 +26,7 @@ const X_TICKS = 5
  * When the events happen and how risky each is: time on x, probability of collision on a log y axis (it spans
  * many decades), colour by risk tier. A dashed line marks "now", so events already behind us are obvious.
  */
-export function EventTimeline({ events, now }: Props) {
+export function EventTimeline({ events, now, selectedKey = null, onSelect }: Props) {
   const plot = useMemo(() => {
     const pts = events
       .map((e) => ({ e, t: parseUtc(e.tca).getTime(), p: e.probability_of_collision }))
@@ -57,11 +65,25 @@ export function EventTimeline({ events, now }: Props) {
         })}
         <line className="timeline__now" x1={x(plot.nowMs)} x2={x(plot.nowMs)} y1={PAD.t} y2={H - PAD.b} />
         <text className="timeline__now-label" x={x(plot.nowMs) + 4} y={PAD.t + 10}>now</text>
-        {plot.pts.map(({ e, t, p }) => (
-          <circle key={`${e.sat1_id}|${e.sat2_id}|${e.tca}`} className={`timeline__dot timeline__dot--${riskTone(e.risk_level)}`} cx={x(t)} cy={y(p)} r={3.6}>
-            <title>{`${e.risk_level}: ${e.sat1_name} × ${e.sat2_name}\nPc ${pc(p)} · miss ${compact(e.min_distance_km)} km\nTCA ${formatUtc(e.tca)}`}</title>
-          </circle>
-        ))}
+        {plot.pts.map(({ e, t, p }) => {
+          const key = pairKey(e)
+          const label = `${e.risk_level}: ${e.sat1_name} × ${e.sat2_name}`
+          const pick = onSelect ? () => onSelect(e) : undefined
+          return (
+            <circle
+              key={key}
+              className={cx('timeline__dot', `timeline__dot--${riskTone(e.risk_level)}`, onSelect && 'timeline__dot--pick', key === selectedKey && 'timeline__dot--selected')}
+              cx={x(t)} cy={y(p)} r={key === selectedKey ? 5.2 : 3.6}
+              role={onSelect ? 'button' : undefined}
+              tabIndex={onSelect ? 0 : undefined}
+              aria-label={onSelect ? `${label}. Show details.` : undefined}
+              onClick={pick}
+              onKeyDown={pick ? (ev) => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); pick() } } : undefined}
+            >
+              <title>{`${label}\nPc ${pc(p)} · miss ${compact(e.min_distance_km)} km\nTCA ${formatUtc(e.tca)}`}</title>
+            </circle>
+          )
+        })}
         <text className="timeline__unit" x={(PAD.l + W - PAD.r) / 2} y={H - 2} textAnchor="middle">time of closest approach (UTC)</text>
         <text className="timeline__unit" x={11} y={(PAD.t + H - PAD.b) / 2} textAnchor="middle" transform={`rotate(-90 11 ${(PAD.t + H - PAD.b) / 2})`}>probability of collision</text>
       </svg>

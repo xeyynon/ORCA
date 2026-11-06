@@ -13,8 +13,8 @@ export function SessionControl({ username, onSignOut }: Props) {
   return (
     <div className="session-control">
       <span className="session-control__who" title={`Signed in as ${username}`}><Mono muted>{username}</Mono></span>
-      <Button variant="ghost" size="sm" title="Sign out of ORCA" onClick={onSignOut}>
-        <Icon name="logout" size={14} /> Sign out
+      <Button variant="ghost" size="sm" title="Sign out of ORCA" ariaLabel="Sign out" onClick={onSignOut}>
+        <Icon name="logout" size={14} /> <span className="session-control__label">Sign out</span>
       </Button>
     </div>
   )

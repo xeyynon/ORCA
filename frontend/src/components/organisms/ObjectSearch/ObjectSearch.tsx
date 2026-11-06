@@ -36,7 +36,7 @@ export function ObjectSearch({ inputRef, query, onQueryChange, results, loading,
       <SearchField
         inputRef={inputRef}
         value={query}
-        placeholder="Search all objects by name or NORAD id"
+        placeholder="Search name or NORAD id"
         ariaLabel="Search objects"
         hint="/"
         onChange={(v) => { onQueryChange(v); setActive(0); setOpen(true) }}

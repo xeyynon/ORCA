@@ -12,3 +12,5 @@
 }
 .search-field__input::placeholder { color: var(--text-faint); }
 .search-field__input:hover { border-color: var(--border-strong); }
+@media (pointer: coarse) { .search-field__input { height: 40px; } }
+@media (max-width: 600px), (pointer: coarse) { .search-field__hint { display: none; } }

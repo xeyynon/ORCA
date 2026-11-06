@@ -1,14 +1,6 @@
 import { NavTab } from '../../molecules/NavTab/NavTab'
-import { VIEWS } from '@/lib/views'
+import { VIEWS, VIEW_LABEL } from '@/lib/views'
 import type { ViewId } from '@/lib/views'
-
-const LABELS: Record<ViewId, string> = {
-  overview: 'Overview',
-  globe: 'Globe',
-  conjunctions: 'Conjunctions',
-  analytics: 'Analytics',
-  data: 'Data',
-}
 
 type Props = { view: ViewId; onChange: (v: ViewId) => void }
 
@@ -17,7 +9,7 @@ export function PrimaryNav({ view, onChange }: Props) {
   return (
     <>
       {VIEWS.map((v, i) => (
-        <NavTab key={v} label={LABELS[v]} hotkey={String(i + 1)} active={v === view} onClick={() => onChange(v)} />
+        <NavTab key={v} label={VIEW_LABEL[v]} hotkey={String(i + 1)} active={v === view} onClick={() => onChange(v)} />
       ))}
     </>
   )
