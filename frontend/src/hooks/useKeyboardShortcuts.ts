@@ -13,6 +13,7 @@ function isTyping(el: EventTarget | null): boolean {
  * One window keydown listener (rules.md §6). Guards, each from a real problem:
  *  - skip events another widget already handled (defaultPrevented)
  *  - skip Ctrl/Meta/Alt chords so browser and OS shortcuts keep working
+ *  - ignore auto-repeat (a held key is one press)
  *  - never fire while typing; Esc inside a text box only blurs it
  * Bindings live in a ref so handlers can change without rebinding the listener.
  */
@@ -24,6 +25,8 @@ export function useKeyboardShortcuts(bindings: Bindings, enabled = true) {
     if (!enabled) return
     const onKey = (e: KeyboardEvent) => {
       if (e.defaultPrevented || e.ctrlKey || e.metaKey || e.altKey) return
+      // Holding a key repeats keydown: a held T would flash the theme back and forth, a held 3 would re-navigate.
+      if (e.repeat) return
       if (isTyping(e.target)) {
         if (e.key === 'Escape') (e.target as HTMLElement).blur()
         return

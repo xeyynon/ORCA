@@ -3,3 +3,4 @@
 .checkbox-row--disabled { opacity: 0.5; cursor: not-allowed; }
 .checkbox-row__input { width: 15px; height: 15px; margin: 0; accent-color: var(--accent); }
 .checkbox-row__label { flex: 1; min-width: 0; }
+@media (pointer: coarse) { .checkbox-row { min-height: 40px; } .checkbox-row__input { width: 20px; height: 20px; } }

@@ -116,11 +116,11 @@ export function GlobeView({ catalog, totalCount, selection, focus, conjunction, 
   const simMs = nowMs + playback.offsetH * HOUR_MS
 
   return (
-    <div className="globe-view">
+    <main className="globe-view" id="main-content" tabIndex={-1} aria-label="Globe">
       <aside className="globe-view__side globe-view__side--left" aria-label="Catalog and filters">
         <CatalogSummaryCard summary={summary.data} error={summary.status === 'error' ? summary.error.message : null} onRetry={summary.reload} />
         <ViewOptionsCard prefs={prefs} onChange={setPrefs} conjunctionActive={conjunction !== null} />
-        <FiltersCard prefs={prefs} onChange={setPrefs} summary={summary.data} bandCounts={bandCounts} conjunctionActive={conjunction !== null} />
+        <FiltersCard prefs={prefs} onChange={setPrefs} summary={summary.data} bandCounts={bandCounts} countsReady={loaded !== undefined} conjunctionActive={conjunction !== null} />
       </aside>
 
       <div className="globe-view__center">
@@ -175,7 +175,11 @@ export function GlobeView({ catalog, totalCount, selection, focus, conjunction, 
         {positions.status === 'error' && !positions.data ? (
           <EmptyState kind="error" title="Could not load positions" action={<Button onClick={positions.reload}>Retry</Button>}>{positions.error.message}</EmptyState>
         ) : null}
-        {positions.status === 'loading' && !positions.data ? <EmptyState kind="awaiting" title="Propagating catalog…" /> : null}
+        {positions.status === 'loading' && !positions.data ? (
+          <EmptyState kind="awaiting" title="Computing positions…">
+            Every object&rsquo;s position is calculated from its element set. The first load can take up to a minute; the points appear on the globe when it finishes.
+          </EmptyState>
+        ) : null}
         {positions.status === 'error' && positions.data ? <FieldNote>Position refresh failed ({positions.error.message}). Showing the last good snapshot; it is extrapolated for at most two minutes.</FieldNote> : null}
         {positions.data && positions.data.objects.length === 0 ? <EmptyState kind="none" title="No positions returned">The catalog is empty or no element set could be propagated.</EmptyState> : null}
         {positions.data && positions.data.skipped > 0 ? <FieldNote>{positions.data.skipped} object(s) could not be propagated and are not drawn.</FieldNote> : null}
@@ -183,6 +187,6 @@ export function GlobeView({ catalog, totalCount, selection, focus, conjunction, 
         {failed.length > 0 ? <FieldNote>Orbit path unavailable for {failed.map(nameOf).join(', ')}.</FieldNote> : null}
 
       </aside>
-    </div>
+    </main>
   )
 }

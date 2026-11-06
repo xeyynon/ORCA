@@ -7,9 +7,12 @@
 .globe-view__side--right { right: var(--gap-3); width: 340px; max-height: calc(100% - 140px); }
 .globe-view__bar { position: absolute; z-index: 2; right: var(--gap-3); width: 340px; bottom: var(--gap-3); border: 1px solid var(--border); border-radius: 10px; background: color-mix(in srgb, var(--bg-panel) 92%, transparent); }
 
+/* Narrow: the globe first, with its playback bar laid over its foot; what is selected next, filters last, all scrolling. */
 @media (max-width: 1000px) {
   .globe-view { overflow-y: auto; display: flex; flex-direction: column; }
-  .globe-view__center { position: relative; inset: auto; height: 70vh; flex: none; }
-  .globe-view__side { position: static; width: auto; max-height: none; padding: var(--gap-3); }
-  .globe-view__bar { position: static; margin: 0 var(--gap-3); width: auto; }
+  .globe-view__center { position: relative; inset: auto; height: 68dvh; min-height: 360px; flex: none; order: 0; }
+  .globe-view__bar { position: absolute; left: var(--gap-2); right: var(--gap-2); bottom: var(--gap-2); width: auto; margin: 0; }
+  .globe-view__side { position: static; width: auto; max-height: none; overflow: visible; padding: var(--gap-3); }
+  .globe-view__side--right { order: 1; }
+  .globe-view__side--left { order: 2; }
 }

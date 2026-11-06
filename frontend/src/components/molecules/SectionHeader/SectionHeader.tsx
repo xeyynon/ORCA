@@ -7,7 +7,7 @@ export function SectionHeader({ title, subtitle, actions }: Props) {
   return (
     <div className="section-header">
       <div>
-        <h2 className="section-header__title">{title}</h2>
+        <h1 className="section-header__title">{title}</h1>
         {subtitle ? <p className="section-header__sub">{subtitle}</p> : null}
       </div>
       {actions ? <div className="section-header__actions">{actions}</div> : null}

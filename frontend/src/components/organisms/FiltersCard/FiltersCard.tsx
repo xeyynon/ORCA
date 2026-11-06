@@ -5,6 +5,7 @@ import type { GlobePrefs, TypeFilter } from '@/lib/globePrefs'
 import { OBJECT_TYPES, OBJECT_TYPE_LABEL } from '@/lib/objectTypes'
 import { ALTITUDE_BANDS, ALTITUDE_BAND_LABEL } from '@/lib/orbit'
 import type { AltitudeBand } from '@/lib/orbit'
+import { Skeleton } from '../../atoms/Skeleton/Skeleton'
 import { Label } from '../../atoms/Label/Label'
 import { CheckboxRow } from '../../molecules/CheckboxRow/CheckboxRow'
 import { Panel } from '../../molecules/Panel/Panel'
@@ -17,11 +18,13 @@ type Props = {
   summary: CatalogSummaryResponse | null
   /** Objects per altitude band among those the globe has loaded (before filtering). */
   bandCounts: Record<AltitudeBand, number>
+  /** False until positions have loaded: a count of 0 before then would read as "nothing is in orbit". */
+  countsReady: boolean
   conjunctionActive: boolean
 }
 
 /** Filters only change what is DRAWN; a selected object is always shown, whatever the filters say. */
-export function FiltersCard({ prefs, onChange, summary, bandCounts, conjunctionActive }: Props) {
+export function FiltersCard({ prefs, onChange, summary, bandCounts, countsReady, conjunctionActive }: Props) {
   const typeOptions: { value: TypeFilter; label: string }[] = [
     { value: 'all', label: summary ? `All objects (${integer(summary.total)})` : 'All objects' },
     ...OBJECT_TYPES.map((t) => ({ value: t as TypeFilter, label: summary ? `${OBJECT_TYPE_LABEL[t]} (${integer(summary.by_type[t])})` : OBJECT_TYPE_LABEL[t] })),
@@ -36,7 +39,7 @@ export function FiltersCard({ prefs, onChange, summary, bandCounts, conjunctionA
             key={b}
             label={ALTITUDE_BAND_LABEL[b]}
             swatch={ALTITUDE_BAND_COLOR[b]}
-            count={integer(bandCounts[b])}
+            count={countsReady ? integer(bandCounts[b]) : <Skeleton width="4ch" />}
             checked={prefs.bands[b]}
             onChange={(v) => onChange({ bands: { ...prefs.bands, [b]: v } })}
           />

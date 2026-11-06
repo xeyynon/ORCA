@@ -6,7 +6,6 @@ import { deriveOrbit } from '@/lib/orbit'
 import { sortBy } from '@/lib/sort'
 import { Mono } from '../../atoms/Mono/Mono'
 import { Badge } from '../../atoms/Badge/Badge'
-import { TleAgeChip } from '../../molecules/TleAgeChip/TleAgeChip'
 import { ValueUnit } from '../../molecules/ValueUnit/ValueUnit'
 import type { SortDir } from '../../molecules/SortHeader/SortHeader'
 import { DataTable } from '../DataTable/DataTable'
@@ -48,7 +47,9 @@ export function CatalogTable({ rows, selectedId, onSelect, now, totalCount = nul
     { id: 'incl', label: 'Incl.', sortable: true, align: 'right', render: (t) => <ValueUnit value={fixed(t.inclination, 2)} unit="°" /> },
     { id: 'ecc', label: 'Ecc.', sortable: true, align: 'right', render: (t) => <Mono>{fixed(t.eccentricity, 5)}</Mono> },
     { id: 'epoch', label: 'TLE epoch', render: (t) => <Mono muted>{formatUtc(t.epoch)}</Mono> },
-    { id: 'age', label: 'Age', sortable: true, render: (t) => <TleAgeChip ageDays={ageDays(t.epoch, now)} /> },
+    // A neutral number, not a coloured chip: on an aged catalog every row would carry the same alarm, and the tone flips
+    // between 29.8 and 30.1 days for effectively the same data. The catalog-wide notice and the object card carry the warning.
+    { id: 'age', label: 'TLE age', sortable: true, align: 'right', render: (t) => <ValueUnit value={fixed(ageDays(t.epoch, now), 1)} unit="d" /> },
   ]
 
   const onSort = (id: string) => {
@@ -70,7 +71,7 @@ export function CatalogTable({ rows, selectedId, onSelect, now, totalCount = nul
         onSort={onSort}
       />
       {rows.length > maxRows ? (
-        <div className="catalog-table__cap">Showing the first {integer(maxRows)} of {integer(rows.length)} loaded objects in this order{totalCount !== null && totalCount > rows.length ? ` (${integer(totalCount)} are stored; the API returns at most 5,000 per request, and search covers only the loaded ones)` : ''}.</div>
+        <div className="catalog-table__cap">Showing the first {integer(maxRows)} of {integer(rows.length)} loaded objects in this order{totalCount !== null && totalCount > rows.length ? ` (${integer(totalCount)} are stored; the API returns at most 5,000 per request; the search box at the top covers all of them)` : ''}.</div>
       ) : null}
     </div>
   )
