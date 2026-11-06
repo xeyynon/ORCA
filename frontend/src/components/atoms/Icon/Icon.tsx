@@ -1,6 +1,6 @@
 import './Icon.css'
 
-export type IconName = 'sun' | 'moon' | 'keyboard' | 'search' | 'close' | 'info' | 'download' | 'globe' | 'refresh' | 'arrow-left' | 'play' | 'pause' | 'logout' | 'login' | 'skip-back' | 'skip-forward' | 'expand' | 'locate' | 'copy' | 'check' | 'eye' | 'eye-off' | 'menu' | 'home' | 'list' | 'orbit' | 'chart' | 'database' | 'bell' | 'help' | 'chat' | 'arrow-right'
+export type IconName = 'sun' | 'moon' | 'keyboard' | 'search' | 'close' | 'info' | 'download' | 'globe' | 'refresh' | 'arrow-left' | 'play' | 'pause' | 'logout' | 'login' | 'skip-back' | 'skip-forward' | 'expand' | 'locate' | 'copy' | 'check' | 'eye' | 'eye-off' | 'menu' | 'home' | 'list' | 'orbit' | 'chart' | 'database' | 'bell' | 'help' | 'chat' | 'arrow-right' | 'alert' | 'target'
 
 // 16x16 stroke icons. Single-path or small-group definitions keep this file readable.
 const PATHS: Record<IconName, string> = {
@@ -36,6 +36,8 @@ const PATHS: Record<IconName, string> = {
   chat: 'M2.5 3h11v7.5H7.5L4.5 13v-2.5h-2Z',
   locate: 'M8 11.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7ZM8 1.5v2M8 12.5v2M1.5 8h2M12.5 8h2',
   'arrow-right': 'M2.5 8h11M9.5 4l4 4-4 4',
+  alert: 'M8 2.2 14.3 13.3H1.7ZM8 6.5v3M8 11.3v.01',
+  target: 'M8 14.5a6.5 6.5 0 1 0 0-13 6.5 6.5 0 0 0 0 13ZM8 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM8 8h.01',
 }
 
 type Props = { name: IconName; size?: number }
