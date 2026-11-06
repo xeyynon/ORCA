@@ -1,0 +1,31 @@
+/* touch-action: none so a drag on the handle moves the sheet instead of scrolling the page under it. */
+.sheet-handle {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+  width: 100%;
+  height: var(--sheet-peek, 48px);
+  padding: 6px var(--gap-3) 0;
+  border: 0;
+  border-radius: inherit;
+  background: transparent;
+  color: var(--text-primary);
+  text-align: left;
+  touch-action: none;
+  cursor: grab;
+}
+.sheet-handle:active { cursor: grabbing; }
+.sheet-handle::before { content: ''; position: absolute; z-index: -1; inset: 0; border-radius: inherit; background: var(--state-hover); opacity: 0; pointer-events: none; transition: opacity var(--dur-1) var(--ease-standard); }
+.sheet-handle:hover::before { opacity: 1; }
+.sheet-handle:focus-visible { outline-offset: -2px; }
+.sheet-handle:focus-visible::before { background: var(--state-focus); opacity: 1; }
+.sheet-handle__grip { align-self: center; width: 36px; height: 4px; border-radius: var(--radius-pill); background: var(--border-strong); }
+.sheet-handle__row { display: flex; align-items: center; justify-content: space-between; gap: var(--gap-3); min-width: 0; }
+.sheet-handle__title { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+.sheet-handle__state { display: inline-flex; align-items: center; gap: 6px; flex: none; color: var(--text-secondary); font-size: var(--text-sm); }
+/* a chevron drawn from two borders: up when it would expand, down when it would collapse */
+.sheet-handle__chevron { width: 7px; height: 7px; margin-top: 3px; border-top: 1.5px solid currentColor; border-left: 1.5px solid currentColor; transform: rotate(45deg); }
+.sheet-handle__chevron--down { margin-top: -3px; transform: rotate(225deg); }

@@ -27,8 +27,9 @@ logger = logging.getLogger(__name__)
 PROVIDER = "Groq"
 ENV_KEY = "GROQ_API_KEY"
 ENV_MODEL = "ORCA_ASSISTANT_MODEL"
-# A general-purpose chat model Groq serves. Groq retires models from time to time: override with ORCA_ASSISTANT_MODEL.
-DEFAULT_MODEL = "llama-3.3-70b-versatile"
+# A general-purpose chat model Groq serves (checked against /openai/v1/models on 2026-11-07: llama-3.3-70b-versatile
+# had been retired). Groq retires models from time to time: override with ORCA_ASSISTANT_MODEL.
+DEFAULT_MODEL = "openai/gpt-oss-120b"
 ENDPOINT = "https://api.groq.com/openai/v1/chat/completions"
 LABEL = "AI-generated"
 
@@ -37,8 +38,12 @@ MAX_FACTS = 30
 MAX_FACT = 300
 MAX_VIEW = 64
 
-# The visible answer is 1-4 sentences; leave room without letting a runaway reply cost much.
-MAX_TOKENS = 400
+# The visible answer is 1-4 sentences. Reasoning models (gpt-oss) also spend tokens thinking before they answer,
+# so leave headroom or the answer can come back empty; still small enough that a runaway reply costs little.
+MAX_TOKENS = 1024
+# Reasoning models accept an effort setting; this is short factual chat, so low. Sent only to models that accept it.
+REASONING_EFFORT = "low"
+_REASONING_PREFIXES = ("openai/gpt-oss",)
 TEMPERATURE = 0.2  # factual answers from given facts: little creativity wanted
 TIMEOUT_S = 30.0
 
@@ -138,12 +143,15 @@ def build_request(req: AskRequest, model_id: str) -> Dict[str, Any]:
         f"Facts shown on screen (the only ORCA data you have):\n{facts}\n\n"
         f"Question: {req.question}"
     )
-    return {
+    body: Dict[str, Any] = {
         "model": model_id,
         "messages": [{"role": "system", "content": SYSTEM_PROMPT}, {"role": "user", "content": user}],
         "max_tokens": MAX_TOKENS,
         "temperature": TEMPERATURE,
     }
+    if model_id.startswith(_REASONING_PREFIXES):
+        body["reasoning_effort"] = REASONING_EFFORT
+    return body
 
 
 def _send(body: Dict[str, Any]) -> Dict[str, Any]:

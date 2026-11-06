@@ -64,3 +64,24 @@ Not kept: two captures that only show the throttled browser (a stalled frame) an
 | [01-home-desktop-light.png](05-mission-control-2026-11-07/01-home-desktop-light.png) | Mission control (bento): hero story tile, freshness, conjunctions (saved example labelled), globe entry |
 | [02-home-desktop-dark-scrolled.png](05-mission-control-2026-11-07/02-home-desktop-dark-scrolled.png) | Dark theme, lower tiles: orbit regimes, system, New here? with the tour and glossary |
 | [03-home-compact-desktop-dark.png](05-mission-control-2026-11-07/03-home-compact-desktop-dark.png) | After "tiles are unnecessarily big": three rows, less padding, smaller story type, smaller globe art; the whole page fits one laptop screen |
+
+## 06-home-hook-2026-11-07
+
+After the owner: "too much clutter; a newcomer has no hook and will leave". The home is rebuilt in story order: hook, how it works, right now.
+
+| File | What it shows |
+|---|---|
+| [01-home-hook-desktop-dark.png](06-home-hook-2026-11-07/01-home-hook-desktop-dark.png) | The hook: one true sentence as the h1, the pair count from the labelled stored run, two actions, the orbit animation; three steps below |
+| [02-home-hook-phone-390-dark.png](06-home-hook-2026-11-07/02-home-hook-phone-390-dark.png) | Phone: animation first, then the sentence and both actions on the first screen (taken before the nav-row fix: tabs now scroll instead of overlapping) |
+| [03-home-one-screen-1366x768-dark.png](06-home-hook-2026-11-07/03-home-one-screen-1366x768-dark.png) | After "can we see it all without scrolling": hook, steps and facts on one screen at 1366x768 (measured to fit at 1280x720 to 1920x1080; the animation clipping visible here was fixed after) |
+
+## 07-ask-orca-glass-gestures-2026-11-07
+
+| File | What it shows |
+|---|---|
+| [01-ask-orca-groq-answer-desktop-dark.png](07-ask-orca-glass-gestures-2026-11-07/01-ask-orca-groq-answer-desktop-dark.png) | Ask ORCA: a why-question answered by Groq (openai/gpt-oss-120b), labelled AI with the may-be-wrong note and the facts it was given |
+| [02-pair-prev-next-desktop-dark.png](07-ask-orca-glass-gestures-2026-11-07/02-pair-prev-next-desktop-dark.png) | Conjunction pair detail with Previous / Next and N of M (the button equivalent of the swipe gesture); breadcrumb shows the pair |
+| [03-globe-glass-bar-legend-desktop-dark.png](07-ask-orca-glass-gestures-2026-11-07/03-globe-glass-bar-legend-desktop-dark.png) | Globe: glass only on the playback bar and the legend, data panels solid |
+| [04-globe-desktop-light.png](07-ask-orca-glass-gestures-2026-11-07/04-globe-desktop-light.png) | Globe in the light theme (glass alpha raised to 0.99 there for contrast) |
+| [05-globe-bottom-sheet-collapsed-phone.png](07-ask-orca-glass-gestures-2026-11-07/05-globe-bottom-sheet-collapsed-phone.png) | Phone: selection details in a bottom sheet, collapsed |
+| [06-globe-bottom-sheet-expanded-phone.png](07-ask-orca-glass-gestures-2026-11-07/06-globe-bottom-sheet-expanded-phone.png) | Phone: the sheet dragged up (a button does the same), playback bar still reachable |

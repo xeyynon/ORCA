@@ -122,7 +122,7 @@ To turn it on, put the key in the git-ignored **`.env`** file next to `api_serve
 ```bash
 # .env  (read once at API start by envfile.py; a variable already in the real environment wins)
 GROQ_API_KEY=gsk_...                          # enables the feature; empty = off, /api/assistant/ask answers 503
-# ORCA_ASSISTANT_MODEL=llama-3.3-70b-versatile # optional; the default. Groq retires models: see console.groq.com/docs/models
+# ORCA_ASSISTANT_MODEL=openai/gpt-oss-120b     # optional; the default. Groq retires models: see console.groq.com/docs/models
 # ORCA_ASSISTANT_LIMIT=20                      # optional; questions per signed-in user per window
 # ORCA_ASSISTANT_WINDOW_S=600                  # optional; window length in seconds
 ```
