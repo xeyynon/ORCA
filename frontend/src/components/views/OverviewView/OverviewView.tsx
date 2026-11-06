@@ -1,12 +1,15 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import type { TleRecord } from '@/api/types'
 import type { AsyncResult } from '@/hooks/useAsync'
 import { deriveSeries } from '@/lib/catalog'
+import { describeFilter, filterCatalog, isFilterActive, NO_FILTER, regimeCounts, toggleRegime } from '@/lib/catalogFilter'
+import type { CatalogFilter } from '@/lib/catalogFilter'
 import type { CatalogSummary } from '@/lib/catalog'
 import { days, fixed, integer } from '@/lib/format'
 import { Button } from '../../atoms/Button/Button'
 import { EmptyState } from '../../molecules/EmptyState/EmptyState'
 import { SectionHeader } from '../../molecules/SectionHeader/SectionHeader'
+import { CatalogFilterBar } from '../../organisms/CatalogFilterBar/CatalogFilterBar'
 import { CatalogTable } from '../../organisms/CatalogTable/CatalogTable'
 import { ChartCard } from '../../organisms/ChartCard/ChartCard'
 import { KpiRow } from '../../organisms/KpiRow/KpiRow'
@@ -36,6 +39,10 @@ function loadedHint(summary: CatalogSummary, totalCount: number | null): string 
 
 export function OverviewView({ catalog, summary, totalCount, selectedId, onSelect, onOpenGlobe, onGoData, now }: Props) {
   const rows = catalog.data
+  const [filter, setFilter] = useState<CatalogFilter>(NO_FILTER)
+  const filterOn = isFilterActive(filter)
+  const filteredRows = useMemo(() => (rows ? filterCatalog(rows, filter) : []), [rows, filter])
+  const counts = useMemo(() => regimeCounts(rows ?? [], filter.query), [rows, filter.query])
   const selected = rows?.find((t) => t.norad_cat_id === selectedId) ?? null
   const ranks = useMemo<CatalogRanks | null>(() => {
     if (!rows || rows.length === 0) return null
@@ -71,7 +78,26 @@ export function OverviewView({ catalog, summary, totalCount, selectedId, onSelec
         ) : null}
         <div className={selected ? 'overview__grid overview__grid--split' : 'overview__grid'}>
           <div className="overview__main">
-            <CatalogTable rows={rows} totalCount={totalCount} selectedId={selectedId} onSelect={onSelect} now={now} />
+            <CatalogFilterBar
+              query={filter.query}
+              regimes={filter.regimes}
+              counts={counts}
+              active={filterOn}
+              matchCount={filteredRows.length}
+              loadedCount={rows.length}
+              totalCount={totalCount}
+              onQueryChange={(query) => setFilter((f) => ({ ...f, query }))}
+              onToggleRegime={(r) => setFilter((f) => ({ ...f, regimes: toggleRegime(f.regimes, r) }))}
+              onClear={() => setFilter(NO_FILTER)}
+            />
+            {filteredRows.length === 0 ? (
+              <EmptyState kind="none" title="No loaded object matches" action={<Button onClick={() => setFilter(NO_FILTER)}>Clear filter</Button>}>
+                Nothing among the {integer(rows.length)} loaded objects has {describeFilter(filter)}.
+                {totalCount !== null && totalCount > rows.length ? ' Objects that were not loaded are not searched here.' : ''}
+              </EmptyState>
+            ) : (
+              <CatalogTable rows={filteredRows} totalCount={totalCount} filtered={filterOn} selectedId={selectedId} onSelect={onSelect} now={now} />
+            )}
           </div>
           <div className="overview__side">
             {selected ? (

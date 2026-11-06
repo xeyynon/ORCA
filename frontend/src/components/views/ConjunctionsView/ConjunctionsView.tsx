@@ -56,7 +56,9 @@ export function ConjunctionsView({ catalogSize, now, search, query, onQueryChang
     () => search.events.find((e) => pairKey(e) === selectedKey) ?? null,
     [search.events, selectedKey],
   )
-  const pair = usePairAssessment(selected)
+  const saved = search.source === 'saved'
+  // A saved example is a stored snapshot: re-assessing its pairs against the live catalog would mix two different datasets.
+  const pair = usePairAssessment(saved ? null : selected)
   const result = search.result
   const counts = useMemo(() => (result ? tierCounts(result) : null), [result])
 
@@ -72,7 +74,6 @@ export function ConjunctionsView({ catalogSize, now, search, query, onQueryChang
   const pastCount = useMemo(() => countPast(search.events, now), [search.events, now])
   const reportKm = method.data?.report_km ?? null
   const stepS = method.data?.step_s ?? null
-  const saved = search.source === 'saved'
 
   let results
   if (search.phase === 'idle') {
@@ -147,6 +148,7 @@ export function ConjunctionsView({ catalogSize, now, search, query, onQueryChang
               assessment={pair.assessment}
               assessing={pair.loading}
               assessError={pair.error}
+              saved={saved}
               onShowOnGlobe={() => onShowOnGlobe([selected.sat1_id, selected.sat2_id], selected)}
               onClose={() => onSelectKey(null)}
             />
@@ -154,7 +156,7 @@ export function ConjunctionsView({ catalogSize, now, search, query, onQueryChang
         </div>
         <FieldNote>
           <GlossaryTerm term="Pc" /> is the probability of collision, <GlossaryTerm term="TCA" /> the time of closest approach, and <GlossaryTerm term="miss distance" /> the
-          separation at that moment. Hover or focus a term for its meaning.
+          separation at that moment; <GlossaryTerm term="uncertainty" /> is how far the true position may be from the computed one. Hover or focus a term for its meaning.
         </FieldNote>
       </>
     )

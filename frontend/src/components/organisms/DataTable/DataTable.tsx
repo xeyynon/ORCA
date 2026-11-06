@@ -7,6 +7,8 @@ import './DataTable.css'
 export interface Column<T> {
   id: string
   label: string
+  /** Plain-language meaning, exposed as the header's accessible description. */
+  hint?: string
   align?: 'left' | 'right'
   sortable?: boolean
   render: (row: T) => ReactNode
@@ -34,7 +36,7 @@ export function DataTable<T>({ caption, columns, rows, rowKey, selectedKey, onSe
         <thead>
           <tr>
             {columns.map((c) => (
-              <SortHeader key={c.id} label={c.label} align={c.align ?? 'left'} sortable={c.sortable ?? false} active={sortId === c.id} dir={sortDir} onSort={() => onSort(c.id)} />
+              <SortHeader key={c.id} label={c.label} hint={c.hint} align={c.align ?? 'left'} sortable={c.sortable ?? false} active={sortId === c.id} dir={sortDir} onSort={() => onSort(c.id)} />
             ))}
           </tr>
         </thead>

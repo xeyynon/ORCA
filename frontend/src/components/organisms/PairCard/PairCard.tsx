@@ -18,12 +18,14 @@ type Props = {
   assessment: PairAssessment | null
   assessing: boolean
   assessError: ApiError | null
+  /** The result on screen is the stored example run: show its values only, no live re-assessment. */
+  saved?: boolean
   onShowOnGlobe: () => void
   onClose: () => void
 }
 
 /** Detail for one selected conjunction. The table row is the search result; the assessment is a second, finer look at the pair. */
-export function PairCard({ event, assessment, assessing, assessError, onShowOnGlobe, onClose }: Props) {
+export function PairCard({ event, assessment, assessing, assessError, saved = false, onShowOnGlobe, onClose }: Props) {
   const full = assessment && 'mahalanobis_distance' in assessment ? assessment : null
   const noRisk = assessment && 'status' in assessment ? assessment : null
 
@@ -55,6 +57,7 @@ export function PairCard({ event, assessment, assessing, assessError, onShowOnGl
         </FactRow>
       </div>
 
+      {saved ? <FieldNote>This pair is from the saved example run, so it is not re-assessed against the live catalog. The values above are the stored ones.</FieldNote> : null}
       {assessing ? <div className="pair-card__state"><Spinner /> <span>Re-assessing this pair…</span></div> : null}
       {assessError ? <FieldNote>Pair re-assessment failed: {assessError.message}. The values above are from the search result.</FieldNote> : null}
       {noRisk ? <FieldNote>Pair re-assessment: {noRisk.message}.</FieldNote> : null}

@@ -17,14 +17,10 @@ import { days, formatLat, formatLon, integer } from '@/lib/format'
 import { formatUtc } from '@/lib/time'
 import { staleBand, staleNotice } from '@/lib/staleness'
 import { VIEWS, VIEW_LABEL } from '@/lib/views'
-import { Icon } from '@/components/atoms/Icon/Icon'
-import { IconButton } from '@/components/atoms/IconButton/IconButton'
-import { FineOnly } from '@/components/molecules/FineOnly/FineOnly'
 import { Brand } from '@/components/molecules/Brand/Brand'
-import { SessionControl } from '@/components/molecules/SessionControl/SessionControl'
-import { ThemeToggle } from '@/components/molecules/ThemeToggle/ThemeToggle'
 import type { Theme } from '@/lib/theme'
 import { AppBar } from '@/components/organisms/AppBar/AppBar'
+import { AppMenu } from '@/components/organisms/AppMenu/AppMenu'
 import { ObjectSearch } from '@/components/organisms/ObjectSearch/ObjectSearch'
 import { PrimaryNav } from '@/components/organisms/PrimaryNav/PrimaryNav'
 import { SkipLink } from '@/components/molecules/SkipLink/SkipLink'
@@ -135,11 +131,7 @@ export function Workspace({ username, onSignOut, theme, onToggleTheme: toggleThe
       <AppBar
         left={<><Brand /><ObjectSearch inputRef={searchRef} query={query} onQueryChange={setQuery} results={search.results} loading={search.loading} degraded={search.degraded} onPick={(id) => showOnGlobe([id])} /></>}
         center={<PrimaryNav view={view} onChange={go} />}
-        right={<>
-          <FineOnly><IconButton label="Keyboard shortcuts (?)" onClick={() => setHelpOpen(true)}><Icon name="keyboard" /></IconButton></FineOnly>
-          <ThemeToggle theme={theme} onToggle={toggleTheme} />
-          <SessionControl username={username} onSignOut={onSignOut} />
-        </>}
+        right={<AppMenu username={username} theme={theme} onToggleTheme={toggleTheme} onShowShortcuts={() => setHelpOpen(true)} onSignOut={onSignOut} />}
       />
 
       {/* Not on Conjunctions: its result carries the same fact as one of its caveats, and one home per fact. Not on Globe/Data: the canvas stays clear, and Data explains it. */}
