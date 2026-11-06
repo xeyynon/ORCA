@@ -6,7 +6,7 @@ import { REGIME_NAME, sharePercent } from '@/lib/homeStory'
 import { REGIMES } from '@/lib/orbit'
 import type { Regime } from '@/lib/orbit'
 import { pairKey } from '@/lib/pair'
-import { includedSections, REPORT_SECTIONS, tierRows } from '@/lib/report'
+import { includedSections, REPORT_MARKING, REPORT_SECTIONS, tierRows } from '@/lib/report'
 import type { ReportOptions, ReportSectionId } from '@/lib/report'
 import { RISK_THRESHOLDS, riskTone } from '@/lib/risk'
 import { formatUtc } from '@/lib/time'
@@ -75,6 +75,9 @@ export function ReportDocument(p: Props) {
 
   return (
     <article className="report" aria-label="Report preview">
+      {/* The handling marking, as formal reports carry one: centred capitals, first thing on the page. In print it
+          repeats at the top of every page (ReportsView.css, @page), so no page of the PDF can travel without it. */}
+      <p className="report__marking">{REPORT_MARKING}</p>
       <header className="report__header">
         <div className="report__brand">
           <img className="report__logo" src={`${BASE}logo-320-light.png`} alt="ORCA" />
@@ -88,10 +91,6 @@ export function ReportDocument(p: Props) {
           <div><dt>Data snapshot</dt><dd>{p.quality.lastUpdate ? formatUtc(p.quality.lastUpdate) : 'Not refreshed through the API'}</dd></div>
         </dl>
         {runLine ? <p className="report__run">{runLine}</p> : null}
-        <p className="report__notice">
-          <span className="report__notice-label">Scope</span>
-          <span>Educational and research tool built on public TLEs. <strong>Not for operational decisions.</strong></span>
-        </p>
         {ids.length > 1 ? (
           <ol className="report__contents" aria-label="Contents">
             {ids.map((id) => <li key={id}>{titleOf(id)}</li>)}

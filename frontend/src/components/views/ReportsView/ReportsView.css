@@ -12,7 +12,32 @@
    the app (bar, nav, builder, preview) is hidden, so long reports flow over as many pages as they need. */
 .report-print { display: none; }
 @media print {
-  @page { size: A4; margin: 16mm 14mm 16mm; }
+  /* Every page carries the handling marking at its head and its number at its foot, in the page margins, as official
+     documents do. The marking text is REPORT_MARKING in lib/report.ts: keep the two in step. */
+  @page {
+    size: A4;
+    margin: 20mm 14mm 18mm;
+    @top-center {
+      content: "EDUCATIONAL USE ONLY \00B7  NOT FOR OPERATIONAL DECISIONS";
+      color: var(--paper-ink);
+      font-family: var(--font-ui);
+      font-size: 7.5pt;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+    }
+    @bottom-left {
+      content: "ORCA \00B7  Space situational awareness report";
+      color: var(--paper-ink-3);
+      font-family: var(--font-ui);
+      font-size: 7.5pt;
+    }
+    @bottom-right {
+      content: "Page " counter(page) " of " counter(pages);
+      color: var(--paper-ink-3);
+      font-family: var(--font-ui);
+      font-size: 7.5pt;
+    }
+  }
   /* :root outranks base.css's html rule, so the page margins print white too; and the dark theme's color-scheme would
      have the browser paint the margins dark, so print is always a light scheme. */
   :root, :root[data-theme], :root body { height: auto; overflow: visible; background: var(--paper-bg); color-scheme: light; }
