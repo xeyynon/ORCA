@@ -2,7 +2,7 @@
 
 This document describes the system as it actually runs today, including the
 seams that matter for anyone modifying or operating it. For the module list see
-[README.md](README.md#architecture), and for per-class detail the module docstrings.
+[README.md](../README.md#architecture), and for per-class detail the module docstrings.
 The conjunction engine (v2, 2026-10-15) is described and validated in
 [conjunction_engine_v2.md](conjunction_engine_v2.md).
 

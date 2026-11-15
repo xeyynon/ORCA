@@ -109,7 +109,7 @@ Priority: **P0** breaks a core task or the first impression; **P1** misleads or 
 
 ### P3
 
-- **F16.** "Evaluator access" shows the demo password to every visitor of a public deployment (by design: [README.md](README.md) says it is baked into the bundle). Honest and convenient for evaluators; it also means the login is a front door only, which the Data/README already state. Owner's call; worth one line on the page ("Shared demo account, read-only") if that is true.
+- **F16.** "Evaluator access" shows the demo password to every visitor of a public deployment (by design: [README.md](../README.md) says it is baked into the bundle). Honest and convenient for evaluators; it also means the login is a front door only, which the Data/README already state. Owner's call; worth one line on the page ("Shared demo account, read-only") if that is true.
 - **F17.** The Overview table shows a capped slice with a note below it; there is no filter on the table itself, so finding "all GEO objects" means leaving the page for the Globe filters.
 - **F18.** The Globe's colour meaning (by altitude or by type) is only in the filter list; there is no legend on the canvas itself. A `GlobeLegend` organism already exists in the repo but nothing imports it.
 - **F19.** Navigation shortcuts `1`-`5` are shown on the tabs, which is good, but they are invisible to touch users and take space the tabs need on small screens.

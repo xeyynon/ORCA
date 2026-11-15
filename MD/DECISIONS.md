@@ -341,3 +341,8 @@ database.
 between the two. Does not scale past single-machine/single-writer use — see
 ARCHITECTURE.md §3 and PRD.md open questions for what would need to change if
 that ever matters.
+
+## 2026-11-15: The project README lives at the repository root again
+
+**Context:** An earlier commit (`7ecaae9`) moved `README.md` into `MD/` with the other documents. GitHub shows a repository's README only from the root, `.github/` or `docs/`, so the repository page showed none (owner: "the readme is not visible in github").
+**Decision:** `README.md` is back at the root; its links were rewritten for that location (`MD/...` for the documents, `docs/screenshots/...` for the preview). The MD files that linked to it now point to `../README.md`.
