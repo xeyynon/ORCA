@@ -26,6 +26,7 @@ Source: [ux_audit_2026-11-15.md](ux_audit_2026-11-15.md) (finding numbers in bra
 - [x] Globe colouring: owner chose a third "Constellation" mode (Starlink, OneWeb, Kuiper, Qianfan, Other; same naming rule as Analytics). Altitude stays the default.
 - [x] Globe decluttered (owner, 2026-11-15): one side panel, conjunction-only controls shown only with a conjunction, not-drawn count in the legend line, a remembered "hide panel".
 - [ ] Screen-reader pass and a real touch device.
+- [ ] Phone Globe: an open conjunction's bottom sheet has Expand but no close, so it cannot be dismissed (found 2026-11-15; owner will check on a phone later).
 
 ## Done
 
