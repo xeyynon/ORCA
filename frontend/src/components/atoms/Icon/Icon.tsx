@@ -1,6 +1,6 @@
 import './Icon.css'
 
-export type IconName = 'sun' | 'moon' | 'keyboard' | 'search' | 'close' | 'info' | 'download' | 'globe' | 'refresh' | 'arrow-left' | 'play' | 'pause' | 'logout' | 'login' | 'skip-back' | 'skip-forward' | 'expand' | 'locate' | 'copy' | 'check' | 'eye' | 'eye-off' | 'menu' | 'home' | 'list' | 'orbit' | 'chart' | 'database' | 'bell' | 'help' | 'chat' | 'arrow-right' | 'alert' | 'target' | 'file' | 'printer' | 'chevron-right' | 'chevron-down' | 'sort-up' | 'sort-down'
+export type IconName = 'sun' | 'moon' | 'keyboard' | 'search' | 'close' | 'info' | 'download' | 'globe' | 'refresh' | 'arrow-left' | 'play' | 'pause' | 'logout' | 'login' | 'skip-back' | 'skip-forward' | 'expand' | 'locate' | 'copy' | 'check' | 'eye' | 'eye-off' | 'menu' | 'home' | 'list' | 'orbit' | 'chart' | 'database' | 'bell' | 'help' | 'chat' | 'arrow-right' | 'alert' | 'target' | 'file' | 'printer' | 'chevron-right' | 'chevron-left' | 'chevron-down' | 'sort-up' | 'sort-down'
 
 // 16x16 stroke icons. Single-path or small-group definitions keep this file readable.
 const PATHS: Record<IconName, string> = {
@@ -37,6 +37,7 @@ const PATHS: Record<IconName, string> = {
   locate: 'M8 11.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7ZM8 1.5v2M8 12.5v2M1.5 8h2M12.5 8h2',
   'arrow-right': 'M2.5 8h11M9.5 4l4 4-4 4',
   'chevron-right': 'M6 3.5 10.5 8 6 12.5',
+  'chevron-left': 'M10 3.5 5.5 8 10 12.5',
   'chevron-down': 'M3.5 6 8 10.5 12.5 6',
   'sort-up': 'M4 10.5 8 5.5l4 5Z',
   'sort-down': 'M4 5.5 8 10.5l4-5Z',

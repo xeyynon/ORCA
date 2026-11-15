@@ -46,3 +46,18 @@
   .globe-view__side--left { order: 2; }
   .globe-view__side--right:empty { display: none; }
 }
+
+/* Desktop: the left column is ONE quiet surface (catalog, view options, filters as sections with a hairline between),
+   not three stacked cards; it can be hidden to give the globe the whole width (owner, 2026-11-15: "too congested"). */
+@media (min-width: 1001px) {
+  .globe-view__side--left { gap: 0; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--bg-card); }
+  .globe-view__side--left .panel { border: 0; border-radius: 0; background: transparent; }
+  .globe-view__side--left .panel + .panel { border-top: 1px solid var(--border); }
+  .globe-view__side--left .catalog-summary__total { font-size: 22px; }
+  .globe-view__side--hidden { display: none; }
+  .globe-view__hide-panel { position: absolute; z-index: 1; top: 6px; right: 6px; }
+  .globe-view__show-panel { position: absolute; z-index: 2; top: var(--gap-3); left: var(--gap-3); }
+}
+@media (max-width: 1000px) {
+  .globe-view__hide-panel, .globe-view__show-panel { display: none; }
+}

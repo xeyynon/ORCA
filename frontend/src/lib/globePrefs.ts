@@ -17,6 +17,8 @@ export interface GlobePrefs {
   typeFilter: TypeFilter
   bands: Record<AltitudeBand, boolean>
   onlyConjunction: boolean
+  /** The side panel is shown (desktop): hide it to give the globe the whole width. */
+  panelOpen: boolean
 }
 
 export const DEFAULT_PREFS: GlobePrefs = {
@@ -28,6 +30,7 @@ export const DEFAULT_PREFS: GlobePrefs = {
   typeFilter: 'all',
   bands: { LEO: true, MEO: true, GEO: true, BEYOND: true },
   onlyConjunction: false,
+  panelOpen: true,
 }
 
 const bool = (v: unknown, fallback: boolean) => (typeof v === 'boolean' ? v : fallback)
@@ -47,6 +50,7 @@ export function parsePrefs(raw: unknown): GlobePrefs {
     typeFilter,
     bands,
     onlyConjunction: bool(o.onlyConjunction, DEFAULT_PREFS.onlyConjunction),
+    panelOpen: bool(o.panelOpen, DEFAULT_PREFS.panelOpen),
   }
 }
 
