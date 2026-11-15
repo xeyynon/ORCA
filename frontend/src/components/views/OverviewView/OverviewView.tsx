@@ -11,13 +11,11 @@ import { EmptyState } from '../../molecules/EmptyState/EmptyState'
 import { SectionHeader } from '../../molecules/SectionHeader/SectionHeader'
 import { CatalogFilterBar } from '../../organisms/CatalogFilterBar/CatalogFilterBar'
 import { CatalogTable } from '../../organisms/CatalogTable/CatalogTable'
-import { ChartCard } from '../../organisms/ChartCard/ChartCard'
 import { KpiRow } from '../../organisms/KpiRow/KpiRow'
 import { ObjectCard } from '../../organisms/ObjectCard/ObjectCard'
 import { ObjectStanding } from '../../organisms/ObjectStanding/ObjectStanding'
 import type { CatalogRanks } from '../../organisms/ObjectStanding/ObjectStanding'
 import { PageLayout } from '../../organisms/PageLayout/PageLayout'
-import { RegimeBreakdown } from '../../organisms/RegimeBreakdown/RegimeBreakdown'
 import './OverviewView.css'
 
 type Props = {
@@ -116,20 +114,15 @@ export function OverviewView({ catalog, summary, totalCount, selectedId, onSelec
               <CatalogTable rows={filteredRows} selectedId={selectedId} onSelect={onSelect} now={now} />
             )}
           </div>
-          <div className="overview__side">
-            {selected ? (
-              <>
-                <ObjectCard tle={selected} position={null} now={now} onClose={() => onSelect(null)} />
-                <Button variant="primary" onClick={() => onOpenGlobe(selected.norad_cat_id)}>Show on globe</Button>
-                {ranks ? <ObjectStanding tle={selected} ranks={ranks} now={now} /> : null}
-              </>
-            ) : null}
-            {summary ? (
-              <ChartCard title={totalCount !== null && totalCount > rows.length ? 'Loaded objects by regime' : 'Whole catalog by regime'} note="Classified from perigee/apogee altitude and eccentricity. Derived, not stored.">
-                <RegimeBreakdown counts={summary.regimes} />
-              </ChartCard>
-            ) : null}
-          </div>
+          {/* The object card only. The regime donut that sat here repeated the regime chips' counts above the table, and
+              stretched across the page when nothing was selected (owner, 2026-11-15); Analytics keeps the regime chart. */}
+          {selected ? (
+            <div className="overview__side">
+              <ObjectCard tle={selected} position={null} now={now} onClose={() => onSelect(null)} />
+              <Button variant="primary" onClick={() => onOpenGlobe(selected.norad_cat_id)}>Show on globe</Button>
+              {ranks ? <ObjectStanding tle={selected} ranks={ranks} now={now} /> : null}
+            </div>
+          ) : null}
         </div>
       </>
     )

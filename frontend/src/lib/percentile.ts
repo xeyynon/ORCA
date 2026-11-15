@@ -12,3 +12,17 @@ export function percentileRank(sortedAsc: readonly number[], value: number): num
   while (lo < hi) { const m = (lo + hi) >> 1; if (sortedAsc[m] <= value) lo = m + 1; else hi = m }
   return ((below + (lo - below) / 2) / n) * 100
 }
+
+/**
+ * A percentile rank in words, so the comparison never depends on reading a marker's position (owner, 2026-11-15: the
+ * markers looked like sliders). Rounds to whole percent and never claims "100%" or "0%" for a single object.
+ */
+export function rankWords(percent: number | null, among: string): string | null {
+  if (percent === null || !Number.isFinite(percent)) return null
+  if (percent >= 50) {
+    const p = Math.round(percent)
+    return p >= 100 ? `Higher than nearly all ${among}` : `Higher than ${p}% of ${among}`
+  }
+  const p = Math.round(100 - percent)
+  return p >= 100 ? `Lower than nearly all ${among}` : `Lower than ${p}% of ${among}`
+}

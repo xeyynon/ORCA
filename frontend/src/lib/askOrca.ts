@@ -81,7 +81,8 @@ const VIEW_ALIASES: Record<ViewId, readonly string[]> = {
   globe: ['globe', 'map', 'earth', '3d', '3d view', 'globe view'],
   conjunctions: ['conjunctions', 'conjunction', 'conjunctions page', 'conjunction search page'],
   analytics: ['analytics', 'charts', 'statistics', 'stats', 'graphs'],
-  data: ['data', 'data page', 'api status', 'api', 'health', 'system status'],
+  data: ['data', 'data page', 'refresh page', 'catalog status'],
+  health: ['health', 'api health', 'health page', 'health check', 'api status', 'api', 'system status'],
   reports: ['reports', 'report', 'reports page', 'pdf', 'make a report', 'generate a report', 'print'],
 }
 
@@ -94,6 +95,7 @@ const STARTERS: Record<ViewId, readonly string[]> = {
   analytics: ['How many objects by orbit?', 'How old is the data?', 'What is SGP4?', 'Open the globe'],
   data: ['How old is the data?', 'How many objects are there?', 'What is a TLE?', 'Keyboard shortcuts'],
   reports: ['Any close approaches?', 'How old is the data?', 'What is Pc?', 'What is TCA?'],
+  health: ['Is the data fresh?', 'How many objects are there?', 'How old is the data?', 'Keyboard shortcuts'],
 }
 
 const UNKNOWN_CHIPS: readonly string[] = ['What can you do?', 'How many objects are there?', 'Is the data fresh?', 'What is Pc?']

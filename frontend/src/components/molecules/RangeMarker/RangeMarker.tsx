@@ -8,16 +8,24 @@ type Props = {
   value: string
   /** Where it falls among the catalog, 0 (lowest) to 100 (highest); null when it cannot be placed. */
   percent: number | null
+  /** The same position in words ("Higher than 54% of loaded objects"); the line only illustrates it. */
+  words: string | null
 }
 
-/** A track spanning the catalog's lowest to highest value with a marker where this object sits. */
-export function RangeMarker({ label, value, percent }: Props) {
+/**
+ * Where one object sits among the catalogue: a hairline from lowest to highest with a short tick, and the same fact in
+ * words. Read-only, so it must not look like a slider (owner, 2026-11-15): no knob, no groove, no accent fill.
+ */
+export function RangeMarker({ label, value, percent, words }: Props) {
   return (
     <div className="range-marker">
       <div className="range-marker__head"><Label>{label}</Label><Mono>{value}</Mono></div>
-      <div className="range-marker__track" role="img" aria-label={percent === null ? `${label}: ${value}` : `${label}: ${value}, higher than ${Math.round(percent)}% of the catalog`}>
-        {percent !== null ? <span className="range-marker__dot" style={{ left: `${Math.min(100, Math.max(0, percent))}%` }} /> : null}
-      </div>
+      {percent !== null ? (
+        <div className="range-marker__line" aria-hidden="true">
+          <span className="range-marker__tick" style={{ left: `${Math.min(100, Math.max(0, percent))}%` }} />
+        </div>
+      ) : null}
+      {words ? <p className="range-marker__words">{words}</p> : null}
     </div>
   )
 }
