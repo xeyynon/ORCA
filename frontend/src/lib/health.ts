@@ -10,6 +10,12 @@ export function agoShort(then: Date | null, now: Date): string {
   return m < 60 ? `${m} min ago` : `${Math.floor(m / 60)} h ${m % 60} min ago`
 }
 
+/** Ends a message with one full stop, unless it already ends a sentence ("…port 8000?" must not become "?."). */
+function sentence(t: string): string {
+  const s = t.trim()
+  return /[.?!]$/.test(s) ? s : `${s}.`
+}
+
 /** The page's answer line, in words. Never claims more than the last check showed. */
 export function healthHeadline(status: ApiStatus, check: HealthCheck): { tone: 'ok' | 'warn' | 'bad'; title: string; detail: string } {
   const every = `Checked every ${Math.round(check.intervalMs / 1000)} s from this browser.`
@@ -17,7 +23,7 @@ export function healthHeadline(status: ApiStatus, check: HealthCheck): { tone: '
     return { tone: 'ok', title: 'The API is online', detail: `${check.latencyMs !== null ? `It answered in ${check.latencyMs} ms. ` : ''}${every}` }
   }
   if (status === 'offline') {
-    return { tone: 'bad', title: 'The API is not answering', detail: `${check.error ? `Last error: ${check.error}. ` : ''}${every} The last good response is shown below.` }
+    return { tone: 'bad', title: 'The API is not answering', detail: `${check.error ? `Last error: ${sentence(check.error)} ` : ''}${every} The last good response is shown below.` }
   }
   return { tone: 'warn', title: 'Checking the API…', detail: every }
 }

@@ -12,7 +12,7 @@ type Props = {
   goLabel: Record<KpiId, string>
 }
 
-const ICON: Record<KpiId, IconName> = { objects: 'globe', pairs: 'orbit', high: 'alert', critical: 'target' }
+const ICON: Record<KpiId, IconName> = { pairs: 'orbit', high: 'alert', critical: 'target' }
 
 /**
  * "Orbital intelligence": the four headline figures as aligned cards, each a big tabular number, a label, and the run it

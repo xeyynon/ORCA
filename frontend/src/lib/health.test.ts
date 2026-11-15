@@ -18,6 +18,7 @@ test('healthHeadline says what the last check showed, with the measured time onl
   const off = healthHeadline('offline', { ...base, error: 'Failed to fetch' })
   assert.equal(off.tone, 'bad')
   assert.match(off.detail, /^Last error: Failed to fetch\. /)
+  assert.match(healthHeadline('offline', { ...base, error: 'Is uvicorn running on port 8000?' }).detail, /^Last error: Is uvicorn running on port 8000\? Checked/)
   assert.equal(healthHeadline('checking', base).tone, 'warn')
 })
 
