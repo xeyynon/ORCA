@@ -23,7 +23,7 @@ Source: [ux_audit_2026-11-15.md](ux_audit_2026-11-15.md) (finding numbers in bra
 - [x] **8. Decoration (#10).** Home glow and kicker removed (step 5); the Home Earth plays its collision once and rests. The sign-in scene stays: approved exception, see DECISIONS.md 2026-11-15.
 - [x] **Follow-up round:** risk KPI emphasis, horizon label, phone status bar, Data column, plurals, 320 px tabs (audit §10).
 - [x] Home: a connection-lost cue on the first screen when the API stops answering (audit §10): a flat red-dot strip and a dated headline; both clear when the API answers.
-- [ ] Globe default colouring: owner to choose (finer LEO bands everywhere, a "constellation" colour mode, or keep).
+- [x] Globe colouring: owner chose a third "Constellation" mode (Starlink, OneWeb, Kuiper, Qianfan, Other; same naming rule as Analytics). Altitude stays the default.
 - [ ] Screen-reader pass and a real touch device.
 
 ## Done

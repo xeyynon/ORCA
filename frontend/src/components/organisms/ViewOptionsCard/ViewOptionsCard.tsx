@@ -28,7 +28,7 @@ export function ViewOptionsCard({ prefs, onChange, conjunctionActive }: Props) {
         <SegmentedControl<ColorBy>
           ariaLabel="Colour objects by"
           value={prefs.colorBy}
-          options={[{ value: 'altitude', label: 'Altitude' }, { value: 'type', label: 'Object type' }]}
+          options={[{ value: 'altitude', label: 'Altitude' }, { value: 'type', label: 'Type' }, { value: 'constellation', label: 'Constellation' }]}
           onChange={(colorBy) => onChange({ colorBy })}
         />
       </div>

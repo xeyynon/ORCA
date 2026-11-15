@@ -172,3 +172,4 @@ After the 2026-11-15 audit's polish pass (MD/ux_audit_2026-11-15.md §9). The "b
 | [12-ask-button-1440.png](13-polish-2026-11-15/12-ask-button-1440.png) | Ask ORCA up front: a labelled button beside search (owner, 2026-11-15), no longer a menu row; pressed while the panel is open |
 | [13-ask-button-390.png](13-polish-2026-11-15/13-ask-button-390.png) | Phone: the same as a 44 px icon button |
 | [14-home-api-down.png](13-polish-2026-11-15/14-home-api-down.png) | API down (requests blocked in a test tab): Home says so on its first screen and the headline is dated, not "right now"; both clear by themselves when the API answers |
+| [15-globe-constellation-1440.png](13-polish-2026-11-15/15-globe-constellation-1440.png) | Globe coloured by constellation (owner's choice): Starlink, OneWeb, Kuiper, Qianfan, Other, keyed in the legend |

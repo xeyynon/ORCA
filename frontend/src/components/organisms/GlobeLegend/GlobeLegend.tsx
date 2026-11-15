@@ -1,5 +1,6 @@
+import { GLOBE_CONSTELLATION_LABEL, GLOBE_CONSTELLATIONS } from '@/lib/groups'
 import { cx } from '@/lib/cx'
-import { ALTITUDE_BAND_COLOR, OBJECT_TYPE_COLOR } from '@/lib/chartColors'
+import { ALTITUDE_BAND_COLOR, CONSTELLATION_COLOR, OBJECT_TYPE_COLOR } from '@/lib/chartColors'
 import { integer } from '@/lib/format'
 import type { ColorBy } from '@/lib/globePrefs'
 import { OBJECT_TYPES, OBJECT_TYPE_LABEL } from '@/lib/objectTypes'
@@ -27,12 +28,14 @@ export function GlobeLegend({ colorBy, shown, total, showOrbit, hasConjunction, 
   const capped = total !== null && total > shown
   const marks = hasSelection || showOrbit || hasConjunction
   return (
-    <div className={cx('globe-legend', !marks && !capped && 'globe-legend--key-only')}>
+    <div className={cx('globe-legend', colorBy === 'constellation' ? 'globe-legend--own-key' : !marks && !capped && 'globe-legend--key-only')}>
       <div className="globe-legend__key">
-        <Label>{colorBy === 'altitude' ? 'Objects by current altitude' : 'Objects by type'}</Label>
+        <Label>{colorBy === 'altitude' ? 'Objects by current altitude' : colorBy === 'constellation' ? 'Objects by constellation (name)' : 'Objects by type'}</Label>
         <div className="globe-legend__items">
           {colorBy === 'altitude'
             ? ALTITUDE_BANDS.map((b) => <LegendItem key={b} shape="circle" color={ALTITUDE_BAND_COLOR[b]} label={ALTITUDE_BAND_LABEL[b]} />)
+            : colorBy === 'constellation'
+            ? GLOBE_CONSTELLATIONS.map((g) => <LegendItem key={g} shape="circle" color={CONSTELLATION_COLOR[g]} label={GLOBE_CONSTELLATION_LABEL[g]} />)
             : OBJECT_TYPES.map((t) => <LegendItem key={t} shape="circle" color={OBJECT_TYPE_COLOR[t]} label={OBJECT_TYPE_LABEL[t]} />)}
         </div>
       </div>
