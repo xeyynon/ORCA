@@ -176,3 +176,4 @@ After the 2026-11-15 audit's polish pass (MD/ux_audit_2026-11-15.md §9). The "b
 | [16-globe-decluttered-1440.png](13-polish-2026-11-15/16-globe-decluttered-1440.png) | Globe decluttered (owner: "too congested"): one quiet side panel instead of three cards; conjunction-only controls appear only with a conjunction; the not-drawn count joins the drawing line |
 | [17-globe-panel-hidden-1440.png](13-polish-2026-11-15/17-globe-panel-hidden-1440.png) | The side panel hidden ("‹" on the panel, "› Panel" to bring it back): the globe gets the whole width |
 | [18-globe-legend-right-1440.png](13-polish-2026-11-15/18-globe-legend-right-1440.png) | The drawing line moved right (owner): stacked just above the playback bar, same right edge |
+| [19-globe-details-above-foot.png](13-polish-2026-11-15/19-globe-details-above-foot.png) | Fix: selection details stop above the drawing line and playback bar at any height (the stack is measured), instead of running under them |
