@@ -7,6 +7,14 @@
  * (260 ms, off under reduced motion via base.css). The row keeps the bar's height (--statusbar-h).
  */
 .statusbar {
+  /* Floats over the bottom of the page, like the top bar's capsules over its top (owner, 2026-11-16: "utilise this
+     space"): the page runs to the bottom edge and shows between the capsules; only the capsules take clicks.
+     PageLayout pads its end by the bar's height so the last line can scroll clear of them. */
+  position: fixed;
+  z-index: 3;
+  left: 0;
+  right: 0;
+  bottom: 0;
   display: flex;
   align-items: stretch;
   justify-content: space-between;
@@ -14,7 +22,9 @@
   height: var(--statusbar-h);
   background: transparent;
   white-space: nowrap;
+  pointer-events: none;
 }
+.statusbar__health, .statusbar__context { pointer-events: auto; }
 .statusbar__health, .statusbar__context {
   display: flex;
   align-items: center;
@@ -57,10 +67,9 @@ button.statusbar__health { cursor: pointer; }
  */
 @media (min-width: 1001px) {
   .statusbar--floating {
-    position: fixed;
-    z-index: 3;
     left: 50%;
-    bottom: 0;
+    right: auto;
+    pointer-events: auto;
     transform: translateX(-50%);
     justify-content: center;
     gap: 0;
