@@ -11,14 +11,14 @@
   line-height: 1.5;
   box-shadow: var(--elev-3);
 }
-.report h2 { margin: 0 0 10px; padding-bottom: 6px; border-bottom: 2px solid var(--paper-ink); color: var(--paper-ink); font-size: 16px; font-weight: 700; break-after: avoid; }
+.report .report__h { margin: 0 0 10px; padding-bottom: 6px; border-bottom: 2px solid var(--paper-ink); color: var(--paper-ink); font-size: 16px; font-weight: 700; break-after: avoid; }
 .report__header { display: flex; flex-direction: column; gap: 10px; padding-bottom: 18px; margin-bottom: 22px; border-bottom: 1px solid var(--paper-rule); }
 .report__brand { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .report__logo { height: 26px; width: auto; }
-.report__kind { color: var(--paper-ink-3); font-size: 10.5px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; }
+.report__kind { color: var(--paper-ink-3); font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; }
 .report__title { margin: 6px 0 0; color: var(--paper-ink); font-size: 26px; line-height: 1.15; font-weight: 700; letter-spacing: -0.01em; }
 .report__meta { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px 16px; margin: 4px 0 0; }
-.report__meta dt { color: var(--paper-ink-3); font-size: 10.5px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; }
+.report__meta dt { color: var(--paper-ink-3); font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; }
 .report__meta dd { margin: 0; color: var(--paper-ink); font-variant-numeric: tabular-nums; }
 .report__run { margin: 0; color: var(--paper-ink-2); }
 /* The handling marking: centred, bold, widely spaced capitals, the way official documents mark how they may be used.
@@ -26,7 +26,7 @@
 .report__marking {
   margin: -28px 0 22px;
   color: var(--paper-ink);
-  font-size: 10.5px;
+  font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.18em;
   text-align: center;
@@ -56,10 +56,9 @@
 .report__dot--low { background: var(--paper-risk-low); }
 .report__dot--negligible { background: var(--paper-risk-negligible); }
 .report__pc { white-space: nowrap; }
-.report__pc sup { font-size: 0.72em; line-height: 0; }
 .report__limits { margin: 0; padding-left: 18px; color: var(--paper-ink-2); }
 .report__limits li + li { margin-top: 3px; }
-.report__footer { margin-top: 28px; padding-top: 8px; border-top: 1px solid var(--paper-rule); color: var(--paper-ink-3); font-size: 10.5px; }
+.report__footer { margin-top: 28px; padding-top: 8px; border-top: 1px solid var(--paper-rule); color: var(--paper-ink-3); font-size: 11px; }
 
 /* Small screens: the preview stays a document (a paper width, scrolled sideways in its frame) instead of half-reflowing.
    Screen only: the A4 print area is under 720 px wide too, and print must keep the paper layout. */

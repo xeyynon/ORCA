@@ -1,8 +1,15 @@
 import { useMemo, useRef, useState } from 'react'
+import { Badge } from '../../atoms/Badge/Badge'
+import { Mono } from '../../atoms/Mono/Mono'
+import type { CSSProperties } from 'react'
+import { IconButton } from '../../atoms/IconButton/IconButton'
+import { Icon } from '../../atoms/Icon/Icon'
+import { cx } from '@/lib/cx'
 import type { ConjunctionEvent, ObjectType, TleRecord } from '@/api/types'
 import type { Snapshot } from '@/globe/EarthScene'
 import { useCatalogSummary } from '@/hooks/useCatalogSummary'
 import { useFullscreen } from '@/hooks/useFullscreen'
+import { useElementHeight } from '@/hooks/useElementHeight'
 import { useGlobePrefs } from '@/hooks/useGlobePrefs'
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
@@ -18,7 +25,7 @@ import { filterObjects } from '@/lib/globePrefs'
 import { ALTITUDE_BANDS, altitudeBand } from '@/lib/orbit'
 import { offsetForTca } from '@/lib/playback'
 import { riskTone } from '@/lib/risk'
-import { parseUtc } from '@/lib/time'
+import { parseUtc, formatSimTime } from '@/lib/time'
 import { positionsWaitNote } from '@/lib/waitNote'
 import type { Theme } from '@/lib/theme'
 import { Button } from '../../atoms/Button/Button'
@@ -74,6 +81,9 @@ export function GlobeView({ catalog, totalCount, selection, focus, conjunction, 
   const [autoRotate, setAutoRotate] = useState(true)
   const [resetNonce, setResetNonce] = useState(0)
   const stageRef = useRef<HTMLDivElement>(null)
+  // The bottom-right stack (drawing line + playback bar) varies in height; the details panel above it gets what is left.
+  const footRef = useRef<HTMLDivElement>(null)
+  const footH = useElementHeight(footRef)
   const toggleFullscreen = useFullscreen(stageRef)
   const narrow = useMediaQuery(NARROW)
 
@@ -136,6 +146,7 @@ export function GlobeView({ catalog, totalCount, selection, focus, conjunction, 
 
   // What is selected: the side panel on a wide screen, a bottom sheet over the globe's foot on a phone (above the
   // playback bar, which stays reachable). Single tap on the globe selects; the sheet handle is a button as well as a drag.
+  const pairOnly = conjunction !== null && selection.length > 0 && selection.every((id) => id === conjunction.sat1_id || id === conjunction.sat2_id)
   const details = conjunction || primary || selection.length > 1 ? (
     <>
       {conjunction ? (
@@ -147,16 +158,29 @@ export function GlobeView({ catalog, totalCount, selection, focus, conjunction, 
           onClose={onClearConjunction}
         />
       ) : null}
-      {primary ? <ObjectCard tle={primary} position={posById.get(primary.norad_cat_id) ?? null} now={now} onClose={() => onSelect([])} /> : null}
-      {selection.length > 1 ? <FieldNote>{selection.length} objects selected: {selection.map(nameOf).join(' and ')}.</FieldNote> : null}
+      {/* While the selection is just the conjunction's pair, the conjunction card is the one card: an object card for one
+          of the two repeated what it shows and pushed it into a scroll (owner, 2026-11-15). Click another object for its card. */}
+      {primary && !pairOnly ? <ObjectCard tle={primary} position={posById.get(primary.norad_cat_id) ?? null} now={now} onClose={() => onSelect([])} /> : null}
+      {selection.length > 1 && !pairOnly ? <FieldNote>{selection.length} objects selected: {selection.map(nameOf).join(' and ')}.</FieldNote> : null}
     </>
   ) : null
   const sheetTitle = conjunction ? `Conjunction: ${conjunction.sat1_name} × ${conjunction.sat2_name}` : primary ? primary.object_name : `${selection.length} objects selected`
   const inSheet = narrow && details !== null
 
   return (
-    <main className="globe-view" id="main-content" tabIndex={-1} aria-label="Globe">
-      <aside className="globe-view__side globe-view__side--left" aria-label="Catalog and filters">
+    <main className="globe-view" id="main-content" tabIndex={-1} aria-label="Globe" style={{ '--globe-foot-h': `${Math.round(footH)}px` } as CSSProperties}>
+      <h1 className="visually-hidden">Globe</h1>
+      {/* One quiet panel (owner, 2026-11-15: "too congested"); hide it to give the globe the whole width. Desktop only:
+          on narrow screens the panels sit below the globe and are always there. */}
+      {prefs.panelOpen ? null : (
+        <div className="globe-view__show-panel">
+          <Button size="sm" onClick={() => setPrefs({ panelOpen: true })}><Icon name="chevron-right" size={14} /> Panel</Button>
+        </div>
+      )}
+      <aside className={cx('globe-view__side globe-view__side--left', !prefs.panelOpen && 'globe-view__side--hidden')} aria-label="Catalog and filters">
+        <div className="globe-view__hide-panel">
+          <IconButton label="Hide panel" onClick={() => setPrefs({ panelOpen: false })}><Icon name="chevron-left" size={14} /></IconButton>
+        </div>
         <CatalogSummaryCard summary={summary.data} error={summary.status === 'error' ? summary.error.message : null} onRetry={summary.reload} />
         <ViewOptionsCard prefs={prefs} onChange={setPrefs} conjunctionActive={conjunction !== null} />
         <FiltersCard prefs={prefs} onChange={setPrefs} summary={summary.data} bandCounts={bandCounts} countsReady={loaded !== undefined} conjunctionActive={conjunction !== null} />
@@ -180,17 +204,33 @@ export function GlobeView({ catalog, totalCount, selection, focus, conjunction, 
             onCamera={onCamera}
           />
         </div>
-        <div className="globe-view__legend">
-          <GlobeLegend
-            colorBy={prefs.colorBy}
-            shown={drawn.length}
-            total={loaded ? summary.data?.total ?? null : null}
-            showOrbit={prefs.showOrbits && selection.length > 0}
-            hasConjunction={activeConj !== null}
-            hasSelection={selection.length > 0}
-          />
-        </div>
-        <div className="globe-view__foot">
+        <div className="globe-view__foot" ref={footRef}>
+          {/* Hidden (desktop): a pill that keeps the simulated time and Live / Paused / Playing on screen, so you never
+              look at a future time without knowing it (owner, 2026-11-15: a hiding option for these). */}
+          {prefs.footOpen ? null : (
+            <div className="globe-view__foot-pill">
+              <Button size="sm" onClick={() => setPrefs({ footOpen: true })}>
+                <Icon name="chevron-up" size={14} />
+                <Mono>{formatSimTime(simMs)}</Mono>
+                {playback.offsetH === 0 && !playback.playing ? <Badge tone="ok">Live</Badge> : <Badge tone="warn">{playback.playing ? `Playing ${playback.speed}×` : 'Paused'}</Badge>}
+              </Button>
+            </div>
+          )}
+          <div className={cx('globe-view__foot-stack', !prefs.footOpen && 'globe-view__foot-stack--hidden')}>
+          <div className="globe-view__hide-foot">
+            <IconButton label="Hide the legend and playback controls" onClick={() => setPrefs({ footOpen: false })}><Icon name="chevron-down" size={14} /></IconButton>
+          </div>
+          <div className="globe-view__legend">
+            <GlobeLegend
+              colorBy={prefs.colorBy}
+              shown={drawn.length}
+              total={loaded ? summary.data?.total ?? null : null}
+              showOrbit={prefs.showOrbits && selection.length > 0}
+              hasConjunction={activeConj !== null}
+              hasSelection={selection.length > 0}
+              skipped={positions.data?.skipped ?? 0}
+            />
+          </div>
           {inSheet ? <div className="globe-view__sheet"><BottomSheet title={sheetTitle}>{details}</BottomSheet></div> : null}
           <div className="globe-view__bar">
             <PlaybackBar
@@ -208,6 +248,7 @@ export function GlobeView({ catalog, totalCount, selection, focus, conjunction, 
               onFullscreen={toggleFullscreen}
             />
           </div>
+          </div>
         </div>
       </div>
 
@@ -224,7 +265,6 @@ export function GlobeView({ catalog, totalCount, selection, focus, conjunction, 
         ) : null}
         {positions.status === 'error' && positions.data ? <FieldNote>Position refresh failed ({positions.error.message}). Showing the last good snapshot; it is extrapolated for at most two minutes.</FieldNote> : null}
         {positions.data && positions.data.objects.length === 0 ? <EmptyState kind="none" title="No positions returned">The catalog is empty or no element set could be propagated.</EmptyState> : null}
-        {positions.data && positions.data.skipped > 0 ? <FieldNote>{positions.data.skipped} object(s) could not be propagated and are not drawn.</FieldNote> : null}
         {notDrawn.length > 0 ? <FieldNote>{notDrawn.map(nameOf).join(', ')} could not be drawn: it is not in the catalog, or SGP4 cannot propagate it (decayed or invalid elements).</FieldNote> : null}
         {failed.length > 0 ? <FieldNote>Orbit path unavailable for {failed.map(nameOf).join(', ')}.</FieldNote> : null}
 

@@ -8,7 +8,7 @@ import type { Regime } from '@/lib/orbit'
 import { pairKey } from '@/lib/pair'
 import { includedSections, REPORT_MARKING, REPORT_SECTIONS, tierRows } from '@/lib/report'
 import type { ReportOptions, ReportSectionId } from '@/lib/report'
-import { RISK_THRESHOLDS, riskTone } from '@/lib/risk'
+import { RISK_TIER_SOURCE, riskTierLines, riskTone } from '@/lib/risk'
 import { formatUtc } from '@/lib/time'
 import './ReportDocument.css'
 
@@ -38,6 +38,8 @@ type Props = {
   events: readonly ConjunctionEvent[]
   quality: ReportQuality
   method: ConjunctionMethod | null
+  /** On screen inside the Reports page: the title is an h2 (the page has its own h1); in print it is the h1. */
+  preview?: boolean
 }
 
 /** A risk tier as a coloured dot and its word: never colour alone, and readable in black-and-white print. */
@@ -47,16 +49,13 @@ function Risk({ level }: { level: RiskLevel }) {
 
 const capitalise = (s: string) => s.charAt(0).toUpperCase() + s.slice(1)
 
-/** Pc typeset for paper: "2.83 × 10" with the exponent as a superscript and a true minus sign, not "10^-5". */
+/** Pc as everywhere else in ORCA ("2.83 × 10⁻⁵", lib/format.pc), kept on one line. */
 function Pc({ v }: { v: number }) {
-  const s = pc(v)
-  const m = /^(.*) × 10\^(-?\d+)$/.exec(s)
-  return m ? <span className="report__pc">{m[1]} × 10<sup>{m[2].replace('-', '−')}</sup></span> : <>{s}</>
+  return <span className="report__pc">{pc(v)}</span>
 }
 
 function Threshold({ level }: { level: RiskLevel }) {
-  const t = RISK_THRESHOLDS.find((x) => x.level === level)
-  return t?.minPc != null ? <>Pc of <Pc v={t.minPc} /> or more</> : <>Pc below every other tier</>
+  return <>{riskTierLines().find((t) => t.level === level)?.rule ?? ''}</>
 }
 
 /**
@@ -65,6 +64,7 @@ function Threshold({ level }: { level: RiskLevel }) {
  * see is what you get. Every figure is real and says where it came from; a missing one is said in words.
  */
 export function ReportDocument(p: Props) {
+  const [H1, H2, H3] = p.preview ? (['h2', 'h3', 'h4'] as const) : (['h1', 'h2', 'h3'] as const)
   const ids = includedSections(p.options)
   const numberOf = (id: ReportSectionId) => ids.indexOf(id) + 1
   const titleOf = (id: ReportSectionId) => REPORT_SECTIONS.find((s) => s.id === id)?.title ?? id
@@ -83,7 +83,7 @@ export function ReportDocument(p: Props) {
           <img className="report__logo" src={`${BASE}logo-320-light.png`} alt="ORCA" />
           <span className="report__kind">Space situational awareness report</span>
         </div>
-        <h1 className="report__title">{ids.length === 1 ? titleOf(ids[0]) : 'Orbital situation report'}</h1>
+        <H1 className="report__title">{ids.length === 1 ? titleOf(ids[0]) : 'Orbital situation report'}</H1>
         <dl className="report__meta">
           <div><dt>Reference</dt><dd>{p.reference}</dd></div>
           <div><dt>Generated</dt><dd>{formatUtc(p.generatedAt.toISOString())}</dd></div>
@@ -100,7 +100,7 @@ export function ReportDocument(p: Props) {
 
       {p.options.sections.summary ? (
         <section className="report__section">
-          <h2>{numberOf('summary')}. Situation summary</h2>
+          <H2 className="report__h">{numberOf('summary')}. Situation summary</H2>
           <p className="report__lead">
             {p.objects !== null ? `${integer(p.objects)} objects are in the tracked catalogue.` : 'The catalogue size is not available.'}
             {p.regimes ? ` ${sharePercent(p.regimes.counts.LEO, p.regimes.total) ?? 'Most'} of them are in low Earth orbit.` : ''}
@@ -109,7 +109,7 @@ export function ReportDocument(p: Props) {
             <caption>Headline figures</caption>
             <thead><tr><th>Figure</th><th className="num">Value</th><th>What it counts</th></tr></thead>
             <tbody>
-              {homeKpis(p.objects, p.run).map((k) => (
+              {homeKpis(p.run).map((k) => (
                 <tr key={k.id}><td>{k.label}</td><td className="num">{k.value ?? NA}</td><td>{k.context}</td></tr>
               ))}
             </tbody>
@@ -133,7 +133,7 @@ export function ReportDocument(p: Props) {
 
       {p.options.sections.approaches ? (
         <section className="report__section">
-          <h2>{numberOf('approaches')}. Close approaches</h2>
+          <H2 className="report__h">{numberOf('approaches')}. Close approaches</H2>
           {p.run && p.tierCounts ? (
             <>
               <p className="report__lead">
@@ -168,10 +168,10 @@ export function ReportDocument(p: Props) {
 
       {p.options.sections.pair ? (
         <section className="report__section">
-          <h2>{numberOf('pair')}. Single pair analysis</h2>
+          <H2 className="report__h">{numberOf('pair')}. Single pair analysis</H2>
           {pair ? (
             <>
-              <h3 className="report__pair">{pair.sat1_name} × {pair.sat2_name}</h3>
+              <H3 className="report__pair">{pair.sat1_name} × {pair.sat2_name}</H3>
               <p className="report__lead">
                 At {formatUtc(pair.tca)}, {pair.sat1_name} (NORAD {pair.sat1_id}) and {pair.sat2_name} (NORAD {pair.sat2_id}) are predicted to pass {fixed(pair.min_distance_km, 3)} km apart at {fixed(pair.relative_velocity_kms, 2)} km/s.
                 {' '}The estimated probability of collision is <Pc v={pair.probability_of_collision} />, which ORCA rates {pair.risk_level}.
@@ -197,7 +197,7 @@ export function ReportDocument(p: Props) {
 
       {p.options.sections.quality ? (
         <section className="report__section">
-          <h2>{numberOf('quality')}. Data quality and method</h2>
+          <H2 className="report__h">{numberOf('quality')}. Data quality and method</H2>
           <table className="report__table report__table--facts">
             <caption>Data quality</caption>
             <tbody>
@@ -223,10 +223,10 @@ export function ReportDocument(p: Props) {
                   <tr><th scope="row">Closest approach</th><td>{p.method.closest_approach}</td></tr>
                   <tr><th scope="row">Probability of collision</th><td>{p.method.collision_probability}</td></tr>
                   <tr><th scope="row">Uncertainty</th><td>{p.method.uncertainty}</td></tr>
-                  <tr><th scope="row">Risk tiers</th><td>{p.method.risk_tiers}</td></tr>
+                  <tr><th scope="row">Risk tiers</th><td>{riskTierLines().map((t) => `${t.level}: ${t.rule}`).join('; ')}. {RISK_TIER_SOURCE}</td></tr>
                 </tbody>
               </table>
-              <h3 className="report__sub">Limits</h3>
+              <H3 className="report__sub">Limits</H3>
               <ul className="report__limits">{p.method.limits.map((l) => <li key={l}>{l}</li>)}</ul>
             </>
           ) : <p className="report__note">Method details: {NA.toLowerCase()} (the API did not answer).</p>}

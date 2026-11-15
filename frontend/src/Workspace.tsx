@@ -1,5 +1,5 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { getStatistics, getTles } from '@/api/endpoints'
+import { getTles } from '@/api/endpoints'
 import type { ConjunctionQuery } from '@/api/endpoints'
 import type { ConjunctionEvent } from '@/api/types'
 import type { CameraGeo } from '@/lib/coords'
@@ -18,17 +18,14 @@ import { loadSavedRun, SAVED_RUN_QUERY } from '@/api/savedRun'
 import { AskOrcaPanel } from '@/components/organisms/AskOrcaPanel/AskOrcaPanel'
 import { summarizeCatalog } from '@/lib/catalog'
 import { days, formatLat, formatLon, integer } from '@/lib/format'
-import { formatUtc } from '@/lib/time'
-import { staleBand, staleNotice } from '@/lib/staleness'
+import { formatUtc, formatRelative } from '@/lib/time'
+import { STALE_MEDIAN_DAYS, staleBand, staleNotice } from '@/lib/staleness'
 import { VIEWS, VIEW_HOTKEY, VIEW_LABEL } from '@/lib/views'
-import type { ViewId } from '@/lib/views'
-import { breadcrumbTrail } from '@/lib/breadcrumbs'
-import { pairKey } from '@/lib/pair'
 import { Brand } from '@/components/molecules/Brand/Brand'
 import type { Theme } from '@/lib/theme'
 import { AppBar } from '@/components/organisms/AppBar/AppBar'
+import { AskButton } from '@/components/molecules/AskButton/AskButton'
 import { AppMenu } from '@/components/organisms/AppMenu/AppMenu'
-import { Breadcrumbs } from '@/components/organisms/Breadcrumbs/Breadcrumbs'
 import { ObjectSearch } from '@/components/organisms/ObjectSearch/ObjectSearch'
 import { SearchPopover } from '@/components/organisms/SearchPopover/SearchPopover'
 import { buildNotices } from '@/lib/notices'
@@ -46,6 +43,7 @@ import { LoadingScreen } from '@/components/views/LoadingScreen/LoadingScreen'
 import { AnalyticsView } from '@/components/views/AnalyticsView/AnalyticsView'
 import { ConjunctionsView } from '@/components/views/ConjunctionsView/ConjunctionsView'
 import { DataView } from '@/components/views/DataView/DataView'
+import { HealthView } from '@/components/views/HealthView/HealthView'
 import { ReportsView } from '@/components/views/ReportsView/ReportsView'
 import { HomeView } from '@/components/views/HomeView/HomeView'
 import { OverviewView } from '@/components/views/OverviewView/OverviewView'
@@ -64,13 +62,12 @@ type Props = { username: string; onSignOut: () => void; theme: Theme; onToggleTh
  */
 export function Workspace({ username, onSignOut, theme, onToggleTheme: toggleTheme }: Props) {
   const { view, go } = useHashView()
-  const { status: apiStatus, health } = useHealth()
+  const { status: apiStatus, health, check: healthCheck, recheck: recheckHealth } = useHealth()
   const now = useNow()
   const searchRef = useRef<HTMLInputElement>(null)
 
   // Shared across views so switching views never refetches or loses the selection.
   const catalog = useAsync((signal) => getTles(CATALOG_LIMIT, { signal }), [])
-  const stats = useAsync((signal) => getStatistics({ signal }), [catalog.data?.length ?? null], view === 'analytics' && catalog.data !== null)
   const update = useCatalogUpdate()
 
   const [selection, setSelection] = useState<string[]>([])
@@ -120,7 +117,7 @@ export function Workspace({ username, onSignOut, theme, onToggleTheme: toggleThe
   useSearchChord(() => setSearchOpen(true))
   const [askOpen, setAskOpen] = useState(false)
   const askInputRef = useRef<HTMLInputElement>(null)
-  const askButtonRef = useRef<HTMLSpanElement>(null)
+  const askButtonRef = useRef<HTMLSpanElement>(null) // wraps the Ask ORCA button: focus returns there when the panel closes
   const closeAsk = useCallback(() => { setAskOpen(false); askButtonRef.current?.querySelector('button')?.focus() }, [])
   const ask = useAskOrca({
     open: askOpen, view, theme, health, summary, loaded: catalog.data ?? [], conjSearch, inputRef: askInputRef,
@@ -137,7 +134,7 @@ export function Workspace({ username, onSignOut, theme, onToggleTheme: toggleThe
 
   // Esc is the last rung of the ladder: modals and detail panes close themselves first (they prevent default).
   useKeyboardShortcuts({
-    ...Object.fromEntries(VIEWS.map((v) => [VIEW_HOTKEY[v], () => go(v)])),
+    ...Object.fromEntries(VIEWS.filter((v) => VIEW_HOTKEY[v]).map((v) => [VIEW_HOTKEY[v], () => go(v)])),
     t: toggleTheme,
     '?': () => setHelpOpen(true),
     '/': () => setSearchOpen(true),
@@ -145,39 +142,40 @@ export function Workspace({ username, onSignOut, theme, onToggleTheme: toggleThe
     Escape: () => setSelection((s) => (s.length ? [] : s)),
   }, !helpOpen)
 
-  // The trail's deepest level: the selected object (by name) or the conjunction pair on screen.
-  const selectedName = selection[0] ? (catalog.data?.find((t) => t.norad_cat_id === selection[0])?.object_name ?? selection[0]) : null
-  const pairOnScreen = view === 'globe' ? conjunction : view === 'conjunctions' ? (conjSearch.events.find((e) => pairKey(e) === conjKey) ?? null) : null
-  const trail = breadcrumbTrail({ view, objectName: selectedName, pairLabel: pairOnScreen ? `${pairOnScreen.sat1_name} × ${pairOnScreen.sat2_name}` : null })
-  const onCrumb = (target: ViewId, clearSelection: boolean) => {
-    if (clearSelection) {
-      if (target === 'conjunctions') setConjKey(null)
-      else if (target === 'globe' && conjunction) setConjunction(null)
-      else setSelection([])
-    }
-    go(target)
-  }
 
   // The bell lists only real, current conditions (lib/notices.ts).
   const notices = buildNotices({ apiStatus, stale, searchPhase: conjSearch.phase, searchSource: conjSearch.source })
 
+  // Health on the left (one click to the Data page), context on the right (audit 2026-11-15, status bar).
+  const medianAge = summary?.medianAgeDays ?? null
   const status: StatusItem[] = [
     { label: 'API', value: apiStatus === 'online' ? 'online' : apiStatus === 'offline' ? 'unreachable' : 'checking', tone: apiStatus === 'online' ? 'ok' : apiStatus === 'offline' ? 'bad' : 'warn', dotOnly: apiStatus === 'online' },
-    { label: 'Objects', value: health ? integer(health.database.tles_count) : null },
-    { label: 'Oldest TLE', value: summary?.oldestAgeDays != null ? days(summary.oldestAgeDays) : null, title: 'Age of the oldest element set in the catalog' },
-    { label: 'Last API refresh', value: health?.database.last_update ? formatUtc(health.database.last_update) : null, title: 'When the API last stored a Celestrak fetch' },
-    ...(view === 'globe' ? [
-      { label: 'Camera lat', value: camera ? formatLat(camera.latDeg) : null },
-      { label: 'Lon', value: camera ? formatLon(camera.lonDeg) : null },
-      { label: 'Alt', value: camera ? `${integer(camera.altKm)} km` : null },
-    ] : []),
+    // No object count: every view that shows the catalogue already states it (owner, 2026-11-15: "this is repeating").
+    // The median, not the oldest: one leftover 90-day-old set made a catalogue refreshed today read as stale.
+    {
+      label: 'Data age',
+      value: medianAge !== null ? `${days(medianAge)} median` : null,
+      tone: medianAge !== null ? (medianAge > STALE_MEDIAN_DAYS ? 'warn' : 'ok') : undefined,
+      title: summary?.oldestAgeDays != null ? `Median age of the loaded element sets; the oldest is ${days(summary.oldestAgeDays)}` : 'Median age of the loaded element sets',
+    },
+    {
+      label: 'Refreshed',
+      value: health?.database.last_update ? formatRelative(health.database.last_update, now) : health ? 'never via the API' : null,
+      title: health?.database.last_update ? `The API last stored a Celestrak fetch at ${formatUtc(health.database.last_update)}` : undefined,
+    },
     ...(conjSearch.phase === 'running' ? [{ label: 'Search', value: 'running', tone: 'warn' as const, title: 'A conjunction search is running. It continues while you look at other views.' }]
       : conjSearch.phase === 'done' && conjSearch.source === 'live' && view !== 'conjunctions' ? [{ label: 'Search', value: 'result ready', tone: 'ok' as const, title: 'A conjunction search result is waiting on the Conjunctions view.' }] : []),
+  ]
+  const statusContext: StatusItem[] = [
+    ...(view === 'globe' ? [
+      { label: 'Camera', value: camera ? `${formatLat(camera.latDeg)} ${formatLon(camera.lonDeg)}` : null },
+      { label: 'Alt', value: camera ? `${integer(camera.altKm)} km` : null },
+    ] : []),
     { label: 'UTC', value: formatUtc(now.toISOString()).replace(' UTC', '') },
   ]
 
   return (
-    <div className="app">
+    <div className={view === 'globe' ? 'app app--immersive' : 'app'}>
       <SkipLink targetId="main-content">Skip to content</SkipLink>
       <AppBar
         left={<Brand href="#/home" onNavigate={() => go('home')} />}
@@ -186,13 +184,11 @@ export function Workspace({ username, onSignOut, theme, onToggleTheme: toggleThe
           <SearchPopover open={searchOpen} onOpen={() => setSearchOpen(true)} onClose={closeSearch} inputRef={searchRef}>
             <ObjectSearch bare inputRef={searchRef} query={query} onQueryChange={setQuery} results={search.results} loading={search.loading} degraded={search.degraded} onPick={(id) => { closeSearch(); showOnGlobe([id]) }} />
           </SearchPopover>
-          <span ref={askButtonRef}>
-            <AppMenu username={username} theme={theme} notices={notices} onGo={go} onAsk={() => setAskOpen(true)} onShortcuts={() => setHelpOpen(true)} onTour={tour.start} onToggleTheme={toggleTheme} onSignOut={onSignOut} />
-          </span>
+          <span ref={askButtonRef}><AskButton open={askOpen} onToggle={() => (askOpen ? closeAsk() : setAskOpen(true))} /></span>
+          <AppMenu username={username} theme={theme} notices={notices} onGo={go} onShortcuts={() => setHelpOpen(true)} onTour={tour.start} onToggleTheme={toggleTheme} onSignOut={onSignOut} />
         </>}
       />
 
-      <Breadcrumbs trail={trail} onNavigate={onCrumb} />
 
       {/* Not on Conjunctions: its result carries the same fact as one of its caveats, and one home per fact. Not on Globe/Data: the canvas stays clear, and Data explains it. */}
       {stale && staleDismissedBand !== currentStaleBand && (view === 'overview' || view === 'analytics') ? (
@@ -244,12 +240,13 @@ export function Workspace({ username, onSignOut, theme, onToggleTheme: toggleThe
           onShowOnGlobe={showOnGlobe}
         />
       ) : null}
-      {view === 'analytics' ? <AnalyticsView catalog={catalog} stats={stats} totalCount={health?.database.tles_count ?? null} now={now} /> : null}
-      {view === 'data' ? <DataView health={health} apiStatus={apiStatus} summary={summary} update={update} /> : null}
+      {view === 'analytics' ? <AnalyticsView catalog={catalog} totalCount={health?.database.tles_count ?? null} now={now} /> : null}
+      {view === 'data' ? <DataView health={health} apiStatus={apiStatus} summary={summary} update={update} onOpenHealth={() => go('health')} /> : null}
+      {view === 'health' ? <HealthView health={health} apiStatus={apiStatus} check={healthCheck} onRecheck={recheckHealth} onBack={() => go('data')} now={now} /> : null}
       {view === 'reports' ? <ReportsView summary={summary} health={health} conjSearch={conjSearch} selectedConjKey={conjKey} username={username} now={now} /> : null}
 
       {/* On the home page these readings are a readable "System status" section instead (homepage spec, Section 05). */}
-      {view !== 'home' ? <StatusBar items={status} /> : null}
+      {view !== 'home' ? <StatusBar items={status} context={statusContext} onOpenData={view === 'data' ? undefined : () => go('data')} floating={view === 'globe'} /> : null}
       {askOpen ? <AskOrcaPanel messages={ask.messages} onSend={ask.send} onPick={ask.pick} onClose={closeAsk} inputRef={askInputRef} footnote={ask.footnote} /> : null}
       {helpOpen ? <ShortcutsHelp onClose={() => setHelpOpen(false)} /> : null}
       {tour.view ? <TourOverlay {...tour.view} /> : null}

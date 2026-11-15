@@ -3,9 +3,11 @@ import type { TleRecord } from '@/api/types'
 import { ageDays, formatUtc } from '@/lib/time'
 import { fixed, integer } from '@/lib/format'
 import { deriveOrbit } from '@/lib/orbit'
+import { pageContaining, pageOf } from '@/lib/paging'
 import { sortBy } from '@/lib/sort'
 import { Mono } from '../../atoms/Mono/Mono'
 import { Badge } from '../../atoms/Badge/Badge'
+import { Pager } from '../../molecules/Pager/Pager'
 import { ValueUnit } from '../../molecules/ValueUnit/ValueUnit'
 import type { SortDir } from '../../molecules/SortHeader/SortHeader'
 import { DataTable } from '../DataTable/DataTable'
@@ -17,12 +19,9 @@ type Props = {
   selectedId: string | null
   onSelect: (id: string) => void
   now: Date
-  /** Objects stored by the API, when more than `rows` were loaded. */
-  totalCount?: number | null
-  /** True when `rows` is already a filtered subset: the cap line then counts matching objects, not the whole load. */
-  filtered?: boolean
-  /** Render cap. Rows are sorted first, so the cap shows the top of the chosen order, and the cap is stated. */
-  maxRows?: number
+  /** Rows per page. Rows are sorted first, so page 1 is the top of the chosen order. 50 (was 250 with "Show next"): the
+      page stays short and the object card beside it stays in view (declutter plan 2026-11-15). */
+  pageSize?: number
 }
 
 const SORT_KEYS: Record<string, (t: TleRecord) => number | string> = {
@@ -34,18 +33,29 @@ const SORT_KEYS: Record<string, (t: TleRecord) => number | string> = {
   age: (t) => -Date.parse(t.epoch),
 }
 
-export function CatalogTable({ rows, selectedId, onSelect, now, totalCount = null, filtered = false, maxRows = 250 }: Props) {
+export function CatalogTable({ rows, selectedId, onSelect, now, pageSize = 50 }: Props) {
   const [sortId, setSortId] = useState('name')
   const [sortDir, setSortDir] = useState<SortDir>('asc')
 
   const sorted = useMemo(() => sortBy(rows, SORT_KEYS[sortId] ?? SORT_KEYS.name, sortDir), [rows, sortId, sortDir])
-  const shown = sorted.slice(0, maxRows)
+  // Back to page 1 when the rows or their order change (a filter or a sort); to the selected object's page when it is
+  // selected from elsewhere (search, the Globe).
+  const [page, setPage] = useState(0)
+  const [pageFor, setPageFor] = useState(sorted)
+  const [seenId, setSeenId] = useState(selectedId)
+  if (pageFor !== sorted) { setPageFor(sorted); setPage(0) }
+  if (seenId !== selectedId) {
+    setSeenId(selectedId)
+    const target = selectedId ? pageContaining(sorted.findIndex((t) => t.norad_cat_id === selectedId), pageSize) : null
+    if (target !== null) setPage(target)
+  }
+  const view = pageOf(sorted, page, pageSize)
 
   const columns: Column<TleRecord>[] = [
     { id: 'name', label: 'Object', sortable: true, render: (t) => t.object_name },
     { id: 'id', label: 'NORAD', sortable: true, align: 'right', render: (t) => <Mono>{t.norad_cat_id}</Mono> },
     { id: 'regime', label: 'Regime', render: (t) => { const o = deriveOrbit(t); return o ? <Badge>{o.regime}</Badge> : <Mono muted>—</Mono> } },
-    { id: 'alt', label: 'Mean alt', sortable: true, align: 'right', render: (t) => <ValueUnit value={fixed(deriveOrbit(t)?.meanAltKm, 0)} unit="km" /> },
+    { id: 'alt', label: 'Mean alt', sortable: true, align: 'right', render: (t) => <ValueUnit value={integer(deriveOrbit(t)?.meanAltKm)} unit="km" /> },
     { id: 'incl', label: 'Incl.', sortable: true, align: 'right', render: (t) => <ValueUnit value={fixed(t.inclination, 2)} unit="°" /> },
     { id: 'ecc', label: 'Ecc.', sortable: true, align: 'right', render: (t) => <Mono>{fixed(t.eccentricity, 5)}</Mono> },
     { id: 'epoch', label: 'TLE epoch', render: (t) => <Mono muted>{formatUtc(t.epoch)}</Mono> },
@@ -64,7 +74,7 @@ export function CatalogTable({ rows, selectedId, onSelect, now, totalCount = nul
       <DataTable
         caption="Catalog objects"
         columns={columns}
-        rows={shown}
+        rows={view.rows}
         rowKey={(t) => t.norad_cat_id}
         selectedKey={selectedId}
         onSelect={(t) => onSelect(t.norad_cat_id)}
@@ -72,13 +82,7 @@ export function CatalogTable({ rows, selectedId, onSelect, now, totalCount = nul
         sortDir={sortDir}
         onSort={onSort}
       />
-      {rows.length > maxRows ? (
-        <div className="catalog-table__cap">
-          {filtered
-            ? `Showing the first ${integer(maxRows)} of ${integer(rows.length)} matching objects in this order. Narrow the filter to see the rest.`
-            : `Showing the first ${integer(maxRows)} of ${integer(rows.length)} loaded objects in this order${totalCount !== null && totalCount > rows.length ? ` (${integer(totalCount)} are stored; the API returns at most 5,000 per request; the search box at the top covers all of them)` : ''}.`}
-        </div>
-      ) : null}
+      <Pager noun="objects" page={view.page} pages={view.pages} from={view.from} to={view.to} total={view.total} onPage={setPage} />
     </div>
   )
 }

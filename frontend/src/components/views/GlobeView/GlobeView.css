@@ -2,9 +2,10 @@
 .globe-view { position: relative; flex: 1; min-height: 0; overflow: hidden; background: var(--bg-abyss); }
 .globe-view__center { position: absolute; inset: 0; }
 .globe-view__stage { position: absolute; inset: 0; }
-.globe-view__side { position: absolute; z-index: 2; top: var(--gap-3); display: flex; flex-direction: column; gap: var(--gap-2); max-height: calc(100% - 2 * var(--gap-3)); overflow-y: auto; scrollbar-width: none; }
+.globe-view__side { position: absolute; z-index: 2; top: calc(var(--globe-top, 0px) + var(--gap-3)); display: flex; flex-direction: column; gap: var(--gap-2); max-height: calc(100% - var(--globe-top, 0px) - 2 * var(--gap-3)); overflow-y: auto; scrollbar-width: none; }
 .globe-view__side--left { left: var(--gap-3); width: 260px; }
-.globe-view__side--right { right: var(--gap-3); width: 340px; max-height: calc(100% - 140px); }
+/* Ends above the bottom-right stack, whatever its height (measured into --globe-foot-h), so details never run under it. */
+.globe-view__side--right { right: var(--gap-3); width: 340px; max-height: calc(100% - var(--globe-top, 0px) - var(--globe-foot-h, 140px) - 3 * var(--gap-3)); }
 /* The foot holds the playback bar (and, on a phone, the details sheet above it). It lets clicks through to the globe. */
 .globe-view__foot { position: absolute; z-index: 2; right: var(--gap-3); bottom: var(--gap-3); width: 340px; display: flex; flex-direction: column; pointer-events: none; }
 
@@ -15,7 +16,7 @@
  * token: the theme blocks in tokens.css out-rank base.css's :root override).
  */
 .globe-view__bar {
-  border: 1px solid var(--glass-border);
+  /* Elevation said once (playbook UI-47): the shadow lifts it off the busy globe, so no border as well. */
   border-radius: var(--radius-md);
   background: var(--glass-bg);
   -webkit-backdrop-filter: blur(var(--glass-blur));
@@ -31,7 +32,9 @@
 }
 
 /* The legend sits at the foot of the stage, clear of the left panel (260 px) and the playback bar (right). */
-.globe-view__legend { position: absolute; z-index: 1; left: calc(260px + 2 * var(--gap-3)); bottom: var(--gap-3); max-width: 280px; pointer-events: none; }
+/* In the right-hand foot column, just above the playback bar (owner, 2026-11-15: move it right): stacked, so it never
+   depends on the bar's height. */
+.globe-view__legend { margin-bottom: var(--gap-2); pointer-events: none; }
 
 /* Narrow: the globe first, with its playback bar laid over its foot; what is selected next, filters last, all scrolling.
    A selection becomes a bottom sheet in the space between the top of the globe and the bar; the sheet clips to it. */
@@ -40,9 +43,33 @@
   .globe-view__center { position: relative; inset: auto; height: 68dvh; min-height: 360px; flex: none; order: 0; }
   .globe-view__foot { top: var(--gap-2); left: var(--gap-2); right: var(--gap-2); bottom: var(--gap-2); width: auto; justify-content: flex-end; gap: var(--gap-2); }
   .globe-view__sheet { position: relative; flex: 1; min-height: 0; overflow: hidden; border-radius: var(--radius-lg); }
-  .globe-view__legend { left: var(--gap-2); top: var(--gap-2); bottom: auto; max-width: calc(100% - 2 * var(--gap-2)); }
+  .globe-view__legend { position: absolute; z-index: 1; left: 0; top: 0; margin: 0; max-width: 100%; }
   .globe-view__side { position: static; width: auto; max-height: none; overflow: visible; padding: var(--gap-3); }
   .globe-view__side--right { order: 1; }
   .globe-view__side--left { order: 2; }
   .globe-view__side--right:empty { display: none; }
+}
+
+/* Desktop: the left column is ONE quiet surface (catalog, view options, filters as sections with a hairline between),
+   not three stacked cards; it can be hidden to give the globe the whole width (owner, 2026-11-15: "too congested"). */
+@media (min-width: 1001px) {
+  .globe-view__side--left { gap: 0; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--bg-card); }
+  .globe-view__side--left .panel { border: 0; border-radius: 0; background: transparent; }
+  .globe-view__side--left .panel + .panel { border-top: 1px solid var(--border); }
+  .globe-view__side--left .catalog-summary__total { font-size: 22px; }
+  .globe-view__side--hidden { display: none; }
+  /* The status bar floats at the bottom left on the Globe: the panel stops above it. */
+  .globe-view__side--left { max-height: calc(100% - var(--globe-top, 0px) - 2 * var(--gap-3) - var(--statusbar-h)); }
+  .globe-view__hide-panel { position: absolute; z-index: 1; top: 6px; right: 6px; }
+  .globe-view__show-panel { position: absolute; z-index: 2; top: calc(var(--globe-top, 0px) + var(--gap-3)); left: var(--gap-3); }
+  /* Legend + playback: a hide control at the stack's top right; hidden, only a pill with the time and its state stays. */
+  .globe-view__foot-stack { position: relative; display: flex; flex-direction: column; }
+  .globe-view__foot-stack--hidden { display: none; }
+  .globe-view__hide-foot { display: flex; justify-content: flex-end; margin-bottom: 4px; pointer-events: auto; }
+  .globe-view__foot-pill { display: flex; justify-content: flex-end; pointer-events: auto; }
+  .globe-view__foot-pill .btn { gap: var(--gap-2); }
+}
+@media (max-width: 1000px) {
+  .globe-view__hide-panel, .globe-view__show-panel, .globe-view__hide-foot, .globe-view__foot-pill { display: none; }
+  .globe-view__foot-stack, .globe-view__foot-stack--hidden { display: contents; }
 }

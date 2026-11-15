@@ -1,0 +1,21 @@
+/* One centred column like Data (PageLayout narrow); the answer first, the facts in two plain cards, raw JSON folded. */
+.health-view__back { margin-bottom: calc(-1 * var(--gap-3)); }
+.health-view__answer, .health-view__card, .health-view__json { border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg-card); padding: var(--gap-4); }
+.health-view__answer-title { display: flex; align-items: center; gap: var(--gap-2); font-size: 18px; font-weight: 600; color: var(--text-primary); }
+.health-view__answer-detail { margin: var(--gap-2) 0 0; color: var(--text-secondary); }
+.health-view__answer-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--gap-2) var(--gap-3); margin-top: var(--gap-3); }
+.health-view__checked { color: var(--text-tertiary); font-size: var(--text-sm); font-variant-numeric: tabular-nums; }
+.health-view__card { display: flex; flex-direction: column; gap: var(--gap-3); }
+.health-view__h2 { margin: 0; font-size: 15px; font-weight: 600; color: var(--text-primary); }
+.health-view__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--gap-3) var(--gap-4); }
+.health-view__detail { margin: 0; color: var(--text-secondary); }
+.health-view__json { padding: var(--gap-3) var(--gap-4); }
+.health-view__json[open] { display: flex; flex-direction: column; gap: var(--gap-3); }
+.health-view__json-summary { display: flex; flex-wrap: wrap; align-items: center; gap: var(--gap-1) var(--gap-3); min-height: 32px; cursor: pointer; list-style: none; }
+.health-view__json-summary::-webkit-details-marker { display: none; }
+.health-view__json-hint { color: var(--text-tertiary); font-size: var(--text-sm); }
+.health-view__chevron { display: inline-flex; margin-left: auto; color: var(--text-tertiary); transition: transform 120ms ease; }
+.health-view__json[open] .health-view__chevron { transform: rotate(180deg); }
+.health-view__json-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--gap-2) var(--gap-4); }
+.health-view__link { display: inline-flex; align-items: center; min-height: 24px; color: var(--accent-ink); }
+.health-view__pre { margin: 0; padding: var(--gap-3); overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius-sm, 6px); background: var(--bg-canvas); color: var(--text-primary); font-family: var(--font-mono); font-size: 12px; line-height: 1.55; }

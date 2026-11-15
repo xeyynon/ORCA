@@ -3,6 +3,7 @@ import { integer } from './format'
 import type { HookRun } from './homeHook'
 import { riskRank } from './risk'
 import { STALE_MEDIAN_DAYS } from './staleness'
+import { formatDayRange, parseUtc } from './time'
 
 /**
  * The home page's command-centre figures (MD/ORCA_Homepage_Redesign_Context.md). Pure, so every label can be tested:
@@ -15,7 +16,7 @@ export function runName(run: Pick<HookRun, 'saved'>): string {
   return run.saved ? 'the stored example run' : 'your latest search'
 }
 
-export type KpiId = 'objects' | 'pairs' | 'high' | 'critical'
+export type KpiId = 'pairs' | 'high' | 'critical'
 
 export interface HomeKpi {
   id: KpiId
@@ -24,24 +25,27 @@ export interface HomeKpi {
   value: string | null
   /** The words under the figure: what it counts, and from which run. */
   context: string
+  /** A risk figure above zero carries its tier's ink on the number (status on the figure, never a fill): it is the one
+      the eye should land on. Zero stays neutral. */
+  tone?: 'high' | 'critical'
 }
 
 /**
- * The four headline figures. The pair count is pairs that came within the report distance, not conjunctions or
+ * The three headline figures (the object count was a fourth; the headline above already says it in large type, so it
+ * was dropped: declutter plan 2026-11-15). The pair count is pairs that came within the report distance, not conjunctions or
  * collisions, and its label says so; the risk tiers keep the run's name attached.
  */
-export function homeKpis(objects: number | null, run: HookRun | null): HomeKpi[] {
+export function homeKpis(run: HookRun | null): HomeKpi[] {
   const where = run ? runName(run) : null
   return [
-    { id: 'objects', label: 'Catalogued objects', value: objects !== null && objects > 0 ? integer(objects) : null, context: 'Objects in the tracked catalogue' },
     {
       id: 'pairs',
       label: 'Close pairs',
       value: run ? integer(run.totalEvents) : null,
       context: run ? `Pairs within ${run.reportKm} km in ${where}` : 'Pairs within the report distance',
     },
-    { id: 'high', label: 'High-risk approaches', value: run ? integer(run.highRisk) : null, context: where ? `Flagged in ${where}` : 'Flagged by screening' },
-    { id: 'critical', label: 'Critical approaches', value: run ? integer(run.critical) : null, context: where ? `In ${where}` : 'Flagged by screening' },
+    { id: 'high', label: 'High-risk approaches', value: run ? integer(run.highRisk) : null, context: where ? `Flagged in ${where}` : 'Flagged by screening', tone: run && run.highRisk > 0 ? 'high' : undefined },
+    { id: 'critical', label: 'Critical approaches', value: run ? integer(run.critical) : null, context: where ? `In ${where}` : 'Flagged by screening', tone: run && run.critical > 0 ? 'critical' : undefined },
   ]
 }
 
@@ -86,4 +90,22 @@ export function fetchSummary(f: FetchOutcome | null | undefined): { tone: 'ok' |
     case 'network_error': return { tone: 'bad', text: 'Failed: network error' }
     default: return { tone: 'warn', text: f.detail }
   }
+}
+
+/**
+ * When a run's approaches happen, in words, and whether that is over: "Closest approaches from 6 to 7 Nov 2026 in the
+ * stored example run. That window ended 8 days ago." A past window must never read as upcoming (audit 2026-11-15, P0 #2).
+ */
+export function runWindowLine(run: Pick<HookRun, 'saved' | 'windowStart'>, windowEnd: string, now: Date): string {
+  const range = formatDayRange(run.windowStart, windowEnd)
+  const base = `Closest approaches ${range.includes(' to ') ? 'from' : 'on'} ${range} in ${runName(run)}.`
+  const endMs = parseUtc(windowEnd).getTime()
+  if (Number.isNaN(endMs) || endMs > now.getTime()) return base
+  const days = Math.floor((now.getTime() - endMs) / 86_400_000)
+  return `${base} That window ended ${days >= 2 ? `${days} days ago` : days === 1 ? 'a day ago' : 'today'}.`
+}
+
+/** True when a closest approach is already in the past at `now`. */
+export function isPast(tcaIso: string, now: Date): boolean {
+  return parseUtc(tcaIso).getTime() < now.getTime()
 }

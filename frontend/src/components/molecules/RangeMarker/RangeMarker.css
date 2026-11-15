@@ -1,4 +1,9 @@
+/* Read-only position, not a control (owner, 2026-11-15: "looking like we can scroll it"): a 1 px hairline with end
+   ticks, a short upright tick in text colour, and the rank in words. Nothing round, filled or raised to grab. */
 .range-marker { display: flex; flex-direction: column; gap: 6px; }
 .range-marker__head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--gap-3); }
-.range-marker__track { position: relative; height: 6px; border-radius: 3px; background: var(--bg-input); }
-.range-marker__dot { position: absolute; top: 50%; width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 2px var(--bg-card); }
+.range-marker__line { position: relative; height: 10px; margin: 0 1px; border-inline: 1px solid var(--border-strong); }
+.range-marker__line::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: var(--border-strong); }
+.range-marker__tick { position: absolute; top: 0; bottom: 0; width: 2px; margin-left: -1px; background: var(--text-primary); }
+.range-marker__words { margin: 0; color: var(--text-secondary); font-size: var(--text-sm); }
+.range-marker + .range-marker { margin-top: var(--gap-2); }

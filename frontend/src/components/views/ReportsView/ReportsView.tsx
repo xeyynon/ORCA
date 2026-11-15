@@ -7,11 +7,9 @@ import { useCatalogSummary } from '@/hooks/useCatalogSummary'
 import type { ConjunctionSearch } from '@/hooks/useConjunctionSearch'
 import { useHomeRun } from '@/hooks/useHomeRun'
 import type { CatalogSummary } from '@/lib/catalog'
-import { integer } from '@/lib/format'
-import { previewEvents, runName } from '@/lib/homeBoard'
+import { previewEvents } from '@/lib/homeBoard'
 import { blockedReason, DEFAULT_REPORT, defaultPairKey, reportFileName, reportReference } from '@/lib/report'
 import type { ReportOptions } from '@/lib/report'
-import { formatUtc } from '@/lib/time'
 import { SectionHeader } from '../../molecules/SectionHeader/SectionHeader'
 import { PageLayout } from '../../organisms/PageLayout/PageLayout'
 import { ReportBuilder } from '../../organisms/ReportBuilder/ReportBuilder'
@@ -63,12 +61,16 @@ export function ReportsView({ summary, health, conjSearch, selectedConjKey, user
     window.print()
   }
 
+  // Once the run is ready the report's own run line names it, so the builder says nothing (declutter plan 2026-11-15);
+  // it speaks only while the run is loading or when it failed.
   const source = ready
-    ? `Close-approach figures from ${runName(home.run)} (${integer(home.run.totalEvents)} pairs, window from ${formatUtc(home.run.windowStart)}).`
+    ? null
     : home.status === 'failed' ? 'The close-approach run could not be loaded.' : 'Loading the close-approach run…'
 
-  const doc = (
+  // The same document twice: the on-screen preview (its title an h2 under the page's h1) and the print-only copy (h1).
+  const report = (preview: boolean) => (
     <ReportDocument
+      preview={preview}
       options={options}
       generatedAt={generatedAt}
       reference={reportReference(generatedAt)}
@@ -99,10 +101,10 @@ export function ReportsView({ summary, health, conjSearch, selectedConjKey, user
           <ReportBuilder options={options} onChange={setOptions} pairs={ranked} source={source} blocked={blocked} onGenerate={generate} />
         </div>
         <div className="reports__preview" aria-label="Preview">
-          {doc}
+          {report(true)}
         </div>
       </div>
-      {createPortal(<div className="report-print">{doc}</div>, document.body)}
+      {createPortal(<div className="report-print">{report(false)}</div>, document.body)}
     </PageLayout>
   )
 }

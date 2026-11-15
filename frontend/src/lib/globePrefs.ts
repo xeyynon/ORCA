@@ -4,7 +4,7 @@ import { ALTITUDE_BANDS, altitudeBand } from './orbit'
 import type { AltitudeBand } from './orbit'
 import { OBJECT_TYPES } from './objectTypes'
 
-export type ColorBy = 'altitude' | 'type'
+export type ColorBy = 'altitude' | 'type' | 'constellation'
 export type TypeFilter = 'all' | ObjectType
 
 /** Everything the person can toggle on the globe. These are preferences, so they persist across navigation (rules.md §5.1). */
@@ -17,6 +17,10 @@ export interface GlobePrefs {
   typeFilter: TypeFilter
   bands: Record<AltitudeBand, boolean>
   onlyConjunction: boolean
+  /** The side panel is shown (desktop): hide it to give the globe the whole width. */
+  panelOpen: boolean
+  /** The legend and playback bar are shown (desktop); hidden, a small pill keeps the time and its state on screen. */
+  footOpen: boolean
 }
 
 export const DEFAULT_PREFS: GlobePrefs = {
@@ -28,6 +32,8 @@ export const DEFAULT_PREFS: GlobePrefs = {
   typeFilter: 'all',
   bands: { LEO: true, MEO: true, GEO: true, BEYOND: true },
   onlyConjunction: false,
+  panelOpen: true,
+  footOpen: true,
 }
 
 const bool = (v: unknown, fallback: boolean) => (typeof v === 'boolean' ? v : fallback)
@@ -43,10 +49,12 @@ export function parsePrefs(raw: unknown): GlobePrefs {
     showOrbits: bool(o.showOrbits, DEFAULT_PREFS.showOrbits),
     showConjunction: bool(o.showConjunction, DEFAULT_PREFS.showConjunction),
     labelSelected: bool(o.labelSelected, DEFAULT_PREFS.labelSelected),
-    colorBy: o.colorBy === 'type' ? 'type' : 'altitude',
+    colorBy: o.colorBy === 'type' || o.colorBy === 'constellation' ? o.colorBy : 'altitude',
     typeFilter,
     bands,
     onlyConjunction: bool(o.onlyConjunction, DEFAULT_PREFS.onlyConjunction),
+    panelOpen: bool(o.panelOpen, DEFAULT_PREFS.panelOpen),
+    footOpen: bool(o.footOpen, DEFAULT_PREFS.footOpen),
   }
 }
 

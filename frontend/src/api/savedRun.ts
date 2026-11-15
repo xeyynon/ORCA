@@ -7,7 +7,7 @@ export const SAVED_RUN_QUERY: ConjunctionQuery = { horizonDays: 1, limit: 100 }
 /**
  * A real search response (1-day horizon over the stored catalog, top 100 rows) kept in the bundle, so the page can be
  * explored without waiting for a fresh run. It is loaded on demand (its own chunk) and is never presented as live:
- * see SavedRunBanner. It contains public TLE-derived data only. Regenerate it with `GET /api/conjunctions` when the
+ * see the first point of the result caveats (ConjunctionsView). It contains public TLE-derived data only. Regenerate it with `GET /api/conjunctions` when the
  * engine changes, or the example will describe an engine that no longer exists.
  */
 export async function loadSavedRun(): Promise<ConjunctionSearchResult> {
