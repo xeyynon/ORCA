@@ -16,7 +16,7 @@ export function runName(run: Pick<HookRun, 'saved'>): string {
   return run.saved ? 'the stored example run' : 'your latest search'
 }
 
-export type KpiId = 'objects' | 'pairs' | 'high' | 'critical'
+export type KpiId = 'pairs' | 'high' | 'critical'
 
 export interface HomeKpi {
   id: KpiId
@@ -31,13 +31,13 @@ export interface HomeKpi {
 }
 
 /**
- * The four headline figures. The pair count is pairs that came within the report distance, not conjunctions or
+ * The three headline figures (the object count was a fourth; the headline above already says it in large type, so it
+ * was dropped: declutter plan 2026-11-15). The pair count is pairs that came within the report distance, not conjunctions or
  * collisions, and its label says so; the risk tiers keep the run's name attached.
  */
-export function homeKpis(objects: number | null, run: HookRun | null): HomeKpi[] {
+export function homeKpis(run: HookRun | null): HomeKpi[] {
   const where = run ? runName(run) : null
   return [
-    { id: 'objects', label: 'Catalogued objects', value: objects !== null && objects > 0 ? integer(objects) : null, context: 'Objects in the tracked catalogue' },
     {
       id: 'pairs',
       label: 'Close pairs',

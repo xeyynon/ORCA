@@ -109,7 +109,7 @@ export function ReportDocument(p: Props) {
             <caption>Headline figures</caption>
             <thead><tr><th>Figure</th><th className="num">Value</th><th>What it counts</th></tr></thead>
             <tbody>
-              {homeKpis(p.objects, p.run).map((k) => (
+              {homeKpis(p.run).map((k) => (
                 <tr key={k.id}><td>{k.label}</td><td className="num">{k.value ?? NA}</td><td>{k.context}</td></tr>
               ))}
             </tbody>

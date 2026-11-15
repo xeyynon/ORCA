@@ -6,29 +6,28 @@ import type { HookRun } from './homeHook.ts'
 
 const run: HookRun = { totalEvents: 442786, reportKm: 10, horizonDays: 1, highRisk: 29, critical: 0, windowStart: '2026-11-06T18:23:26', saved: true }
 
-test('every run figure names its run, and the pair count is pairs within the distance, not conjunctions', () => {
-  const k = homeKpis(15970, run)
-  assert.deepEqual(k.map((x) => x.value), ['15,970', '442,786', '29', '0'])
-  assert.equal(k[1].context, 'Pairs within 10 km in the stored example run')
-  assert.equal(k[2].context, 'Flagged in the stored example run')
-  assert.equal(k[3].context, 'In the stored example run')
+test('three figures, no object count (the headline says it); every run figure names its run, and the pair count is pairs within the distance, not conjunctions', () => {
+  const k = homeKpis(run)
+  assert.deepEqual(k.map((x) => x.value), ['442,786', '29', '0'])
+  assert.equal(k[0].context, 'Pairs within 10 km in the stored example run')
+  assert.equal(k[1].context, 'Flagged in the stored example run')
+  assert.equal(k[2].context, 'In the stored example run')
   assert.doesNotMatch(k.map((x) => `${x.label} ${x.context}`).join(' '), /live|real-time|collisions? found/i)
-  assert.equal(homeKpis(15970, { ...run, saved: false })[1].context, 'Pairs within 10 km in your latest search')
+  assert.equal(homeKpis({ ...run, saved: false })[0].context, 'Pairs within 10 km in your latest search')
   assert.equal(runName({ saved: false }), 'your latest search')
-  assert.equal(homeKpis(15970, { ...run, saved: false })[2].context, 'Flagged in your latest search')
+  assert.equal(homeKpis({ ...run, saved: false })[1].context, 'Flagged in your latest search')
   assert.equal(runName({ saved: true }), 'the stored example run')
 })
 
 test('figures that are not there yet are null (a skeleton), never 0', () => {
-  assert.deepEqual(homeKpis(null, null).map((x) => x.value), [null, null, null, null])
-  assert.equal(homeKpis(0, null)[0].value, null)
+  assert.deepEqual(homeKpis(null).map((x) => x.value), [null, null, null])
 })
 
 test('a risk figure above zero carries its tier ink; zero stays neutral', () => {
-  const k = homeKpis(15970, run)
-  assert.equal(k[2].tone, 'high')
-  assert.equal(k[3].tone, undefined)
-  assert.equal(homeKpis(15970, { ...run, critical: 2 })[3].tone, 'critical')
+  const k = homeKpis(run)
+  assert.equal(k[1].tone, 'high')
+  assert.equal(k[2].tone, undefined)
+  assert.equal(homeKpis({ ...run, critical: 2 })[2].tone, 'critical')
 })
 
 const ev = (risk: ConjunctionEvent['risk_level'], pc: number, tca: string, id: string): ConjunctionEvent => ({

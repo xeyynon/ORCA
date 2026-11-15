@@ -185,3 +185,27 @@ After the 2026-11-15 audit's polish pass (MD/ux_audit_2026-11-15.md §9). The "b
 | [25-globe-controls-hidden-1440.png](13-polish-2026-11-15/25-globe-controls-hidden-1440.png) | Legend and playback hidden (owner): a pill keeps the simulated time and Live / Paused / Playing on screen; click it to bring them back |
 | [26-globe-controls-shown-1440.png](13-polish-2026-11-15/26-globe-controls-shown-1440.png) | Shown: the hide control ("⌄") at the top right of the legend and playback stack |
 | [27-globe-under-topbar-1440.png](13-polish-2026-11-15/27-globe-under-topbar-1440.png) | No band behind the top bar on the Globe (owner): the globe runs under it and the three capsules float over space |
+
+## 14-declutter-2026-11-15
+
+Every page after the declutter pass (`MD/declutter_plan_2026-11-15.md`); the "before" shots are in `MD/ux_audit/2026-11-15-declutter/`. All 1440 px, dark, unless named.
+
+| File | What it shows |
+|---|---|
+| [after-home.png](14-declutter-2026-11-15/after-home.png) | Three KPI cards; API state as the last row of Data quality; no System status section |
+| [after-overview.png](14-declutter-2026-11-15/after-overview.png) | Three KPI cards, 50 rows a page, no regime donut |
+| [after-overview-selected.png](14-declutter-2026-11-15/after-overview-selected.png) | An object open: the card column stays in view |
+| [after-overview-light.png](14-declutter-2026-11-15/after-overview-light.png) | Light theme; "Compared with the catalog" as a read-only line with the rank in words |
+| [after-object-standing.png](14-declutter-2026-11-15/after-object-standing.png) | The comparison close up (was slider knobs) |
+| [after-conjunctions-idle.png](14-declutter-2026-11-15/after-conjunctions-idle.png) | Before a search: one-line run-time note |
+| [after-conjunctions-result.png](14-declutter-2026-11-15/after-conjunctions-result.png) | Saved run, a pair open: caveats hold the saved-run note, 25 rows a page, the pair card beside the table |
+| [after-conjunctions-360.png](14-declutter-2026-11-15/after-conjunctions-360.png) | 360 px: the pager and the card stacked under the table |
+| [after-analytics.png](14-declutter-2026-11-15/after-analytics.png) | No KPI row; scope in the subtitle only; one-line notes |
+| [before-data-1440.png](14-declutter-2026-11-15/before-data-1440.png) | Data before: cards hugging the left (owner) |
+| [after-data-1440.png](14-declutter-2026-11-15/after-data-1440.png) | Data centred with its title; API under "For developers" |
+| [after-data-360.png](14-declutter-2026-11-15/after-data-360.png) | Data at 360 px |
+| [after-health.png](14-declutter-2026-11-15/after-health.png) | The API health page (owner: a page instead of raw JSON) |
+| [health-1440.png](14-declutter-2026-11-15/health-1440.png) | The same with "Raw response (JSON)" open: copy, open /health, API docs |
+| [after-health-light.png](14-declutter-2026-11-15/after-health-light.png) | Light theme |
+| [after-health-offline.png](14-declutter-2026-11-15/after-health-offline.png) | The API blocked: "The API is not answering", the error, the last good response kept |
+| [after-reports.png](14-declutter-2026-11-15/after-reports.png) | Reports: the builder no longer repeats the run line |

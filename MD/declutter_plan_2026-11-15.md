@@ -193,6 +193,23 @@ Owner requests during step 2 (2026-11-15):
 - **"Compared with the catalog" looked like sliders**: the round accent knob on a rounded groove read as a range input. Now a 1 px hairline with end ticks and a short upright tick in text colour, plus the rank in words ("Higher than 54% of loaded objects"; TLE age says "Older" / "Newer"). `rankWords()` in `lib/percentile.ts`, tested.
 - **Regime card too big for one widget**: with nothing selected the side column fell into the single column and the donut stretched across the page; its counts also repeated the regime chips above the table. Removed from Overview; Analytics keeps the regime chart.
 
-| 3 | Analytics | 1,507 → **1,381 px** | 345 → **236** | 7 one-liners | 15,977 ×10 → ×3 (subtitle, donut centre, health of the whole page) | `after-analytics.png` |
+| 3 | Analytics | 1,507 → **1,381 px** | 345 → **234** | 7, each one line | 15,977 ×10 → ×2 (subtitle, donut centre) | `after-analytics.png` |
 
 Step 3 (owner chose "remove it"): the KPI row (mean apogee, median perigee, mean period, mean inclination) is gone, and with it the `/api/statistics` request, which fed nothing else. The scope is said once in the subtitle; only the regime donut shows its own scope, and only when it counts the whole catalogue while the other charts use the first loaded rows (that partial case was not exercised in the browser this time). Every chart note is one clause; the heatmap gives its plotted count only when some objects were left out. `SavedRunBanner` deleted (owner: "delete it").
+
+Steps 4 and 5: Home drops the "Catalogued objects" card (three cards, laid out with auto-fit so three or one per row, never two and one) and the System status section; its API row is now the last row of Data quality ("ORCA API: Connected"). The report's headline table drops the same row (its sentence above already gives the count). Reports: the builder's run line is gone once the run is ready; it still speaks while loading and on failure. `SystemStatus` is no longer rendered; its folder is kept until the owner confirms deleting it.
+
+## Before and after (2026-11-15, 1440 px, `.playwright-mcp/clutter-after.js`)
+
+| Page | Height | Words | Notes | Figures repeated |
+|---|---|---|---|---|
+| Home | 1,476 → **1,362** | 354 → **300** | 0 | 15,977 ×3 → **none** |
+| Overview (first page) | 8,873 → **2,004** | 2,828 → **622** | 1 → **0** | 5,000 ×6 → ×2, 15,977 ×2 |
+| Conjunctions, idle | 1,047 → **993** | 399 → **358** | 1 | none |
+| Conjunctions, a result with a pair open | 4,783 → **2,056** | 2,040 → **745** | 6 → **5** | 442,786 ×3 → **none** |
+| Analytics | 1,507 → **1,381** | 345 → **234** | 7 (one line each) | 15,977 ×10 → ×2 |
+| Data | 816 → 816 (centred) | 136 → **110** | 3 | none |
+| API health (new) | 816 | 83 | 0 | none |
+| Reports | 2,391 → **2,362** | 806 → **784** | 0 | 442,786 ×4 → ×3 (inside the report, expected) |
+
+Checked in the browser: 1440 px dark for every page; 360 px for Conjunctions and Data (no sideways scroll); light theme for Overview with an object open and API health; the API blocked on API health (it says "The API is not answering" with the error, and keeps the last good response). Not checked this round: 820 and 1920 px, and the light theme on Home, Analytics and Reports.
