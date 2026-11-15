@@ -5,9 +5,11 @@ import { fixed, pc } from '@/lib/format'
 import { riskRank } from '@/lib/risk'
 import { sortBy } from '@/lib/sort'
 import { pairKey } from '@/lib/pair'
+import { pageContaining, pageOf } from '@/lib/paging'
 import { GLOSSARY } from '@/lib/glossary'
 import { Badge } from '../../atoms/Badge/Badge'
 import { Mono } from '../../atoms/Mono/Mono'
+import { Pager } from '../../molecules/Pager/Pager'
 import { RiskBadge } from '../../molecules/RiskBadge/RiskBadge'
 import { ValueUnit } from '../../molecules/ValueUnit/ValueUnit'
 import type { SortDir } from '../../molecules/SortHeader/SortHeader'
@@ -20,6 +22,8 @@ type Props = {
   onSelect: (e: ConjunctionEvent) => void
   /** Beside the detail card: drop the uncertainty column (the card shows it) so the TCA stays in view. */
   compact?: boolean
+  /** Rows per page (declutter plan 2026-11-15: 25, so the page stays short and the detail card stays beside its row). */
+  pageSize?: number
 }
 
 const SORT_KEYS: Record<string, (e: ConjunctionEvent) => number | string> = {
@@ -31,10 +35,23 @@ const SORT_KEYS: Record<string, (e: ConjunctionEvent) => number | string> = {
 }
 
 /** Default order is Pc descending, which is how the backend returns it. */
-export function ConjunctionTable({ events, selectedKey, onSelect, compact = false }: Props) {
+export function ConjunctionTable({ events, selectedKey, onSelect, compact = false, pageSize = 25 }: Props) {
   const [sortId, setSortId] = useState('pc')
   const [sortDir, setSortDir] = useState<SortDir>('desc')
   const sorted = useMemo(() => sortBy(events, SORT_KEYS[sortId] ?? SORT_KEYS.pc, sortDir), [events, sortId, sortDir])
+
+  // Back to the first page when the rows or their order change; to the selected pair's page when the selection moves
+  // there from outside the table (Previous / Next on the detail card, a point on the timeline).
+  const [page, setPage] = useState(0)
+  const [pageFor, setPageFor] = useState(sorted)
+  const [seenKey, setSeenKey] = useState(selectedKey)
+  if (pageFor !== sorted) { setPageFor(sorted); setPage(0) }
+  if (seenKey !== selectedKey) {
+    setSeenKey(selectedKey)
+    const target = selectedKey ? pageContaining(sorted.findIndex((e) => pairKey(e) === selectedKey), pageSize) : null
+    if (target !== null) setPage(target)
+  }
+  const view = pageOf(sorted, page, pageSize)
 
   const columns: Column<ConjunctionEvent>[] = [
     {
@@ -64,16 +81,19 @@ export function ConjunctionTable({ events, selectedKey, onSelect, compact = fals
   }
 
   return (
-    <DataTable
-      caption="Predicted conjunctions"
-      columns={shown}
-      rows={sorted}
-      rowKey={pairKey}
-      selectedKey={selectedKey}
-      onSelect={onSelect}
-      sortId={sortId}
-      sortDir={sortDir}
-      onSort={onSort}
-    />
+    <>
+      <DataTable
+        caption="Predicted conjunctions"
+        columns={shown}
+        rows={view.rows}
+        rowKey={pairKey}
+        selectedKey={selectedKey}
+        onSelect={onSelect}
+        sortId={sortId}
+        sortDir={sortDir}
+        onSort={onSort}
+      />
+      <Pager noun="pairs" page={view.page} pages={view.pages} from={view.from} to={view.to} total={view.total} onPage={setPage} />
+    </>
   )
 }
