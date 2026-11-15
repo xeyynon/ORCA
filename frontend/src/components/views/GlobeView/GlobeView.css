@@ -2,10 +2,10 @@
 .globe-view { position: relative; flex: 1; min-height: 0; overflow: hidden; background: var(--bg-abyss); }
 .globe-view__center { position: absolute; inset: 0; }
 .globe-view__stage { position: absolute; inset: 0; }
-.globe-view__side { position: absolute; z-index: 2; top: var(--gap-3); display: flex; flex-direction: column; gap: var(--gap-2); max-height: calc(100% - 2 * var(--gap-3)); overflow-y: auto; scrollbar-width: none; }
+.globe-view__side { position: absolute; z-index: 2; top: calc(var(--globe-top, 0px) + var(--gap-3)); display: flex; flex-direction: column; gap: var(--gap-2); max-height: calc(100% - var(--globe-top, 0px) - 2 * var(--gap-3)); overflow-y: auto; scrollbar-width: none; }
 .globe-view__side--left { left: var(--gap-3); width: 260px; }
 /* Ends above the bottom-right stack, whatever its height (measured into --globe-foot-h), so details never run under it. */
-.globe-view__side--right { right: var(--gap-3); width: 340px; max-height: calc(100% - var(--globe-foot-h, 140px) - 3 * var(--gap-3)); }
+.globe-view__side--right { right: var(--gap-3); width: 340px; max-height: calc(100% - var(--globe-top, 0px) - var(--globe-foot-h, 140px) - 3 * var(--gap-3)); }
 /* The foot holds the playback bar (and, on a phone, the details sheet above it). It lets clicks through to the globe. */
 .globe-view__foot { position: absolute; z-index: 2; right: var(--gap-3); bottom: var(--gap-3); width: 340px; display: flex; flex-direction: column; pointer-events: none; }
 
@@ -59,9 +59,9 @@
   .globe-view__side--left .catalog-summary__total { font-size: 22px; }
   .globe-view__side--hidden { display: none; }
   /* The status bar floats at the bottom left on the Globe: the panel stops above it. */
-  .globe-view__side--left { max-height: calc(100% - 2 * var(--gap-3) - var(--statusbar-h)); }
+  .globe-view__side--left { max-height: calc(100% - var(--globe-top, 0px) - 2 * var(--gap-3) - var(--statusbar-h)); }
   .globe-view__hide-panel { position: absolute; z-index: 1; top: 6px; right: 6px; }
-  .globe-view__show-panel { position: absolute; z-index: 2; top: var(--gap-3); left: var(--gap-3); }
+  .globe-view__show-panel { position: absolute; z-index: 2; top: calc(var(--globe-top, 0px) + var(--gap-3)); left: var(--gap-3); }
   /* Legend + playback: a hide control at the stack's top right; hidden, only a pill with the time and its state stays. */
   .globe-view__foot-stack { position: relative; display: flex; flex-direction: column; }
   .globe-view__foot-stack--hidden { display: none; }

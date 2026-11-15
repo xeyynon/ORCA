@@ -175,7 +175,7 @@ export function Workspace({ username, onSignOut, theme, onToggleTheme: toggleThe
   ]
 
   return (
-    <div className="app">
+    <div className={view === 'globe' ? 'app app--immersive' : 'app'}>
       <SkipLink targetId="main-content">Skip to content</SkipLink>
       <AppBar
         left={<Brand href="#/home" onNavigate={() => go('home')} />}
