@@ -1,4 +1,7 @@
-.data-view__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: var(--gap-4); align-items: start; }
+/* One readable column: the catalogue's status, then the refresh action right under the data it changes, then the API.
+   Side by side at 1,440 px they sat apart over a half-empty page (audit 2026-11-15). */
+.data-view__grid { display: grid; grid-template-columns: 1fr; gap: var(--gap-4); align-items: start; max-width: 960px; }
 .data-view__api { display: flex; flex-direction: column; gap: var(--gap-3); padding: var(--gap-4); border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg-card); }
 .data-view__api-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--gap-3) var(--gap-4); }
 .data-view__link { display: inline-flex; align-items: center; min-height: 24px; color: var(--accent-ink); }
+.data-view__api { max-width: 960px; }

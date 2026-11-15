@@ -25,6 +25,9 @@ export interface HomeKpi {
   value: string | null
   /** The words under the figure: what it counts, and from which run. */
   context: string
+  /** A risk figure above zero carries its tier's ink on the number (status on the figure, never a fill): it is the one
+      the eye should land on. Zero stays neutral. */
+  tone?: 'high' | 'critical'
 }
 
 /**
@@ -41,8 +44,8 @@ export function homeKpis(objects: number | null, run: HookRun | null): HomeKpi[]
       value: run ? integer(run.totalEvents) : null,
       context: run ? `Pairs within ${run.reportKm} km in ${where}` : 'Pairs within the report distance',
     },
-    { id: 'high', label: 'High-risk approaches', value: run ? integer(run.highRisk) : null, context: where ? `Flagged in ${where}` : 'Flagged by screening' },
-    { id: 'critical', label: 'Critical approaches', value: run ? integer(run.critical) : null, context: where ? `In ${where}` : 'Flagged by screening' },
+    { id: 'high', label: 'High-risk approaches', value: run ? integer(run.highRisk) : null, context: where ? `Flagged in ${where}` : 'Flagged by screening', tone: run && run.highRisk > 0 ? 'high' : undefined },
+    { id: 'critical', label: 'Critical approaches', value: run ? integer(run.critical) : null, context: where ? `In ${where}` : 'Flagged by screening', tone: run && run.critical > 0 ? 'critical' : undefined },
   ]
 }
 

@@ -50,3 +50,11 @@
     position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
   }
 }
+/* 320 px (WCAG reflow width): even one label overflows the row, so every tab is icon-only; the underline marks the
+   active one and the page title below says where you are (measured: 40 px overflow at 320 before this). */
+@media (max-width: 359px) {
+  .nav-tab--active .nav-tab__label {
+    position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+  }
+  .nav-tab { padding: 0 8px; }
+}

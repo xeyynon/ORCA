@@ -47,6 +47,8 @@
   letter-spacing: -0.02em;
   font-variant-numeric: tabular-nums;
 }
+.home-kpis__value--high { color: var(--risk-high-ink); }
+.home-kpis__value--critical { color: var(--risk-critical-ink); }
 .home-kpis__context { color: var(--text-tertiary); font-size: var(--text-sm); line-height: 1.4; }
 
 @media (max-width: 960px) { .home-kpis__list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--gap-3); } }

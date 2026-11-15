@@ -162,3 +162,8 @@ test('both logo files exist at both sizes, and the stylesheet shows one per them
   assert.deepEqual([t.light['--logo-on-dark-display'], t.light['--logo-on-light-display']], ['none', 'block'])
   assert.equal(t.light['--logo-backdrop'], undefined)
 })
+
+test('no "word(s)" plurals in components: count with plural() (audit 2026-11-15)', () => {
+  // A whole lowercase word before "(s)": "object(s)", not code such as String(s) or map((s) => …).
+  assert.deepEqual(offenders(inComponents(/\.tsx$/), /\b[a-z]+\(s\)/), [])
+})
