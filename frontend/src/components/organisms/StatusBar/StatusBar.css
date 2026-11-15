@@ -48,11 +48,49 @@ button.statusbar__health { cursor: pointer; }
 @keyframes statusbar-from-left { from { opacity: 0; transform: translateX(-24px); } to { opacity: 1; transform: none; } }
 @keyframes statusbar-from-right { from { opacity: 0; transform: translateX(24px); } to { opacity: 1; transform: none; } }
 
-/* Globe, desktop: the row floats over the bottom edge of the globe; only the two capsules take clicks. */
+/*
+ * Globe, desktop (owner, 2026-11-16): one tab in the middle of the bottom edge holding both groups, flush with the
+ * edge like the top bar's centre tab is with the top (rounded on its top corners only), so the left and right edges
+ * stay free for the panels and the globe. Liquid glass: frosted blur with a little saturation, a hairline edge, a soft sheen
+ * along the top. Its fill is --glass-bg, measured to keep text at 4.5:1 over the brightest
+ * globe pixel (lib/glassContrast.test.ts); opaque where backdrop-filter is missing or less transparency is asked for.
+ */
 @media (min-width: 1001px) {
-  .statusbar--floating { position: fixed; z-index: 3; left: 0; right: 0; bottom: 0; pointer-events: none; }
-  .statusbar--floating .statusbar__health, .statusbar--floating .statusbar__context { pointer-events: auto; }
+  .statusbar--floating {
+    position: fixed;
+    z-index: 3;
+    left: 50%;
+    bottom: 0;
+    transform: translateX(-50%);
+    justify-content: center;
+    gap: 0;
+    max-width: calc(100vw - 2 * var(--gap-3));
+    padding: 0 var(--gap-2);
+    border: 1px solid var(--glass-border);
+    border-bottom: 0;
+    border-radius: var(--radius-pill) var(--radius-pill) 0 0;
+    background: var(--glass-bg);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(160%);
+    backdrop-filter: blur(var(--glass-blur)) saturate(160%);
+    box-shadow: var(--elev-2), inset 0 1px 0 var(--glass-sheen);
+    animation: statusbar-rise 260ms var(--ease-emphasized) backwards;
+  }
+  .statusbar--floating .statusbar__health, .statusbar--floating .statusbar__context {
+    border: 0;
+    border-radius: var(--radius-pill);
+    background: transparent;
+    box-shadow: none;
+    animation: none;
+  }
+  .statusbar--floating .statusbar__context { margin-left: 0; padding-left: var(--gap-3); border-left: 1px solid var(--glass-border); border-radius: 0; }
 }
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .statusbar--floating { background: var(--glass-bg-solid); }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .statusbar--floating { background: var(--glass-bg-solid); -webkit-backdrop-filter: none; backdrop-filter: none; }
+}
+@keyframes statusbar-rise { from { opacity: 0; transform: translate(-50%, 8px); } to { opacity: 1; transform: translateX(-50%); } }
 
 /* Phones: the left capsule only, with its first three readings (they fit); the clock and camera are elsewhere. */
 @media (max-width: 520px) {
