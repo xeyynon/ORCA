@@ -23,8 +23,9 @@
 .home-kpis__card::before { content: ''; position: absolute; z-index: -1; inset: 0; border-radius: inherit; background: var(--state-hover); opacity: 0; transition: opacity var(--dur-1) var(--ease-standard); }
 .home-kpis__card:hover { border-color: var(--border-strong); }
 .home-kpis__card:hover::before, .home-kpis__card:focus-visible::before { opacity: 1; }
-.home-kpis__card::after {
-  content: '\2192';
+/* The "goes somewhere" arrow: an SVG icon (not a typed glyph), shown on hover and focus. */
+.home-kpis__go {
+  display: inline-flex;
   position: absolute;
   top: var(--gap-4);
   right: var(--gap-4);
@@ -33,7 +34,7 @@
   transform: translateX(-4px);
   transition: opacity var(--dur-1) var(--ease-standard), transform var(--dur-2) var(--ease-standard);
 }
-.home-kpis__card:hover::after, .home-kpis__card:focus-visible::after { opacity: 1; transform: none; }
+.home-kpis__card:hover .home-kpis__go, .home-kpis__card:focus-visible .home-kpis__go { opacity: 1; transform: none; }
 .home-kpis__head { display: inline-flex; align-items: center; gap: var(--gap-2); }
 .home-kpis__icon { display: inline-flex; color: var(--accent-ink); }
 .home-kpis__label { color: var(--text-secondary); font-size: var(--text-md); font-weight: 500; }
@@ -50,4 +51,4 @@
 
 @media (max-width: 960px) { .home-kpis__list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--gap-3); } }
 @media (max-width: 420px) { .home-kpis__value { font-size: 24px; } .home-kpis__card { padding: var(--gap-3); } }
-@media (prefers-reduced-motion: reduce) { .home-kpis__card::after { transform: none; } }
+@media (prefers-reduced-motion: reduce) { .home-kpis__go { transform: none; } }

@@ -5,6 +5,12 @@ decided, why, and what alternatives were considered. Newest first.
 
 ---
 
+## 2026-11-15 - Sign-in page keeps its animated debris scene and glass card (approved exception)
+
+**Context:** the 2026-11-15 UI/UX audit (finding #10) flagged the sign-in page's animated `DebrisBackdrop` scene, its glows and the frosted glass card as decoration the playbook bans (UI-15, UI-17). It was removed in the polish pass on a misread "proceed".
+
+**Decision:** the owner asked for it back ("add it again"). The sign-in page keeps the animated scene, the glows and the glass card, always dark. This is an approved exception to the no-decoration rule for this one page; do not flag it again. The other sign-in fixes stay: the reason under the disabled Sign in button and the labelled "Use these details" button.
+
 ## 2026-10-15 - Conjunction engine v2: SGP4, gap-free screening, exact TCA, Foster Pc, measured uncertainty, honest UI
 
 **Context:** The benchmark study (entry of 2026-10-14) measured the original engine on public TLEs against a dense SGP4 reference:

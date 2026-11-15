@@ -46,3 +46,22 @@ export function formatSimTime(ms: number): string {
   const p = (n: number) => String(n).padStart(2, '0')
   return `${p(d.getUTCDate())} ${MONTHS[d.getUTCMonth()]} ${d.getUTCFullYear()} · ${p(d.getUTCHours())}:${p(d.getUTCMinutes())}:${p(d.getUTCSeconds())} UTC`
 }
+
+/** "8 Oct 2026" (UTC): a calendar day in words, for sentences that date a figure. */
+export function formatDay(iso: string | null | undefined): string {
+  if (!iso) return NO_DATA
+  const d = parseUtc(iso)
+  if (Number.isNaN(d.getTime())) return NO_DATA
+  return `${d.getUTCDate()} ${MONTHS[d.getUTCMonth()]} ${d.getUTCFullYear()}`
+}
+
+/** "6 to 7 Nov 2026", "30 Oct to 2 Nov 2026", "30 Dec 2026 to 2 Jan 2027": a UTC window in words. */
+export function formatDayRange(startIso: string, endIso: string): string {
+  const a = parseUtc(startIso)
+  const b = parseUtc(endIso)
+  if (Number.isNaN(a.getTime()) || Number.isNaN(b.getTime())) return NO_DATA
+  if (a.getUTCFullYear() !== b.getUTCFullYear()) return `${formatDay(startIso)} to ${formatDay(endIso)}`
+  if (a.getUTCMonth() !== b.getUTCMonth()) return `${a.getUTCDate()} ${MONTHS[a.getUTCMonth()]} to ${formatDay(endIso)}`
+  if (a.getUTCDate() !== b.getUTCDate()) return `${a.getUTCDate()} to ${formatDay(endIso)}`
+  return formatDay(endIso)
+}

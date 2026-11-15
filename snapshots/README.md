@@ -151,3 +151,21 @@ The Reports view (MD/design_system_v2.md §6).
 | [06-sample-report.pdf](12-reports-2026-11-07/06-sample-report.pdf) | A generated report (all four sections, stored example run): 3 A4 pages, each with the marking and a page number. (The copy pushed before 2026-11-07 21:15 was mistakenly the screen layout: the test browser was left forced to screen media.) |
 | [07-header-marking.png](12-reports-2026-11-07/07-header-marking.png) | The report opens with its handling marking, EDUCATIONAL USE ONLY · NOT FOR OPERATIONAL DECISIONS, in centred spaced capitals, the way official documents mark their use. No box, no tint, no side stripe (rules.md §11.21) |
 | [08-printed-page-2.png](12-reports-2026-11-07/08-printed-page-2.png) | A printed page: the marking at the head of every page, the table header repeated after a page break, "Page 2 of 3" at the foot |
+
+## 13-polish-2026-11-15
+
+After the 2026-11-15 audit's polish pass (MD/ux_audit_2026-11-15.md §9). The "before" set is MD/ux_audit/2026-11-15/.
+
+| File | What it shows |
+|---|---|
+| [01-home-1440.png](13-polish-2026-11-15/01-home-1440.png) | Headline dated and in the past tense on the stale catalogue; no kicker, no glow |
+| [02-overview-1440.png](13-polish-2026-11-15/02-overview-1440.png) | 22 px page title; regime as plain text; the count line above the table |
+| [03-analytics-1440.png](13-polish-2026-11-15/03-analytics-1440.png) | Chart titles as headings with visible notes; "2,211 km", "61.6°"; one-band freshness said in words; neutral constellation bars |
+| [04-conjunctions-1440.png](13-polish-2026-11-15/04-conjunctions-1440.png) | No info icon on notes; the method in two columns |
+| [05-data-1440.png](13-polish-2026-11-15/05-data-1440.png) | "TLE 36.6 d old" as dot + word; "Succeeded"; the real API origin |
+| [06-globe-1440.png](13-polish-2026-11-15/06-globe-1440.png) | Colour key only in the side panels; the disabled switch says why; "Live" as dot + word |
+| [07-overview-390.png](13-polish-2026-11-15/07-overview-390.png) | Phone: all six tabs fit (inactive icon-only); KPIs in two columns |
+| [08-globe-390.png](13-polish-2026-11-15/08-globe-390.png) | Phone: compact colour key over the globe |
+| [09-home-approaches-1440.png](13-polish-2026-11-15/09-home-approaches-1440.png) | The run window and "That window ended 7 days ago"; TCAs marked past; Pc as 2.83 × 10⁻⁵; risk as dot + word |
+| [10-signin-1440.png](13-polish-2026-11-15/10-signin-1440.png) | Sign-in keeps its animated debris scene and glass card (owner-approved exception, DECISIONS.md 2026-11-15); the disabled button says why; "Use these details" replaces the icon on the divider |
+| [11-signin-390.png](13-polish-2026-11-15/11-signin-390.png) | The same on a phone |

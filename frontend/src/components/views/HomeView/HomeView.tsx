@@ -10,10 +10,11 @@ import { useHomeRun } from '@/hooks/useHomeRun'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import type { CatalogSummary } from '@/lib/catalog'
 import { days, integer } from '@/lib/format'
-import { homeKpis, previewEvents } from '@/lib/homeBoard'
+import { homeKpis, previewEvents, runWindowLine } from '@/lib/homeBoard'
 import type { KpiId } from '@/lib/homeBoard'
 import { hookLines } from '@/lib/homeHook'
 import { pairKey } from '@/lib/pair'
+import { STALE_MEDIAN_DAYS } from '@/lib/staleness'
 import { formatUtc } from '@/lib/time'
 import type { ViewId } from '@/lib/views'
 import { ApproachPreview } from '../../organisms/ApproachPreview/ApproachPreview'
@@ -81,7 +82,7 @@ export function HomeView({ catalog, summary, health, apiStatus, conjSearch, onCo
   }
 
   const provenance = run
-    ? `${run.saved ? 'Stored example run' : 'Your latest search'}: ${run.horizonDays === 1 ? 'a 1-day' : `a ${run.horizonDays}-day`} window from ${formatUtc(run.windowStart)}; the worst five of the ${integer(events.length)} most probable approaches returned.`
+    ? `The worst five of the ${integer(events.length)} most probable approaches the run returned.`
     : null
 
   const snapshot = health ? (health.database.last_update ? formatUtc(health.database.last_update) : 'not refreshed through the API') : null
@@ -106,7 +107,7 @@ export function HomeView({ catalog, summary, health, apiStatus, conjSearch, onCo
     <PageLayout>
       <div className="home">
         <HomeHero
-          lines={hookLines(total)}
+          lines={hookLines(total, summary?.medianAgeDays != null ? { stale: summary.medianAgeDays > STALE_MEDIAN_DAYS, asOf: health?.database.last_update ?? null } : null)}
           snapshot={snapshot}
           onExploreGlobe={() => onGo('globe')}
           onViewConjunctions={() => openApproaches()}
@@ -120,6 +121,8 @@ export function HomeView({ catalog, summary, health, apiStatus, conjSearch, onCo
           events={previewEvents(events)}
           provenance={provenance}
           reportKm={run?.reportKm ?? null}
+          windowLine={home.status === 'ready' ? runWindowLine(home.run, home.windowEnd, now) : null}
+          now={now}
           onOpen={(e: ConjunctionEvent) => openApproaches(pairKey(e))}
           onViewAll={() => openApproaches()}
         />

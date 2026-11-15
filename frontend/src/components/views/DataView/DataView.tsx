@@ -1,4 +1,4 @@
-import { API_BASE } from '@/api/client'
+import { API_BASE, API_ORIGIN } from '@/api/client'
 import type { Health } from '@/api/types'
 import type { UpdatePhase } from '@/hooks/useCatalogUpdate'
 import type { ApiStatus } from '@/hooks/useHealth'
@@ -41,7 +41,7 @@ export function DataView({ health, apiStatus, summary, update }: Props) {
         <Label>API</Label>
         <div className="data-view__api-grid">
           <FactRow label="Status"><StatusIndicator tone={tone} label={label} /></FactRow>
-          <FactRow label="Base URL"><Mono>{API_BASE || 'same origin'}</Mono></FactRow>
+          <FactRow label="Base URL"><Mono>{API_ORIGIN}</Mono></FactRow>
           <FactRow label="Health check"><a className="data-view__link" href={`${API_BASE}/health`} target="_blank" rel="noreferrer">/health (JSON)</a></FactRow>
           <FactRow label="App build"><Mono>{__ORCA_BUILD__}</Mono></FactRow>
           <FactRow label="Interactive docs"><a className="data-view__link" href={`${API_BASE}/docs`} target="_blank" rel="noreferrer">/docs (Swagger)</a></FactRow>

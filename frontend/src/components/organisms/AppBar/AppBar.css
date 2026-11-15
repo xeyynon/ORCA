@@ -85,3 +85,5 @@
   .appbar__center::-webkit-scrollbar { display: none; }
   .appbar__left { padding: 0 var(--gap-4); }
 }
+/* Phones: the tabs fit without scrolling (icon-only when inactive, NavTab.css), so they spread across the row. */
+@media (max-width: 520px) { .appbar__center { justify-content: space-between; overflow-x: visible; } }

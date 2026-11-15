@@ -67,8 +67,10 @@ export function ReportsView({ summary, health, conjSearch, selectedConjKey, user
     ? `Close-approach figures from ${runName(home.run)} (${integer(home.run.totalEvents)} pairs, window from ${formatUtc(home.run.windowStart)}).`
     : home.status === 'failed' ? 'The close-approach run could not be loaded.' : 'Loading the close-approach run…'
 
-  const doc = (
+  // The same document twice: the on-screen preview (its title an h2 under the page's h1) and the print-only copy (h1).
+  const report = (preview: boolean) => (
     <ReportDocument
+      preview={preview}
       options={options}
       generatedAt={generatedAt}
       reference={reportReference(generatedAt)}
@@ -99,10 +101,10 @@ export function ReportsView({ summary, health, conjSearch, selectedConjKey, user
           <ReportBuilder options={options} onChange={setOptions} pairs={ranked} source={source} blocked={blocked} onGenerate={generate} />
         </div>
         <div className="reports__preview" aria-label="Preview">
-          {doc}
+          {report(true)}
         </div>
       </div>
-      {createPortal(<div className="report-print">{doc}</div>, document.body)}
+      {createPortal(<div className="report-print">{report(false)}</div>, document.body)}
     </PageLayout>
   )
 }

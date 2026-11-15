@@ -4,6 +4,7 @@ import { fetchSummary, freshness } from '@/lib/homeBoard'
 import { formatUtc } from '@/lib/time'
 import { Dot } from '../../atoms/Dot/Dot'
 import { Skeleton } from '../../atoms/Skeleton/Skeleton'
+import { ArrowLink } from '../../molecules/ArrowLink/ArrowLink'
 import { BlockHeader } from '../../molecules/BlockHeader/BlockHeader'
 import './DataQuality.css'
 
@@ -31,7 +32,7 @@ export function DataQuality({ medianAgeDays, newestAgeDays, measuredOver, stored
   return (
     <section className="home-panel data-quality" aria-labelledby="data-quality-title">
       <BlockHeader id="data-quality-title" title="Data quality" sub="How old the orbit data is, and where it comes from."
-        action={<button type="button" className="home-panel__link" onClick={onOpen}>Data and refresh</button>} />
+        action={<ArrowLink label="Data and refresh" onClick={onOpen} />} />
       <dl className="data-quality__list">
         <div className="data-quality__row data-quality__row--lead">
           <dt>Median TLE age</dt>

@@ -45,7 +45,7 @@ export function AppMenu({ username, theme, notices, onGo, onAsk, onShortcuts, on
           <MenuItem label="Ask ORCA" hint="." icon={<Icon name="chat" />} onSelect={() => { close(false); onAsk() }} />
           <FineOnly><MenuItem label="Keyboard shortcuts" hint="?" icon={<Icon name="keyboard" />} onSelect={() => { close(false); onShortcuts() }} /></FineOnly>
           {/* Focus goes back to the menu button first, so the tour returns it there when it closes. */}
-          <MenuItem label="Take the tour" icon={<Icon name="info" />} onSelect={() => { close(true); onTour() }} />
+          <MenuItem label="Take the tour" icon={<Icon name="play" />} onSelect={() => { close(true); onTour() }} />
 
           <div className="app-menu__sep" role="separator" />
           <MenuItem label={`Switch to ${nextTheme} theme`} hint="T" icon={<Icon name={theme === 'dark' ? 'sun' : 'moon'} />} onSelect={() => { close(true); onToggleTheme() }} />

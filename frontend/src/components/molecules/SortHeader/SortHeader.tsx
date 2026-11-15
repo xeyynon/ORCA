@@ -1,3 +1,4 @@
+import { Icon } from '../../atoms/Icon/Icon'
 import { cx } from '@/lib/cx'
 import './SortHeader.css'
 
@@ -21,7 +22,7 @@ export function SortHeader({ label, hint, align, sortable, active, dir, onSort }
       {sortable ? (
         <button type="button" className="sort-header__btn" title={hint} onClick={onSort}>
           <span>{label}</span>
-          <span className="sort-header__arrow" aria-hidden="true">{active ? (dir === 'asc' ? '▲' : '▼') : ''}</span>
+          <span className="sort-header__arrow" aria-hidden="true">{active ? <Icon name={dir === 'asc' ? 'sort-up' : 'sort-down'} size={10} /> : null}</span>
         </button>
       ) : (
         <span title={hint}>{label}</span>

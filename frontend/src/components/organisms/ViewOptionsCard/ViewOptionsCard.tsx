@@ -1,3 +1,4 @@
+import { FieldNote } from '../../molecules/FieldNote/FieldNote'
 import type { ColorBy, GlobePrefs } from '@/lib/globePrefs'
 import { Label } from '../../atoms/Label/Label'
 import { Switch } from '../../atoms/Switch/Switch'
@@ -20,6 +21,7 @@ export function ViewOptionsCard({ prefs, onChange, conjunctionActive }: Props) {
       <Switch label="Show satellites" checked={prefs.showSatellites} onChange={(v) => onChange({ showSatellites: v })} title="Draw the catalog objects. Selected objects are always drawn." />
       <Switch label="Show orbital paths" checked={prefs.showOrbits} onChange={(v) => onChange({ showOrbits: v })} title="One full orbit for each selected object" />
       <Switch label="Show conjunction" checked={prefs.showConjunction} onChange={(v) => onChange({ showConjunction: v })} disabled={!conjunctionActive} title={conjunctionActive ? undefined : NO_CONJUNCTION} />
+      {conjunctionActive ? null : <FieldNote>“Show conjunction” needs one on the globe: in Conjunctions, choose “Show both objects on the globe”.</FieldNote>}
       <Switch label="Label selected objects" checked={prefs.labelSelected} onChange={(v) => onChange({ labelSelected: v })} />
       <div className="view-options__color">
         <Label>Colour objects by</Label>

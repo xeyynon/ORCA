@@ -1,1 +1,2 @@
 .unit { margin-left: 3px; color: var(--text-tertiary); font-size: 0.85em; font-weight: 400; }
+.unit--attached { margin-left: 0; }

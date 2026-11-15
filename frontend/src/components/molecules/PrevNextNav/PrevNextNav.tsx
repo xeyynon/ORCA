@@ -1,4 +1,5 @@
 import { Button } from '../../atoms/Button/Button'
+import { Icon } from '../../atoms/Icon/Icon'
 import { Mono } from '../../atoms/Mono/Mono'
 import './PrevNextNav.css'
 
@@ -17,9 +18,9 @@ type Props = {
 export function PrevNextNav({ noun, index, total, onPrev, onNext }: Props) {
   return (
     <nav className="prev-next" aria-label={`Move between ${noun}s`}>
-      <Button variant="ghost" disabled={!onPrev} ariaLabel={`Previous ${noun}`} title={`Previous ${noun}`} onClick={onPrev ?? undefined}>← Previous</Button>
+      <Button variant="ghost" disabled={!onPrev} ariaLabel={`Previous ${noun}`} title={`Previous ${noun}`} onClick={onPrev ?? undefined}><Icon name="arrow-left" size={14} /> Previous</Button>
       {index !== undefined && total !== undefined ? <span className="prev-next__pos"><Mono muted>{index} of {total}</Mono></span> : null}
-      <Button variant="ghost" disabled={!onNext} ariaLabel={`Next ${noun}`} title={`Next ${noun}`} onClick={onNext ?? undefined}>Next →</Button>
+      <Button variant="ghost" disabled={!onNext} ariaLabel={`Next ${noun}`} title={`Next ${noun}`} onClick={onNext ?? undefined}>Next <Icon name="arrow-right" size={14} /></Button>
     </nav>
   )
 }
