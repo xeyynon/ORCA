@@ -150,7 +150,7 @@ export function Workspace({ username, onSignOut, theme, onToggleTheme: toggleThe
   const medianAge = summary?.medianAgeDays ?? null
   const status: StatusItem[] = [
     { label: 'API', value: apiStatus === 'online' ? 'online' : apiStatus === 'offline' ? 'unreachable' : 'checking', tone: apiStatus === 'online' ? 'ok' : apiStatus === 'offline' ? 'bad' : 'warn', dotOnly: apiStatus === 'online' },
-    { label: 'Objects', value: health ? integer(health.database.tles_count) : null },
+    // No object count: every view that shows the catalogue already states it (owner, 2026-11-15: "this is repeating").
     // The median, not the oldest: one leftover 90-day-old set made a catalogue refreshed today read as stale.
     {
       label: 'Data age',
