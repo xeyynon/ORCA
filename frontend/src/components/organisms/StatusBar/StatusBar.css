@@ -1,9 +1,9 @@
 .statusbar {
   display: flex;
   align-items: center;
-  gap: var(--gap-5);
+  gap: var(--gap-4);
   height: var(--statusbar-h);
-  padding: 0 var(--gap-4);
+  padding: 0 var(--gap-3);
   overflow-x: auto;
   white-space: nowrap;
   background: var(--bg-panel);
@@ -11,9 +11,9 @@
 }
 .statusbar::-webkit-scrollbar { display: none; }
 /* Two groups: the system's health on the left (a button into the Data page), where and when on the right. */
-.statusbar__health, .statusbar__context { display: flex; align-items: center; gap: var(--gap-5); min-width: 0; }
+.statusbar__health, .statusbar__context { display: flex; align-items: center; gap: var(--gap-4); min-width: 0; }
 /* One line, all on the left: health, then a hairline, then where and when (owner, 2026-11-15). */
-.statusbar__context { padding-left: var(--gap-5); border-left: 1px solid var(--border); }
+.statusbar__context { padding-left: var(--gap-4); border-left: 1px solid var(--border); }
 
 /* Globe, desktop: a slim strip floating at the bottom left; the globe and its right-hand widgets take the full height. */
 @media (min-width: 1001px) {
