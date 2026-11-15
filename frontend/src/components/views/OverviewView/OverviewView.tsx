@@ -5,7 +5,7 @@ import { deriveSeries } from '@/lib/catalog'
 import { describeFilter, filterCatalog, isFilterActive, NO_FILTER, regimeCounts, toggleRegime } from '@/lib/catalogFilter'
 import type { CatalogFilter } from '@/lib/catalogFilter'
 import type { CatalogSummary } from '@/lib/catalog'
-import { days, fixed, integer } from '@/lib/format'
+import { days, integer } from '@/lib/format'
 import { Button } from '../../atoms/Button/Button'
 import { EmptyState } from '../../molecules/EmptyState/EmptyState'
 import { SectionHeader } from '../../molecules/SectionHeader/SectionHeader'
@@ -81,7 +81,7 @@ export function OverviewView({ catalog, summary, totalCount, selectedId, onSelec
               { label: 'Newest TLE', value: summary.newestAgeDays === null ? '—' : days(summary.newestAgeDays), hint: summary.futureEpochs > 0 ? `${integer(summary.futureEpochs)} epoch(s) ahead of this clock excluded` : 'age of the freshest element set' },
               { label: 'Median TLE age', value: summary.medianAgeDays === null ? '—' : days(summary.medianAgeDays), hint: 'typical element-set age' },
               { label: 'Oldest TLE', value: summary.oldestAgeDays === null ? '—' : days(summary.oldestAgeDays), hint: 'older sets propagate less accurately' },
-              { label: 'Median altitude', value: fixed(summary.medianAltKm, 0), unit: 'km', hint: 'derived from mean motion' },
+              { label: 'Median altitude', value: integer(summary.medianAltKm), unit: 'km', hint: 'derived from mean motion' },
             ]}
           />
         ) : null}
@@ -105,7 +105,7 @@ export function OverviewView({ catalog, summary, totalCount, selectedId, onSelec
                 {totalCount !== null && totalCount > rows.length ? ' Objects that were not loaded are not searched here.' : ''}
               </EmptyState>
             ) : (
-              <CatalogTable rows={filteredRows} totalCount={totalCount} filtered={filterOn} selectedId={selectedId} onSelect={onSelect} now={now} />
+              <CatalogTable rows={filteredRows} filtered={filterOn} selectedId={selectedId} onSelect={onSelect} now={now} />
             )}
           </div>
           <div className="overview__side">

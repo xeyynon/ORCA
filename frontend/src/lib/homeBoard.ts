@@ -3,6 +3,7 @@ import { integer } from './format'
 import type { HookRun } from './homeHook'
 import { riskRank } from './risk'
 import { STALE_MEDIAN_DAYS } from './staleness'
+import { formatDayRange, parseUtc } from './time'
 
 /**
  * The home page's command-centre figures (MD/ORCA_Homepage_Redesign_Context.md). Pure, so every label can be tested:
@@ -86,4 +87,22 @@ export function fetchSummary(f: FetchOutcome | null | undefined): { tone: 'ok' |
     case 'network_error': return { tone: 'bad', text: 'Failed: network error' }
     default: return { tone: 'warn', text: f.detail }
   }
+}
+
+/**
+ * When a run's approaches happen, in words, and whether that is over: "Closest approaches from 6 to 7 Nov 2026 in the
+ * stored example run. That window ended 8 days ago." A past window must never read as upcoming (audit 2026-11-15, P0 #2).
+ */
+export function runWindowLine(run: Pick<HookRun, 'saved' | 'windowStart'>, windowEnd: string, now: Date): string {
+  const range = formatDayRange(run.windowStart, windowEnd)
+  const base = `Closest approaches ${range.includes(' to ') ? 'from' : 'on'} ${range} in ${runName(run)}.`
+  const endMs = parseUtc(windowEnd).getTime()
+  if (Number.isNaN(endMs) || endMs > now.getTime()) return base
+  const days = Math.floor((now.getTime() - endMs) / 86_400_000)
+  return `${base} That window ended ${days >= 2 ? `${days} days ago` : days === 1 ? 'a day ago' : 'today'}.`
+}
+
+/** True when a closest approach is already in the past at `now`. */
+export function isPast(tcaIso: string, now: Date): boolean {
+  return parseUtc(tcaIso).getTime() < now.getTime()
 }

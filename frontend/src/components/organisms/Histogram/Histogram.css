@@ -2,5 +2,5 @@
 .histogram__axis { stroke: var(--border-strong); stroke-width: 1; }
 .histogram__bar { fill: var(--chart-1); }
 .histogram__bar:hover { opacity: 0.75; }
-.histogram__tick { fill: var(--text-tertiary); font: 10px var(--font-mono); }
-.histogram__unit { fill: var(--text-tertiary); font: 10px var(--font-ui); }
+.histogram__tick { fill: var(--text-tertiary); font: 11px var(--font-mono); }
+.histogram__unit { fill: var(--text-tertiary); font: 11px var(--font-ui); }

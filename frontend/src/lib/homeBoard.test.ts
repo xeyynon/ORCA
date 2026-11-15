@@ -1,7 +1,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import type { ConjunctionEvent } from '../api/types.ts'
-import { fetchSummary, freshness, homeKpis, previewEvents, runName } from './homeBoard.ts'
+import { fetchSummary, freshness, homeKpis, isPast, previewEvents, runName, runWindowLine } from './homeBoard.ts'
 import type { HookRun } from './homeHook.ts'
 
 const run: HookRun = { totalEvents: 442786, reportKm: 10, horizonDays: 1, highRisk: 29, critical: 0, windowStart: '2026-11-06T18:23:26', saved: true }
@@ -54,4 +54,13 @@ test('the last fetch outcome is said in words', () => {
   assert.equal(fetchSummary({ status: 'ok', http_status: 200, detail: '', at: '' }).text, 'Succeeded')
   assert.equal(fetchSummary({ status: 'http_error', http_status: 503, detail: 'x', at: '' }).text, 'Failed (HTTP 503)')
   assert.equal(fetchSummary({ status: 'rate_limited', http_status: 403, detail: 'x', at: '' }).tone, 'warn')
+})
+
+test('a run window says when it was and, once over, how long ago (never reads as upcoming)', () => {
+  const now = new Date(Date.UTC(2026, 10, 15, 15, 0))
+  assert.equal(runWindowLine(run, '2026-11-07T18:23:26', now), 'Closest approaches from 6 to 7 Nov 2026 in the stored example run. That window ended 7 days ago.')
+  assert.equal(runWindowLine({ saved: false, windowStart: '2026-11-15T10:00:00' }, '2026-11-16T10:00:00', now), 'Closest approaches from 15 to 16 Nov 2026 in your latest search.')
+  assert.equal(runWindowLine({ saved: true, windowStart: '2026-11-14T01:00:00' }, '2026-11-14T20:00:00', now), 'Closest approaches on 14 Nov 2026 in the stored example run. That window ended today.')
+  assert.equal(isPast('2026-11-07T13:09:00', now), true)
+  assert.equal(isPast('2026-11-16T13:09:00', now), false)
 })

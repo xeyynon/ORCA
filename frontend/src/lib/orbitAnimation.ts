@@ -1,7 +1,7 @@
 import { loadEarthTextures, renderEarth } from './earthRender'
 import type { EarthTextures } from './earthRender'
 import {
-  GLOBE_R, IMPACT_POINT, T_IMPACT, bodyAlpha, bodyPos, dustAlpha, dustPos, flashAt, fragmentAt, loopTime,
+  GLOBE_R, IMPACT_POINT, T_IMPACT, FRAGMENT_LIFE, bodyAlpha, bodyPos, dustAlpha, dustPos, flashAt, fragmentAt, loopTime,
   makeDust, makeFragments, orbitPoint, satelliteAngle, warning,
 } from './orbitScene'
 import type { BodyId, Vec } from './orbitScene'
@@ -158,7 +158,7 @@ function drawFrame(ctx: CanvasRenderingContext2D, earth: Earth, tex: EarthTextur
  * resolution; its CSS size is set here. The loop stops by itself when the canvas leaves the page, and it is a single
  * still frame (no loop) when the user prefers reduced motion. `base` is the app's public base path (for the Earth maps).
  */
-export function startOrbitAnimation(canvas: HTMLCanvasElement, opts: { size: number; base?: string }): () => void {
+export function startOrbitAnimation(canvas: HTMLCanvasElement, opts: { size: number; base?: string; once?: boolean }): () => void {
   const ctx = canvas.getContext('2d')
   if (!ctx) return () => {}
   const dpr = Math.min(window.devicePixelRatio || 1, 2)
@@ -182,6 +182,7 @@ export function startOrbitAnimation(canvas: HTMLCanvasElement, opts: { size: num
   let texAt = 0
   let stopped = false
   let still = false
+  let stillT = 0.2
   let raf = 0
 
   const render = (t: number, now: number) => {
@@ -196,7 +197,7 @@ export function startOrbitAnimation(canvas: HTMLCanvasElement, opts: { size: num
   void loadEarthTextures(opts.base ?? import.meta.env.BASE_URL).then((t) => {
     tex = t
     texAt = performance.now() - (reduce ? 900 : 0)
-    if (reduce && !stopped) render(0.2, performance.now()) // a still frame, now with the real maps
+    if (still && !stopped) render(stillT, performance.now()) // the resting frame again, now with the real maps
   })
 
   if (reduce) {
@@ -205,11 +206,16 @@ export function startOrbitAnimation(canvas: HTMLCanvasElement, opts: { size: num
     return () => { stopped = true }
   }
 
+  // `once`: play the approach and collision a single time, then rest on the frame where the fragments have faded into
+  // the dust (no perpetual motion where the scene is decoration, playbook UI-19; the loading screen keeps looping).
+  const restAt = T_IMPACT + FRAGMENT_LIFE
   const start = performance.now()
   const frame = (now: number) => {
     if (stopped || still || !canvas.isConnected) return
     if (now - palAt > 800) { pal = readPalette(); palAt = now } // follow a theme change without re-reading every frame
-    render((now - start) / 1000 + T_IMPACT * 0.35, now) // begin part-way through, so something is moving at once
+    const t = (now - start) / 1000 + T_IMPACT * 0.35 // begin part-way through, so something is moving at once
+    if (opts.once && t >= restAt) { still = true; stillT = restAt; render(restAt, now); return }
+    render(t, now)
     raf = requestAnimationFrame(frame)
   }
   raf = requestAnimationFrame(frame)

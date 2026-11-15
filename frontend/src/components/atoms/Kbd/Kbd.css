@@ -7,6 +7,6 @@
   border-radius: var(--radius);
   background: var(--bg-input);
   color: var(--text-secondary);
-  font: 600 10px/16px var(--font-mono);
+  font: 600 11px/16px var(--font-mono);
   text-align: center;
 }

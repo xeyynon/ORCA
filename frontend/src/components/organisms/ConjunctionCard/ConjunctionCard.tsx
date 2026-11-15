@@ -69,7 +69,7 @@ export function ConjunctionCard({ event, nowMs, onJumpToTca, onViewDetails, onCl
 
       <div className="conjunction-card__actions">
         <Button size="sm" disabled={!canJump} title={canJump ? 'Move the globe to the moment of closest approach' : REASON[(jump as { reason: 'past' | 'beyond' }).reason]} onClick={onJumpToTca}>Jump to closest approach</Button>
-        <Button size="sm" variant="primary" onClick={onViewDetails}>View full conjunction details →</Button>
+        <Button size="sm" variant="primary" onClick={onViewDetails}>View full conjunction details <Icon name="arrow-right" size={14} /></Button>
       </div>
     </Panel>
   )

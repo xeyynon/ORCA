@@ -1,5 +1,5 @@
 import type { TleRecord } from '@/api/types'
-import { fixed } from '@/lib/format'
+import { fixed, integer } from '@/lib/format'
 import { deriveOrbit } from '@/lib/orbit'
 import { percentileRank } from '@/lib/percentile'
 import { ageDays } from '@/lib/time'
@@ -17,7 +17,7 @@ export function ObjectStanding({ tle, ranks, now }: Props) {
   const age = ageDays(tle.epoch, now)
   return (
     <Panel title="Compared with the catalog">
-      <RangeMarker label="Altitude" value={alt === undefined ? '—' : `${fixed(alt, 0)} km`} percent={alt === undefined ? null : percentileRank(ranks.altKm, alt)} />
+      <RangeMarker label="Altitude" value={alt === undefined ? '—' : `${integer(alt)} km`} percent={alt === undefined ? null : percentileRank(ranks.altKm, alt)} />
       <RangeMarker label="Inclination" value={`${fixed(tle.inclination, 1)}°`} percent={percentileRank(ranks.inclDeg, tle.inclination)} />
       <RangeMarker label="Eccentricity" value={fixed(tle.eccentricity, 5)} percent={percentileRank(ranks.ecc, tle.eccentricity)} />
       <RangeMarker label="TLE age" value={`${fixed(age, 1)} d`} percent={age >= 0 ? percentileRank(ranks.ageDays, age) : null} />

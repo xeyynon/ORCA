@@ -1,4 +1,4 @@
-/* Mission overview. On the page itself, not in a card: about 60% text, 40% a medium Earth on a restrained glow.
+/* Mission overview. On the page itself, not in a card: about 60% text, 40% a medium Earth, no glow.
    Hierarchy from size and space: one big sentence, one solid button. */
 .home-hero {
   display: grid;
@@ -8,18 +8,6 @@
   padding: var(--gap-4) 0;
 }
 .home-hero__text { display: flex; flex-direction: column; align-items: flex-start; gap: var(--gap-3); min-width: 0; }
-.home-hero__eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--gap-2);
-  margin: 0;
-  color: var(--text-tertiary);
-  font-size: var(--text-xs);
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-.home-hero__eyebrow::before { content: ''; width: 18px; height: 1px; background: currentColor; }
 .home-hero__title {
   max-width: 22ch;
   margin: 0;
@@ -53,36 +41,22 @@
   color: var(--accent-ink);
   transition: border-color var(--dur-1) var(--ease-standard);
 }
+.home-hero__tour { min-height: 24px; }
 .home-hero__tour:hover { color: var(--text-primary); }
 .home-hero__tour:hover .home-hero__tour-icon { border-color: var(--accent); }
-.home-hero__snapshot { margin: 0; color: var(--text-tertiary); font-family: var(--font-mono); font-size: var(--text-sm); letter-spacing: 0.02em; text-transform: uppercase; }
+.home-hero__snapshot { margin: 0; color: var(--text-tertiary); font-size: var(--text-sm); }
 
-/* The Earth on one soft glow: atmosphere, not decoration. */
+/* The Earth alone on the page: no glow behind it (playbook UI-15, audit 2026-11-15 #10). */
 .home-hero__visual { position: relative; display: grid; place-items: center; min-width: 0; isolation: isolate; }
-.home-hero__visual::before {
-  content: '';
-  position: absolute;
-  z-index: -1;
-  left: 50%;
-  top: 50%;
-  width: 380px;
-  height: 380px;
-  border-radius: 50%;
-  background: radial-gradient(closest-side, color-mix(in srgb, var(--accent) 16%, transparent), transparent);
-  pointer-events: none;
-  transform: translate(-50%, -50%);
-}
 
 @media (max-width: 1100px) and (min-width: 861px) {
   /* Scaled with an equal negative margin, so its layout box matches what is drawn and it stays centred (measured). */
   .home-hero__visual > * { transform: scale(0.82); margin: -31px; }
-  .home-hero__visual::before { width: 310px; height: 310px; }
 }
 @media (max-width: 860px) {
   /* Text first, then a smaller Earth (spec §7). */
   .home-hero { grid-template-columns: 1fr; gap: var(--gap-2); padding-top: 0; }
   .home-hero__visual > * { transform: scale(0.7); margin: -51px; }
-  .home-hero__visual::before { width: 270px; height: 270px; }
   .home-hero__actions { width: 100%; }
   .home-hero__actions > * { flex: 1 1 200px; }
 }

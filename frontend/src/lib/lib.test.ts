@@ -22,8 +22,8 @@ test('formatUtc and formatRelative', () => {
 })
 
 test('pc is scientific and never fabricates', () => {
-  assert.equal(pc(0.000123), '1.23 × 10^-4')
-  assert.equal(pc(2.5e-7), '2.50 × 10^-7')
+  assert.equal(pc(0.000123), '1.23 × 10⁻⁴')
+  assert.equal(pc(2.5e-7), '2.50 × 10⁻⁷')
   assert.equal(pc(0), '0')
   assert.equal(pc(NaN), NO_DATA)
   assert.equal(pc(undefined), NO_DATA)

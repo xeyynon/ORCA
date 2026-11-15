@@ -2,6 +2,7 @@ import type { FetchOutcome } from '@/api/types'
 import { formatUtc } from '@/lib/time'
 import { integer, days } from '@/lib/format'
 import { Label } from '../../atoms/Label/Label'
+import { fetchSummary } from '@/lib/homeBoard'
 import { FactRow } from '../../molecules/FactRow/FactRow'
 import { FieldNote } from '../../molecules/FieldNote/FieldNote'
 import { Mono } from '../../atoms/Mono/Mono'
@@ -28,7 +29,7 @@ export function DataStatusCard({ count, lastUpdate, lastFetch, newestAgeDays, ol
           {lastUpdate ? <Mono>{formatUtc(lastUpdate)}</Mono> : <Mono muted>never (seeded outside the API)</Mono>}
         </FactRow>
         <FactRow label="Last Celestrak fetch">
-          {lastFetch ? <Mono>{lastFetch.status === 'ok' ? 'ok' : lastFetch.detail} ({formatUtc(lastFetch.at)})</Mono> : <Mono muted>none recorded</Mono>}
+          {lastFetch ? <span>{fetchSummary(lastFetch).text}, <Mono>{formatUtc(lastFetch.at)}</Mono></span> : <Mono muted>none recorded</Mono>}
         </FactRow>
         <FactRow label="Newest element set">
           {newestAgeDays !== null ? <TleAgeChip ageDays={newestAgeDays} /> : <Mono muted>—</Mono>}

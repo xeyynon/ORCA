@@ -12,3 +12,9 @@ test('the supporting line says what ORCA does and quotes no run figure (those ca
   assert.equal(hookLines(15970).sub, HOME_SUB)
   assert.doesNotMatch(HOME_SUB, /\d/)
 })
+
+test('"right now" only while the catalogue is fresh; a stale one is dated, in the past tense', () => {
+  assert.equal(hookLines(15970, { stale: false, asOf: '2026-10-08T05:26:00' }).headline, '15,970 objects are circling Earth right now.')
+  assert.equal(hookLines(15970, { stale: true, asOf: '2026-10-08T05:26:00' }).headline, '15,970 objects were circling Earth on 8 Oct 2026.')
+  assert.equal(hookLines(15970, { stale: true, asOf: null }).headline, '15,970 objects are in the stored catalogue.')
+})

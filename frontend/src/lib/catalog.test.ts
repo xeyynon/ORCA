@@ -45,3 +45,10 @@ test('tleAgeTone: fresh, aging, stale, and a negative age is flagged rather than
   assert.equal(tleAgeTone(45), 'bad')
   assert.equal(tleAgeTone(-2), 'warn')
 })
+
+test('a one-band age spread is said in words, a mixed one is left to the chart', async () => {
+  const { ageVerdict } = await import('./tleAge.ts')
+  assert.equal(ageVerdict({ ok: 0, warn: 0, bad: 15970 }, 15970), 'All 15,970 element sets are over 30 days old.')
+  assert.equal(ageVerdict({ ok: 3, warn: 0, bad: 15967 }, 15970), null)
+  assert.equal(ageVerdict({ ok: 0, warn: 0, bad: 0 }, 0), null)
+})

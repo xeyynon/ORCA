@@ -9,6 +9,19 @@ Backlog and status tracking. Not a changelog — see `git log` for history and
 
 ---
 
+## Open: UI/UX polish pass from the 2026-11-15 audit
+
+Source: [ux_audit_2026-11-15.md](ux_audit_2026-11-15.md) (finding numbers in brackets). Order follows the playbook's fix order (spacing, colour, icons, copy, type, layout, details, motion). Each step is fixed as a class, gets a check where one is possible, and leaves before/after screenshots in `snapshots/13-polish-2026-11-15/`.
+
+- [x] **1. Honesty (#1, #2).** Home headline in the past tense with the catalogue date when the data is stale; the close-approach preview says its window and that it has passed, TCAs marked past.
+- [x] **2. Status without fills (#3, #11).** `Badge` becomes dot + word (no tinted box): risk, TLE age, LIVE; regime as plain text; Globe chrome elevation by shadow only. Check: rules test bans a filled badge.
+- [x] **3. Icons and glyphs (#4, #7).** No circled "i" on footnotes (`FieldNote`, sign-in, Globe); every typed arrow/caret (→ ← › ▲ ▼) becomes an SVG icon. Check: rules test bans typed arrow glyphs in components.
+- [x] **4. Copy and numbers (#5, P2).** One `Pc` atom (superscript exponent, true minus) everywhere incl. tier thresholds; thousands separators on Analytics; degree sign attached; "108 objects"; "Succeeded" instead of "ok"; the real API origin instead of "same origin".
+- [x] **5. Type (#6, #8, #12).** One page-title size (22 px); a heading on Globe; one h1 on Reports; 11 px floor for labels and badges; section and chart titles in sentence case; no kicker above the Home h1. Checks: every view has exactly one h1; no component font-size under 11 px.
+- [x] **6. Layout (P2).** Overview: one count line above the table and "Show next 250"; phone KPIs in two columns. Globe: altitude bands listed once; phone legend collapsed. Conjunctions: method in two columns with a tier table. Analytics: freshness says "all stale" in words when it is one bar; constellation labels fit; constellation bars not in regime colours. Phone tab row gets a fade cue.
+- [x] **7. Details (#9).** 24 px hit areas on desktop (sort headers, text links); disabled Globe switches say why; sign-in: real primary button, labelled "Use these details".
+- [x] **8. Decoration (#10).** Home glow and kicker removed (step 5); the Home Earth plays its collision once and rests. The sign-in scene stays: approved exception, see DECISIONS.md 2026-11-15.
+
 ## Done
 
 - [x] Fix `dashboard.py` hardcoded absolute DB path crashing every page load.
