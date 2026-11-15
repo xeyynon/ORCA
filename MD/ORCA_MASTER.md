@@ -24,7 +24,7 @@ It is an educational and research tool. It is **not** an operational collision-w
 | [DECISIONS.md](DECISIONS.md) | Decision log with reasons. Newest first. |
 | [TASKS.md](TASKS.md) | Backlog and status. |
 | [AGENTS.md](AGENTS.md) | Fast path for coding agents and contributors: setup, run, verify. |
-| [README.md](README.md) | Project overview, quick start, API table, risk model, limitations. |
+| [README.md](../README.md) (repository root, shown on GitHub) | Project overview, quick start, API table, risk model, limitations. |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | Earlier architecture and the units contract (written before auth and the React app). |
 | [system_architecture_2026-09-11.md](system_architecture_2026-09-11.md) | Current detailed architecture, including auth and the React app. |
 | [system_design_and_boundary.md](system_design_and_boundary.md) | What is in scope, what is out. |

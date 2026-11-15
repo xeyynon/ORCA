@@ -341,3 +341,14 @@ database.
 between the two. Does not scale past single-machine/single-writer use — see
 ARCHITECTURE.md §3 and PRD.md open questions for what would need to change if
 that ever matters.
+
+## 2026-11-15: The project README lives at the repository root again
+
+**Context:** An earlier commit (`7ecaae9`) moved `README.md` into `MD/` with the other documents. GitHub shows a repository's README only from the root, `.github/` or `docs/`, so the repository page showed none (owner: "the readme is not visible in github").
+**Decision:** `README.md` is back at the root; its links were rewritten for that location (`MD/...` for the documents, `docs/screenshots/...` for the preview). The MD files that linked to it now point to `../README.md`.
+
+## 2026-11-15: `final.png`, `demo.gif` and `Video Project 1.mp4` purged from the history
+
+**Context:** Large binaries nobody links to (pain P24); the owner asked to remove them from GitHub and the whole history.
+**Decision:** `git filter-repo --invert-paths` on a fresh mirror of `xeyynon/ORCA`, then a force-push of all seven branches and the tag `orca-as-built-2026-10-14`. Every branch was checked to differ from before only by those three files.
+**Consequence:** Every commit ID changed (the video and GIF were in the first commit), so commit IDs quoted in older MD notes, including `7ecaae9` and the tag's old target, no longer resolve. A full backup of the old history is at `../ORCA-backup-before-purge-2026-11-15.bundle`, and the files at `../ORCA-removed-files/`. GitHub can still serve the old commits through the merged pull requests until GitHub Support removes them; the upstream repository `lalit2121/STELLA…` still holds the video and GIF.

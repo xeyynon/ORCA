@@ -109,7 +109,7 @@ implementation that takes a learner or small team from "raw TLE text" to
 
 ## 10. References
 
-- [README.md](README.md) — module-level design documentation (source of truth for
+- [README.md](../README.md) — module-level design documentation (source of truth for
   implementation details).
 - [ARCHITECTURE.md](ARCHITECTURE.md) — system architecture and data flow.
 - [DECISIONS.md](DECISIONS.md) — decision log, including bugs found/fixed while

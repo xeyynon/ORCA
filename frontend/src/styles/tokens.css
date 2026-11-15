@@ -235,7 +235,7 @@
   --radius: 4px;            /* a precision tool, not a friendly app */
   --radius-lg: 8px;
   --appbar-h: 56px;
-  --statusbar-h: 28px;
+  --statusbar-h: 22px; /* 28 until 2026-11-15 (owner: "make this little smaller in all pages") */
   --gap-1: 4px;
   --gap-2: 8px;
   --gap-3: 12px;

@@ -81,7 +81,7 @@ On the VM these come from `~/ORCA/deploy/.env` (template: `deploy/env.example`),
 | Setting | Live value | Purpose |
 |---|---|---|
 | `VITE_API_BASE` | `https://129-159-230-127.sslip.io` (Production) | API origin baked into the bundle. Unset = same origin (Vite proxy in dev) |
-| `VITE_EVALUATOR_USERNAME`, `VITE_EVALUATOR_PASSWORD` | unset | If both are set, the sign-in page shows them in an "Evaluator access" panel. They become public in the bundle, so set them only if the hosted login is meant to be open. Locally they live in the git-ignored `frontend/.env.local`. |
+| `VITE_EVALUATOR_USERNAME`, `VITE_EVALUATOR_PASSWORD` | set (Production, 2026-11-16): `admin` and the hosted password, which the owner reset on the VM for this | If both are set, the sign-in page shows them in an "Evaluator access" panel. They become public in the bundle, so set them only if the hosted login is meant to be open. Locally they live in the git-ignored `frontend/.env.local`. |
 
 ### GitHub repository secrets (used by the deploy workflow)
 
@@ -158,3 +158,9 @@ Containers restart on crash and on reboot (`restart: unless-stopped`). More in [
 ## 10. Known operational hazards
 
 See [pain.md](pain.md). Locally, the two that have broken a run: the console-encoding crash on Windows, and Celestrak refusing `active` after repeated requests. Hosting hazards hit while setting up are in [tried_and_failed.md](tried_and_failed.md) sections 9–12.
+
+## Evaluator login and analytics on the hosted site (2026-11-16)
+
+- The hosted sign-in shows the "Evaluator access" panel. The hosted `admin` password was reset on the VM (`docker compose exec orca python auth.py set-password`) and the same value saved as the Vercel variable `VITE_EVALUATOR_PASSWORD`, so it is public by design. Rotating it means doing both again, then a redeploy.
+- A redeploy after a Vercel variable change must untick **"Use project's Ignore Build Step"**, or the build is skipped (nothing under `frontend/` changed) and the variable never reaches the bundle. Vercel also asks for the account's two-factor code before it redeploys.
+- Vercel Web Analytics: `@vercel/analytics` (`src/PageAnalytics.tsx`) sends a page view per hash view (`/overview`, `/globe`, ...). It records nothing until Analytics is enabled for the project in the Vercel dashboard (project `orca` > Analytics > Enable).

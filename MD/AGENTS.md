@@ -2,7 +2,7 @@
 
 Instructions for AI coding agents (and humans skimming for the fast path)
 working in this repository. See [ARCHITECTURE.md](ARCHITECTURE.md) for system
-design and [README.md](README.md) for module-level API detail.
+design and [README.md](../README.md) for module-level API detail.
 
 ## Project
 
@@ -124,7 +124,7 @@ Tests: `.venv/Scripts/python.exe -m unittest discover -s tests` (89 tests) and
 
 | Question | File |
 |---|---|
-| "What does module X do, method by method?" | [README.md](README.md) |
+| "What does module X do, method by method?" | [README.md](../README.md) |
 | "How do the pieces fit together / what's the deployment shape?" | [ARCHITECTURE.md](ARCHITECTURE.md) |
 | "Why was it built this way? What broke before?" | [DECISIONS.md](DECISIONS.md) |
 | "What's left to do?" | [TASKS.md](TASKS.md) |
