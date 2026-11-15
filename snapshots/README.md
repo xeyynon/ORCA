@@ -173,3 +173,5 @@ After the 2026-11-15 audit's polish pass (MD/ux_audit_2026-11-15.md §9). The "b
 | [13-ask-button-390.png](13-polish-2026-11-15/13-ask-button-390.png) | Phone: the same as a 44 px icon button |
 | [14-home-api-down.png](13-polish-2026-11-15/14-home-api-down.png) | API down (requests blocked in a test tab): Home says so on its first screen and the headline is dated, not "right now"; both clear by themselves when the API answers |
 | [15-globe-constellation-1440.png](13-polish-2026-11-15/15-globe-constellation-1440.png) | Globe coloured by constellation (owner's choice): Starlink, OneWeb, Kuiper, Qianfan, Other, keyed in the legend |
+| [16-globe-decluttered-1440.png](13-polish-2026-11-15/16-globe-decluttered-1440.png) | Globe decluttered (owner: "too congested"): one quiet side panel instead of three cards; conjunction-only controls appear only with a conjunction; the not-drawn count joins the drawing line |
+| [17-globe-panel-hidden-1440.png](13-polish-2026-11-15/17-globe-panel-hidden-1440.png) | The side panel hidden ("‹" on the panel, "› Panel" to bring it back): the globe gets the whole width |

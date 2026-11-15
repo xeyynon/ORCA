@@ -1,5 +1,7 @@
-import { integer } from '@/lib/format'
 import { useMemo, useRef, useState } from 'react'
+import { IconButton } from '../../atoms/IconButton/IconButton'
+import { Icon } from '../../atoms/Icon/Icon'
+import { cx } from '@/lib/cx'
 import type { ConjunctionEvent, ObjectType, TleRecord } from '@/api/types'
 import type { Snapshot } from '@/globe/EarthScene'
 import { useCatalogSummary } from '@/hooks/useCatalogSummary'
@@ -158,7 +160,17 @@ export function GlobeView({ catalog, totalCount, selection, focus, conjunction, 
   return (
     <main className="globe-view" id="main-content" tabIndex={-1} aria-label="Globe">
       <h1 className="visually-hidden">Globe</h1>
-      <aside className="globe-view__side globe-view__side--left" aria-label="Catalog and filters">
+      {/* One quiet panel (owner, 2026-11-15: "too congested"); hide it to give the globe the whole width. Desktop only:
+          on narrow screens the panels sit below the globe and are always there. */}
+      {prefs.panelOpen ? null : (
+        <div className="globe-view__show-panel">
+          <Button size="sm" onClick={() => setPrefs({ panelOpen: true })}><Icon name="chevron-right" size={14} /> Panel</Button>
+        </div>
+      )}
+      <aside className={cx('globe-view__side globe-view__side--left', !prefs.panelOpen && 'globe-view__side--hidden')} aria-label="Catalog and filters">
+        <div className="globe-view__hide-panel">
+          <IconButton label="Hide panel" onClick={() => setPrefs({ panelOpen: false })}><Icon name="chevron-left" size={14} /></IconButton>
+        </div>
         <CatalogSummaryCard summary={summary.data} error={summary.status === 'error' ? summary.error.message : null} onRetry={summary.reload} />
         <ViewOptionsCard prefs={prefs} onChange={setPrefs} conjunctionActive={conjunction !== null} />
         <FiltersCard prefs={prefs} onChange={setPrefs} summary={summary.data} bandCounts={bandCounts} countsReady={loaded !== undefined} conjunctionActive={conjunction !== null} />
@@ -190,6 +202,7 @@ export function GlobeView({ catalog, totalCount, selection, focus, conjunction, 
             showOrbit={prefs.showOrbits && selection.length > 0}
             hasConjunction={activeConj !== null}
             hasSelection={selection.length > 0}
+            skipped={positions.data?.skipped ?? 0}
           />
         </div>
         <div className="globe-view__foot">
@@ -226,7 +239,6 @@ export function GlobeView({ catalog, totalCount, selection, focus, conjunction, 
         ) : null}
         {positions.status === 'error' && positions.data ? <FieldNote>Position refresh failed ({positions.error.message}). Showing the last good snapshot; it is extrapolated for at most two minutes.</FieldNote> : null}
         {positions.data && positions.data.objects.length === 0 ? <EmptyState kind="none" title="No positions returned">The catalog is empty or no element set could be propagated.</EmptyState> : null}
-        {positions.data && positions.data.skipped > 0 ? <FieldNote>{integer(positions.data.skipped)} {positions.data.skipped === 1 ? 'object is' : 'objects are'} not drawn: SGP4 could not compute a position from {positions.data.skipped === 1 ? 'its element set' : 'their element sets'}.</FieldNote> : null}
         {notDrawn.length > 0 ? <FieldNote>{notDrawn.map(nameOf).join(', ')} could not be drawn: it is not in the catalog, or SGP4 cannot propagate it (decayed or invalid elements).</FieldNote> : null}
         {failed.length > 0 ? <FieldNote>Orbit path unavailable for {failed.map(nameOf).join(', ')}.</FieldNote> : null}
 

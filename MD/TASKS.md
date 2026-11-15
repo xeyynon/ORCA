@@ -24,6 +24,7 @@ Source: [ux_audit_2026-11-15.md](ux_audit_2026-11-15.md) (finding numbers in bra
 - [x] **Follow-up round:** risk KPI emphasis, horizon label, phone status bar, Data column, plurals, 320 px tabs (audit §10).
 - [x] Home: a connection-lost cue on the first screen when the API stops answering (audit §10): a flat red-dot strip and a dated headline; both clear when the API answers.
 - [x] Globe colouring: owner chose a third "Constellation" mode (Starlink, OneWeb, Kuiper, Qianfan, Other; same naming rule as Analytics). Altitude stays the default.
+- [x] Globe decluttered (owner, 2026-11-15): one side panel, conjunction-only controls shown only with a conjunction, not-drawn count in the legend line, a remembered "hide panel".
 - [ ] Screen-reader pass and a real touch device.
 
 ## Done
