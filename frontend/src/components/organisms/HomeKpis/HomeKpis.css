@@ -1,7 +1,7 @@
-/* Four aligned cards: navy surface, hairline border, large tabular numerals, small muted labels, one restrained blue
+/* Three aligned cards: navy surface, hairline border, large tabular numerals, small muted labels, one restrained blue
    icon. No heavy shadow; hover is a neutral state layer and a brighter border, plus an arrow. */
 .home-kpis__title { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-.home-kpis__list { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--gap-4); margin: 0; padding: 0; list-style: none; }
+.home-kpis__list { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: var(--gap-4); margin: 0; padding: 0; list-style: none; }
 .home-kpis__item { min-width: 0; }
 .home-kpis__card {
   position: relative;
@@ -51,6 +51,6 @@
 .home-kpis__value--critical { color: var(--risk-critical-ink); }
 .home-kpis__context { color: var(--text-tertiary); font-size: var(--text-sm); line-height: 1.4; }
 
-@media (max-width: 960px) { .home-kpis__list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--gap-3); } }
+@media (max-width: 960px) { .home-kpis__list { gap: var(--gap-3); } }
 @media (max-width: 420px) { .home-kpis__value { font-size: 24px; } .home-kpis__card { padding: var(--gap-3); } }
 @media (prefers-reduced-motion: reduce) { .home-kpis__go { transform: none; } }
