@@ -6,7 +6,7 @@ import type { AsyncResult } from '@/hooks/useAsync'
 import { deriveSeries, summarizeCatalog } from '@/lib/catalog'
 import { AGE_TONE_COLOR, ALTITUDE_BAND_COLOR, INCLINATION_COLOR } from '@/lib/chartColors'
 import { countBy } from '@/lib/countBy'
-import { fixed, integer } from '@/lib/format'
+import { fixed, integer, plural } from '@/lib/format'
 import { topGroups, UNNAMED } from '@/lib/groups'
 import { binGrid } from '@/lib/heatmap'
 import type { GridSpec } from '@/lib/heatmap'
@@ -173,7 +173,7 @@ export function AnalyticsView({ catalog, stats, totalCount, now }: Props) {
         <ChartCard
           title="Eccentricity"
           scope={chartScope}
-          note={`Log axis: nearly every orbit is close to circular.${model.ecc.unplottable > 0 ? ` ${integer(model.ecc.unplottable)} object(s) have e = 0 exactly and cannot be placed on a log axis.` : ''}`}
+          note={`Log axis: nearly every orbit is close to circular.${model.ecc.unplottable > 0 ? ` ${plural(model.ecc.unplottable, 'object')} ${model.ecc.unplottable === 1 ? 'has' : 'have'} e = 0 exactly and cannot be placed on a log axis.` : ''}`}
         >
           <Histogram bins={model.ecc.bins} unit="eccentricity (log scale)" ariaLabel="Histogram of eccentricity on a log axis" colorOf={(b) => ECC_COLOR[eccClass(geoMid(b))]} formatTick={(v) => v.toExponential(0).replace('e+', 'e')} />
           <ChartLegend items={ECC_ORDER.map((c) => ({ label: ECC_LABEL[c], color: ECC_COLOR[c], value: integer(model.eccCounts[c]) }))} />

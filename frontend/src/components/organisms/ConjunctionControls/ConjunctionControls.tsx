@@ -29,7 +29,7 @@ export function ConjunctionControls({ query, catalogSize, stepS, reportKm, runni
   return (
     <div className="conj-controls">
       <div className="conj-controls__fields">
-        <NumberField label="Horizon" value={query.horizonDays} min={1} max={7} step={1} unit="days" onChange={(v) => onChange({ ...query, horizonDays: v })} />
+        <NumberField label="Horizon (days)" value={query.horizonDays} min={1} max={7} step={1} onChange={(v) => onChange({ ...query, horizonDays: v })} />
         <NumberField label="Rows to show" value={query.limit} min={1} max={1000} step={10} onChange={(v) => onChange({ ...query, limit: v })} />
         <div className="conj-controls__run">
           <Button variant="primary" disabled={running || tooSmall || catalogSize === null} onClick={onRun}>

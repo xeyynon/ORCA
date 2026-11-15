@@ -32,7 +32,7 @@ export function HomeKpis({ kpis, onOpen, goLabel }: Props) {
                 <span className="home-kpis__icon" aria-hidden="true"><Icon name={ICON[k.id]} size={14} /></span>
                 <span className="home-kpis__label">{k.label}</span>
               </span>
-              <span className="home-kpis__value">{k.value ?? <Skeleton width="5ch" height="0.9em" />}</span>
+              <span className={k.tone ? `home-kpis__value home-kpis__value--${k.tone}` : 'home-kpis__value'}>{k.value ?? <Skeleton width="5ch" height="0.9em" />}</span>
               <span className="home-kpis__context">{k.context}</span>
             </button>
           </li>

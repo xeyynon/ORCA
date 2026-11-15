@@ -24,6 +24,13 @@ test('figures that are not there yet are null (a skeleton), never 0', () => {
   assert.equal(homeKpis(0, null)[0].value, null)
 })
 
+test('a risk figure above zero carries its tier ink; zero stays neutral', () => {
+  const k = homeKpis(15970, run)
+  assert.equal(k[2].tone, 'high')
+  assert.equal(k[3].tone, undefined)
+  assert.equal(homeKpis(15970, { ...run, critical: 2 })[3].tone, 'critical')
+})
+
 const ev = (risk: ConjunctionEvent['risk_level'], pc: number, tca: string, id: string): ConjunctionEvent => ({
   sat1_id: id, sat1_name: `A${id}`, sat2_id: `${id}b`, sat2_name: `B${id}`, tca, min_distance_km: 1, probability_of_collision: pc,
   risk_level: risk, relative_velocity_kms: 7, tle_age_days: 3, uncertainty_km: 1, long_encounter: false,
