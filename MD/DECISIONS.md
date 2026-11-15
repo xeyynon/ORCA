@@ -17,6 +17,28 @@ decided, why, and what alternatives were considered. Newest first.
 
 **Decision:** the owner asked for it back ("add it again"). The sign-in page keeps the animated scene, the glows and the glass card, always dark. This is an approved exception to the no-decoration rule for this one page; do not flag it again. The other sign-in fixes stay: the reason under the disabled Sign in button and the labelled "Use these details" button.
 
+## 2026-10-20 - Bug sweep: sidereal time, truncated epochs, per-row ingest, one bad record
+
+**Context:** A fresh read of the code, then probes against the real 15,927-object `active` catalog (Celestrak, 2026-10-20).
+
+| Finding | Measured | Fix |
+|---|---|---|
+| `_gmst` used a wrong sidereal rate (`67*3600+48*60+45.25625` s per century), so it sat near 193 deg on any date | Server `gmst_rad` 58.8 deg off at the probe time: the ISS longitude was wrong by that much and the globe's Earth was misoriented. Ground tracks in `Analytics.py` share it | IAU-82 rate (`876600 h + 8640184.812866 s` per century), `tests/test_frames.py` against `sgp4.propagation.gstime` |
+| `TLEDatabase.get_tle/get_all_tles/search_tles` rebuilt the epoch from whole seconds, dropping the microseconds the row was stored with | Every object shifted along-track: median 3.6 km, p90 6.9 km, max 7.7 km from SGP4 on the original lines. The engine propagates from that epoch | `_epoch_year_day` keeps the fraction. Error is now 0.000 km. `tests/test_tle_database.py` |
+| `insert_batch` opened a connection and committed once per row | 178 s for the full catalog; the Data view gives up after 90 s (`UPDATE_GIVE_UP_MS`) and would say "unchanged" while the refresh was still landing | One transaction with `executemany`: 0.1 s, and a refresh is all-or-nothing |
+| `/api/statistics`, `/api/conjunctions`, `/api/export/conjunctions` called `to_orbital_element()` unguarded | One record with a zero mean motion gave HTTP 500 on all three (`_sat_cache` already guarded) | `_orbital_elements` skips and logs unusable records. `tests/test_bad_records.py` |
+| `useConjunctionSearch` set `query` when a search started | Cancelling a newer search fell back to the older result under the newer horizon | `query` is set when a result arrives |
+
+**Effect on results:** the same 1-day full-catalog search before and after the epoch fix kept 7 of the top 20 pairs and 52 of the top 100 (636 of the top 1000). For pairs in both lists the miss distance moved by a median of 1.0 km, up to 9.4 km. The two runs started about six minutes apart, which moves only events near the window edges. The benchmark validation in the entry below compared the engine with a reference built from the same elements, so it could not see this.
+
+**Not fixed, for a decision:**
+- A refresh never removes an object that has left the group, so decayed objects stay in the catalog.
+- At 60x playback the globe asks for new positions every 1.2 s, and `/api/positions` took 1.3-1.4 s here. `useAsync` aborts the request in flight when the next one starts, so the globe may stop updating. Not reproduced in a browser.
+- `/api/positions` propagates the whole catalog even when `limit` is small.
+- The globe note says positions are extrapolated "at most two minutes"; the constant is 150 s.
+
+---
+
 ## 2026-10-15 - Conjunction engine v2: SGP4, gap-free screening, exact TCA, Foster Pc, measured uncertainty, honest UI
 
 **Context:** The benchmark study (entry of 2026-10-14) measured the original engine on public TLEs against a dense SGP4 reference:

@@ -349,7 +349,7 @@ class TwoBodyDragPropagator:
  #====================
 def _julian_day(dt: datetime
                  ) -> float:
-     """Compute Julina day number at 0h UT"""
+     """Julian date (days) of the UT instant dt, whole-second resolution"""
      a = (14-dt.month)//12
      y= dt.year+4800-a
      m = dt.month + 12 *a -3
@@ -359,9 +359,11 @@ def _julian_day(dt: datetime
     
 def _gmst(jd:float
               )-> float:
-       """Greenwich mean sidereal time (radians )  from JUlian Day"""
+       """Greenwich mean sidereal time (radians) from the UT1 Julian date (IAU-82, Vallado eq. 3-47)"""
        T= (jd-2451545.0)/36525.0
-       gmst_sec = 67310.54841+(67.0 *3600.0+48.0*60.0+45.25625)*T+\
+       # 876600 h is exactly 36525 days, so it adds nothing modulo a day; it is kept so the rate reads as the
+       # published 876600 h + 8640184.812866 s per Julian century (about 360.9856 deg per day).
+       gmst_sec = 67310.54841+(876600.0*3600.0+8640184.812866)*T+\
          (0.093104)*T**2-(6.2e-6)*T**3
        gmst_sec=gmst_sec%86400.0
        return 2*math.pi*gmst_sec/86400.0
