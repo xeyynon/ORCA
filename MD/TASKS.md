@@ -147,9 +147,7 @@ Source: [ux_audit_2026-11-15.md](ux_audit_2026-11-15.md) (finding numbers in bra
 
 ## Open — housekeeping
 
-- [ ] Confirm `ssa_data.db` and the large demo assets (`demo.gif`, `pre.png`,
-      `Video Project 1.mp4`) are appropriately handled in `.gitignore` /
-      Git LFS — the video/gif are large binary assets in a plain git repo.
+- [x] Large demo assets: `demo.gif` and `Video Project 1.mp4` (with `final.png`) purged from the whole history on 2026-11-15 and git-ignored; `pre.png` remains (owner kept it). `ssa_data.db` still to confirm.
 - [ ] `requirements.txt` pins lower bounds only (`>=`) with no upper bounds
       or lockfile — fine for a portfolio project, but worth a `pip freeze`
       snapshot if reproducibility across time becomes a concern.
