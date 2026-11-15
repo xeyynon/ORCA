@@ -68,8 +68,7 @@ Source: [ux_audit_2026-11-15.md](ux_audit_2026-11-15.md) (finding numbers in bra
 - [ ] **Merge `fix/honest-conjunctions` into `main` and push.** This deploys v2. The
       `/api/conjunctions` response changed shape, so the backend and frontend must deploy
       together; one push to `main` does both. Needs the owner's go-ahead.
-- [ ] Decide whether the hosted site shows an evaluator login. Setting `VITE_EVALUATOR_*` in
-      Vercel makes that login public.
+- [x] Hosted site shows the evaluator login (owner, 2026-11-16): `VITE_EVALUATOR_*` set in Vercel, hosted password reset to match; checked: the panel's details sign in.
 - [x] Update the screenshots in `docs/screenshots/` (2026-11-15: all six pages, after the declutter pass).
 
 ## Open — accuracy
