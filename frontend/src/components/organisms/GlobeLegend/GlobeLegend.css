@@ -22,7 +22,7 @@
 .globe-legend__items { display: flex; flex-direction: column; gap: 4px; }
 /* Wide: the side panels key the colours, so only the marks and the cap line stay; nothing left means no legend. */
 @media (min-width: 1001px) {
-  .globe-legend__key { display: none; }
+  .globe-legend:not(.globe-legend--own-key) .globe-legend__key { display: none; }
   .globe-legend--key-only { display: none; }
 }
 /* Narrow: one compact wrapped row, so the key does not cover the top of the globe. */

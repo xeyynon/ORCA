@@ -26,3 +26,19 @@ export function topGroups(names: readonly string[], top: number): GroupCount[] {
   const rest = sorted.slice(top).reduce((n, [, c]) => n + c, 0)
   return rest > 0 ? [...head, { label: 'Other', count: rest }] : head
 }
+
+/**
+ * The Globe's "Constellation" colouring (owner, 2026-11-15): the four largest broadband constellations in the catalogue,
+ * by the same naming rule as the Analytics chart, and everything else as Other. A naming heuristic, not an ownership record.
+ */
+export const GLOBE_CONSTELLATIONS = ['STARLINK', 'ONEWEB', 'KUIPER', 'QIANFAN', 'OTHER'] as const
+export type GlobeConstellation = (typeof GLOBE_CONSTELLATIONS)[number]
+
+export const GLOBE_CONSTELLATION_LABEL: Record<GlobeConstellation, string> = {
+  STARLINK: 'Starlink', ONEWEB: 'OneWeb', KUIPER: 'Kuiper', QIANFAN: 'Qianfan', OTHER: 'Other',
+}
+
+export function globeConstellation(name: string): GlobeConstellation {
+  const g = constellationOf(name)
+  return (GLOBE_CONSTELLATIONS as readonly string[]).includes(g) && g !== 'OTHER' ? (g as GlobeConstellation) : 'OTHER'
+}
