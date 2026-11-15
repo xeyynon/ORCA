@@ -91,3 +91,10 @@ test('percentileRank: below/above/tie/empty', () => {
   assert.equal(percentileRank([], 1), null)
   assert.equal(percentileRank(v, NaN), null)
 })
+
+test('plural agrees the noun with the count', async () => {
+  const { plural } = await import('./format.ts')
+  assert.equal(plural(1, 'object'), '1 object')
+  assert.equal(plural(108, 'object'), '108 objects')
+  assert.equal(plural(2, 'entry', 'entries'), '2 entries')
+})

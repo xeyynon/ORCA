@@ -10,3 +10,9 @@
   border-top: 1px solid var(--border);
 }
 .statusbar::-webkit-scrollbar { display: none; }
+/* Phones: a sideways-scrolling strip with a hidden scrollbar was cut mid-word with no cue (audit 2026-11-15). Show the
+   first three readings, which fit; the rest are on Home (System status) and the Data page. */
+@media (max-width: 520px) {
+  .statusbar { gap: var(--gap-4); overflow-x: hidden; }
+  .statusbar > :nth-child(n + 4) { display: none; }
+}

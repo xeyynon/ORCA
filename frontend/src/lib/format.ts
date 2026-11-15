@@ -58,3 +58,8 @@ export function formatLat(deg: number): string {
 export function formatLon(deg: number): string {
   return Number.isFinite(deg) ? `${Math.abs(deg).toFixed(1)}° ${deg < 0 ? 'W' : 'E'}` : NO_DATA
 }
+
+/** "1 object", "108 objects": a count with its noun agreed, never "object(s)" (audit 2026-11-15). */
+export function plural(n: number, one: string, many = `${one}s`): string {
+  return `${integer(n)} ${n === 1 ? one : many}`
+}
