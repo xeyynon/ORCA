@@ -179,5 +179,11 @@ Target: Home about 1,280 px with every figure once; Data about 600 px.
 | Step | Page | Height | Words | Notes | Figures repeated | Shots |
 |---|---|---|---|---|---|---|
 | 0 + 1 | Conjunctions (saved run, a pair open) | 4,783 → **2,056 px** | 2,040 → **756** | 6 → **5** | 442,786 ×3 → **none** | `snapshots/14-declutter-2026-11-15/after-conjunctions-result.png`, `after-conjunctions-360.png` |
+| 2 | Overview (first page; a row selected) | 8,873 → **2,258 px** (2,004 selected) | 2,828 → **653** | 1 | 5,000 ×6 → ×3 (filter line, pager, donut centre) | `after-overview.png`, `after-overview-selected.png` |
+| 4.3 | Data | 816 px (folded API; now centred) | | | none | `before-data-1440.png`, `after-data-1440.png`, `after-data-360.png` |
 
 Step 1 notes: the table caption is now "The 100 most probable" (the total stays in the answer only); the tier chart note was dropped as well (it repeated the caption). Checked: the card stays in view while the table scrolls (1440 px), Next from pair 25 turns the table to page 2, no sideways scroll at 360 px where the card stacks under the table. `SavedRunBanner` is no longer rendered; its folder is left in place until the owner confirms deleting it. Not checked yet: light theme and the API down on this page.
+
+Step 2 notes: three KPI cards (TLE age as one card: median, newest and oldest in its hint); 50 rows a page with the object card kept in view; the count line above the table removed (the pager says "1 to 50 of 5,000"). The regime chart is titled "Loaded objects by regime" when only part of the catalogue is loaded, since its scope note was removed.
+
+Data (owner, 2026-11-15: "why everything is moved towards left?"): the cards had been capped at 960 px but not centred, while the title and bars span the window, leaving a 460 px empty band on the right at 1440 px. `PageLayout` gained a `narrow` mode that centres the whole page, title included, in one 960 px column. The API card is now a "For developers" disclosure, closed, with the API state in its summary (plan step 4.3, done early).

@@ -1,5 +1,1 @@
 .catalog-table { display: flex; flex-direction: column; gap: var(--gap-2); min-height: 0; }
-/* The count sits above the table, where it is read before the rows, not after 250 of them. */
-.catalog-table__count { margin: 0; color: var(--text-secondary); font-size: 12px; }
-.catalog-table__more { display: flex; flex-wrap: wrap; align-items: center; gap: var(--gap-3); padding-top: var(--gap-1); }
-.catalog-table__rest { color: var(--text-tertiary); font-size: 12px; }
