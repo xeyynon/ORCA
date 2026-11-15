@@ -83,3 +83,8 @@ benchmarks/results/propagation_*/errors.csv
 
 # Playwright MCP scratch output
 .playwright-mcp/
+
+# Purged from history on 2026-11-15 (MD/DECISIONS.md); kept outside the repo in ../ORCA-removed-files/
+/final.png
+/demo.gif
+/Video Project 1.mp4
