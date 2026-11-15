@@ -1,4 +1,5 @@
 import { useMemo, useRef, useState } from 'react'
+import type { CSSProperties } from 'react'
 import { IconButton } from '../../atoms/IconButton/IconButton'
 import { Icon } from '../../atoms/Icon/Icon'
 import { cx } from '@/lib/cx'
@@ -6,6 +7,7 @@ import type { ConjunctionEvent, ObjectType, TleRecord } from '@/api/types'
 import type { Snapshot } from '@/globe/EarthScene'
 import { useCatalogSummary } from '@/hooks/useCatalogSummary'
 import { useFullscreen } from '@/hooks/useFullscreen'
+import { useElementHeight } from '@/hooks/useElementHeight'
 import { useGlobePrefs } from '@/hooks/useGlobePrefs'
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
@@ -77,6 +79,9 @@ export function GlobeView({ catalog, totalCount, selection, focus, conjunction, 
   const [autoRotate, setAutoRotate] = useState(true)
   const [resetNonce, setResetNonce] = useState(0)
   const stageRef = useRef<HTMLDivElement>(null)
+  // The bottom-right stack (drawing line + playback bar) varies in height; the details panel above it gets what is left.
+  const footRef = useRef<HTMLDivElement>(null)
+  const footH = useElementHeight(footRef)
   const toggleFullscreen = useFullscreen(stageRef)
   const narrow = useMediaQuery(NARROW)
 
@@ -158,7 +163,7 @@ export function GlobeView({ catalog, totalCount, selection, focus, conjunction, 
   const inSheet = narrow && details !== null
 
   return (
-    <main className="globe-view" id="main-content" tabIndex={-1} aria-label="Globe">
+    <main className="globe-view" id="main-content" tabIndex={-1} aria-label="Globe" style={{ '--globe-foot-h': `${Math.round(footH)}px` } as CSSProperties}>
       <h1 className="visually-hidden">Globe</h1>
       {/* One quiet panel (owner, 2026-11-15: "too congested"); hide it to give the globe the whole width. Desktop only:
           on narrow screens the panels sit below the globe and are always there. */}
@@ -194,7 +199,7 @@ export function GlobeView({ catalog, totalCount, selection, focus, conjunction, 
             onCamera={onCamera}
           />
         </div>
-        <div className="globe-view__foot">
+        <div className="globe-view__foot" ref={footRef}>
           <div className="globe-view__legend">
             <GlobeLegend
               colorBy={prefs.colorBy}
