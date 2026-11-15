@@ -23,6 +23,7 @@ import { HomeHero } from '../../organisms/HomeHero/HomeHero'
 import { HomeKpis } from '../../organisms/HomeKpis/HomeKpis'
 import { OrbitDistribution } from '../../organisms/OrbitDistribution/OrbitDistribution'
 import { PageLayout } from '../../organisms/PageLayout/PageLayout'
+import { StaleDataBanner } from '../../organisms/StaleDataBanner/StaleDataBanner'
 import { SystemStatus } from '../../organisms/SystemStatus/SystemStatus'
 import type { SystemField } from '../../organisms/SystemStatus/SystemStatus'
 import './HomeView.css'
@@ -106,8 +107,20 @@ export function HomeView({ catalog, summary, health, apiStatus, conjSearch, onCo
   return (
     <PageLayout>
       <div className="home">
+        {/* The first screen says when the API stops answering (audit 2026-11-15 §10): the page keeps the last data. */}
+        {offline ? (
+          <StaleDataBanner
+            tone="bad"
+            notice={{ title: 'The API is not answering', body: 'This page shows the last data loaded; nothing updates until it is back.' }}
+            actionLabel="See the API status"
+            onGoData={() => onGo('data')}
+          />
+        ) : null}
         <HomeHero
-          lines={hookLines(total, summary?.medianAgeDays != null ? { stale: summary.medianAgeDays > STALE_MEDIAN_DAYS, asOf: health?.database.last_update ?? null } : null)}
+          lines={hookLines(total, offline || summary?.medianAgeDays != null
+            // Not answering counts as not current: the figures are the last ones loaded, so no "right now".
+            ? { stale: offline || (summary?.medianAgeDays ?? 0) > STALE_MEDIAN_DAYS, asOf: health?.database.last_update ?? null }
+            : null)}
           snapshot={snapshot}
           onExploreGlobe={() => onGo('globe')}
           onViewConjunctions={() => openApproaches()}
