@@ -8,9 +8,15 @@ ORCA ingests public satellite tracking data, propagates orbits, screens the cata
 
 ## Preview
 
-| Overview | Globe | Conjunctions |
+| Home | Globe | Conjunctions |
 |---|---|---|
-| ![Overview](../docs/screenshots/overview.png) | ![Globe](../docs/screenshots/globe.png) | ![Conjunctions](../docs/screenshots/conjunctions.png) |
+| ![Home: the object count, the latest search's close pairs and its five worst approaches](../docs/screenshots/home.png) | ![Globe: a critical conjunction with both orbits and the closest approach](../docs/screenshots/globe.png) | ![Conjunctions: a live search, the table a page at a time, the pair's detail beside it](../docs/screenshots/conjunctions.png) |
+
+| Overview | Analytics | API health |
+|---|---|---|
+| ![Overview: the catalogue table with one object open and where it sits among the catalogue](../docs/screenshots/overview.png) | ![Analytics: regime share, constellations, data age and orbit distributions](../docs/screenshots/analytics.png) | ![API health: whether the API answers, what it reports, and the raw JSON](../docs/screenshots/api-health.png) |
+
+Screenshots from 2026-11-15 (1440 px, dark theme, a live 1-day search over 15,977 objects).
 
 ## What it does
 

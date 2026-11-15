@@ -69,7 +69,7 @@ Source: [ux_audit_2026-11-15.md](ux_audit_2026-11-15.md) (finding numbers in bra
       together; one push to `main` does both. Needs the owner's go-ahead.
 - [ ] Decide whether the hosted site shows an evaluator login. Setting `VITE_EVALUATOR_*` in
       Vercel makes that login public.
-- [ ] Update the screenshots in `docs/screenshots/` (the Conjunctions page changed).
+- [x] Update the screenshots in `docs/screenshots/` (2026-11-15: all six pages, after the declutter pass).
 
 ## Open — accuracy
 

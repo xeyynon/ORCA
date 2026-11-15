@@ -209,3 +209,25 @@ Every page after the declutter pass (`MD/declutter_plan_2026-11-15.md`); the "be
 | [after-health-light.png](14-declutter-2026-11-15/after-health-light.png) | Light theme |
 | [after-health-offline.png](14-declutter-2026-11-15/after-health-offline.png) | The API blocked: "The API is not answering", the error, the last good response kept |
 | [after-reports.png](14-declutter-2026-11-15/after-reports.png) | Reports: the builder no longer repeats the run line |
+
+## 14-report-figures-2026-11-15
+
+Figures for the final report, retaken after the declutter pass (same names, same 1440x900 or 390x844 framing). Conjunction figures come from a live 1-day search run at 17:39 UTC on 2026-11-15 (262,303 approaches closer than 10 km; 9 critical, 640 high). `01-sign-in` is the earlier capture (the sign-in page did not change). There is no figure 05.
+
+| File | What it shows |
+|---|---|
+| [01-sign-in-1440.png](14-report-figures-2026-11-15/01-sign-in-1440.png) | Sign in |
+| [02-home-1440.png](14-report-figures-2026-11-15/02-home-1440.png) | Home: headline, three KPI cards |
+| [03-home-lower-1440.png](14-report-figures-2026-11-15/03-home-lower-1440.png) | Home, lower: five worst approaches, orbit regimes, Data quality with the API row |
+| [04-overview-1440.png](14-report-figures-2026-11-15/04-overview-1440.png) | Overview with an object open |
+| [06-conjunctions-result-1440.png](14-report-figures-2026-11-15/06-conjunctions-result-1440.png) | Conjunctions: the answer, risk tiers, caveats |
+| [07-conjunctions-table-1440.png](14-report-figures-2026-11-15/07-conjunctions-table-1440.png) | The timeline and the table |
+| [08-pair-detail-1440.png](14-report-figures-2026-11-15/08-pair-detail-1440.png) | A pair open beside the table (with Mahalanobis distance and hard-body radius from the live re-assessment) |
+| [09-globe-conjunction-1440.png](14-report-figures-2026-11-15/09-globe-conjunction-1440.png) | The same pair on the Globe |
+| [10-analytics-1440.png](14-report-figures-2026-11-15/10-analytics-1440.png) | Analytics |
+| [11-data-1440.png](14-report-figures-2026-11-15/11-data-1440.png) | Data, centred |
+| [12-reports-1440.png](14-report-figures-2026-11-15/12-reports-1440.png) | Reports: builder and document |
+| [13-ask-orca-1440.png](14-report-figures-2026-11-15/13-ask-orca-1440.png) | Ask ORCA answering "Any close approaches?" |
+| [14-phone-home-390.png](14-report-figures-2026-11-15/14-phone-home-390.png) | Home on a phone |
+| [15-phone-globe-390.png](14-report-figures-2026-11-15/15-phone-globe-390.png) | Globe on a phone with a conjunction open |
+| [16-api-health-1440.png](14-report-figures-2026-11-15/16-api-health-1440.png) | API health with the raw JSON open (new) |

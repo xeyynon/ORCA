@@ -885,7 +885,7 @@ P22 partial CI (Python tests gate deploys; frontend tests, typecheck and a live 
 ### Release
 - [ ] **Merge `fix/honest-conjunctions` into `main` and push** (deploys v2; backend and frontend together; needs the owner's go-ahead).
 - [ ] Decide whether the hosted site shows an evaluator login.
-- [ ] Update `docs/screenshots/` (the Conjunctions page changed).
+- [x] Update `docs/screenshots/` (2026-11-15: all six pages, after the declutter pass).
 
 ### Accuracy
 - [ ] Take a catalog snapshot daily for about a week (`benchmarks\refresh_measured.ps1`) to fill the 1–5 day gap, then copy the new bins into `CovarianceModel.MEASURED`.
