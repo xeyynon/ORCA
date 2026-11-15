@@ -59,6 +59,15 @@ class FetchStatusTests(unittest.TestCase):
         with mock.patch("parser_pipeline.requests.get", return_value=_response(403)):
             self.assertEqual(CelestrackClient.fetch_group("stations"), [])
 
+    def test_full_catalogue_gets_time_to_answer(self):
+        # Celestrak takes longer than 10 s to start sending the "active" group; a 10 s read timeout failed every
+        # full-catalogue refresh on the hosted VM (2026-11-16). Connect stays short, the read gets two minutes.
+        with mock.patch("parser_pipeline.requests.get", return_value=_response(200, ISS)) as get:
+            CelestrackClient.fetch_group_checked("active")
+        connect, read = get.call_args.kwargs["timeout"]
+        self.assertLessEqual(connect, 15)
+        self.assertGreaterEqual(read, 60)
+
 
 if __name__ == "__main__":
     unittest.main()
