@@ -1,6 +1,6 @@
 import './Icon.css'
 
-export type IconName = 'sun' | 'moon' | 'keyboard' | 'search' | 'close' | 'info' | 'download' | 'globe' | 'refresh' | 'arrow-left' | 'play' | 'pause' | 'logout' | 'login' | 'skip-back' | 'skip-forward' | 'expand' | 'locate' | 'copy' | 'check' | 'eye' | 'eye-off' | 'menu' | 'home' | 'list' | 'orbit' | 'chart' | 'database' | 'bell' | 'help' | 'chat' | 'arrow-right' | 'alert' | 'target' | 'file' | 'printer' | 'chevron-right' | 'chevron-left' | 'chevron-down' | 'sort-up' | 'sort-down'
+export type IconName = 'sun' | 'moon' | 'keyboard' | 'search' | 'close' | 'info' | 'download' | 'globe' | 'refresh' | 'arrow-left' | 'play' | 'pause' | 'logout' | 'login' | 'skip-back' | 'skip-forward' | 'expand' | 'locate' | 'copy' | 'check' | 'eye' | 'eye-off' | 'menu' | 'home' | 'list' | 'orbit' | 'chart' | 'database' | 'bell' | 'help' | 'chat' | 'arrow-right' | 'alert' | 'target' | 'file' | 'printer' | 'chevron-right' | 'chevron-left' | 'chevron-down' | 'chevron-up' | 'sort-up' | 'sort-down'
 
 // 16x16 stroke icons. Single-path or small-group definitions keep this file readable.
 const PATHS: Record<IconName, string> = {
@@ -39,6 +39,7 @@ const PATHS: Record<IconName, string> = {
   'chevron-right': 'M6 3.5 10.5 8 6 12.5',
   'chevron-left': 'M10 3.5 5.5 8 10 12.5',
   'chevron-down': 'M3.5 6 8 10.5 12.5 6',
+  'chevron-up': 'M3.5 10 8 5.5 12.5 10',
   'sort-up': 'M4 10.5 8 5.5l4 5Z',
   'sort-down': 'M4 5.5 8 10.5l4-5Z',
   alert: 'M8 2.2 14.3 13.3H1.7ZM8 6.5v3M8 11.3v.01',

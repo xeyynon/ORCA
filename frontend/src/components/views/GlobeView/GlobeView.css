@@ -62,7 +62,14 @@
   .globe-view__side--left { max-height: calc(100% - 2 * var(--gap-3) - var(--statusbar-h)); }
   .globe-view__hide-panel { position: absolute; z-index: 1; top: 6px; right: 6px; }
   .globe-view__show-panel { position: absolute; z-index: 2; top: var(--gap-3); left: var(--gap-3); }
+  /* Legend + playback: a hide control at the stack's top right; hidden, only a pill with the time and its state stays. */
+  .globe-view__foot-stack { position: relative; display: flex; flex-direction: column; }
+  .globe-view__foot-stack--hidden { display: none; }
+  .globe-view__hide-foot { display: flex; justify-content: flex-end; margin-bottom: 4px; pointer-events: auto; }
+  .globe-view__foot-pill { display: flex; justify-content: flex-end; pointer-events: auto; }
+  .globe-view__foot-pill .btn { gap: var(--gap-2); }
 }
 @media (max-width: 1000px) {
-  .globe-view__hide-panel, .globe-view__show-panel { display: none; }
+  .globe-view__hide-panel, .globe-view__show-panel, .globe-view__hide-foot, .globe-view__foot-pill { display: none; }
+  .globe-view__foot-stack, .globe-view__foot-stack--hidden { display: contents; }
 }
