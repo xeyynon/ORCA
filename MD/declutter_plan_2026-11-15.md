@@ -197,7 +197,7 @@ Owner requests during step 2 (2026-11-15):
 
 Step 3 (owner chose "remove it"): the KPI row (mean apogee, median perigee, mean period, mean inclination) is gone, and with it the `/api/statistics` request, which fed nothing else. The scope is said once in the subtitle; only the regime donut shows its own scope, and only when it counts the whole catalogue while the other charts use the first loaded rows (that partial case was not exercised in the browser this time). Every chart note is one clause; the heatmap gives its plotted count only when some objects were left out. `SavedRunBanner` deleted (owner: "delete it").
 
-Steps 4 and 5: Home drops the "Catalogued objects" card (three cards, laid out with auto-fit so three or one per row, never two and one) and the System status section; its API row is now the last row of Data quality ("ORCA API: Connected"). The report's headline table drops the same row (its sentence above already gives the count). Reports: the builder's run line is gone once the run is ready; it still speaks while loading and on failure. `SystemStatus` is no longer rendered; its folder is kept until the owner confirms deleting it.
+Steps 4 and 5: Home drops the "Catalogued objects" card (three cards, laid out with auto-fit so three or one per row, never two and one) and the System status section; its API row is now the last row of Data quality ("ORCA API: Connected"). The report's headline table drops the same row (its sentence above already gives the count). Reports: the builder's run line is gone once the run is ready; it still speaks while loading and on failure. `SystemStatus` is no longer rendered and was deleted (owner: "yes").
 
 ## Before and after (2026-11-15, 1440 px, `.playwright-mcp/clutter-after.js`)
 
