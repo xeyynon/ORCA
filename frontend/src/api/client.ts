@@ -4,6 +4,9 @@ import { clearToken, getToken } from './session'
 /** Empty string = same origin (the Vite dev proxy). Set VITE_API_BASE to target a remote API. */
 export const API_BASE: string = (import.meta.env.VITE_API_BASE as string | undefined) ?? ''
 
+/** Where the API actually is, for people to read: the configured base, or this page's own origin (the dev proxy). */
+export const API_ORIGIN = API_BASE || (typeof window !== 'undefined' ? window.location.origin : '')
+
 export class ApiError extends Error {
   readonly status: number | null
   /** 'http' = server answered with an error; 'network' = nothing answered; 'aborted' = we cancelled */

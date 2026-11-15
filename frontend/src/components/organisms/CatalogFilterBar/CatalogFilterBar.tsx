@@ -44,10 +44,13 @@ export function CatalogFilterBar({ query, regimes, counts, active, matchCount, l
         </div>
         {active ? <Button onClick={onClear}>Clear</Button> : null}
       </div>
-      <div className="filter-bar__status" role="status">
-        {active ? `${integer(matchCount)} of ${integer(loadedCount)} loaded objects match.` : `${integer(loadedCount)} loaded objects.`}
-        {partial ? ` The filter covers the loaded objects only; ${integer(totalCount)} are stored. Use the search box at the top for the rest.` : ''}
-      </div>
+      {/* What the filter can reach; how many rows show is stated once, above the table (one home per fact). */}
+      {active || partial ? (
+        <div className="filter-bar__status" role="status">
+          {active ? `${integer(matchCount)} of ${integer(loadedCount)} loaded objects match.` : ''}
+          {partial ? `${active ? ' ' : ''}The filter searches the ${integer(loadedCount)} loaded objects; ${integer(totalCount)} are stored, and the search at the top covers them all.` : ''}
+        </div>
+      ) : null}
     </div>
   )
 }

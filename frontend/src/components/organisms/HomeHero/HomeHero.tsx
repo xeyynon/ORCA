@@ -1,6 +1,7 @@
 import type { HookLines } from '@/lib/homeHook'
 import { Button } from '../../atoms/Button/Button'
 import { Icon } from '../../atoms/Icon/Icon'
+import { Mono } from '../../atoms/Mono/Mono'
 import { LoadingMark } from '../../molecules/LoadingMark/LoadingMark'
 import './HomeHero.css'
 
@@ -26,7 +27,6 @@ export function HomeHero({ lines, snapshot, onExploreGlobe, onViewConjunctions, 
   return (
     <section className="home-hero" aria-labelledby="home-hero-title">
       <div className="home-hero__text">
-        <p className="home-hero__eyebrow">Space situational awareness</p>
         <h1 id="home-hero-title" className="home-hero__title">{lines.headline}</h1>
         <p className="home-hero__sub">{lines.sub}</p>
         <div className="home-hero__actions">
@@ -40,11 +40,11 @@ export function HomeHero({ lines, snapshot, onExploreGlobe, onViewConjunctions, 
               New here? Take the one-minute tour
             </button>
           ) : null}
-          {snapshot ? <p className="home-hero__snapshot">Data snapshot · {snapshot}</p> : null}
+          {snapshot ? <p className="home-hero__snapshot">Data snapshot: <Mono>{snapshot}</Mono></p> : null}
         </div>
       </div>
       <div className="home-hero__visual" aria-hidden="true">
-        <LoadingMark size={earthSize} />
+        <LoadingMark size={earthSize} once />
       </div>
     </section>
   )

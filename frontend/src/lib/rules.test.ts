@@ -63,6 +63,36 @@ test('no coloured side stripes on boxes (rules.md §11.21)', () => {
   assert.deepEqual(offenders(inComponents(/\.css$/), SIDE_STRIPE), [])
 })
 
+/**
+ * A background TINTED with a status hue (a colour-mix of ok/warn/bad/risk, or an *-bg tint) behind words: status goes
+ * on the word or dot, never a fill (UI-13/UI-22). Solid marks (chart segments, track markers, dots) are graphics, allowed.
+ */
+const STATUS_FILL = /(background|-bg\s*:)[^;]*color-mix\([^;]*var\(--(ok|warn|bad|risk-[a-z]+)\)|background[^;]*--(ok|warn|bad)-bg/
+
+test('no status colour used as a fill (audit 2026-11-15 #3)', () => {
+  assert.deepEqual(offenders(inComponents(/\.css$/), STATUS_FILL).filter((o) => !/atoms\/Dot\//.test(o)), [])
+})
+
+/** Typed arrows and carets used as UI (→ ← › ▲ ▼, or their CSS escapes): use an SVG icon from Icon (UI-17, UI-49). */
+const TYPED_ARROW = /[→←›▲▼]|\\2192|\\2190|\\203A|\\25B2|\\25BC/
+
+test('no typed arrow or caret glyphs in components (audit 2026-11-15 #7)', () => {
+  assert.deepEqual(offenders(inComponents(/\.(tsx|css)$/), TYPED_ARROW), [])
+})
+
+/** px sizes set by font-size or the font shorthand ("font: 600 10px/15px"). */
+const FONT_PX = /font(?:-size)?\s*:[^;]*?(\d+(?:\.\d+)?)px/g
+
+test('no text smaller than 11 px in component styles (audit 2026-11-15 #8)', () => {
+  const bad: string[] = []
+  for (const f of inComponents(/\.css$/)) {
+    read(f).split('\n').forEach((line, i) => {
+      for (const m of line.matchAll(FONT_PX)) if (Number(m[1]) < 11) bad.push(`${rel(f)}:${i + 1}  ${m[0]}`)
+    })
+  }
+  assert.deepEqual(bad, [])
+})
+
 test('one component per file (rules.md §1)', () => {
   const bad = inComponents(/\.tsx$/).filter((f) => (read(f).match(/^export (default )?(function|class) [A-Z]/gm) ?? []).length > 1).map(rel)
   assert.deepEqual(bad, [])

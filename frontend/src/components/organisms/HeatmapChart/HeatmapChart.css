@@ -1,8 +1,8 @@
 .heatmap { display: flex; flex-direction: column; gap: var(--gap-2); }
 .heatmap__svg { display: block; width: 100%; height: auto; max-height: 360px; }
 .heatmap__plot { fill: var(--bg-input); stroke: var(--border-strong); stroke-width: 1; }
-.heatmap__tick { fill: var(--text-tertiary); font: 10px var(--font-mono); }
-.heatmap__unit { fill: var(--text-tertiary); font: 10px var(--font-ui); }
+.heatmap__tick { fill: var(--text-tertiary); font: 11px var(--font-mono); }
+.heatmap__unit { fill: var(--text-tertiary); font: 11px var(--font-ui); }
 .heatmap__key { display: flex; align-items: center; gap: var(--gap-2); font-size: 11px; }
 .heatmap__ramp { width: 140px; height: 8px; border-radius: 2px; background: linear-gradient(90deg, var(--heat-0), var(--heat-1), var(--heat-2)); }
 .heatmap__key-label { color: var(--text-tertiary); }

@@ -21,7 +21,7 @@ type Props = { fields: readonly SystemField[]; note?: string }
 export function SystemStatus({ fields, note }: Props) {
   return (
     <section className="sys-status" aria-labelledby="sys-status-title">
-      <h2 id="sys-status-title" className="sys-status__title">ORCA system status</h2>
+      <h2 id="sys-status-title" className="sys-status__title">System status</h2>
       <dl className="sys-status__grid">
         {fields.map((f) => (
           <div key={f.label} className="sys-status__item" title={f.title}>

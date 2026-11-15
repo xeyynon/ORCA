@@ -18,3 +18,14 @@
   .globe-legend { background: var(--glass-bg-solid); -webkit-backdrop-filter: none; backdrop-filter: none; }
 }
 .globe-legend__cap { color: var(--text-tertiary); font-size: 11px; }
+.globe-legend__key { display: flex; flex-direction: column; gap: 4px; }
+.globe-legend__items { display: flex; flex-direction: column; gap: 4px; }
+/* Wide: the side panels key the colours, so only the marks and the cap line stay; nothing left means no legend. */
+@media (min-width: 1001px) {
+  .globe-legend__key { display: none; }
+  .globe-legend--key-only { display: none; }
+}
+/* Narrow: one compact wrapped row, so the key does not cover the top of the globe. */
+@media (max-width: 1000px) {
+  .globe-legend__items { flex-direction: row; flex-wrap: wrap; gap: 2px 12px; }
+}

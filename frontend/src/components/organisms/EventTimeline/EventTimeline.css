@@ -5,10 +5,10 @@
 .timeline__dot:focus-visible { outline: none; stroke: var(--focus-ring); stroke-width: 2.5; }
 .timeline__plot { fill: var(--bg-input); stroke: var(--border-strong); stroke-width: 1; }
 .timeline__grid { stroke: var(--chart-grid); stroke-width: 1; }
-.timeline__tick { fill: var(--text-tertiary); font: 10px var(--font-mono); }
-.timeline__unit { fill: var(--text-tertiary); font: 10px var(--font-ui); }
+.timeline__tick { fill: var(--text-tertiary); font: 11px var(--font-mono); }
+.timeline__unit { fill: var(--text-tertiary); font: 11px var(--font-ui); }
 .timeline__now { stroke: var(--text-secondary); stroke-width: 1; stroke-dasharray: 4 3; }
-.timeline__now-label { fill: var(--text-secondary); font: 10px var(--font-ui); }
+.timeline__now-label { fill: var(--text-secondary); font: 11px var(--font-ui); }
 .timeline__dot { stroke: var(--bg-input); stroke-width: 1; fill-opacity: 0.9; }
 .timeline__dot:hover { stroke: var(--text-primary); stroke-width: 1.5; }
 .timeline__dot--critical   { fill: var(--risk-critical); }

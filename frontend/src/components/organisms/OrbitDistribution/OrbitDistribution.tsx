@@ -3,6 +3,7 @@ import { REGIME_NAME, sharePercent } from '@/lib/homeStory'
 import { REGIMES } from '@/lib/orbit'
 import type { Regime } from '@/lib/orbit'
 import { Skeleton } from '../../atoms/Skeleton/Skeleton'
+import { ArrowLink } from '../../molecules/ArrowLink/ArrowLink'
 import { BlockHeader } from '../../molecules/BlockHeader/BlockHeader'
 import { EmptyState } from '../../molecules/EmptyState/EmptyState'
 import { BarList } from '../BarList/BarList'
@@ -31,7 +32,7 @@ export function OrbitDistribution({ counts, unclassified, total, failed, onOpen 
   return (
     <section className="home-panel orbit-dist" aria-labelledby="orbit-dist-title">
       <BlockHeader id="orbit-dist-title" title="Where are objects orbiting?" sub="The whole catalogue, by orbit regime."
-        action={<button type="button" className="home-panel__link" onClick={onOpen}>See the charts</button>} />
+        action={<ArrowLink label="See the charts" onClick={onOpen} />} />
       {items ? (
         <>
           <BarList items={items} ariaLabel="Catalogued objects by orbit regime" />

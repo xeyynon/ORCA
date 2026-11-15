@@ -11,12 +11,22 @@ export function integer(v: number | null | undefined): string {
   return isMissing(v) ? NO_DATA : Math.round(v).toLocaleString('en-US')
 }
 
-/** Pc spans many decades, so it is always scientific. Zero prints as 0. */
+const SUPERSCRIPT: Record<string, string> = { '-': '⁻', 0: '⁰', 1: '¹', 2: '²', 3: '³', 4: '⁴', 5: '⁵', 6: '⁶', 7: '⁷', 8: '⁸', 9: '⁹' }
+
+/** "10⁻⁵": a power of ten with a real superscript exponent and a true minus, readable as plain text everywhere. */
+export function powerOfTen(exp: number): string {
+  return `10${String(exp).split('').map((c) => SUPERSCRIPT[c] ?? c).join('')}`
+}
+
+/**
+ * Pc spans many decades, so it is always scientific, written one way everywhere: "2.83 × 10⁻⁵" (audit 2026-11-15 #5;
+ * it used to be "10^-5" in tables, a superscript in the report and "1e-4" in the method). Zero prints as 0.
+ */
 export function pc(v: number | null | undefined): string {
   if (isMissing(v)) return NO_DATA
   if (v === 0) return '0'
   const [mant, exp] = v.toExponential(2).split('e')
-  return `${mant} × 10^${Number(exp)}`
+  return `${mant} × ${powerOfTen(Number(exp))}`
 }
 
 /**

@@ -1,5 +1,5 @@
 .sys-status { display: flex; flex-direction: column; gap: var(--gap-3); padding-top: var(--gap-5); border-top: 1px solid var(--border); }
-.sys-status__title { margin: 0; color: var(--text-tertiary); font-size: var(--text-xs); font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; }
+.sys-status__title { margin: 0; color: var(--text-primary); font-size: var(--text-lg); font-weight: 600; }
 .sys-status__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: var(--gap-3) var(--gap-5); margin: 0; }
 .sys-status__item { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .sys-status__label { color: var(--text-tertiary); font-size: var(--text-sm); }

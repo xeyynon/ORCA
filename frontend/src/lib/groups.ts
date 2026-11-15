@@ -2,7 +2,8 @@ export interface GroupCount { label: string; count: number }
 
 /** Official-looking designators ("2021-050D", "1998-067A") have no constellation name. */
 const DESIGNATOR = /^\d{4}-\d{3}/
-export const UNNAMED = 'Unnamed (designator only)'
+/** Objects named only by their international designator ("2021-050D"): no constellation name to group by. */
+export const UNNAMED = 'Designator only'
 
 /**
  * A rough grouping key from an object name: the first word before a space or hyphen

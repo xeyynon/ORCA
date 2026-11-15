@@ -1,1 +1,7 @@
 .kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: var(--gap-3); }
+/* Phones: two columns, not five full-width cards stacked to 520 px before the first row of data (audit 2026-11-15). */
+@media (max-width: 520px) {
+  .kpi-row { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--gap-2); }
+  .kpi-row .kpi { padding: 10px 12px; }
+  .kpi-row .kpi__value { font-size: 20px; }
+}

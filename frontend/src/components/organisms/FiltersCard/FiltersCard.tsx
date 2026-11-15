@@ -1,3 +1,4 @@
+import { FieldNote } from '../../molecules/FieldNote/FieldNote'
 import type { CatalogSummaryResponse } from '@/api/types'
 import { ALTITUDE_BAND_COLOR } from '@/lib/chartColors'
 import { integer } from '@/lib/format'
@@ -52,6 +53,7 @@ export function FiltersCard({ prefs, onChange, summary, bandCounts, countsReady,
         disabled={!conjunctionActive}
         title={conjunctionActive ? undefined : 'No conjunction is active.'}
       />
+      {conjunctionActive ? null : <FieldNote>Available once a conjunction is shown on the globe.</FieldNote>}
     </Panel>
   )
 }

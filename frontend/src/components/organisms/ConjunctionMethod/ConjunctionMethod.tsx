@@ -1,4 +1,6 @@
 import type { ConjunctionMethod as Method } from '@/api/types'
+import { riskTierLines, RISK_TIER_SOURCE } from '@/lib/risk'
+import { RiskBadge } from '../../molecules/RiskBadge/RiskBadge'
 import { FactRow } from '../../molecules/FactRow/FactRow'
 import { FieldNote } from '../../molecules/FieldNote/FieldNote'
 import { GlossaryTerm } from '../../molecules/GlossaryTerm/GlossaryTerm'
@@ -34,7 +36,12 @@ export function ConjunctionMethod({ method, error, open }: Props) {
         <FactRow label="Closest approach">{method.closest_approach}</FactRow>
         <FactRow label="Probability of collision">{method.collision_probability}</FactRow>
         <FactRow label="Position uncertainty">{method.uncertainty}</FactRow>
-        <FactRow label="Risk tiers">{method.risk_tiers}</FactRow>
+        <FactRow label="Risk tiers">
+          <ul className="conj-method__tiers">
+            {riskTierLines().map((t) => <li key={t.level}><RiskBadge level={t.level} /> <span>{t.rule}</span></li>)}
+          </ul>
+          <span className="conj-method__tier-source">{RISK_TIER_SOURCE}</span>
+        </FactRow>
       </div>
       <ul className="conj-method__limits" aria-label="Limits">
         {method.limits.map((l) => <li key={l}>{l}</li>)}

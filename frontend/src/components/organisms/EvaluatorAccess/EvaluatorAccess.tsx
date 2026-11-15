@@ -1,7 +1,7 @@
 import { useId, useState } from 'react'
 import type { Credential } from '@/lib/evaluator'
+import { Button } from '../../atoms/Button/Button'
 import { Icon } from '../../atoms/Icon/Icon'
-import { IconButton } from '../../atoms/IconButton/IconButton'
 import { CredentialRow } from '../../molecules/CredentialRow/CredentialRow'
 import './EvaluatorAccess.css'
 
@@ -32,15 +32,13 @@ export function EvaluatorAccess({ credential, lastCopy, onCopy, onUse }: Props) 
       <div className="evaluator__box">
         <CredentialRow label="Username" value={credential.username}
           copied={lastCopy?.key === 'username' && lastCopy.ok} onCopy={() => onCopy('username', credential.username)} />
-        <div className="evaluator__join">
-          <span className="evaluator__use">
-            <IconButton label="Fill the sign-in form" onClick={onUse}><Icon name="login" size={14} /></IconButton>
-          </span>
-        </div>
+        <div className="evaluator__join" />
         <CredentialRow label="Password" value={credential.password} secret revealed={revealed}
           onToggleReveal={() => setRevealed((r) => !r)}
           copied={lastCopy?.key === 'password' && lastCopy.ok} onCopy={() => onCopy('password', credential.password)} />
       </div>
+      {/* A labelled action, not an icon sitting on the divider whose purpose could not be read (audit 2026-11-15). */}
+      <Button size="sm" onClick={onUse}><Icon name="login" size={14} /> Use these details</Button>
       <p className="evaluator__status" role="status">{status}</p>
     </section>
   )

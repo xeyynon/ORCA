@@ -15,7 +15,7 @@
  * token: the theme blocks in tokens.css out-rank base.css's :root override).
  */
 .globe-view__bar {
-  border: 1px solid var(--glass-border);
+  /* Elevation said once (playbook UI-47): the shadow lifts it off the busy globe, so no border as well. */
   border-radius: var(--radius-md);
   background: var(--glass-bg);
   -webkit-backdrop-filter: blur(var(--glass-blur));
