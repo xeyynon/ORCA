@@ -4,7 +4,7 @@ import { TOUR_STEPS, TOUR_STORAGE_KEY, availableSteps, moveStep, reconcileStep, 
 import { placeCard, spotlightRect, SHEET_BELOW_PX } from './tourPlacement.ts'
 
 test('the tour has the five steps in order, each with a target and short copy', () => {
-  assert.deepEqual(TOUR_STEPS.map((s) => s.id), ['how', 'views', 'search', 'globe', 'conjunctions', 'menu'])
+  assert.deepEqual(TOUR_STEPS.map((s) => s.id), ['how', 'views', 'search', 'globe', 'conjunctions', 'ask', 'menu'])
   for (const s of TOUR_STEPS) {
     assert.ok(s.target.length > 0 && s.title.length > 0, s.id)
     // one or two sentences (the views step lists the six views in one, then the keys)
@@ -29,10 +29,10 @@ test('the copy names the keys the app really binds', () => {
 
 test('a step whose target is missing is skipped, never pointed at nothing', () => {
   const shown = availableSteps(TOUR_STEPS, (s) => s.id !== 'search')
-  assert.deepEqual(shown.map((s) => s.id), ['how', 'views', 'globe', 'conjunctions', 'menu'])
-  assert.equal(stepLabel(1, shown.length), 'Step 2 of 5')
+  assert.deepEqual(shown.map((s) => s.id), ['how', 'views', 'globe', 'conjunctions', 'ask', 'menu'])
+  assert.equal(stepLabel(1, shown.length), 'Step 2 of 6')
   // Off the home page the hero is not there, so "How ORCA works" is skipped.
-  assert.deepEqual(availableSteps(TOUR_STEPS, (s) => s.id !== 'how').map((s) => s.id), ['views', 'search', 'globe', 'conjunctions', 'menu'])
+  assert.deepEqual(availableSteps(TOUR_STEPS, (s) => s.id !== 'how').map((s) => s.id), ['views', 'search', 'globe', 'conjunctions', 'ask', 'menu'])
   assert.deepEqual(availableSteps(TOUR_STEPS, () => false), [])
 })
 
@@ -51,7 +51,7 @@ test('when the steps on screen change, the current step is kept, or the next one
   const without = (...ids: string[]) => all.filter((s) => !ids.includes(s.id))
   assert.equal(reconcileStep('globe', all, without('search')), 2)
   assert.equal(reconcileStep('search', all, without('search')), 2) // globe came next
-  assert.equal(reconcileStep('menu', all, without('menu')), 4) // nothing after it: the last remaining
+  assert.equal(reconcileStep('menu', all, without('menu')), 5) // nothing after it: the last remaining
   assert.equal(reconcileStep('views', all, []), null)
 })
 

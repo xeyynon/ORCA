@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import type { ConjunctionEvent } from '@/api/types'
 import { cx } from '@/lib/cx'
-import { compact, pc } from '@/lib/format'
+import { compact, pc, plural } from '@/lib/format'
 import { pairKey } from '@/lib/pair'
 import { riskTone } from '@/lib/risk'
 import { decadeTicks, linearScale, logScale } from '@/lib/scale'
@@ -18,7 +18,8 @@ type Props = {
 }
 
 const W = 760
-const H = 220
+// 160 (was 220): the points sit in a narrow band, so the extra height was empty space (declutter plan 2026-11-15).
+const H = 160
 const PAD = { l: 52, r: 14, t: 10, b: 30 }
 const X_TICKS = 5
 
@@ -87,7 +88,7 @@ export function EventTimeline({ events, now, selectedKey = null, onSelect }: Pro
         <text className="timeline__unit" x={(PAD.l + W - PAD.r) / 2} y={H - 2} textAnchor="middle">time of closest approach (UTC)</text>
         <text className="timeline__unit" x={11} y={(PAD.t + H - PAD.b) / 2} textAnchor="middle" transform={`rotate(-90 11 ${(PAD.t + H - PAD.b) / 2})`}>probability of collision</text>
       </svg>
-      {plot.skipped > 0 ? <div className="timeline__note">{plot.skipped} event(s) with a non-positive probability are not plotted (no log).</div> : null}
+      {plot.skipped > 0 ? <div className="timeline__note">{plural(plot.skipped, 'event')} with a non-positive probability {plot.skipped === 1 ? 'is' : 'are'} not plotted (no log).</div> : null}
     </div>
   )
 }

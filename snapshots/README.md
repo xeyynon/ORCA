@@ -151,3 +151,83 @@ The Reports view (MD/design_system_v2.md §6).
 | [06-sample-report.pdf](12-reports-2026-11-07/06-sample-report.pdf) | A generated report (all four sections, stored example run): 3 A4 pages, each with the marking and a page number. (The copy pushed before 2026-11-07 21:15 was mistakenly the screen layout: the test browser was left forced to screen media.) |
 | [07-header-marking.png](12-reports-2026-11-07/07-header-marking.png) | The report opens with its handling marking, EDUCATIONAL USE ONLY · NOT FOR OPERATIONAL DECISIONS, in centred spaced capitals, the way official documents mark their use. No box, no tint, no side stripe (rules.md §11.21) |
 | [08-printed-page-2.png](12-reports-2026-11-07/08-printed-page-2.png) | A printed page: the marking at the head of every page, the table header repeated after a page break, "Page 2 of 3" at the foot |
+
+## 13-polish-2026-11-15
+
+After the 2026-11-15 audit's polish pass (MD/ux_audit_2026-11-15.md §9). The "before" set is MD/ux_audit/2026-11-15/.
+
+| File | What it shows |
+|---|---|
+| [01-home-1440.png](13-polish-2026-11-15/01-home-1440.png) | Headline dated and in the past tense on the stale catalogue; no kicker, no glow |
+| [02-overview-1440.png](13-polish-2026-11-15/02-overview-1440.png) | 22 px page title; regime as plain text; the count line above the table |
+| [03-analytics-1440.png](13-polish-2026-11-15/03-analytics-1440.png) | Chart titles as headings with visible notes; "2,211 km", "61.6°"; one-band freshness said in words; neutral constellation bars |
+| [04-conjunctions-1440.png](13-polish-2026-11-15/04-conjunctions-1440.png) | No info icon on notes; the method in two columns |
+| [05-data-1440.png](13-polish-2026-11-15/05-data-1440.png) | "TLE 36.6 d old" as dot + word; "Succeeded"; the real API origin |
+| [06-globe-1440.png](13-polish-2026-11-15/06-globe-1440.png) | Colour key only in the side panels; the disabled switch says why; "Live" as dot + word |
+| [07-overview-390.png](13-polish-2026-11-15/07-overview-390.png) | Phone: all six tabs fit (inactive icon-only); KPIs in two columns |
+| [08-globe-390.png](13-polish-2026-11-15/08-globe-390.png) | Phone: compact colour key over the globe |
+| [09-home-approaches-1440.png](13-polish-2026-11-15/09-home-approaches-1440.png) | The run window and "That window ended 7 days ago"; TCAs marked past; Pc as 2.83 × 10⁻⁵; risk as dot + word |
+| [10-signin-1440.png](13-polish-2026-11-15/10-signin-1440.png) | Sign-in keeps its animated debris scene and glass card (owner-approved exception, DECISIONS.md 2026-11-15); the disabled button says why; "Use these details" replaces the icon on the divider |
+| [11-signin-390.png](13-polish-2026-11-15/11-signin-390.png) | The same on a phone |
+| [12-ask-button-1440.png](13-polish-2026-11-15/12-ask-button-1440.png) | Ask ORCA up front: a labelled button beside search (owner, 2026-11-15), no longer a menu row; pressed while the panel is open |
+| [13-ask-button-390.png](13-polish-2026-11-15/13-ask-button-390.png) | Phone: the same as a 44 px icon button |
+| [14-home-api-down.png](13-polish-2026-11-15/14-home-api-down.png) | API down (requests blocked in a test tab): Home says so on its first screen and the headline is dated, not "right now"; both clear by themselves when the API answers |
+| [15-globe-constellation-1440.png](13-polish-2026-11-15/15-globe-constellation-1440.png) | Globe coloured by constellation (owner's choice): Starlink, OneWeb, Kuiper, Qianfan, Other, keyed in the legend |
+| [16-globe-decluttered-1440.png](13-polish-2026-11-15/16-globe-decluttered-1440.png) | Globe decluttered (owner: "too congested"): one quiet side panel instead of three cards; conjunction-only controls appear only with a conjunction; the not-drawn count joins the drawing line |
+| [17-globe-panel-hidden-1440.png](13-polish-2026-11-15/17-globe-panel-hidden-1440.png) | The side panel hidden ("‹" on the panel, "› Panel" to bring it back): the globe gets the whole width |
+| [18-globe-legend-right-1440.png](13-polish-2026-11-15/18-globe-legend-right-1440.png) | The drawing line moved right (owner): stacked just above the playback bar, same right edge |
+| [19-globe-details-above-foot.png](13-polish-2026-11-15/19-globe-details-above-foot.png) | Fix: selection details stop above the drawing line and playback bar at any height (the stack is measured), instead of running under them |
+| [22-statusbar-1440.png](13-polish-2026-11-15/22-statusbar-1440.png) | Status bar: health on the left (API, data age as the median, refreshed-ago; one click opens Data; no repeated object count), camera and clock on the right |
+| [23-globe-no-breadcrumbs-1440.png](13-polish-2026-11-15/23-globe-no-breadcrumbs-1440.png) | No breadcrumb strip (owner): the conjunction card already names the pair and closes it; the card fits without scrolling |
+| [21-globe-conjunction-no-scroll-1440.png](13-polish-2026-11-15/21-globe-conjunction-no-scroll-1440.png) | Conjunction card without scrolling (owner): one card instead of two, facts in two columns, the reason in place of a greyed button, the legend in rows; measured to fit at 1920x1080, 1440x900, 1366x768 and 1280x720 |
+| [20-globe-conjunction-1280x720.png](13-polish-2026-11-15/20-globe-conjunction-1280x720.png) | The same at 1280x720 |
+| [24-globe-floating-statusbar-1440.png](13-polish-2026-11-15/24-globe-floating-statusbar-1440.png) | All status readings in one line on the left; on the Globe the bar floats at the bottom left and the legend and playback bar drop into the freed bottom-right corner (owner) |
+| [25-globe-controls-hidden-1440.png](13-polish-2026-11-15/25-globe-controls-hidden-1440.png) | Legend and playback hidden (owner): a pill keeps the simulated time and Live / Paused / Playing on screen; click it to bring them back |
+| [26-globe-controls-shown-1440.png](13-polish-2026-11-15/26-globe-controls-shown-1440.png) | Shown: the hide control ("⌄") at the top right of the legend and playback stack |
+| [27-globe-under-topbar-1440.png](13-polish-2026-11-15/27-globe-under-topbar-1440.png) | No band behind the top bar on the Globe (owner): the globe runs under it and the three capsules float over space |
+
+## 14-declutter-2026-11-15
+
+Every page after the declutter pass (`MD/declutter_plan_2026-11-15.md`); the "before" shots are in `MD/ux_audit/2026-11-15-declutter/`. All 1440 px, dark, unless named.
+
+| File | What it shows |
+|---|---|
+| [after-home.png](14-declutter-2026-11-15/after-home.png) | Three KPI cards; API state as the last row of Data quality; no System status section |
+| [after-overview.png](14-declutter-2026-11-15/after-overview.png) | Three KPI cards, 50 rows a page, no regime donut |
+| [after-overview-selected.png](14-declutter-2026-11-15/after-overview-selected.png) | An object open: the card column stays in view |
+| [after-overview-light.png](14-declutter-2026-11-15/after-overview-light.png) | Light theme; "Compared with the catalog" as a read-only line with the rank in words |
+| [after-object-standing.png](14-declutter-2026-11-15/after-object-standing.png) | The comparison close up (was slider knobs) |
+| [after-conjunctions-idle.png](14-declutter-2026-11-15/after-conjunctions-idle.png) | Before a search: one-line run-time note |
+| [after-conjunctions-result.png](14-declutter-2026-11-15/after-conjunctions-result.png) | Saved run, a pair open: caveats hold the saved-run note, 25 rows a page, the pair card beside the table |
+| [after-conjunctions-360.png](14-declutter-2026-11-15/after-conjunctions-360.png) | 360 px: the pager and the card stacked under the table |
+| [after-analytics.png](14-declutter-2026-11-15/after-analytics.png) | No KPI row; scope in the subtitle only; one-line notes |
+| [before-data-1440.png](14-declutter-2026-11-15/before-data-1440.png) | Data before: cards hugging the left (owner) |
+| [after-data-1440.png](14-declutter-2026-11-15/after-data-1440.png) | Data centred with its title; API under "For developers" |
+| [after-data-360.png](14-declutter-2026-11-15/after-data-360.png) | Data at 360 px |
+| [after-health.png](14-declutter-2026-11-15/after-health.png) | The API health page (owner: a page instead of raw JSON) |
+| [health-1440.png](14-declutter-2026-11-15/health-1440.png) | The same with "Raw response (JSON)" open: copy, open /health, API docs |
+| [after-health-light.png](14-declutter-2026-11-15/after-health-light.png) | Light theme |
+| [after-health-offline.png](14-declutter-2026-11-15/after-health-offline.png) | The API blocked: "The API is not answering", the error, the last good response kept |
+| [after-reports.png](14-declutter-2026-11-15/after-reports.png) | Reports: the builder no longer repeats the run line |
+
+## 14-report-figures-2026-11-15
+
+Figures for the final report, retaken after the declutter pass (same names, same 1440x900 or 390x844 framing). Conjunction figures come from a live 1-day search run at 17:39 UTC on 2026-11-15 (262,303 approaches closer than 10 km; 9 critical, 640 high). `01-sign-in` is the earlier capture (the sign-in page did not change). There is no figure 05.
+
+| File | What it shows |
+|---|---|
+| [01-sign-in-1440.png](14-report-figures-2026-11-15/01-sign-in-1440.png) | Sign in |
+| [02-home-1440.png](14-report-figures-2026-11-15/02-home-1440.png) | Home: headline, three KPI cards |
+| [03-home-lower-1440.png](14-report-figures-2026-11-15/03-home-lower-1440.png) | Home, lower: five worst approaches, orbit regimes, Data quality with the API row |
+| [04-overview-1440.png](14-report-figures-2026-11-15/04-overview-1440.png) | Overview with an object open |
+| [06-conjunctions-result-1440.png](14-report-figures-2026-11-15/06-conjunctions-result-1440.png) | Conjunctions: the answer, risk tiers, caveats |
+| [07-conjunctions-table-1440.png](14-report-figures-2026-11-15/07-conjunctions-table-1440.png) | The timeline and the table |
+| [08-pair-detail-1440.png](14-report-figures-2026-11-15/08-pair-detail-1440.png) | A pair open beside the table (with Mahalanobis distance and hard-body radius from the live re-assessment) |
+| [09-globe-conjunction-1440.png](14-report-figures-2026-11-15/09-globe-conjunction-1440.png) | The same pair on the Globe |
+| [10-analytics-1440.png](14-report-figures-2026-11-15/10-analytics-1440.png) | Analytics |
+| [11-data-1440.png](14-report-figures-2026-11-15/11-data-1440.png) | Data, centred |
+| [12-reports-1440.png](14-report-figures-2026-11-15/12-reports-1440.png) | Reports: builder and document |
+| [13-ask-orca-1440.png](14-report-figures-2026-11-15/13-ask-orca-1440.png) | Ask ORCA answering "Any close approaches?" |
+| [14-phone-home-390.png](14-report-figures-2026-11-15/14-phone-home-390.png) | Home on a phone |
+| [15-phone-globe-390.png](14-report-figures-2026-11-15/15-phone-globe-390.png) | Globe on a phone with a conjunction open |
+| [16-api-health-1440.png](14-report-figures-2026-11-15/16-api-health-1440.png) | API health with the raw JSON open (new) |

@@ -12,7 +12,7 @@ type Props = {
   goLabel: Record<KpiId, string>
 }
 
-const ICON: Record<KpiId, IconName> = { objects: 'globe', pairs: 'orbit', high: 'alert', critical: 'target' }
+const ICON: Record<KpiId, IconName> = { pairs: 'orbit', high: 'alert', critical: 'target' }
 
 /**
  * "Orbital intelligence": the four headline figures as aligned cards, each a big tabular number, a label, and the run it
@@ -27,11 +27,12 @@ export function HomeKpis({ kpis, onOpen, goLabel }: Props) {
           <li key={k.id} className="home-kpis__item">
             <button type="button" className="home-kpis__card" onClick={() => onOpen(k.id)} title={goLabel[k.id]}
               aria-label={`${k.label}: ${k.value ?? 'loading'}. ${k.context}. ${goLabel[k.id]}`}>
+              <span className="home-kpis__go" aria-hidden="true"><Icon name="arrow-right" size={14} /></span>
               <span className="home-kpis__head">
                 <span className="home-kpis__icon" aria-hidden="true"><Icon name={ICON[k.id]} size={14} /></span>
                 <span className="home-kpis__label">{k.label}</span>
               </span>
-              <span className="home-kpis__value">{k.value ?? <Skeleton width="5ch" height="0.9em" />}</span>
+              <span className={k.tone ? `home-kpis__value home-kpis__value--${k.tone}` : 'home-kpis__value'}>{k.value ?? <Skeleton width="5ch" height="0.9em" />}</span>
               <span className="home-kpis__context">{k.context}</span>
             </button>
           </li>

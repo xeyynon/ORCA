@@ -45,13 +45,10 @@ export function FiltersCard({ prefs, onChange, summary, bandCounts, countsReady,
           />
         ))}
       </div>
-      <CheckboxRow
-        label="Show only conjunction objects"
-        checked={prefs.onlyConjunction}
-        onChange={(v) => onChange({ onlyConjunction: v })}
-        disabled={!conjunctionActive}
-        title={conjunctionActive ? undefined : 'No conjunction is active.'}
-      />
+      {/* Only while a conjunction is on the globe (see ViewOptionsCard). */}
+      {conjunctionActive ? (
+        <CheckboxRow label="Show only conjunction objects" checked={prefs.onlyConjunction} onChange={(v) => onChange({ onlyConjunction: v })} />
+      ) : null}
     </Panel>
   )
 }

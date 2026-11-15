@@ -1,3 +1,4 @@
+import type { GlobeConstellation } from './groups'
 import type { ObjectType } from '@/api/types'
 import type { AltitudeBand, InclinationClassId, Regime } from './orbit'
 import type { TleAgeTone } from './tleAge'
@@ -25,6 +26,15 @@ export const OBJECT_TYPE_COLOR: Record<ObjectType, string> = {
   payload: 'var(--cat-1)',
   rocket_body: 'var(--cat-5)',
   debris: 'var(--cat-3)',
+}
+
+/** Globe colouring by constellation: four categorical hues, and a quiet grey for everything else. */
+export const CONSTELLATION_COLOR: Record<GlobeConstellation, string> = {
+  STARLINK: 'var(--cat-1)',
+  ONEWEB: 'var(--cat-2)',
+  KUIPER: 'var(--cat-5)',
+  QIANFAN: 'var(--cat-4)',
+  OTHER: 'var(--text-tertiary)',
 }
 
 export const INCLINATION_COLOR: Record<InclinationClassId, string> = {

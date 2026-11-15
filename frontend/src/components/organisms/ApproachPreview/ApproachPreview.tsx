@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import type { ConjunctionEvent } from '@/api/types'
 import { fixed, pc } from '@/lib/format'
+import { isPast } from '@/lib/homeBoard'
 import { GLOSSARY } from '@/lib/glossary'
 import { pairKey } from '@/lib/pair'
 import { riskRank } from '@/lib/risk'
@@ -8,6 +9,7 @@ import { sortBy } from '@/lib/sort'
 import { formatUtc } from '@/lib/time'
 import { Mono } from '../../atoms/Mono/Mono'
 import { Skeleton } from '../../atoms/Skeleton/Skeleton'
+import { ArrowLink } from '../../molecules/ArrowLink/ArrowLink'
 import { BlockHeader } from '../../molecules/BlockHeader/BlockHeader'
 import { EmptyState } from '../../molecules/EmptyState/EmptyState'
 import { RiskBadge } from '../../molecules/RiskBadge/RiskBadge'
@@ -24,6 +26,9 @@ type Props = {
   /** Which run and window the rows come from, e.g. "Stored example run, 1-day window from …". */
   provenance: string | null
   reportKm: number | null
+  /** When the run's approaches happen and whether that is over ("… That window ended 8 days ago."); null while loading. */
+  windowLine: string | null
+  now: Date
   onOpen: (e: ConjunctionEvent) => void
   onViewAll: () => void
 }
@@ -40,7 +45,7 @@ const SORT_KEYS: Record<string, (e: ConjunctionEvent) => number | string> = {
  * (Section 03 of the homepage spec). Never sample data: while the run loads the rows are skeletons, if it cannot load
  * that is said, and a run that found nothing is a result.
  */
-export function ApproachPreview({ status, events, provenance, reportKm, onOpen, onViewAll }: Props) {
+export function ApproachPreview({ status, events, provenance, reportKm, windowLine, now, onOpen, onViewAll }: Props) {
   const [sortId, setSortId] = useState('risk')
   const [sortDir, setSortDir] = useState<SortDir>('asc')
   const rows = useMemo(() => sortBy(events, SORT_KEYS[sortId] ?? SORT_KEYS.risk, sortDir), [events, sortId, sortDir])
@@ -51,7 +56,7 @@ export function ApproachPreview({ status, events, provenance, reportKm, onOpen, 
 
   const columns: Column<ConjunctionEvent>[] = [
     { id: 'pair', label: 'Object pair', render: (e) => <span className="approach__pair">{e.sat1_name} <Mono muted>×</Mono> {e.sat2_name}</span> },
-    { id: 'tca', label: 'TCA', hint: GLOSSARY.TCA, sortable: true, render: (e) => <Mono>{formatUtc(e.tca)}</Mono> },
+    { id: 'tca', label: 'TCA', hint: GLOSSARY.TCA, sortable: true, render: (e) => <span><Mono>{formatUtc(e.tca)}</Mono>{isPast(e.tca, now) ? <> <Mono muted>(past)</Mono></> : null}</span> },
     { id: 'miss', label: 'Miss distance', hint: GLOSSARY['miss distance'], sortable: true, align: 'right', render: (e) => <ValueUnit value={fixed(e.min_distance_km, 3)} unit="km" /> },
     { id: 'pc', label: 'Pc', hint: GLOSSARY.Pc, sortable: true, align: 'right', render: (e) => <Mono>{pc(e.probability_of_collision)}</Mono> },
     { id: 'risk', label: 'Risk', sortable: true, render: (e) => <RiskBadge level={e.risk_level} /> },
@@ -62,8 +67,8 @@ export function ApproachPreview({ status, events, provenance, reportKm, onOpen, 
       <BlockHeader
         id="approach-title"
         title="Close approach intelligence"
-        sub="Potential encounters identified through orbital screening."
-        action={<button type="button" className="approach__all" onClick={onViewAll}>View all conjunctions</button>}
+        sub={windowLine ?? 'Potential encounters identified through orbital screening.'}
+        action={<ArrowLink label="View all conjunctions" onClick={onViewAll} />}
       />
       {status === 'loading' ? (
         <div className="approach__loading" aria-busy="true" aria-label="Loading the close approaches">

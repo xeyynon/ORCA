@@ -5,7 +5,9 @@ import { Line2 } from 'three/examples/jsm/lines/Line2.js'
 import { LineGeometry } from 'three/examples/jsm/lines/LineGeometry.js'
 import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial.js'
 import type { ObjectType } from '@/api/types'
-import { ALTITUDE_BAND_COLOR, OBJECT_TYPE_COLOR } from '@/lib/chartColors'
+import { ALTITUDE_BAND_COLOR, CONSTELLATION_COLOR, OBJECT_TYPE_COLOR } from '@/lib/chartColors'
+import { GLOBE_CONSTELLATIONS, globeConstellation } from '@/lib/groups'
+import type { GlobeConstellation } from '@/lib/groups'
 import {
   EARTH_RADIUS_KM, EARTH_ROTATION_RAD_S, SCENE_UNIT_KM,
   cameraGeo, eciToScene, nearestIndex, occludedXYZ,
@@ -31,7 +33,7 @@ export interface Snapshot {
   rate: number
 }
 
-export type ColorMode = 'altitude' | 'type'
+export type ColorMode = 'altitude' | 'type' | 'constellation'
 export interface ConjunctionOverlay { a: string; b: string; /** a colour token reference such as "var(--risk-high)" */ color: string }
 export interface LabelSpec { id: string; text: string }
 
@@ -128,6 +130,7 @@ export class EarthScene {
   private colorMode: ColorMode = 'altitude'
   private readonly bandColors = new Map<AltitudeBand, THREE.Color>()
   private readonly typeColors = new Map<ObjectType, THREE.Color>()
+  private readonly constellationColors = new Map<GlobeConstellation, THREE.Color>()
   private hoveredId: string | null = null
   private autoRotate = true
   private focusTarget: THREE.Vector3 | null = null
@@ -269,6 +272,7 @@ export class EarthScene {
     const light = document.documentElement.dataset.theme === 'light'
     for (const band of ALTITUDE_BANDS) this.bandColors.set(band, new THREE.Color(readColorRef(ALTITUDE_BAND_COLOR[band], '#cbd5e1')))
     for (const type of OBJECT_TYPES) this.typeColors.set(type, new THREE.Color(readColorRef(OBJECT_TYPE_COLOR[type], '#cbd5e1')))
+    for (const g of GLOBE_CONSTELLATIONS) this.constellationColors.set(g, new THREE.Color(readColorRef(CONSTELLATION_COLOR[g], '#cbd5e1')))
     this.rebuildColors()
     // Selection is the theme's primary text colour (white on dark): an accent blue would blend into the LEO band colour.
     ;(this.selectedPoints.material as THREE.PointsMaterial).color.set(readToken('--text-primary', '#ffffff'))
@@ -435,6 +439,8 @@ export class EarthScene {
       const o = s.objects[i]
       const c = this.colorMode === 'type'
         ? this.typeColors.get(o.type)
+        : this.colorMode === 'constellation'
+        ? this.constellationColors.get(globeConstellation(o.name))
         : this.bandColors.get(altitudeBand(Math.hypot(o.r[0], o.r[1], o.r[2]) - EARTH_RADIUS_KM))
       buf[i * 3] = c?.r ?? 0.8; buf[i * 3 + 1] = c?.g ?? 0.8; buf[i * 3 + 2] = c?.b ?? 0.8
     }

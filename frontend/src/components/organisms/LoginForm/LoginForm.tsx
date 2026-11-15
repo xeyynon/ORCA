@@ -59,6 +59,8 @@ export function LoginForm({ initialUsername, busy, failure, prefill = null, onSu
       <TextField label="Password" name="password" type="password" autoComplete="current-password" inputRef={passwordRef} value={password} onChange={setPassword} disabled={busy} />
       {failure ? <Callout tone="bad" title={TITLE[failure.kind]}>{failure.message}</Callout> : null}
       <Button variant="primary" type="submit" disabled={busy || !username.trim() || !password}>{busy ? 'Signing in…' : 'Sign in'}</Button>
+      {/* A disabled control says why (playbook UI-09). */}
+      {!busy && (!username.trim() || !password) ? <p className="login-form__hint">Enter {!username.trim() && !password ? 'a username and password' : !username.trim() ? 'a username' : 'the password'} to sign in.</p> : null}
     </form>
   )
 }

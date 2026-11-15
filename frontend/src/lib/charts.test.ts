@@ -78,3 +78,13 @@ test('catColor cycles through the five categorical tokens', () => {
   assert.equal(catColor(4), 'var(--cat-5)')
   assert.equal(catColor(5), 'var(--cat-1)')
 })
+
+test('the Globe constellation colouring groups by the same naming rule as the Analytics chart', async () => {
+  const { globeConstellation } = await import('./groups.ts')
+  assert.equal(globeConstellation('STARLINK-32032'), 'STARLINK')
+  assert.equal(globeConstellation('ONEWEB-0123'), 'ONEWEB')
+  assert.equal(globeConstellation('KUIPER-00388'), 'KUIPER')
+  assert.equal(globeConstellation('QIANFAN-89'), 'QIANFAN')
+  assert.equal(globeConstellation('ISS (ZARYA)'), 'OTHER')
+  assert.equal(globeConstellation('2021-050D'), 'OTHER')
+})

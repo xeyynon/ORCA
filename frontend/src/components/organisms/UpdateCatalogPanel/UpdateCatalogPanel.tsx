@@ -38,7 +38,7 @@ export function UpdateCatalogPanel({ phase, before, after, error, apiOnline, onS
         <EmptyState kind="awaiting" title="Fetch started">Waiting for the stored object count to change. The fetch is ~2.7 MB and can take a minute; the API gives no completion event, so this page polls.</EmptyState>
       ) : null}
       {phase === 'changed' ? (
-        <EmptyState kind="none" title="Catalog updated">Objects stored: {integer(before)} → {integer(after)}.</EmptyState>
+        <EmptyState kind="none" title="Catalog updated">Objects stored: {integer(after)}, was {integer(before)}.</EmptyState>
       ) : null}
       {phase === 'unchanged' ? (
         <EmptyState kind="error" title={`No change observed after ${UPDATE_GIVE_UP_MS / 1000} s`}>

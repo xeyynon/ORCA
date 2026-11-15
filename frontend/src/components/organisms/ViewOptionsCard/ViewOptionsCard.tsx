@@ -12,21 +12,21 @@ type Props = {
   conjunctionActive: boolean
 }
 
-const NO_CONJUNCTION = 'No conjunction is active. Use “Show both objects on the globe” in the Conjunctions view.'
-
 export function ViewOptionsCard({ prefs, onChange, conjunctionActive }: Props) {
   return (
     <Panel title="View options">
       <Switch label="Show satellites" checked={prefs.showSatellites} onChange={(v) => onChange({ showSatellites: v })} title="Draw the catalog objects. Selected objects are always drawn." />
       <Switch label="Show orbital paths" checked={prefs.showOrbits} onChange={(v) => onChange({ showOrbits: v })} title="One full orbit for each selected object" />
-      <Switch label="Show conjunction" checked={prefs.showConjunction} onChange={(v) => onChange({ showConjunction: v })} disabled={!conjunctionActive} title={conjunctionActive ? undefined : NO_CONJUNCTION} />
+      {/* Only while a conjunction is on the globe: a control that cannot apply, and the note explaining why, crowded the
+          panel the rest of the time (owner, 2026-11-15: "too congested"). */}
+      {conjunctionActive ? <Switch label="Show conjunction" checked={prefs.showConjunction} onChange={(v) => onChange({ showConjunction: v })} /> : null}
       <Switch label="Label selected objects" checked={prefs.labelSelected} onChange={(v) => onChange({ labelSelected: v })} />
       <div className="view-options__color">
         <Label>Colour objects by</Label>
         <SegmentedControl<ColorBy>
           ariaLabel="Colour objects by"
           value={prefs.colorBy}
-          options={[{ value: 'altitude', label: 'Altitude' }, { value: 'type', label: 'Object type' }]}
+          options={[{ value: 'altitude', label: 'Altitude' }, { value: 'type', label: 'Type' }, { value: 'constellation', label: 'Constellation' }]}
           onChange={(colorBy) => onChange({ colorBy })}
         />
       </div>

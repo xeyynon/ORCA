@@ -4,6 +4,7 @@ import { fetchSummary, freshness } from '@/lib/homeBoard'
 import { formatUtc } from '@/lib/time'
 import { Dot } from '../../atoms/Dot/Dot'
 import { Skeleton } from '../../atoms/Skeleton/Skeleton'
+import { ArrowLink } from '../../molecules/ArrowLink/ArrowLink'
 import { BlockHeader } from '../../molecules/BlockHeader/BlockHeader'
 import './DataQuality.css'
 
@@ -17,21 +18,24 @@ type Props = {
   /** The API is not answering: the fetch outcome is unknown, not "none". */
   offline: boolean
   catalogFailed: boolean
+  /** The API's state, folded in from the old System status section (declutter plan 2026-11-15). */
+  apiStatus: 'checking' | 'online' | 'offline'
   onOpen: () => void
 }
 
 /**
  * "Data quality": how old the orbital data is and how the last fetch from the source went. The age of the data and the
- * time of a refresh are different things, and this panel is about the first (the refresh time is in System status).
+ * time of a refresh are different things, and this panel is about the first. The API's state is its last row: a
+ * connected API means ORCA can answer, not that the data is fresh, which is why it sits under the age.
  */
-export function DataQuality({ medianAgeDays, newestAgeDays, measuredOver, storedTotal, lastFetch, offline, catalogFailed, onOpen }: Props) {
+export function DataQuality({ medianAgeDays, newestAgeDays, measuredOver, storedTotal, lastFetch, offline, catalogFailed, apiStatus, onOpen }: Props) {
   const fresh = medianAgeDays !== null ? freshness(medianAgeDays) : null
   const fetch = fetchSummary(lastFetch)
   const subset = measuredOver !== null && storedTotal !== null && measuredOver < storedTotal
   return (
     <section className="home-panel data-quality" aria-labelledby="data-quality-title">
       <BlockHeader id="data-quality-title" title="Data quality" sub="How old the orbit data is, and where it comes from."
-        action={<button type="button" className="home-panel__link" onClick={onOpen}>Data and refresh</button>} />
+        action={<ArrowLink label="Data and refresh" onClick={onOpen} />} />
       <dl className="data-quality__list">
         <div className="data-quality__row data-quality__row--lead">
           <dt>Median TLE age</dt>
@@ -60,6 +64,10 @@ export function DataQuality({ medianAgeDays, newestAgeDays, measuredOver, stored
               <span className="data-quality__word"><Dot tone={fetch.tone} /> {fetch.text}{lastFetch?.at ? <span className="data-quality__when"> · {formatUtc(lastFetch.at)}</span> : null}</span>
             )}
           </dd>
+        </div>
+        <div className="data-quality__row">
+          <dt>ORCA API</dt>
+          <dd><span className="data-quality__word"><Dot tone={apiStatus === 'online' ? 'ok' : apiStatus === 'offline' ? 'bad' : 'warn'} /> {apiStatus === 'online' ? 'Connected' : apiStatus === 'offline' ? 'Not answering' : 'Checking'}</span></dd>
         </div>
       </dl>
     </section>

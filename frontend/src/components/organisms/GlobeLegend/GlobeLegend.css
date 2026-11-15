@@ -1,8 +1,10 @@
 /* Glass, as the playback bar (GlobeView.css): chrome over the globe; alpha measured in lib/glassContrast.test.ts. */
 .globe-legend {
+  /* Everything flows in wrapped rows; the heading, the colour key and the drawing line each take a full row. */
   display: flex;
-  flex-direction: column;
-  gap: 4px;
+  flex-flow: row wrap;
+  align-items: center;
+  gap: 2px 12px;
   padding: 8px 10px;
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
@@ -18,3 +20,14 @@
   .globe-legend { background: var(--glass-bg-solid); -webkit-backdrop-filter: none; backdrop-filter: none; }
 }
 .globe-legend__cap { color: var(--text-tertiary); font-size: 11px; }
+.globe-legend__key { display: flex; flex-direction: column; gap: 4px; }
+.globe-legend__items { display: flex; flex-direction: column; gap: 4px; }
+/* Wide: the side panels key the colours, so only the marks and the cap line stay; nothing left means no legend. */
+@media (min-width: 1001px) {
+  .globe-legend:not(.globe-legend--own-key) .globe-legend__key { display: none; }
+  .globe-legend--key-only { display: none; }
+}
+/* The key flows in wrapped rows at every width (five colours in two lines, not five), so the legend and the playback
+   bar leave the selection card room above them (owner, 2026-11-15: no scrolling). */
+.globe-legend__items { flex-direction: row; flex-wrap: wrap; gap: 2px 12px; }
+.globe-legend__key, .globe-legend__cap { flex-basis: 100%; }

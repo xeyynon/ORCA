@@ -5,6 +5,8 @@ import './LoadingMark.css'
 type Props = {
   /** Rendered edge length in px. */
   size?: number
+  /** Play the collision once and rest (a page's decoration); omitted, it loops (a loading screen). */
+  once?: boolean
 }
 
 /**
@@ -13,14 +15,14 @@ type Props = {
  * A host component: it owns one canvas and starts/stops the animation in its effect, nothing else. The motion is
  * decoration only; with prefers-reduced-motion it is a single still frame.
  */
-export function LoadingMark({ size = 96 }: Props) {
+export function LoadingMark({ size = 96, once = false }: Props) {
   const ref = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
     const canvas = ref.current
     if (!canvas) return
-    return startOrbitAnimation(canvas, { size })
-  }, [size])
+    return startOrbitAnimation(canvas, { size, once })
+  }, [size, once])
 
   return (
     <span className="loading-mark" style={{ width: size, height: size }} aria-hidden="true">

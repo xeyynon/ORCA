@@ -1,4 +1,6 @@
-import { ALTITUDE_BAND_COLOR, OBJECT_TYPE_COLOR } from '@/lib/chartColors'
+import { GLOBE_CONSTELLATION_LABEL, GLOBE_CONSTELLATIONS } from '@/lib/groups'
+import { cx } from '@/lib/cx'
+import { ALTITUDE_BAND_COLOR, CONSTELLATION_COLOR, OBJECT_TYPE_COLOR } from '@/lib/chartColors'
 import { integer } from '@/lib/format'
 import type { ColorBy } from '@/lib/globePrefs'
 import { OBJECT_TYPES, OBJECT_TYPE_LABEL } from '@/lib/objectTypes'
@@ -14,20 +16,39 @@ type Props = {
   showOrbit: boolean
   hasConjunction: boolean
   hasSelection: boolean
+  /** Objects SGP4 could not place: said on the same line as the drawing count, not in a corner of its own. */
+  skipped?: number
 }
 
-/** Names every colour on the globe. Altitude means CURRENT altitude (a position snapshot carries no eccentricity). */
-export function GlobeLegend({ colorBy, shown, total, showOrbit, hasConjunction, hasSelection }: Props) {
+/**
+ * Names every colour on the globe. Altitude means CURRENT altitude (a position snapshot carries no eccentricity).
+ * On wide screens the side panels already key the colours (Filters: altitude bands; Catalog: object types), so the
+ * colour list shows only on narrow screens, where those panels are below the fold (one home per fact, audit
+ * 2026-11-15). The selection, orbit and closest-approach marks are keyed only here, so they always show.
+ */
+export function GlobeLegend({ colorBy, shown, total, showOrbit, hasConjunction, hasSelection, skipped = 0 }: Props) {
+  const capped = (total !== null && total > shown) || skipped > 0
+  const marks = hasSelection || showOrbit || hasConjunction
   return (
-    <div className="globe-legend">
-      <Label>{colorBy === 'altitude' ? 'Objects by current altitude' : 'Objects by type'}</Label>
-      {colorBy === 'altitude'
-        ? ALTITUDE_BANDS.map((b) => <LegendItem key={b} shape="circle" color={ALTITUDE_BAND_COLOR[b]} label={ALTITUDE_BAND_LABEL[b]} />)
-        : OBJECT_TYPES.map((t) => <LegendItem key={t} shape="circle" color={OBJECT_TYPE_COLOR[t]} label={OBJECT_TYPE_LABEL[t]} />)}
+    <div className={cx('globe-legend', colorBy === 'constellation' ? 'globe-legend--own-key' : !marks && !capped && 'globe-legend--key-only')}>
+      <div className="globe-legend__key">
+        <Label>{colorBy === 'altitude' ? 'Objects by current altitude' : colorBy === 'constellation' ? 'Objects by constellation (name)' : 'Objects by type'}</Label>
+        <div className="globe-legend__items">
+          {colorBy === 'altitude'
+            ? ALTITUDE_BANDS.map((b) => <LegendItem key={b} shape="circle" color={ALTITUDE_BAND_COLOR[b]} label={ALTITUDE_BAND_LABEL[b]} />)
+            : colorBy === 'constellation'
+            ? GLOBE_CONSTELLATIONS.map((g) => <LegendItem key={g} shape="circle" color={CONSTELLATION_COLOR[g]} label={GLOBE_CONSTELLATION_LABEL[g]} />)
+            : OBJECT_TYPES.map((t) => <LegendItem key={t} shape="circle" color={OBJECT_TYPE_COLOR[t]} label={OBJECT_TYPE_LABEL[t]} />)}
+        </div>
+      </div>
       {hasSelection ? <LegendItem shape="circle" color="var(--text-primary)" label="Selected" /> : null}
       {showOrbit ? <LegendItem color="var(--globe-orbit)" label="Orbit of selected, one period" /> : null}
       {hasConjunction ? <LegendItem color="var(--risk-high)" label="Closest approach (dashed line)" /> : null}
-      {total !== null && total > shown ? <div className="globe-legend__cap">Drawing {integer(shown)} of {integer(total)} objects (filters and the request cap apply).</div> : null}
+      {capped ? (
+        <div className="globe-legend__cap">
+          Drawing {integer(shown)}{total !== null ? <> of {integer(total)}</> : null} objects{skipped > 0 ? <> ({integer(skipped)} could not be propagated)</> : null}.
+        </div>
+      ) : null}
     </div>
   )
 }

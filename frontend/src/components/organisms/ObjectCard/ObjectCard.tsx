@@ -1,6 +1,6 @@
 import type { PositionedObject, TleRecord } from '@/api/types'
 import { ageDays, formatUtc } from '@/lib/time'
-import { fixed } from '@/lib/format'
+import { fixed, integer } from '@/lib/format'
 import { OBJECT_TYPE_SINGULAR } from '@/lib/objectTypes'
 import { deriveOrbit } from '@/lib/orbit'
 import { Badge } from '../../atoms/Badge/Badge'
@@ -38,8 +38,8 @@ export function ObjectCard({ tle, position, now, onClose }: Props) {
         <TleAgeChip ageDays={ageDays(tle.epoch, now)} />
       </div>
       <div className="object-card__grid">
-        <FactRow label="Mean altitude"><ValueUnit value={fixed(orbit?.meanAltKm, 0)} unit="km" /></FactRow>
-        <FactRow label="Perigee / apogee"><ValueUnit value={`${fixed(orbit?.perigeeAltKm, 0)} / ${fixed(orbit?.apogeeAltKm, 0)}`} unit="km" /></FactRow>
+        <FactRow label="Mean altitude"><ValueUnit value={integer(orbit?.meanAltKm)} unit="km" /></FactRow>
+        <FactRow label="Perigee / apogee"><ValueUnit value={`${integer(orbit?.perigeeAltKm)} / ${integer(orbit?.apogeeAltKm)}`} unit="km" /></FactRow>
         <FactRow label="Period"><ValueUnit value={fixed(orbit?.periodMinutes, 1)} unit="min" /></FactRow>
         <FactRow label="Inclination"><ValueUnit value={fixed(tle.inclination, 3)} unit="°" /></FactRow>
         <FactRow label="Eccentricity"><Mono>{fixed(tle.eccentricity, 6)}</Mono></FactRow>
@@ -48,13 +48,13 @@ export function ObjectCard({ tle, position, now, onClose }: Props) {
           <>
             <FactRow label="Latitude"><ValueUnit value={fixed(position.lat, 2)} unit="°" /></FactRow>
             <FactRow label="Longitude"><ValueUnit value={fixed(position.lon, 2)} unit="°" /></FactRow>
-            <FactRow label="Altitude now"><ValueUnit value={fixed(position.alt_km, 0)} unit="km" /></FactRow>
+            <FactRow label="Altitude now"><ValueUnit value={integer(position.alt_km)} unit="km" /></FactRow>
             <FactRow label="Velocity"><ValueUnit value={fixed(Math.hypot(position.v[0], position.v[1], position.v[2]), 2)} unit="km/s" /></FactRow>
           </>
         ) : null}
       </div>
       {!position ? <FieldNote>No live position is shown for this object. Positions are computed on the Globe view, and an object SGP4 cannot propagate has none.</FieldNote> : null}
-      <FieldNote>Size and shape here are derived from the TLE mean motion (rev/day → rad/s, then Kepler's third law), not read from a stored field.</FieldNote>
+      <FieldNote>Size and shape here are derived from the TLE mean motion (converted from revolutions per day to radians per second, then Kepler's third law), not read from a stored field.</FieldNote>
     </aside>
   )
 }

@@ -22,8 +22,8 @@ test('formatUtc and formatRelative', () => {
 })
 
 test('pc is scientific and never fabricates', () => {
-  assert.equal(pc(0.000123), '1.23 × 10^-4')
-  assert.equal(pc(2.5e-7), '2.50 × 10^-7')
+  assert.equal(pc(0.000123), '1.23 × 10⁻⁴')
+  assert.equal(pc(2.5e-7), '2.50 × 10⁻⁷')
   assert.equal(pc(0), '0')
   assert.equal(pc(NaN), NO_DATA)
   assert.equal(pc(undefined), NO_DATA)
@@ -82,7 +82,7 @@ test('formatSimTime is UTC, zero-padded, and includes the seconds', () => {
   assert.equal(formatSimTime(NaN), NO_DATA)
 })
 
-import { percentileRank } from './percentile'
+import { percentileRank, rankWords } from './percentile'
 test('percentileRank: below/above/tie/empty', () => {
   const v = [1, 2, 3, 4]
   assert.equal(percentileRank(v, 0), 0)
@@ -90,4 +90,20 @@ test('percentileRank: below/above/tie/empty', () => {
   assert.equal(percentileRank(v, 3), 62.5) // 2 below + half of 1 tie = 2.5 of 4
   assert.equal(percentileRank([], 1), null)
   assert.equal(percentileRank(v, NaN), null)
+})
+
+test('plural agrees the noun with the count', async () => {
+  const { plural } = await import('./format.ts')
+  assert.equal(plural(1, 'object'), '1 object')
+  assert.equal(plural(108, 'object'), '108 objects')
+  assert.equal(plural(2, 'entry', 'entries'), '2 entries')
+})
+
+test('rankWords: higher or lower in words, never 100% or 0%, nothing for no rank', () => {
+  assert.equal(rankWords(54.2, 'loaded objects'), 'Higher than 54% of loaded objects')
+  assert.equal(rankWords(50, 'loaded objects'), 'Higher than 50% of loaded objects')
+  assert.equal(rankWords(17, 'loaded objects'), 'Lower than 83% of loaded objects')
+  assert.equal(rankWords(99.8, 'loaded objects'), 'Higher than nearly all loaded objects')
+  assert.equal(rankWords(0.1, 'loaded objects'), 'Lower than nearly all loaded objects')
+  assert.equal(rankWords(null, 'loaded objects'), null)
 })

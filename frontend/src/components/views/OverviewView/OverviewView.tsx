@@ -5,19 +5,17 @@ import { deriveSeries } from '@/lib/catalog'
 import { describeFilter, filterCatalog, isFilterActive, NO_FILTER, regimeCounts, toggleRegime } from '@/lib/catalogFilter'
 import type { CatalogFilter } from '@/lib/catalogFilter'
 import type { CatalogSummary } from '@/lib/catalog'
-import { days, fixed, integer } from '@/lib/format'
+import { days, integer, plural } from '@/lib/format'
 import { Button } from '../../atoms/Button/Button'
 import { EmptyState } from '../../molecules/EmptyState/EmptyState'
 import { SectionHeader } from '../../molecules/SectionHeader/SectionHeader'
 import { CatalogFilterBar } from '../../organisms/CatalogFilterBar/CatalogFilterBar'
 import { CatalogTable } from '../../organisms/CatalogTable/CatalogTable'
-import { ChartCard } from '../../organisms/ChartCard/ChartCard'
 import { KpiRow } from '../../organisms/KpiRow/KpiRow'
 import { ObjectCard } from '../../organisms/ObjectCard/ObjectCard'
 import { ObjectStanding } from '../../organisms/ObjectStanding/ObjectStanding'
 import type { CatalogRanks } from '../../organisms/ObjectStanding/ObjectStanding'
 import { PageLayout } from '../../organisms/PageLayout/PageLayout'
-import { RegimeBreakdown } from '../../organisms/RegimeBreakdown/RegimeBreakdown'
 import './OverviewView.css'
 
 type Props = {
@@ -33,11 +31,21 @@ type Props = {
 }
 
 /** The KPI captions, shown with skeletons while the catalog loads. Same order and words as the loaded row below. */
-const KPI_CAPTIONS = ['Objects', 'Newest TLE', 'Median TLE age', 'Oldest TLE', 'Median altitude'] as const
+const KPI_CAPTIONS = ['Objects', 'TLE age (median)', 'Median altitude'] as const
 
-function loadedHint(summary: CatalogSummary, totalCount: number | null): string {
-  if (totalCount !== null && totalCount > summary.count) return `${integer(summary.count)} loaded here (API returns up to 5,000)`
+/** The loaded-subset limit is said once, by the filter bar; this hint only covers classification. */
+function objectsHint(summary: CatalogSummary): string {
   return summary.unclassified ? `${integer(summary.unclassified)} could not be classified` : 'all classified'
+}
+
+/** Newest and oldest in one hint: three cards for one fact (TLE age) were two too many (declutter plan 2026-11-15). */
+function ageHint(summary: CatalogSummary): string {
+  const parts = [
+    summary.newestAgeDays === null ? null : `newest ${days(summary.newestAgeDays)}`,
+    summary.oldestAgeDays === null ? null : `oldest ${days(summary.oldestAgeDays)}`,
+    summary.futureEpochs > 0 ? `${plural(summary.futureEpochs, 'future epoch')} excluded` : null,
+  ].filter(Boolean)
+  return parts.length ? parts.join(' · ') : 'typical element-set age'
 }
 
 export function OverviewView({ catalog, summary, totalCount, selectedId, onSelect, onOpenGlobe, onGoData, now }: Props) {
@@ -77,11 +85,9 @@ export function OverviewView({ catalog, summary, totalCount, selectedId, onSelec
         {summary ? (
           <KpiRow
             items={[
-              { label: 'Objects', value: integer(totalCount ?? summary.count), hint: loadedHint(summary, totalCount) },
-              { label: 'Newest TLE', value: summary.newestAgeDays === null ? '—' : days(summary.newestAgeDays), hint: summary.futureEpochs > 0 ? `${integer(summary.futureEpochs)} epoch(s) ahead of this clock excluded` : 'age of the freshest element set' },
-              { label: 'Median TLE age', value: summary.medianAgeDays === null ? '—' : days(summary.medianAgeDays), hint: 'typical element-set age' },
-              { label: 'Oldest TLE', value: summary.oldestAgeDays === null ? '—' : days(summary.oldestAgeDays), hint: 'older sets propagate less accurately' },
-              { label: 'Median altitude', value: fixed(summary.medianAltKm, 0), unit: 'km', hint: 'derived from mean motion' },
+              { label: 'Objects', value: integer(totalCount ?? summary.count), hint: objectsHint(summary) },
+              { label: 'TLE age (median)', value: summary.medianAgeDays === null ? '—' : days(summary.medianAgeDays), hint: ageHint(summary) },
+              { label: 'Median altitude', value: integer(summary.medianAltKm), unit: 'km', hint: 'derived from mean motion' },
             ]}
           />
         ) : null}
@@ -105,23 +111,18 @@ export function OverviewView({ catalog, summary, totalCount, selectedId, onSelec
                 {totalCount !== null && totalCount > rows.length ? ' Objects that were not loaded are not searched here.' : ''}
               </EmptyState>
             ) : (
-              <CatalogTable rows={filteredRows} totalCount={totalCount} filtered={filterOn} selectedId={selectedId} onSelect={onSelect} now={now} />
+              <CatalogTable rows={filteredRows} selectedId={selectedId} onSelect={onSelect} now={now} />
             )}
           </div>
-          <div className="overview__side">
-            {selected ? (
-              <>
-                <ObjectCard tle={selected} position={null} now={now} onClose={() => onSelect(null)} />
-                <Button variant="primary" onClick={() => onOpenGlobe(selected.norad_cat_id)}>Show on globe</Button>
-                {ranks ? <ObjectStanding tle={selected} ranks={ranks} now={now} /> : null}
-              </>
-            ) : null}
-            {summary ? (
-              <ChartCard title="Whole catalog by regime" note={`Classified from perigee/apogee altitude and eccentricity. Derived, not stored.${totalCount !== null && totalCount > rows.length ? ` Counts cover the ${integer(rows.length)} loaded objects.` : ''}`}>
-                <RegimeBreakdown counts={summary.regimes} />
-              </ChartCard>
-            ) : null}
-          </div>
+          {/* The object card only. The regime donut that sat here repeated the regime chips' counts above the table, and
+              stretched across the page when nothing was selected (owner, 2026-11-15); Analytics keeps the regime chart. */}
+          {selected ? (
+            <div className="overview__side">
+              <ObjectCard tle={selected} position={null} now={now} onClose={() => onSelect(null)} />
+              <Button variant="primary" onClick={() => onOpenGlobe(selected.norad_cat_id)}>Show on globe</Button>
+              {ranks ? <ObjectStanding tle={selected} ranks={ranks} now={now} /> : null}
+            </div>
+          ) : null}
         </div>
       </>
     )

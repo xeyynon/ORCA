@@ -10,3 +10,22 @@
   border-top: 1px solid var(--border);
 }
 .statusbar::-webkit-scrollbar { display: none; }
+/* Two groups: the system's health on the left (a button into the Data page), where and when on the right. */
+.statusbar__health, .statusbar__context { display: flex; align-items: center; gap: var(--gap-5); min-width: 0; }
+/* One line, all on the left: health, then a hairline, then where and when (owner, 2026-11-15). */
+.statusbar__context { padding-left: var(--gap-5); border-left: 1px solid var(--border); }
+
+/* Globe, desktop: a slim strip floating at the bottom left; the globe and its right-hand widgets take the full height. */
+@media (min-width: 1001px) {
+  .statusbar--floating { position: fixed; z-index: 3; left: 0; bottom: 0; max-width: calc(100vw - 380px); border-right: 1px solid var(--border); border-top-right-radius: var(--radius-md); }
+}
+.statusbar__health { height: 100%; margin-left: calc(-1 * var(--gap-2)); padding: 0 var(--gap-2); border: 0; border-radius: var(--radius); background: none; color: inherit; font: inherit; text-align: left; }
+button.statusbar__health:hover { background: var(--state-hover); }
+
+/* Phones: a sideways-scrolling strip with a hidden scrollbar was cut mid-word with no cue (audit 2026-11-15). Show the
+   first three health readings, which fit; the rest are on Home (System status) and the Data page. */
+@media (max-width: 520px) {
+  .statusbar { gap: var(--gap-4); overflow-x: hidden; }
+  .statusbar__health { gap: var(--gap-4); }
+  .statusbar__health > :nth-child(n + 4), .statusbar__context { display: none; }
+}

@@ -5,6 +5,18 @@ decided, why, and what alternatives were considered. Newest first.
 
 ---
 
+## 2026-11-15 - No breadcrumb strip; the status bar splits health from context
+
+**Context:** the owner asked why the breadcrumb strip ("Mission control / Globe / A x B") was needed, and whether the status bar was used well.
+
+**Decision:** removed the breadcrumbs everywhere. ORCA is two levels deep, and every drilled-in state already has a card that names it and closes it (the conjunction card, the object card); the strip repeated that and, on the Globe, sat over the canvas. The status bar now has two groups: the system's health on the left (API, data age as the median with a dot, refreshed as relative time; one click opens the Data page; no object count, which every catalogue view already states) and then, after a hairline, the context (camera on the Globe, the UTC clock), all in one line on the left (owner, same day). On the Globe (desktop) the bar is a slim strip floating at the bottom left, so the globe runs to the bottom of the screen and the legend and playback bar sit in the freed bottom-right corner. The data age is the median, not the oldest: after a refresh one leftover 90-day-old element set made a fresh catalogue read as stale.
+
+## 2026-11-15 - Sign-in page keeps its animated debris scene and glass card (approved exception)
+
+**Context:** the 2026-11-15 UI/UX audit (finding #10) flagged the sign-in page's animated `DebrisBackdrop` scene, its glows and the frosted glass card as decoration the playbook bans (UI-15, UI-17). It was removed in the polish pass on a misread "proceed".
+
+**Decision:** the owner asked for it back ("add it again"). The sign-in page keeps the animated scene, the glows and the glass card, always dark. This is an approved exception to the no-decoration rule for this one page; do not flag it again. The other sign-in fixes stay: the reason under the disabled Sign in button and the labelled "Use these details" button.
+
 ## 2026-10-15 - Conjunction engine v2: SGP4, gap-free screening, exact TCA, Foster Pc, measured uncertainty, honest UI
 
 **Context:** The benchmark study (entry of 2026-10-14) measured the original engine on public TLEs against a dense SGP4 reference:

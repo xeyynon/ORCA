@@ -11,3 +11,16 @@ export function tleAgeTone(ageDays: number): TleAgeTone {
   if (ageDays < 30) return 'warn'
   return 'bad'
 }
+
+/**
+ * When every element set falls in one age band, the histogram is a single bar and says nothing a sentence would not:
+ * say it in words ("All 15,970 element sets are over 30 days old."). Null when the ages are spread over bands.
+ */
+export function ageVerdict(counts: Record<TleAgeTone, number>, total: number): string | null {
+  if (!(total > 0)) return null
+  const n = total.toLocaleString('en-US')
+  if (counts.bad === total) return `All ${n} element sets are over 30 days old.`
+  if (counts.ok === total) return `All ${n} element sets are under 7 days old.`
+  if (counts.warn === total) return `All ${n} element sets are between 7 and 30 days old, or dated ahead of this clock.`
+  return null
+}
