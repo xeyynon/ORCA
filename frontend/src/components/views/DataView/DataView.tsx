@@ -19,9 +19,11 @@ type Props = {
   apiStatus: ApiStatus
   summary: CatalogSummary | null
   update: { phase: UpdatePhase; before: number | null; after: number | null; error: string | null; start: () => void }
+  /** Opens the API health page (a readable page, with the raw JSON as an option). */
+  onOpenHealth: () => void
 }
 
-export function DataView({ health, apiStatus, summary, update }: Props) {
+export function DataView({ health, apiStatus, summary, update, onOpenHealth }: Props) {
   const tone = apiStatus === 'online' ? 'ok' : apiStatus === 'offline' ? 'bad' : 'warn'
   const label = apiStatus === 'online' ? 'Online' : apiStatus === 'offline' ? 'Unreachable' : 'Checking…'
   return (
@@ -47,7 +49,7 @@ export function DataView({ health, apiStatus, summary, update }: Props) {
         </summary>
         <div className="data-view__api-grid">
           <FactRow label="Base URL"><Mono>{API_ORIGIN}</Mono></FactRow>
-          <FactRow label="Health check"><a className="data-view__link" href={`${API_BASE}/health`} target="_blank" rel="noreferrer">/health (JSON)</a></FactRow>
+          <FactRow label="Health check"><button type="button" className="data-view__link data-view__link--button" onClick={onOpenHealth}>API health page</button></FactRow>
           <FactRow label="Interactive docs"><a className="data-view__link" href={`${API_BASE}/docs`} target="_blank" rel="noreferrer">/docs (Swagger)</a></FactRow>
           <FactRow label="App build"><Mono>{__ORCA_BUILD__}</Mono></FactRow>
         </div>

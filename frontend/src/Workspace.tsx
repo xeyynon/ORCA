@@ -43,6 +43,7 @@ import { LoadingScreen } from '@/components/views/LoadingScreen/LoadingScreen'
 import { AnalyticsView } from '@/components/views/AnalyticsView/AnalyticsView'
 import { ConjunctionsView } from '@/components/views/ConjunctionsView/ConjunctionsView'
 import { DataView } from '@/components/views/DataView/DataView'
+import { HealthView } from '@/components/views/HealthView/HealthView'
 import { ReportsView } from '@/components/views/ReportsView/ReportsView'
 import { HomeView } from '@/components/views/HomeView/HomeView'
 import { OverviewView } from '@/components/views/OverviewView/OverviewView'
@@ -61,7 +62,7 @@ type Props = { username: string; onSignOut: () => void; theme: Theme; onToggleTh
  */
 export function Workspace({ username, onSignOut, theme, onToggleTheme: toggleTheme }: Props) {
   const { view, go } = useHashView()
-  const { status: apiStatus, health } = useHealth()
+  const { status: apiStatus, health, check: healthCheck, recheck: recheckHealth } = useHealth()
   const now = useNow()
   const searchRef = useRef<HTMLInputElement>(null)
 
@@ -134,7 +135,7 @@ export function Workspace({ username, onSignOut, theme, onToggleTheme: toggleThe
 
   // Esc is the last rung of the ladder: modals and detail panes close themselves first (they prevent default).
   useKeyboardShortcuts({
-    ...Object.fromEntries(VIEWS.map((v) => [VIEW_HOTKEY[v], () => go(v)])),
+    ...Object.fromEntries(VIEWS.filter((v) => VIEW_HOTKEY[v]).map((v) => [VIEW_HOTKEY[v], () => go(v)])),
     t: toggleTheme,
     '?': () => setHelpOpen(true),
     '/': () => setSearchOpen(true),
@@ -241,7 +242,8 @@ export function Workspace({ username, onSignOut, theme, onToggleTheme: toggleThe
         />
       ) : null}
       {view === 'analytics' ? <AnalyticsView catalog={catalog} stats={stats} totalCount={health?.database.tles_count ?? null} now={now} /> : null}
-      {view === 'data' ? <DataView health={health} apiStatus={apiStatus} summary={summary} update={update} /> : null}
+      {view === 'data' ? <DataView health={health} apiStatus={apiStatus} summary={summary} update={update} onOpenHealth={() => go('health')} /> : null}
+      {view === 'health' ? <HealthView health={health} apiStatus={apiStatus} check={healthCheck} onRecheck={recheckHealth} onBack={() => go('data')} now={now} /> : null}
       {view === 'reports' ? <ReportsView summary={summary} health={health} conjSearch={conjSearch} selectedConjKey={conjKey} username={username} now={now} /> : null}
 
       {/* On the home page these readings are a readable "System status" section instead (homepage spec, Section 05). */}
