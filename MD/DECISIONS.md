@@ -9,7 +9,7 @@ decided, why, and what alternatives were considered. Newest first.
 
 **Context:** the owner asked why the breadcrumb strip ("Mission control / Globe / A x B") was needed, and whether the status bar was used well.
 
-**Decision:** removed the breadcrumbs everywhere. ORCA is two levels deep, and every drilled-in state already has a card that names it and closes it (the conjunction card, the object card); the strip repeated that and, on the Globe, sat over the canvas. The status bar now has two groups: the system's health on the left (API, objects, data age as the median with a dot, refreshed as relative time; one click opens the Data page) and context on the right (camera on the Globe, the UTC clock). The data age is the median, not the oldest: after a refresh one leftover 90-day-old element set made a fresh catalogue read as stale.
+**Decision:** removed the breadcrumbs everywhere. ORCA is two levels deep, and every drilled-in state already has a card that names it and closes it (the conjunction card, the object card); the strip repeated that and, on the Globe, sat over the canvas. The status bar now has two groups: the system's health on the left (API, data age as the median with a dot, refreshed as relative time; one click opens the Data page; no object count, which every catalogue view already states) and context on the right (camera on the Globe, the UTC clock). The data age is the median, not the oldest: after a refresh one leftover 90-day-old element set made a fresh catalogue read as stale.
 
 ## 2026-11-15 - Sign-in page keeps its animated debris scene and glass card (approved exception)
 
