@@ -58,6 +58,8 @@
   .globe-view__side--left .panel + .panel { border-top: 1px solid var(--border); }
   .globe-view__side--left .catalog-summary__total { font-size: 22px; }
   .globe-view__side--hidden { display: none; }
+  /* The status bar floats at the bottom left on the Globe: the panel stops above it. */
+  .globe-view__side--left { max-height: calc(100% - 2 * var(--gap-3) - var(--statusbar-h)); }
   .globe-view__hide-panel { position: absolute; z-index: 1; top: 6px; right: 6px; }
   .globe-view__show-panel { position: absolute; z-index: 2; top: var(--gap-3); left: var(--gap-3); }
 }

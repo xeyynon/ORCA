@@ -12,7 +12,13 @@
 .statusbar::-webkit-scrollbar { display: none; }
 /* Two groups: the system's health on the left (a button into the Data page), where and when on the right. */
 .statusbar__health, .statusbar__context { display: flex; align-items: center; gap: var(--gap-5); min-width: 0; }
-.statusbar__context { margin-left: auto; }
+/* One line, all on the left: health, then a hairline, then where and when (owner, 2026-11-15). */
+.statusbar__context { padding-left: var(--gap-5); border-left: 1px solid var(--border); }
+
+/* Globe, desktop: a slim strip floating at the bottom left; the globe and its right-hand widgets take the full height. */
+@media (min-width: 1001px) {
+  .statusbar--floating { position: fixed; z-index: 3; left: 0; bottom: 0; max-width: calc(100vw - 380px); border-right: 1px solid var(--border); border-top-right-radius: var(--radius-md); }
+}
 .statusbar__health { height: 100%; margin-left: calc(-1 * var(--gap-2)); padding: 0 var(--gap-2); border: 0; border-radius: var(--radius); background: none; color: inherit; font: inherit; text-align: left; }
 button.statusbar__health:hover { background: var(--state-hover); }
 
