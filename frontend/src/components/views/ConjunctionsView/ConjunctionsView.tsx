@@ -8,7 +8,7 @@ import type { ConjunctionSearch } from '@/hooks/useConjunctionSearch'
 import { useElapsed } from '@/hooks/useElapsed'
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { usePairAssessment } from '@/hooks/usePairAssessment'
-import { resultAnswer, resultHeadline, tierCounts } from '@/lib/conjunctionSummary'
+import { resultAnswer, tableLine, tierCounts } from '@/lib/conjunctionSummary'
 import { downloadConjunctionsCsv, downloadConjunctionsJson } from '@/lib/exportConjunctions'
 import { integer } from '@/lib/format'
 import { countPast, pairKey } from '@/lib/pair'
@@ -32,7 +32,6 @@ import { PairCard } from '../../organisms/PairCard/PairCard'
 import { ResultAnswer } from '../../organisms/ResultAnswer/ResultAnswer'
 import { ResultCaveats } from '../../organisms/ResultCaveats/ResultCaveats'
 import { RiskSummaryBar } from '../../organisms/RiskSummaryBar/RiskSummaryBar'
-import { SavedRunBanner } from '../../organisms/SavedRunBanner/SavedRunBanner'
 import './ConjunctionsView.css'
 
 type Props = {
@@ -114,12 +113,15 @@ export function ConjunctionsView({ catalogSize, now, search, query, onQueryChang
   } else {
     const horizonDays = search.query?.horizonDays ?? query.horizonDays
     const answer = resultAnswer(counts ?? tierCounts(result), result.total_events, horizonDays, result.report_km)
-    const headline = resultHeadline(result.events.length, result.total_events, result.report_km)
+    const headline = tableLine(result.events.length, result.total_events)
     const ranAt = search.finishedAt ? formatUtc(search.finishedAt.toISOString()) : '—'
 
     // Every caveat that used to be its own box, in order of importance. Nothing is dropped; they now share one.
     const caveats: string[] = []
-    if (pastCount > 0) {
+    if (saved) {
+      // The saved-run notice and the "in the past" caveat said one thing twice; now it is the first point (declutter plan).
+      caveats.push(`This is a saved example run from ${formatUtc(result.window_start)}, stored with the app so the page can be explored without waiting. Its times are in the past and its element sets have aged since.`)
+    } else if (pastCount > 0) {
       caveats.push(`${pastCount === search.events.length ? 'Every event below is' : `${pastCount} of ${search.events.length} events are`} already in the past. The search window started when it ran (${formatUtc(result.window_start)}), so approaches between then and now are no longer a forecast. Run the search again for a fresh one.`)
     }
     caveats.push('Risk tiers depend on an assumed position uncertainty, because TLEs carry none. A different assumption can move a pair by orders of magnitude (see the method below).')
@@ -132,15 +134,14 @@ export function ConjunctionsView({ catalogSize, now, search, query, onQueryChang
 
     results = (
       <>
-        {saved ? <SavedRunBanner ranAt={formatUtc(result.window_start)} disabled={running} onRunFresh={run} /> : null}
         <ResultAnswer answer={answer} context={`${horizonDays} d horizon · ${integer(result.objects)} objects · ran ${ranAt} in ${Math.round(result.runtime_s)} s`} />
         {counts ? (
-          <ChartCard title="Every approach found, by risk tier" note={`${integer(result.total_events)} approaches closer than ${result.report_km} km, grouped by tier. The table below lists the highest-probability ones.`}>
+          <ChartCard title="Every approach found, by risk tier">
             <RiskSummaryBar counts={counts} />
           </ChartCard>
         ) : null}
-        <ResultCaveats items={caveats} />
-        <ChartCard title="When, and how risky" note="The rows in the table: time on x, probability of collision on a log y axis, colour by risk tier. The dashed line is now. Hover a point for the pair; select it to open its detail.">
+        <ResultCaveats items={caveats} action={saved ? <Button size="sm" disabled={running} onClick={run}>Run a fresh search</Button> : undefined} />
+        <ChartCard title="When, and how risky" note="The rows in the table. Log y axis; the dashed line is now; select a point to open its pair.">
           <EventTimeline events={search.events} now={now} selectedKey={selectedKey} onSelect={(e) => onSelectKey(pairKey(e))} />
         </ChartCard>
         <div className="conj-view__bar">
@@ -169,8 +170,7 @@ export function ConjunctionsView({ catalogSize, now, search, query, onQueryChang
           ) : null}
         </div>
         <FieldNote>
-          <GlossaryTerm term="Pc" /> is the probability of collision, <GlossaryTerm term="TCA" /> the time of closest approach, and <GlossaryTerm term="miss distance" /> the
-          separation at that moment; <GlossaryTerm term="uncertainty" /> is how far the true position may be from the computed one. Hover or focus a term for its meaning.
+          <GlossaryTerm term="Pc" />, <GlossaryTerm term="TCA" />, <GlossaryTerm term="miss distance" /> and <GlossaryTerm term="uncertainty" />: hover or focus a term for its meaning.
         </FieldNote>
       </>
     )
@@ -179,7 +179,7 @@ export function ConjunctionsView({ catalogSize, now, search, query, onQueryChang
   return (
     <PageLayout>
       <SectionHeader title="Conjunction screening" subtitle="Close approaches between catalog objects, forecast from public TLEs. Educational and research use only." />
-      <ConjunctionControls query={query} catalogSize={catalogSize} stepS={stepS} reportKm={reportKm} running={running} onChange={onQueryChange} onRun={run} />
+      <ConjunctionControls query={query} catalogSize={catalogSize} running={running} onChange={onQueryChange} onRun={run} />
       {results}
       <ConjunctionMethod method={method.data} error={method.status === 'error' ? method.error.message : null} open={search.phase === 'idle'} />
     </PageLayout>
