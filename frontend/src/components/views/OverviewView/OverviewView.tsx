@@ -33,11 +33,21 @@ type Props = {
 }
 
 /** The KPI captions, shown with skeletons while the catalog loads. Same order and words as the loaded row below. */
-const KPI_CAPTIONS = ['Objects', 'Newest TLE', 'Median TLE age', 'Oldest TLE', 'Median altitude'] as const
+const KPI_CAPTIONS = ['Objects', 'TLE age (median)', 'Median altitude'] as const
 
-function loadedHint(summary: CatalogSummary, totalCount: number | null): string {
-  if (totalCount !== null && totalCount > summary.count) return `${integer(summary.count)} loaded here (API returns up to 5,000)`
+/** The loaded-subset limit is said once, by the filter bar; this hint only covers classification. */
+function objectsHint(summary: CatalogSummary): string {
   return summary.unclassified ? `${integer(summary.unclassified)} could not be classified` : 'all classified'
+}
+
+/** Newest and oldest in one hint: three cards for one fact (TLE age) were two too many (declutter plan 2026-11-15). */
+function ageHint(summary: CatalogSummary): string {
+  const parts = [
+    summary.newestAgeDays === null ? null : `newest ${days(summary.newestAgeDays)}`,
+    summary.oldestAgeDays === null ? null : `oldest ${days(summary.oldestAgeDays)}`,
+    summary.futureEpochs > 0 ? `${plural(summary.futureEpochs, 'future epoch')} excluded` : null,
+  ].filter(Boolean)
+  return parts.length ? parts.join(' · ') : 'typical element-set age'
 }
 
 export function OverviewView({ catalog, summary, totalCount, selectedId, onSelect, onOpenGlobe, onGoData, now }: Props) {
@@ -77,10 +87,8 @@ export function OverviewView({ catalog, summary, totalCount, selectedId, onSelec
         {summary ? (
           <KpiRow
             items={[
-              { label: 'Objects', value: integer(totalCount ?? summary.count), hint: loadedHint(summary, totalCount) },
-              { label: 'Newest TLE', value: summary.newestAgeDays === null ? '—' : days(summary.newestAgeDays), hint: summary.futureEpochs > 0 ? `${plural(summary.futureEpochs, 'epoch')} ahead of this clock excluded` : 'age of the freshest element set' },
-              { label: 'Median TLE age', value: summary.medianAgeDays === null ? '—' : days(summary.medianAgeDays), hint: 'typical element-set age' },
-              { label: 'Oldest TLE', value: summary.oldestAgeDays === null ? '—' : days(summary.oldestAgeDays), hint: 'older sets propagate less accurately' },
+              { label: 'Objects', value: integer(totalCount ?? summary.count), hint: objectsHint(summary) },
+              { label: 'TLE age (median)', value: summary.medianAgeDays === null ? '—' : days(summary.medianAgeDays), hint: ageHint(summary) },
               { label: 'Median altitude', value: integer(summary.medianAltKm), unit: 'km', hint: 'derived from mean motion' },
             ]}
           />
@@ -105,7 +113,7 @@ export function OverviewView({ catalog, summary, totalCount, selectedId, onSelec
                 {totalCount !== null && totalCount > rows.length ? ' Objects that were not loaded are not searched here.' : ''}
               </EmptyState>
             ) : (
-              <CatalogTable rows={filteredRows} filtered={filterOn} selectedId={selectedId} onSelect={onSelect} now={now} />
+              <CatalogTable rows={filteredRows} selectedId={selectedId} onSelect={onSelect} now={now} />
             )}
           </div>
           <div className="overview__side">
@@ -117,7 +125,7 @@ export function OverviewView({ catalog, summary, totalCount, selectedId, onSelec
               </>
             ) : null}
             {summary ? (
-              <ChartCard title="Whole catalog by regime" note={`Classified from perigee/apogee altitude and eccentricity. Derived, not stored.${totalCount !== null && totalCount > rows.length ? ` Counts cover the ${integer(rows.length)} loaded objects.` : ''}`}>
+              <ChartCard title={totalCount !== null && totalCount > rows.length ? 'Loaded objects by regime' : 'Whole catalog by regime'} note="Classified from perigee/apogee altitude and eccentricity. Derived, not stored.">
                 <RegimeBreakdown counts={summary.regimes} />
               </ChartCard>
             ) : null}
