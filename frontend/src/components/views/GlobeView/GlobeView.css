@@ -60,6 +60,10 @@
   .globe-view__side--hidden { display: none; }
   /* The status bar floats at the bottom left on the Globe: the panel stops above it. */
   .globe-view__side--left { max-height: calc(100% - var(--globe-top, 0px) - 2 * var(--gap-3) - var(--statusbar-h)); }
+  /* The status bar's right capsule (camera, clock) sits at the bottom right (owner, 2026-11-16): the legend and
+     playback stack rise above it, and the details column ends above them. */
+  .globe-view__foot { bottom: calc(var(--gap-3) + var(--statusbar-h)); }
+  .globe-view__side--right { max-height: calc(100% - var(--globe-top, 0px) - var(--globe-foot-h, 140px) - 3 * var(--gap-3) - var(--statusbar-h)); }
   .globe-view__hide-panel { position: absolute; z-index: 1; top: 6px; right: 6px; }
   .globe-view__show-panel { position: absolute; z-index: 2; top: calc(var(--globe-top, 0px) + var(--gap-3)); left: var(--gap-3); }
   /* Legend + playback: a hide control at the stack's top right; hidden, only a pill with the time and its state stays. */
