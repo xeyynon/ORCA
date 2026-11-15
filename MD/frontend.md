@@ -1,8 +1,8 @@
 # Frontend Guide
 
-> How the React frontend is built, component by component. Read from `frontend/src` on 2026-10-03.
-> The rulebook it follows is [rules.md](rules.md). The short run guide is [../frontend/README.md](../frontend/README.md).
-> This file is a deep reference. If you want it out of git, add `MD/frontend.md` to `.gitignore`.
+How the React frontend is built, component by component. Read from `frontend/src` on 2026-10-03.
+The rulebook it follows is [rules.md](rules.md). The short run guide is [../frontend/README.md](../frontend/README.md).
+This file is a deep reference. If you want it out of git, add `MD/frontend.md` to `.gitignore`.
 
 ## 1. Stack
 

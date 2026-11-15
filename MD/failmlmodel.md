@@ -1,6 +1,6 @@
 # ML Model Failure Modes
 
-> Every known way the ML model fails.
+Every known way the ML model fails.
 
 ## Status: not applicable
 

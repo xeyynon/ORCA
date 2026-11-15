@@ -1,7 +1,7 @@
 # Conjunction engine v2 (2026-10-15)
 
-> What changed in ORCA's conjunction search, why, how it was checked, and what it still cannot do.
-> The research behind it is in [research_paper_brief.md](research_paper_brief.md), Section 10.
+What changed in ORCA's conjunction search, why, how it was checked, and what it still cannot do.
+The research behind it is in [research_paper_brief.md](research_paper_brief.md), Section 10.
 
 ## 1. Why
 

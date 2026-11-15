@@ -1,6 +1,6 @@
 # Deployment
 
-> How ORCA runs locally, and how the hosted copy is deployed. Hosted since 2026-10-08 on free tiers only (Oracle Cloud Always Free + Vercel Hobby + GitHub Actions). Updated from the live setup on 2026-10-09.
+How ORCA runs locally, and how the hosted copy is deployed. Hosted since 2026-10-08 on free tiers only (Oracle Cloud Always Free + Vercel Hobby + GitHub Actions). Updated from the live setup on 2026-10-09.
 
 ## 1. Where it runs
 

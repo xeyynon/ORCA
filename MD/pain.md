@@ -1,7 +1,7 @@
 # Pain
 
-> What can break the system and how badly. Severity is for a user trusting the output, not just uptime.
-> **Seen** means it actually happened (see [DECISIONS.md](DECISIONS.md)). **Latent** means the code allows it and it has not been observed.
+What can break the system and how badly. Severity is for a user trusting the output, not just uptime.
+**Seen** means it actually happened (see [DECISIONS.md](DECISIONS.md)). **Latent** means the code allows it and it has not been observed.
 
 | Severity | Meaning |
 |---|---|

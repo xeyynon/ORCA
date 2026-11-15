@@ -1,8 +1,8 @@
 # ORCA Master Reference
 
-> The master reference for the whole system. **When documents disagree, trust the code first and this file second.**
-> Last reconciled with the code: 2026-11-16, on branch `ui/design-system-v2` (design system v2, the 2026-11-15 audit and declutter pass, the API health page, Vercel Analytics). Engine v2 (2026-10-15) is merged and hosted. `main` holds everything up to pull request #7. Open and mergeable on 2026-11-16: PR #9 (`ui/design-system-v2`: the README back at the root, the purge's `.gitignore`, the smaller status bar, Vercel Analytics) and PR #8 (`fix/bug-sweep-2026-10-20`: sidereal time, epoch microseconds, one-transaction ingest, skipping bad records). PR #3 (`frontendimprovements`) is older and unreviewed.
-> All commit IDs changed on 2026-11-15 when three large binaries were purged from the history (DECISIONS.md); IDs quoted in older notes no longer resolve. The newest session notes are in [session_handover_2026-11-16.md](session_handover_2026-11-16.md).
+The master reference for the whole system. **When documents disagree, trust the code first and this file second.**
+Last reconciled with the code: 2026-11-16, on branch `ui/design-system-v2` (design system v2, the 2026-11-15 audit and declutter pass, the API health page, Vercel Analytics). Engine v2 (2026-10-15) is merged and hosted. `main` holds everything up to pull request #7. Open and mergeable on 2026-11-16: PR #9 (`ui/design-system-v2`: the README back at the root, the purge's `.gitignore`, the smaller status bar, Vercel Analytics) and PR #8 (`fix/bug-sweep-2026-10-20`: sidereal time, epoch microseconds, one-transaction ingest, skipping bad records). PR #3 (`frontendimprovements`) is older and unreviewed.
+All commit IDs changed on 2026-11-15 when three large binaries were purged from the history (DECISIONS.md); IDs quoted in older notes no longer resolve. The newest session notes are in [session_handover_2026-11-16.md](session_handover_2026-11-16.md).
 
 ## 1. What ORCA is
 

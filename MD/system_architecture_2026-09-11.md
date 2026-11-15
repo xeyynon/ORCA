@@ -1,7 +1,7 @@
 # System Architecture
 
-> The current, detailed architecture. It extends [ARCHITECTURE.md](ARCHITECTURE.md) with the parts added since: operator authentication and the React frontend. The file name keeps the 2026-09-11 date it was planned under; the content was reconciled with the code on 2026-10-15 (conjunction engine v2).
-> For per-class detail see [README.md](../README.md). For the units contract see [ARCHITECTURE.md](ARCHITECTURE.md) section 7, which still holds.
+The current, detailed architecture. It extends [ARCHITECTURE.md](ARCHITECTURE.md) with the parts added since: operator authentication and the React frontend. The file name keeps the 2026-09-11 date it was planned under; the content was reconciled with the code on 2026-10-15 (conjunction engine v2).
+For per-class detail see [README.md](../README.md). For the units contract see [ARCHITECTURE.md](ARCHITECTURE.md) section 7, which still holds.
 
 ## 1. System diagram
 

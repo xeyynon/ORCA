@@ -1,6 +1,6 @@
 # Tried and Implemented
 
-> Approaches confirmed working. Check here before building something new. Each entry says where it lives and how it was confirmed. Drawn from [DECISIONS.md](DECISIONS.md), [TASKS.md](TASKS.md), the tests and the code.
+Approaches confirmed working. Check here before building something new. Each entry says where it lives and how it was confirmed. Drawn from [DECISIONS.md](DECISIONS.md), [TASKS.md](TASKS.md), the tests and the code.
 
 ## Pipeline
 

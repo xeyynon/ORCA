@@ -1,6 +1,6 @@
 # Learning guide: what we did, and why
 
-> A walk-through of the whole working session (2026-10-14 to 2026-10-15), from the brief you pasted at the start to the paper and the fixed app. Read it in order: each part builds on the one before. Every number here comes from a file in the repository.
+A walk-through of the whole working session (2026-10-14 to 2026-10-15), from the brief you pasted at the start to the paper and the fixed app. Read it in order: each part builds on the one before. Every number here comes from a file in the repository.
 
 ---
 

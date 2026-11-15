@@ -253,11 +253,11 @@ Follow ARCHITECTURE.md §7. In the UI:
 
    Never bypass it with `--no-verify`.
 
-> **Incident, 2026-10-08:** deploy commit `d9e0690` was pushed with a
-> `Co-Authored-By: Claude` trailer, so GitHub showed "xeyynon and claude
-> committed". With the owner's go-ahead the message was amended and
-> force-pushed as `a520f7e`; the files were unchanged. Rules 5 and 6 were
-> added so it does not recur.
+**Incident, 2026-10-08:** deploy commit `d9e0690` was pushed with a
+`Co-Authored-By: Claude` trailer, so GitHub showed "xeyynon and claude
+committed". With the owner's go-ahead the message was amended and
+force-pushed as `a520f7e`; the files were unchanged. Rules 5 and 6 were
+added so it does not recur.
 
 ---
 

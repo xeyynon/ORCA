@@ -1,6 +1,6 @@
 # System Design and Boundary
 
-> What is inside ORCA, what is outside it, and where the trust boundaries sit. Written 2026-10-03 from [PRD.md](PRD.md), [LEO_Conjunction_Project_Context.md](LEO_Conjunction_Project_Context.md) and the code.
+What is inside ORCA, what is outside it, and where the trust boundaries sit. Written 2026-10-03 from [PRD.md](PRD.md), [LEO_Conjunction_Project_Context.md](LEO_Conjunction_Project_Context.md) and the code.
 
 ## 1. Inside the boundary
 

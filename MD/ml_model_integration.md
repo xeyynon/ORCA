@@ -1,6 +1,6 @@
 # ML Model Integration
 
-> How a hosted model would be wired into the backend.
+How a hosted model would be wired into the backend.
 
 ## Status: not applicable
 

@@ -1,10 +1,10 @@
 # Research Brief (v2): Benchmarking Algorithmic Choices in TLE-Based Conjunction Assessment
 
-> **Version 2, 2026-10-14.** v1 was a handoff written without access to the ORCA code. v2 checks it against the code, the measurements already in `MD/DECISIONS.md`, and the capstone proposal in `MD/LEO_Conjunction_Project_Context.md`, then corrects it. Section 1 lists what v1 got wrong. Everything after it replaces v1.
->
-> **Since 2026-10-15** production runs conjunction engine v2 ([conjunction_engine_v2.md](conjunction_engine_v2.md)). Section 3 still describes ORCA as built, the paper's baseline, which is frozen in `benchmarks/legacy/`.
->
-> Labels used below: **[CODE]** read from the repo, **[MEASURED]** a number produced by a script in the repo (the script is named), **[PROPOSAL]** from the approved capstone proposal, **[PLAN]** a proposal for this paper that is not done yet, **[VERIFY]** a citation or external fact that must be checked at its source before it goes into the paper.
+**Version 2, 2026-10-14.** v1 was a handoff written without access to the ORCA code. v2 checks it against the code, the measurements already in `MD/DECISIONS.md`, and the capstone proposal in `MD/LEO_Conjunction_Project_Context.md`, then corrects it. Section 1 lists what v1 got wrong. Everything after it replaces v1.
+
+**Since 2026-10-15** production runs conjunction engine v2 ([conjunction_engine_v2.md](conjunction_engine_v2.md)). Section 3 still describes ORCA as built, the paper's baseline, which is frozen in `benchmarks/legacy/`.
+
+Labels used below: **[CODE]** read from the repo, **[MEASURED]** a number produced by a script in the repo (the script is named), **[PROPOSAL]** from the approved capstone proposal, **[PLAN]** a proposal for this paper that is not done yet, **[VERIFY]** a citation or external fact that must be checked at its source before it goes into the paper.
 
 ---
 
@@ -47,7 +47,7 @@ v1 points that **remain correct**: TLEs carry no covariance. Monte Carlo is not 
 
 ## 2. Research objective (revised)
 
-> Using only public TLE data and an open pipeline (ORCA), measure how each algorithmic choice in TLE-based conjunction assessment changes what the pipeline reports: which encounters it finds, when and how close they are, and how risky it says they are. Report each choice's computational cost.
+Using only public TLE data and an open pipeline (ORCA), measure how each algorithmic choice in TLE-based conjunction assessment changes what the pipeline reports: which encounters it finds, when and how close they are, and how risky it says they are. Report each choice's computational cost.
 
 The contribution is a **measured, reproducible accounting of where accuracy is lost** in a public-data conjunction pipeline, stage by stage. It is not a new algorithm. Rows 3, 6, 9 and 10 of Section 1 show that the losses are large and measurable, which is a stronger claim than "we compared standard methods" (v1's novelty risk).
 

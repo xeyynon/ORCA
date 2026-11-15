@@ -1,9 +1,9 @@
 # Literature verification log
 
-> 2026-10-14. Three research passes (collision probability; propagation and TLE accuracy; screening, TCA and prior work).
-> **CONFIRMED** means the source itself was opened: a publisher or Crossref DOI record, an agency PDF, or the author's page.
-> **SECONDARY** means the source was seen only in other papers' reference lists; re-check these before submission.
-> BibTeX for everything: [references.bib](references.bib).
+2026-10-14. Three research passes (collision probability; propagation and TLE accuracy; screening, TCA and prior work).
+**CONFIRMED** means the source itself was opened: a publisher or Crossref DOI record, an agency PDF, or the author's page.
+**SECONDARY** means the source was seen only in other papers' reference lists; re-check these before submission.
+BibTeX for everything: [references.bib](references.bib).
 
 ## 1. Corrections to our own text
 
