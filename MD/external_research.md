@@ -1,7 +1,7 @@
 # External Research
 
-> Log of outside systems, data and tools ORCA depends on or learned from. Each entry says what was checked, what was found, and where it came from, so it can be repeated.
-> Sources: ORCA's own decision log and observed behaviour, and the literature review summarised in [LEO_Conjunction_Project_Context.md](LEO_Conjunction_Project_Context.md). Anything not checked at its source says so.
+Log of outside systems, data and tools ORCA depends on or learned from. Each entry says what was checked, what was found, and where it came from, so it can be repeated.
+Sources: ORCA's own decision log and observed behaviour, and the literature review summarised in [LEO_Conjunction_Project_Context.md](LEO_Conjunction_Project_Context.md). Anything not checked at its source says so.
 
 ## 1. Celestrak (the data source)
 

@@ -1,15 +1,15 @@
 # Paper draft: full text, Sections I–VI
 
-> Draft 3, 2026-10-29 (adds §IV-D evaluation metrics, candidate reduction in §V-B and the metric summary in §V-F). Draft 2 was 2026-10-15. Written from `MD/research_paper_brief.md` (Section 10) and the committed files in `benchmarks/results/`. Every number below is traceable to one of those files.
->
-> **Placeholders:**
-> - Citations are keys in [references.bib](references.bib), written as [key]. The verification status of each is in [literature_verification.md](literature_verification.md); keys marked SECONDARY there must be re-checked before submission.
-> - **[Fig. n] / [Table n]** follow the brief's plan.
-> - All figures, including **F1** (`fig_pipeline`) and **F5** (`fig_mc_convergence`), are in `benchmarks/figures/`.
->
-> Sections I and III use the gap verified in `MD/literature_verification.md` §5. An 8-page IEEE version is in `paper/`.
->
-> **Length:** IV + V are about 3,500 words including tables, well over their ~4.1-page budget. II is about 650 words against ~0.6 page. Trim after the template is fixed.
+Draft 3, 2026-10-29 (adds §IV-D evaluation metrics, candidate reduction in §V-B and the metric summary in §V-F). Draft 2 was 2026-10-15. Written from `MD/research_paper_brief.md` (Section 10) and the committed files in `benchmarks/results/`. Every number below is traceable to one of those files.
+
+**Placeholders:**
+- Citations are keys in [references.bib](references.bib), written as [key]. The verification status of each is in [literature_verification.md](literature_verification.md); keys marked SECONDARY there must be re-checked before submission.
+- **[Fig. n] / [Table n]** follow the brief's plan.
+- All figures, including **F1** (`fig_pipeline`) and **F5** (`fig_mc_convergence`), are in `benchmarks/figures/`.
+
+Sections I and III use the gap verified in `MD/literature_verification.md` §5. An 8-page IEEE version is in `paper/`.
+
+**Length:** IV + V are about 3,500 words including tables, well over their ~4.1-page budget. II is about 650 words against ~0.6 page. Trim after the template is fixed.
 
 ---
 

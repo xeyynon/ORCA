@@ -1,6 +1,6 @@
 # Deployment
 
-> How ORCA runs locally, and how the hosted copy is deployed. Hosted since 2026-10-08 on free tiers only (Oracle Cloud Always Free + Vercel Hobby + GitHub Actions). Updated from the live setup on 2026-10-09.
+How ORCA runs locally, and how the hosted copy is deployed. Hosted since 2026-10-08 on free tiers only (Oracle Cloud Always Free + Vercel Hobby + GitHub Actions). Updated from the live setup on 2026-10-09.
 
 ## 1. Where it runs
 
@@ -71,7 +71,7 @@ Push (or merge) to `main`. Nothing else is needed.
 | `ORCA_DB_PATH` | `ssa_data.db` in the working directory | `/data/ssa_data.db` | SQLite location |
 | `ORCA_STATIC_DIR` | unset | unset (the `api` image target) | Serve a built `frontend/dist` from the API's own origin |
 | `ORCA_CORS_ORIGINS` | the two Vite dev origins | `https://orca-vitap.vercel.app` | Comma-separated origins allowed to call the API |
-| `ORCA_TLE_GROUP` | `active` | `stations` | Celestrak group fetched on refresh. Kept small on the 1 GB VM |
+| `ORCA_TLE_GROUP` | `active` | `active` (was `stations` until 2026-11-16; backup `deploy/.env.bak-2026-11-16` on the VM) | Celestrak group fetched on refresh. The full catalogue on the 1 GB VM is a stopgap until an A1 VM |
 | `ORCA_FETCH_COOLDOWN_S` | `300` | `300` | Minimum seconds between Celestrak fetches |
 
 On the VM these come from `~/ORCA/deploy/.env` (template: `deploy/env.example`), which also sets `ORCA_DOMAIN` (the name Caddy certifies) and `ORCA_BUILD_TARGET` (`api` = backend only, `full` = backend + frontend). Edit `.env` on the VM, then run `cd ~/ORCA/deploy && sudo docker compose up -d`.
@@ -164,3 +164,10 @@ See [pain.md](pain.md). Locally, the two that have broken a run: the console-enc
 - The hosted sign-in shows the "Evaluator access" panel. The hosted `admin` password was reset on the VM (`docker compose exec orca python auth.py set-password`) and the same value saved as the Vercel variable `VITE_EVALUATOR_PASSWORD`, so it is public by design. Rotating it means doing both again, then a redeploy.
 - A redeploy after a Vercel variable change must untick **"Use project's Ignore Build Step"**, or the build is skipped (nothing under `frontend/` changed) and the variable never reaches the bundle. Vercel also asks for the account's two-factor code before it redeploys.
 - Vercel Web Analytics: `@vercel/analytics` (`src/PageAnalytics.tsx`) sends a page view per hash view (`/overview`, `/globe`, ...). It records nothing until Analytics is enabled for the project in the Vercel dashboard (project `orca` > Analytics > Enable).
+
+## Full catalogue on the hosted VM (2026-11-16)
+
+- `ORCA_TLE_GROUP` switched to `active` on the VM and the `orca` container recreated (owner: show all objects on the hosted site).
+- The first refresh failed: `CelestrackClient.TIMEOUT` was a flat 10 s, and Celestrak takes longer than that to start sending the full group ("Read timed out"). Fixed in code: `(10, 120)`, tested in `tests/test_fetch_status.py`; it reaches the VM with the next backend deploy from `main`.
+- A one-off load with the longer timeout (`/tmp/oneoff_load.py` in the container, log in `/data/oneoff-load.log`) was then refused by Celestrak (HTTP 403): the timed-out request counted. Wait about two hours before the next attempt, and attempt once.
+- Expect the catalogue views and the Globe to be slow on this VM with ~16,000 objects, and live conjunction searches to take very long; PR #8's one-transaction ingest matters here (per-row commits took 178 s for the full catalogue on a laptop).

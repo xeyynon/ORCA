@@ -1,6 +1,6 @@
 # Data Flow
 
-> End-to-end data flow from raw input to analyst output. Read from the code on 2026-10-15 (conjunction engine v2, branch `fix/honest-conjunctions`).
+End-to-end data flow from raw input to analyst output. Read from the code on 2026-10-15 (conjunction engine v2, branch `fix/honest-conjunctions`).
 
 ## 1. Overview
 

@@ -1,6 +1,6 @@
 # Intent
 
-> Why ORCA exists: the problem, the users, the design principles.
+Why ORCA exists: the problem, the users, the design principles.
 
 ## The problem
 

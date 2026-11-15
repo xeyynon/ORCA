@@ -1,31 +1,108 @@
+/*
+ * Built like the top bar (owner, 2026-11-16: "split into two, one side from the left, the other from the right, middle
+ * nothing, the same size"). No strip: two capsules on a transparent row.
+ *   left   health (API, data age, refreshed), flush with the left edge, rounded on its right; the way into Data;
+ *   right  context (camera on the Globe, the clock), flush with the right edge, rounded on its left.
+ * Same surface, hairline border and light elevation as the top bar's capsules; each slides in from its own edge
+ * (260 ms, off under reduced motion via base.css). The row keeps the bar's height (--statusbar-h).
+ */
 .statusbar {
+  /* Floats over the bottom of the page, like the top bar's capsules over its top (owner, 2026-11-16: "utilise this
+     space"): the page runs to the bottom edge and shows between the capsules; only the capsules take clicks.
+     PageLayout pads its end by the bar's height so the last line can scroll clear of them. */
+  position: fixed;
+  z-index: 3;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: var(--gap-4);
+  height: var(--statusbar-h);
+  background: transparent;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.statusbar__health, .statusbar__context { pointer-events: auto; }
+.statusbar__health, .statusbar__context {
   display: flex;
   align-items: center;
   gap: var(--gap-4);
-  height: var(--statusbar-h);
-  padding: 0 var(--gap-3);
-  overflow-x: auto;
-  white-space: nowrap;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-bottom: 0;
   background: var(--bg-panel);
-  border-top: 1px solid var(--border);
+  box-shadow: var(--elev-1);
 }
-.statusbar::-webkit-scrollbar { display: none; }
-/* Two groups: the system's health on the left (a button into the Data page), where and when on the right. */
-.statusbar__health, .statusbar__context { display: flex; align-items: center; gap: var(--gap-4); min-width: 0; }
-/* One line, all on the left: health, then a hairline, then where and when (owner, 2026-11-15). */
-.statusbar__context { padding-left: var(--gap-4); border-left: 1px solid var(--border); }
+.statusbar__health {
+  padding: 0 var(--gap-4) 0 var(--gap-3);
+  border-left: 0;
+  border-radius: 0 var(--radius-pill) 0 0;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  animation: statusbar-from-left 260ms var(--ease-emphasized) backwards;
+}
+button.statusbar__health { cursor: pointer; }
+@media (hover: hover) { button.statusbar__health:hover { background: linear-gradient(var(--state-hover), var(--state-hover)), var(--bg-panel); } }
+.statusbar__context {
+  margin-left: auto;
+  padding: 0 var(--gap-3) 0 var(--gap-4);
+  border-right: 0;
+  border-radius: var(--radius-pill) 0 0 0;
+  animation: statusbar-from-right 260ms var(--ease-emphasized) backwards;
+}
 
-/* Globe, desktop: a slim strip floating at the bottom left; the globe and its right-hand widgets take the full height. */
+@keyframes statusbar-from-left { from { opacity: 0; transform: translateX(-24px); } to { opacity: 1; transform: none; } }
+@keyframes statusbar-from-right { from { opacity: 0; transform: translateX(24px); } to { opacity: 1; transform: none; } }
+
+/*
+ * Globe, desktop (owner, 2026-11-16): one tab in the middle of the bottom edge holding both groups, flush with the
+ * edge like the top bar's centre tab is with the top (rounded on its top corners only), so the left and right edges
+ * stay free for the panels and the globe. Liquid glass: frosted blur with a little saturation, a hairline edge, a soft sheen
+ * along the top. Its fill is --glass-bg, measured to keep text at 4.5:1 over the brightest
+ * globe pixel (lib/glassContrast.test.ts); opaque where backdrop-filter is missing or less transparency is asked for.
+ */
 @media (min-width: 1001px) {
-  .statusbar--floating { position: fixed; z-index: 3; left: 0; bottom: 0; max-width: calc(100vw - 380px); border-right: 1px solid var(--border); border-top-right-radius: var(--radius-md); }
+  .statusbar--floating {
+    left: 50%;
+    right: auto;
+    pointer-events: auto;
+    transform: translateX(-50%);
+    justify-content: center;
+    gap: 0;
+    max-width: calc(100vw - 2 * var(--gap-3));
+    padding: 0 var(--gap-2);
+    border: 1px solid var(--glass-border);
+    border-bottom: 0;
+    border-radius: var(--radius-pill) var(--radius-pill) 0 0;
+    background: var(--glass-bg);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(160%);
+    backdrop-filter: blur(var(--glass-blur)) saturate(160%);
+    box-shadow: var(--elev-2), inset 0 1px 0 var(--glass-sheen);
+    animation: statusbar-rise 260ms var(--ease-emphasized) backwards;
+  }
+  .statusbar--floating .statusbar__health, .statusbar--floating .statusbar__context {
+    border: 0;
+    border-radius: var(--radius-pill);
+    background: transparent;
+    box-shadow: none;
+    animation: none;
+  }
+  .statusbar--floating .statusbar__context { margin-left: 0; padding-left: var(--gap-3); border-left: 1px solid var(--glass-border); border-radius: 0; }
 }
-.statusbar__health { height: 100%; margin-left: calc(-1 * var(--gap-2)); padding: 0 var(--gap-2); border: 0; border-radius: var(--radius); background: none; color: inherit; font: inherit; text-align: left; }
-button.statusbar__health:hover { background: var(--state-hover); }
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .statusbar--floating { background: var(--glass-bg-solid); }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .statusbar--floating { background: var(--glass-bg-solid); -webkit-backdrop-filter: none; backdrop-filter: none; }
+}
+@keyframes statusbar-rise { from { opacity: 0; transform: translate(-50%, 8px); } to { opacity: 1; transform: translateX(-50%); } }
 
-/* Phones: a sideways-scrolling strip with a hidden scrollbar was cut mid-word with no cue (audit 2026-11-15). Show the
-   first three health readings, which fit; the rest are on Home (System status) and the Data page. */
+/* Phones: the left capsule only, with its first three readings (they fit); the clock and camera are elsewhere. */
 @media (max-width: 520px) {
-  .statusbar { gap: var(--gap-4); overflow-x: hidden; }
-  .statusbar__health { gap: var(--gap-4); }
+  .statusbar__health { gap: var(--gap-3); }
   .statusbar__health > :nth-child(n + 4), .statusbar__context { display: none; }
 }

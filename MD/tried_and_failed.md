@@ -1,6 +1,6 @@
 # Tried and Failed
 
-> Approaches that did not work, so nobody repeats them. Each entry gives what was tried, what happened, and the lesson. Drawn from [DECISIONS.md](DECISIONS.md) and the code. Add to the top.
+Approaches that did not work, so nobody repeats them. Each entry gives what was tried, what happened, and the lesson. Drawn from [DECISIONS.md](DECISIONS.md) and the code. Add to the top.
 
 ## 22. Two snapshots to fit TLE error growth
 - **Tried:** Fitting uncertainty against TLE age from two catalog snapshots.

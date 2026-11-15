@@ -1,4 +1,5 @@
 .page-layout { flex: 1; min-height: 0; overflow-y: auto; }
-.page-layout__inner { display: flex; flex-direction: column; gap: var(--gap-4); max-width: 1500px; margin: 0 auto; padding: var(--gap-5) var(--gap-4); }
+.page-layout__inner { display: flex; flex-direction: column; gap: var(--gap-4); max-width: 1500px; margin: 0 auto; padding: var(--gap-5) var(--gap-4) calc(var(--gap-5) + var(--statusbar-h)); }
+/* The bottom padding includes the status bar's height: the bar floats over the page, so the last line scrolls clear. */
 /* The title moves with the column, so a narrow page sits centred instead of hugging the left (owner, 2026-11-15). */
 .page-layout__inner--narrow { max-width: 960px; }

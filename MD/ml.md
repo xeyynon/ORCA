@@ -1,6 +1,6 @@
 # ML Model
 
-> The detection model, how it was evaluated, and the measured accuracy.
+The detection model, how it was evaluated, and the measured accuracy.
 
 ## Status: not applicable
 

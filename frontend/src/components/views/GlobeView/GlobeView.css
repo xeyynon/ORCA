@@ -58,8 +58,9 @@
   .globe-view__side--left .panel + .panel { border-top: 1px solid var(--border); }
   .globe-view__side--left .catalog-summary__total { font-size: 22px; }
   .globe-view__side--hidden { display: none; }
-  /* The status bar floats at the bottom left on the Globe: the panel stops above it. */
-  .globe-view__side--left { max-height: calc(100% - var(--globe-top, 0px) - 2 * var(--gap-3) - var(--statusbar-h)); }
+  /* The status bar is one glass tab at the bottom centre on the Globe (owner, 2026-11-16), so the corners are free
+     again: the left panel and the legend and playback stack reach the bottom edge. */
+  .globe-view__side--left { max-height: calc(100% - var(--globe-top, 0px) - 2 * var(--gap-3)); }
   .globe-view__hide-panel { position: absolute; z-index: 1; top: 6px; right: 6px; }
   .globe-view__show-panel { position: absolute; z-index: 2; top: calc(var(--globe-top, 0px) + var(--gap-3)); left: var(--gap-3); }
   /* Legend + playback: a hide control at the stack's top right; hidden, only a pill with the time and its state stays. */
@@ -68,6 +69,12 @@
   .globe-view__hide-foot { display: flex; justify-content: flex-end; margin-bottom: 4px; pointer-events: auto; }
   .globe-view__foot-pill { display: flex; justify-content: flex-end; pointer-events: auto; }
   .globe-view__foot-pill .btn { gap: var(--gap-2); }
+}
+/* Below 1700 px the centred status tab (about 780 px wide) reaches under the corner panels: they stop just above it. */
+@media (min-width: 1001px) and (max-width: 1699px) {
+  .globe-view__side--left { max-height: calc(100% - var(--globe-top, 0px) - 2 * var(--gap-3) - var(--statusbar-h)); }
+  .globe-view__foot { bottom: calc(var(--statusbar-h) + var(--gap-2)); }
+  .globe-view__side--right { max-height: calc(100% - var(--globe-top, 0px) - var(--globe-foot-h, 140px) - 2 * var(--gap-3) - var(--statusbar-h) - var(--gap-2)); }
 }
 @media (max-width: 1000px) {
   .globe-view__hide-panel, .globe-view__show-panel, .globe-view__hide-foot, .globe-view__foot-pill { display: none; }

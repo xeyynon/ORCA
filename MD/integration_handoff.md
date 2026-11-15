@@ -1,6 +1,6 @@
 # Integration Handoff
 
-> Handoff notes between the frontend and the backend. The imagery and ML work this file was planned for does not exist in ORCA (see [ml.md](ml.md)), so this covers the frontend-to-API contract that does.
+Handoff notes between the frontend and the backend. The imagery and ML work this file was planned for does not exist in ORCA (see [ml.md](ml.md)), so this covers the frontend-to-API contract that does.
 
 ## The contract
 

@@ -18,7 +18,7 @@ Source: [ux_audit_2026-11-15.md](ux_audit_2026-11-15.md) (finding numbers in bra
 - [x] **3. Icons and glyphs (#4, #7).** No circled "i" on footnotes (`FieldNote`, sign-in, Globe); every typed arrow/caret (→ ← › ▲ ▼) becomes an SVG icon. Check: rules test bans typed arrow glyphs in components.
 - [x] **4. Copy and numbers (#5, P2).** One `Pc` atom (superscript exponent, true minus) everywhere incl. tier thresholds; thousands separators on Analytics; degree sign attached; "108 objects"; "Succeeded" instead of "ok"; the real API origin instead of "same origin".
 - [x] **5. Type (#6, #8, #12).** One page-title size (22 px); a heading on Globe; one h1 on Reports; 11 px floor for labels and badges; section and chart titles in sentence case; no kicker above the Home h1. Checks: every view has exactly one h1; no component font-size under 11 px.
-- [x] **6. Layout (P2).** Overview: one count line above the table and "Show next 250"; phone KPIs in two columns. Globe: altitude bands listed once; phone legend collapsed. Conjunctions: method in two columns with a tier table. Analytics: freshness says "all stale" in words when it is one bar; constellation labels fit; constellation bars not in regime colours. Phone tab row gets a fade cue.
+- [x] **6. Layout (P2).** Overview: one count line above the table and "Show next 250" (replaced on 2026-11-15 by 50-row pages); phone KPIs in two columns. Globe: altitude bands listed once; phone legend collapsed. Conjunctions: method in two columns with a tier table. Analytics: freshness says "all stale" in words when it is one bar; constellation labels fit; constellation bars not in regime colours. Phone tab row gets a fade cue.
 - [x] **7. Details (#9).** 24 px hit areas on desktop (sort headers, text links); disabled Globe switches say why; sign-in: real primary button, labelled "Use these details".
 - [x] **8. Decoration (#10).** Home glow and kicker removed (step 5); the Home Earth plays its collision once and rests. The sign-in scene stays: approved exception, see DECISIONS.md 2026-11-15.
 - [x] **Follow-up round:** risk KPI emphasis, horizon label, phone status bar, Data column, plurals, 320 px tabs (audit §10).
@@ -82,11 +82,23 @@ Source: [ux_audit_2026-11-15.md](ux_audit_2026-11-15.md) (finding numbers in bra
 - [ ] Starlink: compare against CelesTrak's operator-derived SupGP elements.
 - [ ] Long encounters: a 3D Pc (Coppola 2012) instead of only flagging them.
 
+## Open: final report ([final_report.md](final_report.md))
+
+- [x] Final report built from the teammate's template `Fina Report ORCA.docx`: `ORCA Final Report.docx` and `.pdf`
+      (53 pages, 21 figures, 11 tables), every claim checked against the repository (2026-11-15).
+- [x] Figures 3 to 15 from the app after the declutter pass (`snapshots/14-report-figures-2026-11-15/`), with the
+      API health page as Figure 12; text matched to the live run (262,303 approaches, 9 critical, 640 high).
+- [x] Guide's name is Ashish Kumar Dalai (owner, 2026-11-16); template's "ASISH" corrected in the build.
+- [ ] Biodata: mobile numbers, permanent addresses, photos (and university e-mails if required) from the team.
+- [ ] Decide whether to redraw Figure 1 (shows three tiers and two features the code does not have).
+- [ ] After `ui/design-system-v2` is merged, update the deployment paragraph in `report/generator/content.py` and rebuild.
+
 ## Open — paper (paper/, MD/paper_draft.md)
 
 - [ ] Choose the conference; adapt `paper/main.tex` to its template and page rules
-      (currently 6 pages, IEEE two-column).
-- [ ] Fill in authors' department, university and e-mails (TODO in `main.tex`); confirm the author order.
+      (currently 7 pages, IEEE two-column; the Springer LNCS version in `ORCA_overleaf/` already has authors,
+      supervisor and e-mails).
+- [ ] Fill in authors' department, university and e-mails in `paper/main.tex` (still TODO there); confirm the author order.
 - [ ] Check the 4 SECONDARY references in a library: Foster & Estes 1992, Alfano & Negron 1993,
       the smart-sieve paper (2002), and COVGEN's pages.
 - [ ] Archive the TLE snapshots (`benchmarks/data/*.tle`, git-ignored) somewhere citable, and cite

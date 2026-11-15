@@ -1,8 +1,8 @@
 # Frontend Guide
 
-> How the React frontend is built, component by component. Read from `frontend/src` on 2026-10-03.
-> The rulebook it follows is [rules.md](rules.md). The short run guide is [../frontend/README.md](../frontend/README.md).
-> This file is a deep reference. If you want it out of git, add `MD/frontend.md` to `.gitignore`.
+How the React frontend is built, component by component. Read from `frontend/src` on 2026-10-03.
+The rulebook it follows is [rules.md](rules.md). The short run guide is [../frontend/README.md](../frontend/README.md).
+This file is a deep reference. If you want it out of git, add `MD/frontend.md` to `.gitignore`.
 
 ## 1. Stack
 
@@ -46,23 +46,26 @@ src/
 
 ## 4. Components
 
-**Atoms (12):** Badge, Button, Divider, Dot, Icon, IconButton, Kbd, Label, Mono, Spinner, Swatch, Unit.
+**Atoms (15):** Badge, Button, Divider, Dot, Icon, IconButton, Kbd, Label, Mono, SheetHandle, Skeleton, Spinner, Swatch, Switch, Unit.
 
-**Molecules (30):** Brand, Callout, CheckboxRow, CredentialRow, EmptyState, FactRow, FieldNote, GlobeTooltip, Kpi, LegendItem, LoadingMark, NavTab, NumberField, Panel, RangeMarker, RiskBadge, SearchField, SearchResultItem, SectionHeader, SegmentedControl, SelectField, SessionControl, ShortcutRow, SortHeader, StatusField, StatusIndicator, TextField, ThemeToggle, TleAgeChip, ValueUnit.
+**Molecules (45):** ArrowLink, AskButton, BlockHeader, Brand, Callout, ChatComposer, ChatMessage, CheckboxRow, CopyButton, CredentialRow, EmptyState, FactRow, FieldNote, FineOnly, GlobeTooltip, GlossaryTerm, Kpi, LegendItem, LoadingMark, MenuItem, NavTab, NoticeRow, NumberField, Pager, Panel, PrevNextNav, QuickReplyChips, RangeMarker, RiskBadge, SearchField, SearchResultItem, SectionHeader, SegmentedControl, SelectField, ShortcutRow, SkipLink, SortHeader, StatusField, StatusIndicator, StepDots, TextField, ThemeToggle, TleAgeChip, ToggleChip, ValueUnit.
 
-**Organisms (41):** AppBar, BarList, CameraCard, CatalogSummaryCard, CatalogTable, ChartCard, ChartLegend, ConjunctionCard, ConjunctionControls, ConjunctionMethod, ConjunctionTable, DataStatusCard, DataTable, DebrisBackdrop, DonutChart, EvaluatorAccess, EventTimeline, FiltersCard, GlobeCanvas, GlobeLegend, HeatmapChart, Histogram, JobProgress, KpiRow, LoginForm, MethodNote, Modal, ObjectCard, ObjectSearch, ObjectStanding, PageLayout, PairCard, PlaybackBar, PrimaryNav, RegimeBreakdown, RiskSummaryBar, ShortcutsHelp, StatusBar, TimeScrubber, UpdateCatalogPanel, ViewOptionsCard.
+**Organisms (60):** AppBar, AppMenu, ApproachPreview, AskOrcaPanel, BarList, BottomSheet, CameraCard, CatalogFilterBar, CatalogSummaryCard, CatalogTable, ChartCard, ChartLegend, ChunkErrorBoundary, ConjunctionCard, ConjunctionControls, ConjunctionMethod, ConjunctionTable, DataQuality, DataStatusCard, DataTable, DebrisBackdrop, DonutChart, EvaluatorAccess, EventTimeline, FiltersCard, GlobeCanvas, GlobeLegend, HeatmapChart, Histogram, HomeHero, HomeKpis, JobProgress, KpiRow, LoginForm, MethodNote, Modal, ObjectCard, ObjectSearch, ObjectStanding, OrbitDistribution, PageLayout, PairCard, PlaybackBar, PopoverMenu, PrimaryNav, RegimeBreakdown, ReportBuilder, ReportDocument, ResultAnswer, ResultCaveats, RiskSummaryBar, SearchPopover, ShortcutsHelp, StaleDataBanner, StatusBar, TimeScrubber, TourCard, TourOverlay, UpdateCatalogPanel, ViewOptionsCard.
 
-**Views (7):** LoadingScreen, LoginView, OverviewView, GlobeView, ConjunctionsView, AnalyticsView, DataView.
+**Views (10):** AnalyticsView, ConjunctionsView, DataView, GlobeView, HealthView, HomeView, LoadingScreen, LoginView, OverviewView, ReportsView.
 
 ## 5. Views and keys
 
 | Key | View | Shows |
 |---|---|---|
-| `1` | Overview | Catalog KPIs, sortable table, object detail, regime breakdown |
-| `2` | Globe | three.js Earth, every object, orbit paths, time scrub up to +7 days |
-| `3` | Conjunctions | Method panel (from `/api/conjunctions/method`), cancellable search over 1–7 days, "Top N of M" with tier counts over all M, uncertainty and TLE age per event, long-encounter badges, pair detail, event timeline, CSV/JSON export |
-| `4` | Analytics | Server statistics, plus histograms, a density heatmap, bar lists and donut charts derived in the browser |
-| `5` | Data | Catalog freshness and Celestrak refresh with progress |
+| `H` (or the logo) | Home ("Mission control") | Headline object count, three run figures, the five worst approaches, orbit regimes, data quality with the API state |
+| `1` | Overview | Three KPI cards, a filterable table 50 rows a page, the object card beside it with its standing in the catalogue |
+| `2` | Globe | three.js Earth, every object, orbit paths, time scrub up to +7 days, colour by altitude, type or constellation |
+| `3` | Conjunctions | Method panel, cancellable search over 1 to 7 days, tier counts over everything found, 25 rows a page, the pair card beside the table |
+| `4` | Analytics | Histograms, a density heatmap, bar lists and a donut, all derived in the browser; the scope is stated once in the subtitle |
+| `5` | Data | Catalogue status and the Celestrak refresh; API details under "For developers" |
+| `6` | Reports | Report builder and a printable PDF |
+| (none) | API health (`#/health`) | Opened from Data: whether the API answers, response time, what it reports, the raw JSON folded |
 
 `/` focuses search, `T` toggles the theme, `?` lists shortcuts, `Esc` steps back once per press. Handled by one window listener in `hooks/useKeyboardShortcuts.ts`.
 
@@ -72,12 +75,14 @@ src/
 |---|---|
 | `useAsync` | Shared loading, result and error states |
 | `useSession` | Sign-in state and token |
-| `useHealth` | Polls `/health` |
+| `useHealth` | Polls `/health` every 15 s; also returns `check` (last check time, response time, last error) and `recheck` for the API health page |
 | `useCatalogUpdate` | Triggers the refresh and tracks progress |
 | `useConjunctionSearch`, `usePairAssessment` | Conjunction search (cancellable; holds the whole result with its counts) and pair detail |
 | `useClipboard` | Copy with a short "copied" state (evaluator panel) |
 | `usePositions`, `useOrbitPaths`, `useTleById` | Globe data and object detail |
 | `useObjectSearch` | Catalog search |
+| `useHashView` | The current view from the URL hash (also feeds `PageAnalytics`, one Vercel page view per view) |
+| `useElementHeight` | Measures an element so the Globe's side panel stops above the bottom-right stack |
 | `useHashView` | View selection through the URL hash |
 | `useKeyboardShortcuts`, `useTheme`, `useNow`, `useElapsed` | UI plumbing |
 
