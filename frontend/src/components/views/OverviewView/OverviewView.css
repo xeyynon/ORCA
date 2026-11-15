@@ -2,4 +2,7 @@
 .overview__grid--split { grid-template-columns: minmax(0, 1fr) 360px; }
 .overview__main { min-width: 0; }
 .overview__side { display: flex; flex-direction: column; gap: var(--gap-3); min-width: 0; }
-@media (max-width: 1000px) { .overview__grid--split { grid-template-columns: 1fr; } }
+/* The object card stays in view while the table scrolls (sticky in .page-layout, the scroll container); it scrolls on
+   its own when taller than the window (declutter plan 2026-11-15). */
+.overview__grid--split > .overview__side { position: sticky; top: var(--gap-4); max-height: calc(100dvh - var(--appbar-h) - var(--statusbar-h) - 2 * var(--gap-4)); overflow-y: auto; }
+@media (max-width: 1000px) { .overview__grid--split { grid-template-columns: 1fr; } .overview__grid--split > .overview__side { position: static; max-height: none; } }

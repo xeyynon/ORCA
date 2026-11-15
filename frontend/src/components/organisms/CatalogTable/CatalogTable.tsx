@@ -3,10 +3,11 @@ import type { TleRecord } from '@/api/types'
 import { ageDays, formatUtc } from '@/lib/time'
 import { fixed, integer } from '@/lib/format'
 import { deriveOrbit } from '@/lib/orbit'
+import { pageContaining, pageOf } from '@/lib/paging'
 import { sortBy } from '@/lib/sort'
-import { Button } from '../../atoms/Button/Button'
 import { Mono } from '../../atoms/Mono/Mono'
 import { Badge } from '../../atoms/Badge/Badge'
+import { Pager } from '../../molecules/Pager/Pager'
 import { ValueUnit } from '../../molecules/ValueUnit/ValueUnit'
 import type { SortDir } from '../../molecules/SortHeader/SortHeader'
 import { DataTable } from '../DataTable/DataTable'
@@ -18,10 +19,8 @@ type Props = {
   selectedId: string | null
   onSelect: (id: string) => void
   now: Date
-  /** True when `rows` is already a filtered subset: the cap line then counts matching objects, not the whole load. */
-  filtered?: boolean
-  /** Rows per page. Rows are sorted first, so a page shows the top of the chosen order; the count is stated above the
-      table and "Show next" extends it (audit 2026-11-15, Overview). */
+  /** Rows per page. Rows are sorted first, so page 1 is the top of the chosen order. 50 (was 250 with "Show next"): the
+      page stays short and the object card beside it stays in view (declutter plan 2026-11-15). */
   pageSize?: number
 }
 
@@ -34,17 +33,23 @@ const SORT_KEYS: Record<string, (t: TleRecord) => number | string> = {
   age: (t) => -Date.parse(t.epoch),
 }
 
-export function CatalogTable({ rows, selectedId, onSelect, now, filtered = false, pageSize = 250 }: Props) {
+export function CatalogTable({ rows, selectedId, onSelect, now, pageSize = 50 }: Props) {
   const [sortId, setSortId] = useState('name')
   const [sortDir, setSortDir] = useState<SortDir>('asc')
 
   const sorted = useMemo(() => sortBy(rows, SORT_KEYS[sortId] ?? SORT_KEYS.name, sortDir), [rows, sortId, sortDir])
-  // How many rows are shown; back to one page whenever the rows or their order change (a new filter or sort).
-  const [limit, setLimit] = useState(pageSize)
-  const [limitFor, setLimitFor] = useState(sorted)
-  if (limitFor !== sorted) { setLimitFor(sorted); setLimit(pageSize) }
-  const shown = sorted.slice(0, limit)
-  const rest = rows.length - shown.length
+  // Back to page 1 when the rows or their order change (a filter or a sort); to the selected object's page when it is
+  // selected from elsewhere (search, the Globe).
+  const [page, setPage] = useState(0)
+  const [pageFor, setPageFor] = useState(sorted)
+  const [seenId, setSeenId] = useState(selectedId)
+  if (pageFor !== sorted) { setPageFor(sorted); setPage(0) }
+  if (seenId !== selectedId) {
+    setSeenId(selectedId)
+    const target = selectedId ? pageContaining(sorted.findIndex((t) => t.norad_cat_id === selectedId), pageSize) : null
+    if (target !== null) setPage(target)
+  }
+  const view = pageOf(sorted, page, pageSize)
 
   const columns: Column<TleRecord>[] = [
     { id: 'name', label: 'Object', sortable: true, render: (t) => t.object_name },
@@ -66,13 +71,10 @@ export function CatalogTable({ rows, selectedId, onSelect, now, filtered = false
 
   return (
     <div className="catalog-table">
-      <p className="catalog-table__count" role="status">
-        Showing <Mono>{integer(shown.length)}</Mono> of <Mono>{integer(rows.length)}</Mono> {filtered ? 'matching' : 'loaded'} objects, in this order.
-      </p>
       <DataTable
         caption="Catalog objects"
         columns={columns}
-        rows={shown}
+        rows={view.rows}
         rowKey={(t) => t.norad_cat_id}
         selectedKey={selectedId}
         onSelect={(t) => onSelect(t.norad_cat_id)}
@@ -80,12 +82,7 @@ export function CatalogTable({ rows, selectedId, onSelect, now, filtered = false
         sortDir={sortDir}
         onSort={onSort}
       />
-      {rest > 0 ? (
-        <div className="catalog-table__more">
-          <Button onClick={() => setLimit((l) => l + pageSize)}>Show next {integer(Math.min(pageSize, rest))}</Button>
-          <span className="catalog-table__rest">{integer(rest)} more in this order</span>
-        </div>
-      ) : null}
+      <Pager noun="objects" page={view.page} pages={view.pages} from={view.from} to={view.to} total={view.total} onPage={setPage} />
     </div>
   )
 }
