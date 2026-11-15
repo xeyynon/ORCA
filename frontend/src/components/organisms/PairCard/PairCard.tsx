@@ -60,15 +60,12 @@ export function PairCard({ event, assessment, assessing, assessError, saved = fa
         <FactRow label="Time of closest approach">
           <Mono>{formatUtc(event.tca)}</Mono> <Mono muted>({formatRelative(event.tca)})</Mono>
         </FactRow>
-        <FactRow label="Mahalanobis distance">
-          {full ? <ValueUnit value={fixed(full.mahalanobis_distance, 3)} unit="σ" /> : <Mono muted>—</Mono>}
-        </FactRow>
-        <FactRow label="Combined hard-body radius">
-          {full ? <ValueUnit value={fixed(full.combined_hbr_km * 1000, 1)} unit="m" /> : <Mono muted>—</Mono>}
-        </FactRow>
+        {/* Only with a value: the stored run and a failed re-assessment have none, and a row of dashes says nothing. */}
+        {full ? <FactRow label="Mahalanobis distance"><ValueUnit value={fixed(full.mahalanobis_distance, 3)} unit="σ" /></FactRow> : null}
+        {full ? <FactRow label="Combined hard-body radius"><ValueUnit value={fixed(full.combined_hbr_km * 1000, 1)} unit="m" /></FactRow> : null}
       </div>
 
-      {saved ? <FieldNote>This pair is from the saved example run, so it is not re-assessed against the live catalog. The values above are the stored ones.</FieldNote> : null}
+      {saved ? <FieldNote>Stored values from the saved run; a live search adds the Mahalanobis distance and hard-body radius.</FieldNote> : null}
       {assessing ? <div className="pair-card__state"><Spinner /> <span>Re-assessing this pair…</span></div> : null}
       {assessError ? <FieldNote>Pair re-assessment failed: {assessError.message}. The values above are from the search result.</FieldNote> : null}
       {noRisk ? <FieldNote>Pair re-assessment: {noRisk.message}.</FieldNote> : null}
@@ -79,17 +76,11 @@ export function PairCard({ event, assessment, assessing, assessError, saved = fa
         </FieldNote>
       ) : null}
       {event.long_encounter ? (
-        <FieldNote>
-          Long encounter: the two pass slower than 0.1 km/s and stay close for a long time. The probability assumes a fast, straight-line
-          pass and can be several times too low here.
-        </FieldNote>
+        <FieldNote>Long encounter: slower than 0.1 km/s, so the probability can be several times too low.</FieldNote>
       ) : null}
 
-      <FieldNote>
-        Pc assumes the position uncertainty above, measured from successive public TLEs, because TLEs carry no covariance. A different
-        assumption can move the tier by orders of magnitude. It is a research estimate, not an operational one, and must not drive a
-        manoeuvre decision.
-      </FieldNote>
+      {/* The long form of this caveat is in the page's "things to know"; here it is one line (declutter plan 2026-11-15). */}
+      <FieldNote>A research estimate from an assumed uncertainty; not for manoeuvre decisions.</FieldNote>
 
       <Button variant="primary" onClick={onShowOnGlobe}>Show both objects on the globe</Button>
     </aside>

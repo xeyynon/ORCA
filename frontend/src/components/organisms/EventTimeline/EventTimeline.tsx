@@ -18,7 +18,8 @@ type Props = {
 }
 
 const W = 760
-const H = 220
+// 160 (was 220): the points sit in a narrow band, so the extra height was empty space (declutter plan 2026-11-15).
+const H = 160
 const PAD = { l: 52, r: 14, t: 10, b: 30 }
 const X_TICKS = 5
 

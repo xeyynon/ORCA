@@ -1,2 +1,3 @@
 .result-caveats { margin: 0; padding-left: var(--gap-4); }
 .result-caveats li + li { margin-top: var(--gap-1); }
+.result-caveats__action { margin-top: var(--gap-2); }

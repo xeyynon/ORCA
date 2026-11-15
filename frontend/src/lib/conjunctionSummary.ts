@@ -10,13 +10,12 @@ export function tierCounts(result: Pick<ConjunctionSearchResult, 'tier_counts'>)
 }
 
 /**
- * What the table holds, said so a short list is never mistaken for everything found:
- * "Top 100 of 426,418 approaches closer than 10 km" or "All 12 approaches closer than 10 km".
+ * The line above the table. The total is already in the answer above it, so this only says which of them are listed
+ * (declutter plan 2026-11-15: one home per figure).
  */
-export function resultHeadline(shown: number, total: number, reportKm: number): string {
-  const what = `${total === 1 ? 'approach' : 'approaches'} closer than ${reportKm} km`
-  if (total === 0) return `No approaches closer than ${reportKm} km`
-  return shown < total ? `Top ${integer(shown)} of ${integer(total)} ${what}` : `All ${integer(total)} ${what}`
+export function tableLine(shown: number, total: number): string {
+  if (shown >= total) return `All ${integer(shown)}, most probable first`
+  return `The ${integer(shown)} most probable`
 }
 
 /** Runtime estimate shown before a search: measured ~1.5-2 min per day of horizon for ~16,000 objects on a laptop. */
