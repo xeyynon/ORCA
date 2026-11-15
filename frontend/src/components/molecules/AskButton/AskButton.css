@@ -1,0 +1,27 @@
+/* A quiet labelled pill: neutral at rest (blue is for the active view and focus), accent ink while the panel is open. */
+.ask-btn {
+  position: relative;
+  isolation: isolate;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--text-secondary);
+  font-weight: 500;
+  white-space: nowrap;
+  transition: color var(--dur-1) var(--ease-standard), border-color var(--dur-1) var(--ease-standard);
+}
+.ask-btn::before { content: ''; position: absolute; z-index: -1; inset: 0; border-radius: inherit; background: var(--state-hover); opacity: 0; transition: opacity var(--dur-1) var(--ease-standard); }
+.ask-btn:hover { color: var(--text-primary); border-color: var(--border-strong); }
+.ask-btn:hover::before { opacity: 1; }
+.ask-btn[aria-pressed="true"] { color: var(--accent-ink); border-color: var(--accent); }
+/* Phones: icon only, a 44 px circle; the label stays in the accessible name. */
+@media (max-width: 520px) {
+  .ask-btn { justify-content: center; width: 44px; height: 44px; padding: 0; }
+  .ask-btn__label { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+}
+@media (pointer: coarse) { .ask-btn { height: 44px; } }

@@ -169,3 +169,5 @@ After the 2026-11-15 audit's polish pass (MD/ux_audit_2026-11-15.md §9). The "b
 | [09-home-approaches-1440.png](13-polish-2026-11-15/09-home-approaches-1440.png) | The run window and "That window ended 7 days ago"; TCAs marked past; Pc as 2.83 × 10⁻⁵; risk as dot + word |
 | [10-signin-1440.png](13-polish-2026-11-15/10-signin-1440.png) | Sign-in keeps its animated debris scene and glass card (owner-approved exception, DECISIONS.md 2026-11-15); the disabled button says why; "Use these details" replaces the icon on the divider |
 | [11-signin-390.png](13-polish-2026-11-15/11-signin-390.png) | The same on a phone |
+| [12-ask-button-1440.png](13-polish-2026-11-15/12-ask-button-1440.png) | Ask ORCA up front: a labelled button beside search (owner, 2026-11-15), no longer a menu row; pressed while the panel is open |
+| [13-ask-button-390.png](13-polish-2026-11-15/13-ask-button-390.png) | Phone: the same as a 44 px icon button |

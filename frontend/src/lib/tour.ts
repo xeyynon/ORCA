@@ -51,10 +51,16 @@ export const TOUR_STEPS: readonly TourStep[] = [
     body: 'Conjunctions searches for pairs of objects that pass close to each other and estimates their probability of collision. A search takes minutes, so a saved example run is there to explore first.',
   },
   {
+    id: 'ask',
+    target: '[data-tour="ask"]',
+    title: 'Ask ORCA',
+    body: 'Ask in plain words: how many objects, how old the data is, what a term means, or to open a view. Press . to ask from anywhere.',
+  },
+  {
     id: 'menu',
     target: '[data-tour="menu"]',
     title: 'Your menu',
-    body: 'Everything else lives here: notifications, Ask ORCA, keyboard shortcuts, the theme and Sign out. Choose Take the tour in this menu to see these steps again.',
+    body: 'Everything else lives here: notifications, keyboard shortcuts, the theme and Sign out. Choose Take the tour in this menu to see these steps again.',
   },
 ]
 
