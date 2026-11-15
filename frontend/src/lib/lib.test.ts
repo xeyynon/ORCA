@@ -82,7 +82,7 @@ test('formatSimTime is UTC, zero-padded, and includes the seconds', () => {
   assert.equal(formatSimTime(NaN), NO_DATA)
 })
 
-import { percentileRank } from './percentile'
+import { percentileRank, rankWords } from './percentile'
 test('percentileRank: below/above/tie/empty', () => {
   const v = [1, 2, 3, 4]
   assert.equal(percentileRank(v, 0), 0)
@@ -97,4 +97,13 @@ test('plural agrees the noun with the count', async () => {
   assert.equal(plural(1, 'object'), '1 object')
   assert.equal(plural(108, 'object'), '108 objects')
   assert.equal(plural(2, 'entry', 'entries'), '2 entries')
+})
+
+test('rankWords: higher or lower in words, never 100% or 0%, nothing for no rank', () => {
+  assert.equal(rankWords(54.2, 'loaded objects'), 'Higher than 54% of loaded objects')
+  assert.equal(rankWords(50, 'loaded objects'), 'Higher than 50% of loaded objects')
+  assert.equal(rankWords(17, 'loaded objects'), 'Lower than 83% of loaded objects')
+  assert.equal(rankWords(99.8, 'loaded objects'), 'Higher than nearly all loaded objects')
+  assert.equal(rankWords(0.1, 'loaded objects'), 'Lower than nearly all loaded objects')
+  assert.equal(rankWords(null, 'loaded objects'), null)
 })
