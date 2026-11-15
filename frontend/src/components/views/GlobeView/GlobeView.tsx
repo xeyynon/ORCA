@@ -1,4 +1,6 @@
 import { useMemo, useRef, useState } from 'react'
+import { Badge } from '../../atoms/Badge/Badge'
+import { Mono } from '../../atoms/Mono/Mono'
 import type { CSSProperties } from 'react'
 import { IconButton } from '../../atoms/IconButton/IconButton'
 import { Icon } from '../../atoms/Icon/Icon'
@@ -23,7 +25,7 @@ import { filterObjects } from '@/lib/globePrefs'
 import { ALTITUDE_BANDS, altitudeBand } from '@/lib/orbit'
 import { offsetForTca } from '@/lib/playback'
 import { riskTone } from '@/lib/risk'
-import { parseUtc } from '@/lib/time'
+import { parseUtc, formatSimTime } from '@/lib/time'
 import { positionsWaitNote } from '@/lib/waitNote'
 import type { Theme } from '@/lib/theme'
 import { Button } from '../../atoms/Button/Button'
@@ -203,6 +205,21 @@ export function GlobeView({ catalog, totalCount, selection, focus, conjunction, 
           />
         </div>
         <div className="globe-view__foot" ref={footRef}>
+          {/* Hidden (desktop): a pill that keeps the simulated time and Live / Paused / Playing on screen, so you never
+              look at a future time without knowing it (owner, 2026-11-15: a hiding option for these). */}
+          {prefs.footOpen ? null : (
+            <div className="globe-view__foot-pill">
+              <Button size="sm" onClick={() => setPrefs({ footOpen: true })}>
+                <Icon name="chevron-up" size={14} />
+                <Mono>{formatSimTime(simMs)}</Mono>
+                {playback.offsetH === 0 && !playback.playing ? <Badge tone="ok">Live</Badge> : <Badge tone="warn">{playback.playing ? `Playing ${playback.speed}×` : 'Paused'}</Badge>}
+              </Button>
+            </div>
+          )}
+          <div className={cx('globe-view__foot-stack', !prefs.footOpen && 'globe-view__foot-stack--hidden')}>
+          <div className="globe-view__hide-foot">
+            <IconButton label="Hide the legend and playback controls" onClick={() => setPrefs({ footOpen: false })}><Icon name="chevron-down" size={14} /></IconButton>
+          </div>
           <div className="globe-view__legend">
             <GlobeLegend
               colorBy={prefs.colorBy}
@@ -230,6 +247,7 @@ export function GlobeView({ catalog, totalCount, selection, focus, conjunction, 
               onResetView={() => setResetNonce((n) => n + 1)}
               onFullscreen={toggleFullscreen}
             />
+          </div>
           </div>
         </div>
       </div>

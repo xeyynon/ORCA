@@ -49,5 +49,7 @@ test('parsePrefs falls back field by field and never throws on junk', () => {
   assert.equal(parsePrefs({ colorBy: 'constellation' }).colorBy, 'constellation')
   assert.equal(parsePrefs({ panelOpen: false }).panelOpen, false)
   assert.equal(parsePrefs({}).panelOpen, true)
+  assert.equal(parsePrefs({ footOpen: false }).footOpen, false)
+  assert.equal(parsePrefs({}).footOpen, true)
   assert.equal(p.bands.LEO, false); assert.equal(p.bands.MEO, true); assert.equal(p.onlyConjunction, true)
 })
