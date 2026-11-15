@@ -1,5 +1,5 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { getStatistics, getTles } from '@/api/endpoints'
+import { getTles } from '@/api/endpoints'
 import type { ConjunctionQuery } from '@/api/endpoints'
 import type { ConjunctionEvent } from '@/api/types'
 import type { CameraGeo } from '@/lib/coords'
@@ -68,7 +68,6 @@ export function Workspace({ username, onSignOut, theme, onToggleTheme: toggleThe
 
   // Shared across views so switching views never refetches or loses the selection.
   const catalog = useAsync((signal) => getTles(CATALOG_LIMIT, { signal }), [])
-  const stats = useAsync((signal) => getStatistics({ signal }), [catalog.data?.length ?? null], view === 'analytics' && catalog.data !== null)
   const update = useCatalogUpdate()
 
   const [selection, setSelection] = useState<string[]>([])
@@ -241,7 +240,7 @@ export function Workspace({ username, onSignOut, theme, onToggleTheme: toggleThe
           onShowOnGlobe={showOnGlobe}
         />
       ) : null}
-      {view === 'analytics' ? <AnalyticsView catalog={catalog} stats={stats} totalCount={health?.database.tles_count ?? null} now={now} /> : null}
+      {view === 'analytics' ? <AnalyticsView catalog={catalog} totalCount={health?.database.tles_count ?? null} now={now} /> : null}
       {view === 'data' ? <DataView health={health} apiStatus={apiStatus} summary={summary} update={update} onOpenHealth={() => go('health')} /> : null}
       {view === 'health' ? <HealthView health={health} apiStatus={apiStatus} check={healthCheck} onRecheck={recheckHealth} onBack={() => go('data')} now={now} /> : null}
       {view === 'reports' ? <ReportsView summary={summary} health={health} conjSearch={conjSearch} selectedConjKey={conjKey} username={username} now={now} /> : null}
