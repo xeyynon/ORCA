@@ -1,1 +1,8 @@
 .app { display: flex; flex-direction: column; height: 100%; min-height: 0; background: var(--bg-canvas); }
+/* Globe, desktop: the globe runs under the top bar, whose three capsules float over it with their own surfaces; no band
+   of page colour between them (owner, 2026-11-15). Below 1101 px the bar wraps to two rows and stays in the flow. */
+@media (min-width: 1101px) {
+  .app--immersive { position: relative; }
+  .app--immersive > .appbar { position: absolute; top: 0; left: 0; right: 0; }
+  .app--immersive .globe-view { --globe-top: var(--appbar-h); }
+}
