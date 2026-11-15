@@ -194,18 +194,18 @@ export function GlobeView({ catalog, totalCount, selection, focus, conjunction, 
             onCamera={onCamera}
           />
         </div>
-        <div className="globe-view__legend">
-          <GlobeLegend
-            colorBy={prefs.colorBy}
-            shown={drawn.length}
-            total={loaded ? summary.data?.total ?? null : null}
-            showOrbit={prefs.showOrbits && selection.length > 0}
-            hasConjunction={activeConj !== null}
-            hasSelection={selection.length > 0}
-            skipped={positions.data?.skipped ?? 0}
-          />
-        </div>
         <div className="globe-view__foot">
+          <div className="globe-view__legend">
+            <GlobeLegend
+              colorBy={prefs.colorBy}
+              shown={drawn.length}
+              total={loaded ? summary.data?.total ?? null : null}
+              showOrbit={prefs.showOrbits && selection.length > 0}
+              hasConjunction={activeConj !== null}
+              hasSelection={selection.length > 0}
+              skipped={positions.data?.skipped ?? 0}
+            />
+          </div>
           {inSheet ? <div className="globe-view__sheet"><BottomSheet title={sheetTitle}>{details}</BottomSheet></div> : null}
           <div className="globe-view__bar">
             <PlaybackBar

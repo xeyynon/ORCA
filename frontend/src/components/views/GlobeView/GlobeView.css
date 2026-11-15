@@ -31,7 +31,9 @@
 }
 
 /* The legend sits at the foot of the stage, clear of the left panel (260 px) and the playback bar (right). */
-.globe-view__legend { position: absolute; z-index: 1; left: calc(260px + 2 * var(--gap-3)); bottom: var(--gap-3); max-width: 280px; pointer-events: none; }
+/* In the right-hand foot column, just above the playback bar (owner, 2026-11-15: move it right): stacked, so it never
+   depends on the bar's height. */
+.globe-view__legend { margin-bottom: var(--gap-2); pointer-events: none; }
 
 /* Narrow: the globe first, with its playback bar laid over its foot; what is selected next, filters last, all scrolling.
    A selection becomes a bottom sheet in the space between the top of the globe and the bar; the sheet clips to it. */
@@ -40,7 +42,7 @@
   .globe-view__center { position: relative; inset: auto; height: 68dvh; min-height: 360px; flex: none; order: 0; }
   .globe-view__foot { top: var(--gap-2); left: var(--gap-2); right: var(--gap-2); bottom: var(--gap-2); width: auto; justify-content: flex-end; gap: var(--gap-2); }
   .globe-view__sheet { position: relative; flex: 1; min-height: 0; overflow: hidden; border-radius: var(--radius-lg); }
-  .globe-view__legend { left: var(--gap-2); top: var(--gap-2); bottom: auto; max-width: calc(100% - 2 * var(--gap-2)); }
+  .globe-view__legend { position: absolute; z-index: 1; left: 0; top: 0; margin: 0; max-width: 100%; }
   .globe-view__side { position: static; width: auto; max-height: none; overflow: visible; padding: var(--gap-3); }
   .globe-view__side--right { order: 1; }
   .globe-view__side--left { order: 2; }
