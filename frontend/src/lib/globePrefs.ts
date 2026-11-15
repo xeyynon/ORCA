@@ -19,6 +19,8 @@ export interface GlobePrefs {
   onlyConjunction: boolean
   /** The side panel is shown (desktop): hide it to give the globe the whole width. */
   panelOpen: boolean
+  /** The legend and playback bar are shown (desktop); hidden, a small pill keeps the time and its state on screen. */
+  footOpen: boolean
 }
 
 export const DEFAULT_PREFS: GlobePrefs = {
@@ -31,6 +33,7 @@ export const DEFAULT_PREFS: GlobePrefs = {
   bands: { LEO: true, MEO: true, GEO: true, BEYOND: true },
   onlyConjunction: false,
   panelOpen: true,
+  footOpen: true,
 }
 
 const bool = (v: unknown, fallback: boolean) => (typeof v === 'boolean' ? v : fallback)
@@ -51,6 +54,7 @@ export function parsePrefs(raw: unknown): GlobePrefs {
     bands,
     onlyConjunction: bool(o.onlyConjunction, DEFAULT_PREFS.onlyConjunction),
     panelOpen: bool(o.panelOpen, DEFAULT_PREFS.panelOpen),
+    footOpen: bool(o.footOpen, DEFAULT_PREFS.footOpen),
   }
 }
 
