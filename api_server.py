@@ -102,6 +102,24 @@ app.add_middleware(
 
 db = TLEDatabase(os.environ.get("ORCA_DB_PATH", "ssa_data.db"))
 
+def _orbital_elements(tles) -> Dict[str, tuple]:
+    """
+    {norad id: (OrbitalElement, name)} for the records that can be turned into an orbit. An unusable record (a zero
+    mean motion, say) is skipped with a warning rather than failing every catalog-wide endpoint, as _sat_cache does.
+    """
+    elements = {}
+    for tle in tles:
+        try:
+            oe = tle.to_orbital_element()
+            if not oe.n > 0:
+                raise ValueError(f"mean motion {oe.n} rad/s is not positive")
+        except Exception as exc:
+            logger.warning("skipping %s: %s", tle.norad_cat_id, exc)
+            continue
+        elements[tle.norad_cat_id] = (oe, tle.object_name)
+    return elements
+
+
 # In-memory cache for expensive computations
 _conjunction_cache = {}
 _analytics_cache = {}
@@ -809,9 +827,7 @@ def search_conjunctions(  # sync on purpose: runs in FastAPI's threadpool so /he
     if len(all_tles) < 2:
         raise HTTPException(status_code=400, detail="Insufficient TLEs in database")
     
-    orbital_elements = {}
-    for tle in all_tles:
-        orbital_elements[tle.norad_cat_id] = (tle.to_orbital_element(), tle.object_name)
+    orbital_elements = _orbital_elements(all_tles)
     
     detector = ConjunctionDetector(time_horizon_days=time_horizon_days)
     search = ConjunctionSearch(detector)
@@ -888,9 +904,7 @@ async def catalog_statistics():
     
     all_tles = db.get_all_tles()
     
-    orbital_elements = {}
-    for tle in all_tles:
-        orbital_elements[tle.norad_cat_id] = (tle.to_orbital_element(), tle.object_name)
+    orbital_elements = _orbital_elements(all_tles)
     
     stats = OrbitalAnalytics.catalog_statistics(orbital_elements)
     
@@ -915,9 +929,7 @@ def export_conjunctions(format: str = Query("json", regex="^(json|csv)$")):
     """
     all_tles = db.get_all_tles()
 
-    orbital_elements = {}
-    for tle in all_tles:
-        orbital_elements[tle.norad_cat_id] = (tle.to_orbital_element(), tle.object_name)
+    orbital_elements = _orbital_elements(all_tles)
 
     detector = ConjunctionDetector(time_horizon_days=1)
     search = ConjunctionSearch(detector)
