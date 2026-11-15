@@ -10,9 +10,16 @@
   border-top: 1px solid var(--border);
 }
 .statusbar::-webkit-scrollbar { display: none; }
+/* Two groups: the system's health on the left (a button into the Data page), where and when on the right. */
+.statusbar__health, .statusbar__context { display: flex; align-items: center; gap: var(--gap-5); min-width: 0; }
+.statusbar__context { margin-left: auto; }
+.statusbar__health { height: 100%; margin-left: calc(-1 * var(--gap-2)); padding: 0 var(--gap-2); border: 0; border-radius: var(--radius); background: none; color: inherit; font: inherit; text-align: left; }
+button.statusbar__health:hover { background: var(--state-hover); }
+
 /* Phones: a sideways-scrolling strip with a hidden scrollbar was cut mid-word with no cue (audit 2026-11-15). Show the
-   first three readings, which fit; the rest are on Home (System status) and the Data page. */
+   first three health readings, which fit; the rest are on Home (System status) and the Data page. */
 @media (max-width: 520px) {
   .statusbar { gap: var(--gap-4); overflow-x: hidden; }
-  .statusbar > :nth-child(n + 4) { display: none; }
+  .statusbar__health { gap: var(--gap-4); }
+  .statusbar__health > :nth-child(n + 4), .statusbar__context { display: none; }
 }

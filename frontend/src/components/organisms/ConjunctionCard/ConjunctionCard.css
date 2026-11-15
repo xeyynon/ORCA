@@ -2,5 +2,13 @@
 .conjunction-card__title { display: flex; align-items: center; gap: var(--gap-2); font-weight: 600; }
 .conjunction-card__pair { display: grid; grid-template-columns: 1fr auto 1fr; align-items: start; gap: var(--gap-2); }
 .conjunction-card__name { font-weight: 600; overflow-wrap: anywhere; }
-.conjunction-card__grid { display: grid; grid-template-columns: 1fr; gap: var(--gap-2); }
+/* Two columns, the time across both: the card fits the space above the playback bar without scrolling, even at 768 px tall. */
+.conjunction-card__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--gap-2) var(--gap-3); margin: 0; }
+.conjunction-card__grid > :first-child { grid-column: 1 / -1; }
 .conjunction-card__actions { display: flex; flex-direction: column; gap: var(--gap-2); margin-top: var(--gap-1); }
+.conjunction-card__why { margin: 0; color: var(--text-tertiary); font-size: 12px; }
+/* Short laptop screens (720 px tall): slightly tighter spacing so the whole card still fits above the playback bar. */
+@media (max-height: 760px) {
+  .panel:has(.conjunction-card__grid) .panel__body { gap: 6px; padding-top: 8px; padding-bottom: 10px; }
+  .conjunction-card__grid { gap: 6px var(--gap-3); }
+}
