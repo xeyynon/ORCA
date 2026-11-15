@@ -4,7 +4,7 @@ import { ALTITUDE_BANDS, altitudeBand } from './orbit'
 import type { AltitudeBand } from './orbit'
 import { OBJECT_TYPES } from './objectTypes'
 
-export type ColorBy = 'altitude' | 'type'
+export type ColorBy = 'altitude' | 'type' | 'constellation'
 export type TypeFilter = 'all' | ObjectType
 
 /** Everything the person can toggle on the globe. These are preferences, so they persist across navigation (rules.md §5.1). */
@@ -43,7 +43,7 @@ export function parsePrefs(raw: unknown): GlobePrefs {
     showOrbits: bool(o.showOrbits, DEFAULT_PREFS.showOrbits),
     showConjunction: bool(o.showConjunction, DEFAULT_PREFS.showConjunction),
     labelSelected: bool(o.labelSelected, DEFAULT_PREFS.labelSelected),
-    colorBy: o.colorBy === 'type' ? 'type' : 'altitude',
+    colorBy: o.colorBy === 'type' || o.colorBy === 'constellation' ? o.colorBy : 'altitude',
     typeFilter,
     bands,
     onlyConjunction: bool(o.onlyConjunction, DEFAULT_PREFS.onlyConjunction),

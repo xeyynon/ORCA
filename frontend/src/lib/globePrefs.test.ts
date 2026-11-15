@@ -46,5 +46,6 @@ test('parsePrefs falls back field by field and never throws on junk', () => {
   assert.deepEqual(parsePrefs({ showOrbits: 'yes', colorBy: 'weird', typeFilter: 'aliens', bands: 7 }), DEFAULT_PREFS)
   const p = parsePrefs({ showOrbits: false, colorBy: 'type', typeFilter: 'debris', bands: { LEO: false, MEO: 'x' }, onlyConjunction: true })
   assert.equal(p.showOrbits, false); assert.equal(p.colorBy, 'type'); assert.equal(p.typeFilter, 'debris')
+  assert.equal(parsePrefs({ colorBy: 'constellation' }).colorBy, 'constellation')
   assert.equal(p.bands.LEO, false); assert.equal(p.bands.MEO, true); assert.equal(p.onlyConjunction, true)
 })
