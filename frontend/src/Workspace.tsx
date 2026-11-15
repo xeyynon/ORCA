@@ -27,6 +27,7 @@ import { pairKey } from '@/lib/pair'
 import { Brand } from '@/components/molecules/Brand/Brand'
 import type { Theme } from '@/lib/theme'
 import { AppBar } from '@/components/organisms/AppBar/AppBar'
+import { AskButton } from '@/components/molecules/AskButton/AskButton'
 import { AppMenu } from '@/components/organisms/AppMenu/AppMenu'
 import { Breadcrumbs } from '@/components/organisms/Breadcrumbs/Breadcrumbs'
 import { ObjectSearch } from '@/components/organisms/ObjectSearch/ObjectSearch'
@@ -120,7 +121,7 @@ export function Workspace({ username, onSignOut, theme, onToggleTheme: toggleThe
   useSearchChord(() => setSearchOpen(true))
   const [askOpen, setAskOpen] = useState(false)
   const askInputRef = useRef<HTMLInputElement>(null)
-  const askButtonRef = useRef<HTMLSpanElement>(null)
+  const askButtonRef = useRef<HTMLSpanElement>(null) // wraps the Ask ORCA button: focus returns there when the panel closes
   const closeAsk = useCallback(() => { setAskOpen(false); askButtonRef.current?.querySelector('button')?.focus() }, [])
   const ask = useAskOrca({
     open: askOpen, view, theme, health, summary, loaded: catalog.data ?? [], conjSearch, inputRef: askInputRef,
@@ -186,9 +187,8 @@ export function Workspace({ username, onSignOut, theme, onToggleTheme: toggleThe
           <SearchPopover open={searchOpen} onOpen={() => setSearchOpen(true)} onClose={closeSearch} inputRef={searchRef}>
             <ObjectSearch bare inputRef={searchRef} query={query} onQueryChange={setQuery} results={search.results} loading={search.loading} degraded={search.degraded} onPick={(id) => { closeSearch(); showOnGlobe([id]) }} />
           </SearchPopover>
-          <span ref={askButtonRef}>
-            <AppMenu username={username} theme={theme} notices={notices} onGo={go} onAsk={() => setAskOpen(true)} onShortcuts={() => setHelpOpen(true)} onTour={tour.start} onToggleTheme={toggleTheme} onSignOut={onSignOut} />
-          </span>
+          <span ref={askButtonRef}><AskButton open={askOpen} onToggle={() => (askOpen ? closeAsk() : setAskOpen(true))} /></span>
+          <AppMenu username={username} theme={theme} notices={notices} onGo={go} onShortcuts={() => setHelpOpen(true)} onTour={tour.start} onToggleTheme={toggleTheme} onSignOut={onSignOut} />
         </>}
       />
 
