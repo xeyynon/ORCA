@@ -24,8 +24,8 @@ type Props = {
 }
 
 const REASON = {
-  past: 'This closest approach is already in the past. Positions can only be shown from now to 7 days ahead.',
-  beyond: 'This closest approach is more than 7 days ahead, beyond what positions can be shown for.',
+  past: 'Already past: the globe shows now to 7 days ahead.',
+  beyond: 'More than 7 days ahead: beyond what the globe can show.',
 } as const
 
 /** The conjunction shown on the globe: when, how close, how fast, how risky, and a way to see it happen. */
@@ -51,24 +51,27 @@ export function ConjunctionCard({ event, nowMs, onJumpToTca, onViewDetails, onCl
         <div><div className="conjunction-card__name">{event.sat2_name}</div><Mono muted>{event.sat2_id}</Mono></div>
       </div>
 
+      {/* Two columns, the time across both: three rows instead of six. The TLE age sits with the uncertainty it drives. */}
       <div className="conjunction-card__grid">
         <FactRow label="Time of closest approach"><Mono>{formatUtc(event.tca)}</Mono> <Mono muted>({formatRelative(event.tca, new Date(nowMs))})</Mono></FactRow>
         <FactRow label="Miss distance"><ValueUnit value={fixed(event.min_distance_km, 2)} unit="km" /></FactRow>
-        <FactRow label="Relative velocity">
+        <FactRow label="Probability (Pc)"><Mono>{pc(event.probability_of_collision)}</Mono></FactRow>
+        <FactRow label="Relative speed">
           <ValueUnit value={fixed(event.relative_velocity_kms, event.relative_velocity_kms < 0.1 ? 4 : 2)} unit="km/s" />
           {coMoving ? <> <Badge tone="accent" title="Relative speed under 50 m/s at closest approach">Co-moving</Badge></> : null}
         </FactRow>
-        <FactRow label="Probability of collision"><Mono>{pc(event.probability_of_collision)}</Mono></FactRow>
-        <FactRow label="Position uncertainty (1 sigma)"><ValueUnit value={fixed(event.uncertainty_km, 2)} unit="km" /></FactRow>
-        <FactRow label="Older TLE's age"><ValueUnit value={fixed(event.tle_age_days, 1)} unit="days" /></FactRow>
+        <FactRow label="Uncertainty (1σ)"><ValueUnit value={fixed(event.uncertainty_km, 2)} unit="km" /> <Mono muted>· TLE {fixed(event.tle_age_days, 1)} d</Mono></FactRow>
       </div>
 
-      {coMoving ? <FieldNote>These two are flying together (a formation or a shared launch). A small miss distance between co-moving objects is expected and is not a crossing encounter.</FieldNote> : null}
-      {event.long_encounter ? <FieldNote>Long encounter (under 0.1 km/s): the probability assumes a fast pass and can be several times too low.</FieldNote> : null}
-      <FieldNote>Pc assumes the position uncertainty above (TLEs carry none): a research estimate, not an operational probability.</FieldNote>
+      {coMoving ? <FieldNote>These two fly together (a formation or a shared launch): a small miss distance is expected, not a crossing.</FieldNote> : null}
+      {event.long_encounter ? <FieldNote>Long encounter (under 0.1 km/s): the probability can be several times too low.</FieldNote> : null}
+      <FieldNote>Pc is a research estimate under an assumed uncertainty (TLEs carry none), not an operational probability.</FieldNote>
 
       <div className="conjunction-card__actions">
-        <Button size="sm" disabled={!canJump} title={canJump ? 'Move the globe to the moment of closest approach' : REASON[(jump as { reason: 'past' | 'beyond' }).reason]} onClick={onJumpToTca}>Jump to closest approach</Button>
+        {/* The jump when it can happen; otherwise the reason in words, not a greyed button (playbook UI-09). */}
+        {canJump
+          ? <Button size="sm" onClick={onJumpToTca}>Jump to closest approach</Button>
+          : <p className="conjunction-card__why">{REASON[(jump as { reason: 'past' | 'beyond' }).reason]}</p>}
         <Button size="sm" variant="primary" onClick={onViewDetails}>View full conjunction details <Icon name="arrow-right" size={14} /></Button>
       </div>
     </Panel>
