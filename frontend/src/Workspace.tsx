@@ -245,7 +245,7 @@ export function Workspace({ username, onSignOut, theme, onToggleTheme: toggleThe
       {view === 'reports' ? <ReportsView summary={summary} health={health} conjSearch={conjSearch} selectedConjKey={conjKey} username={username} now={now} /> : null}
 
       {/* On the home page these readings are a readable "System status" section instead (homepage spec, Section 05). */}
-      {view !== 'home' ? <StatusBar items={status} context={statusContext} onOpenData={view === 'data' ? undefined : () => go('data')} /> : null}
+      {view !== 'home' ? <StatusBar items={status} context={statusContext} onOpenData={view === 'data' ? undefined : () => go('data')} floating={view === 'globe'} /> : null}
       {askOpen ? <AskOrcaPanel messages={ask.messages} onSend={ask.send} onPick={ask.pick} onClose={closeAsk} inputRef={askInputRef} footnote={ask.footnote} /> : null}
       {helpOpen ? <ShortcutsHelp onClose={() => setHelpOpen(false)} /> : null}
       {tour.view ? <TourOverlay {...tour.view} /> : null}
