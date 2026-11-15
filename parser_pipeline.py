@@ -72,6 +72,16 @@ class TLE:
             bstar=sat.bstar
         )
 
+def _epoch_year_day(epoch: datetime) -> Tuple[int, float]:
+    """
+    (two-digit year, day of year with its fraction) of a naive UTC epoch, as a TLE's line 1 carries them.
+    The fraction keeps the microseconds: dropping them moves the epoch by up to a second, which shifts the
+    object along its track by up to ~7.5 km when the engine propagates from it.
+    """
+    seconds = epoch.hour * 3600 + epoch.minute * 60 + epoch.second + epoch.microsecond / 1e6
+    return epoch.year % 100, epoch.timetuple().tm_yday + seconds / 86400.0
+
+
 # ============================================================================
 # TLE PARSER
 # ============================================================================
@@ -445,12 +455,36 @@ class TLEDatabase:
             conn.close()
 
     def insert_batch(self, tles: List[TLE], replace: bool = True):
-        """Batch insert TLE records"""
+        """
+        Insert many TLE records in ONE transaction: a catalog refresh lands all at once or not at all, and costs
+        one commit instead of one per row (a connection and an fsync each took ~3 minutes for 16,000 objects).
+        With replace=False a record whose NORAD id is already stored is skipped.
+        """
         print(f"\n[DB] Inserting {len(tles)} TLEs...")
-        for i, tle in enumerate(tles):
-            self.insert_tle(tle, replace=replace)
-            if (i + 1) % 100 == 0:
-                print(f"  [{i + 1}/{len(tles)}]")
+        verb = "INSERT OR REPLACE" if replace else "INSERT OR IGNORE"
+        rows = [
+            (tle.norad_cat_id, tle.object_name, tle.epoch.isoformat(),
+             tle.inclination, tle.raan, tle.eccentricity,
+             tle.arg_of_perigee, tle.mean_anomaly, tle.mean_motion,
+             tle.bstar, tle.mean_motion_dot, tle.mean_motion_ddot,
+             tle.element_number, tle.line1, tle.line2)
+            for tle in tles
+        ]
+        conn = sqlite3.connect(self.db_path)
+        try:
+            with conn:  # commits on success, rolls the whole batch back if any row fails
+                conn.executemany(
+                    f"""
+                    {verb} INTO tle
+                    (norad_cat_id, object_name, epoch, inclination, raan,
+                     eccentricity, arg_of_perigee, mean_anomaly, mean_motion,
+                     bstar, mean_motion_dot, mean_motion_ddot, element_number, line1, line2)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """,
+                    rows,
+                )
+        finally:
+            conn.close()
         print(f"[DB] Insertion complete!")
 
     def get_tle(self, norad_cat_id: str) -> Optional[TLE]:
@@ -480,8 +514,7 @@ class TLEDatabase:
             else:
                 return None
             
-            epoch_year = epoch_dt.year % 100
-            epoch_day = epoch_dt.timetuple().tm_yday + (epoch_dt.hour * 3600 + epoch_dt.minute * 60 + epoch_dt.second) / 86400.0
+            epoch_year, epoch_day = _epoch_year_day(epoch_dt)
             
             return TLE(
                 object_name=data['object_name'],
@@ -535,8 +568,7 @@ class TLEDatabase:
                 else:
                     continue
                 
-                epoch_year = epoch_dt.year % 100
-                epoch_day = epoch_dt.timetuple().tm_yday + (epoch_dt.hour * 3600 + epoch_dt.minute * 60 + epoch_dt.second) / 86400.0
+                epoch_year, epoch_day = _epoch_year_day(epoch_dt)
                 
                 tles.append(TLE(
                     object_name=data['object_name'],
@@ -607,8 +639,7 @@ class TLEDatabase:
                 out.append(TLE(
                     object_name=name, norad_cat_id=nid,
                     epoch_year=epoch_dt.year % 100,
-                    epoch_day=epoch_dt.timetuple().tm_yday
-                    + (epoch_dt.hour * 3600 + epoch_dt.minute * 60 + epoch_dt.second) / 86400.0,
+                    epoch_day=_epoch_year_day(epoch_dt)[1],
                     bstar=0.0, mean_motion_dot=0.0, mean_motion_ddot=0.0, element_number=0,
                     line1="", line2="",
                     inclination=incl, raan=raan, eccentricity=ecc,
