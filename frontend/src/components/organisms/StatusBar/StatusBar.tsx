@@ -10,14 +10,14 @@ type Props = {
   /** Where and when you are looking (camera on the Globe, the clock): on the right. */
   context?: readonly StatusItem[]
   onOpenData?: () => void
-  /** On the Globe (desktop): a slim strip floating at the bottom left, so the globe and its right-hand widgets use the
-      full height (owner, 2026-11-15). */
+  /** On the Globe (desktop): the two capsules float over the bottom of the globe instead of taking a row of their own. */
   floating?: boolean
 }
 
 /**
- * Always the same fields in the same order. It scrolls sideways when narrow rather than wrapping:
- * a bar that changes height makes everything above it jump.
+ * Two capsules like the top bar's: health from the left edge, context from the right, nothing between (owner,
+ * 2026-11-16). Always the same fields in the same order, one line, never wrapping: a bar that changes height makes
+ * everything above it jump.
  */
 export function StatusBar({ items, context = [], onOpenData, floating = false }: Props) {
   const health = items.map((it) => <StatusField key={it.label} {...it} />)
