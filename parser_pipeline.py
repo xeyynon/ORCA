@@ -230,7 +230,9 @@ class CelestrackClient:
     """Fetch and parse TLEs from Celestrak"""
 
     BASE_URL = "https://celestrak.org/NORAD/elements/gp.php"
-    TIMEOUT = 10
+    # (connect, read) seconds. Celestrak takes longer than 10 s to start sending the ~16,000-object "active" group, so a
+    # flat 10 s timed out every full-catalogue refresh on the hosted VM (2026-11-16); "stations" always came back in time.
+    TIMEOUT = (10, 120)
     
     @classmethod
     def fetch_group(cls, group: str = "active", format_type: str = "tle") -> List[TLE]:
