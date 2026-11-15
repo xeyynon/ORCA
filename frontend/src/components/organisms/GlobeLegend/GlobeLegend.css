@@ -1,8 +1,10 @@
 /* Glass, as the playback bar (GlobeView.css): chrome over the globe; alpha measured in lib/glassContrast.test.ts. */
 .globe-legend {
+  /* Everything flows in wrapped rows; the heading, the colour key and the drawing line each take a full row. */
   display: flex;
-  flex-direction: column;
-  gap: 4px;
+  flex-flow: row wrap;
+  align-items: center;
+  gap: 2px 12px;
   padding: 8px 10px;
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
@@ -25,7 +27,7 @@
   .globe-legend:not(.globe-legend--own-key) .globe-legend__key { display: none; }
   .globe-legend--key-only { display: none; }
 }
-/* Narrow: one compact wrapped row, so the key does not cover the top of the globe. */
-@media (max-width: 1000px) {
-  .globe-legend__items { flex-direction: row; flex-wrap: wrap; gap: 2px 12px; }
-}
+/* The key flows in wrapped rows at every width (five colours in two lines, not five), so the legend and the playback
+   bar leave the selection card room above them (owner, 2026-11-15: no scrolling). */
+.globe-legend__items { flex-direction: row; flex-wrap: wrap; gap: 2px 12px; }
+.globe-legend__key, .globe-legend__cap { flex-basis: 100%; }

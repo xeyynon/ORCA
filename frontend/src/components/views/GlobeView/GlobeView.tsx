@@ -144,6 +144,7 @@ export function GlobeView({ catalog, totalCount, selection, focus, conjunction, 
 
   // What is selected: the side panel on a wide screen, a bottom sheet over the globe's foot on a phone (above the
   // playback bar, which stays reachable). Single tap on the globe selects; the sheet handle is a button as well as a drag.
+  const pairOnly = conjunction !== null && selection.length > 0 && selection.every((id) => id === conjunction.sat1_id || id === conjunction.sat2_id)
   const details = conjunction || primary || selection.length > 1 ? (
     <>
       {conjunction ? (
@@ -155,8 +156,10 @@ export function GlobeView({ catalog, totalCount, selection, focus, conjunction, 
           onClose={onClearConjunction}
         />
       ) : null}
-      {primary ? <ObjectCard tle={primary} position={posById.get(primary.norad_cat_id) ?? null} now={now} onClose={() => onSelect([])} /> : null}
-      {selection.length > 1 ? <FieldNote>{selection.length} objects selected: {selection.map(nameOf).join(' and ')}.</FieldNote> : null}
+      {/* While the selection is just the conjunction's pair, the conjunction card is the one card: an object card for one
+          of the two repeated what it shows and pushed it into a scroll (owner, 2026-11-15). Click another object for its card. */}
+      {primary && !pairOnly ? <ObjectCard tle={primary} position={posById.get(primary.norad_cat_id) ?? null} now={now} onClose={() => onSelect([])} /> : null}
+      {selection.length > 1 && !pairOnly ? <FieldNote>{selection.length} objects selected: {selection.map(nameOf).join(' and ')}.</FieldNote> : null}
     </>
   ) : null
   const sheetTitle = conjunction ? `Conjunction: ${conjunction.sat1_name} × ${conjunction.sat2_name}` : primary ? primary.object_name : `${selection.length} objects selected`

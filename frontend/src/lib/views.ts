@@ -1,7 +1,7 @@
 export const VIEWS = ['home', 'overview', 'globe', 'conjunctions', 'analytics', 'data', 'reports'] as const
 export type ViewId = (typeof VIEWS)[number]
 
-/** One name per view, used by the page title, breadcrumbs and the skip target, so they cannot disagree. */
+/** One name per view, used by the page title and the skip target, so they cannot disagree. */
 export const VIEW_LABEL: Record<ViewId, string> = {
   home: 'Mission control',
   overview: 'Overview',

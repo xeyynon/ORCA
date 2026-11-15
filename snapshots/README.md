@@ -177,3 +177,7 @@ After the 2026-11-15 audit's polish pass (MD/ux_audit_2026-11-15.md §9). The "b
 | [17-globe-panel-hidden-1440.png](13-polish-2026-11-15/17-globe-panel-hidden-1440.png) | The side panel hidden ("‹" on the panel, "› Panel" to bring it back): the globe gets the whole width |
 | [18-globe-legend-right-1440.png](13-polish-2026-11-15/18-globe-legend-right-1440.png) | The drawing line moved right (owner): stacked just above the playback bar, same right edge |
 | [19-globe-details-above-foot.png](13-polish-2026-11-15/19-globe-details-above-foot.png) | Fix: selection details stop above the drawing line and playback bar at any height (the stack is measured), instead of running under them |
+| [22-statusbar-1440.png](13-polish-2026-11-15/22-statusbar-1440.png) | Status bar: health on the left (data age as the median, refreshed as "39m ago"; one click opens Data), camera and clock on the right |
+| [23-globe-no-breadcrumbs-1440.png](13-polish-2026-11-15/23-globe-no-breadcrumbs-1440.png) | No breadcrumb strip (owner): the conjunction card already names the pair and closes it; the card fits without scrolling |
+| [21-globe-conjunction-no-scroll-1440.png](13-polish-2026-11-15/21-globe-conjunction-no-scroll-1440.png) | Conjunction card without scrolling (owner): one card instead of two, facts in two columns, the reason in place of a greyed button, the legend in rows; measured to fit at 1920x1080, 1440x900, 1366x768 and 1280x720 |
+| [20-globe-conjunction-1280x720.png](13-polish-2026-11-15/20-globe-conjunction-1280x720.png) | The same at 1280x720 |
