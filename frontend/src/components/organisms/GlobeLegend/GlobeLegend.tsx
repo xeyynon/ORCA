@@ -16,6 +16,8 @@ type Props = {
   showOrbit: boolean
   hasConjunction: boolean
   hasSelection: boolean
+  /** Objects SGP4 could not place: said on the same line as the drawing count, not in a corner of its own. */
+  skipped?: number
 }
 
 /**
@@ -24,8 +26,8 @@ type Props = {
  * colour list shows only on narrow screens, where those panels are below the fold (one home per fact, audit
  * 2026-11-15). The selection, orbit and closest-approach marks are keyed only here, so they always show.
  */
-export function GlobeLegend({ colorBy, shown, total, showOrbit, hasConjunction, hasSelection }: Props) {
-  const capped = total !== null && total > shown
+export function GlobeLegend({ colorBy, shown, total, showOrbit, hasConjunction, hasSelection, skipped = 0 }: Props) {
+  const capped = (total !== null && total > shown) || skipped > 0
   const marks = hasSelection || showOrbit || hasConjunction
   return (
     <div className={cx('globe-legend', colorBy === 'constellation' ? 'globe-legend--own-key' : !marks && !capped && 'globe-legend--key-only')}>
@@ -42,7 +44,11 @@ export function GlobeLegend({ colorBy, shown, total, showOrbit, hasConjunction, 
       {hasSelection ? <LegendItem shape="circle" color="var(--text-primary)" label="Selected" /> : null}
       {showOrbit ? <LegendItem color="var(--globe-orbit)" label="Orbit of selected, one period" /> : null}
       {hasConjunction ? <LegendItem color="var(--risk-high)" label="Closest approach (dashed line)" /> : null}
-      {capped ? <div className="globe-legend__cap">Drawing {integer(shown)} of {integer(total)} objects (filters and the request cap apply).</div> : null}
+      {capped ? (
+        <div className="globe-legend__cap">
+          Drawing {integer(shown)}{total !== null ? <> of {integer(total)}</> : null} objects{skipped > 0 ? <> ({integer(skipped)} could not be propagated)</> : null}.
+        </div>
+      ) : null}
     </div>
   )
 }

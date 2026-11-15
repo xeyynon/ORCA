@@ -1,4 +1,3 @@
-import { FieldNote } from '../../molecules/FieldNote/FieldNote'
 import type { CatalogSummaryResponse } from '@/api/types'
 import { ALTITUDE_BAND_COLOR } from '@/lib/chartColors'
 import { integer } from '@/lib/format'
@@ -46,14 +45,10 @@ export function FiltersCard({ prefs, onChange, summary, bandCounts, countsReady,
           />
         ))}
       </div>
-      <CheckboxRow
-        label="Show only conjunction objects"
-        checked={prefs.onlyConjunction}
-        onChange={(v) => onChange({ onlyConjunction: v })}
-        disabled={!conjunctionActive}
-        title={conjunctionActive ? undefined : 'No conjunction is active.'}
-      />
-      {conjunctionActive ? null : <FieldNote>Available once a conjunction is shown on the globe.</FieldNote>}
+      {/* Only while a conjunction is on the globe (see ViewOptionsCard). */}
+      {conjunctionActive ? (
+        <CheckboxRow label="Show only conjunction objects" checked={prefs.onlyConjunction} onChange={(v) => onChange({ onlyConjunction: v })} />
+      ) : null}
     </Panel>
   )
 }

@@ -47,5 +47,7 @@ test('parsePrefs falls back field by field and never throws on junk', () => {
   const p = parsePrefs({ showOrbits: false, colorBy: 'type', typeFilter: 'debris', bands: { LEO: false, MEO: 'x' }, onlyConjunction: true })
   assert.equal(p.showOrbits, false); assert.equal(p.colorBy, 'type'); assert.equal(p.typeFilter, 'debris')
   assert.equal(parsePrefs({ colorBy: 'constellation' }).colorBy, 'constellation')
+  assert.equal(parsePrefs({ panelOpen: false }).panelOpen, false)
+  assert.equal(parsePrefs({}).panelOpen, true)
   assert.equal(p.bands.LEO, false); assert.equal(p.bands.MEO, true); assert.equal(p.onlyConjunction, true)
 })
