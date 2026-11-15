@@ -403,10 +403,10 @@ src/
 ```
 
 ### 9.2 Component inventory
-- **Atoms (12):** Badge, Button, Divider, Dot, Icon, IconButton, Kbd, Label, Mono, Spinner, Swatch, Unit.
-- **Molecules (30):** Brand, Callout, CheckboxRow, CredentialRow, EmptyState, FactRow, GlobeTooltip, Kpi, LegendItem, LoadingMark, NavTab, NumberField, Panel, RangeMarker, RiskBadge, SearchField, SearchResultItem, SectionHeader, SegmentedControl, SelectField, SessionControl, ShortcutRow, SortHeader, StatusField, StatusIndicator, TextField, ThemeToggle, TleAgeChip, ValueUnit, FieldNote.
-- **Organisms (41):** AppBar, BarList, CameraCard, CatalogSummaryCard, CatalogTable, ChartCard, ChartLegend, ConjunctionCard, ConjunctionControls, ConjunctionMethod, ConjunctionTable, DataStatusCard, DataTable, DebrisBackdrop, DonutChart, EvaluatorAccess, EventTimeline, FiltersCard, GlobeCanvas, GlobeLegend, HeatmapChart, Histogram, JobProgress, KpiRow, LoginForm, MethodNote, Modal, ObjectCard, ObjectSearch, ObjectStanding, PageLayout, PairCard, PlaybackBar, PrimaryNav, RegimeBreakdown, RiskSummaryBar, ShortcutsHelp, StatusBar, TimeScrubber, UpdateCatalogPanel, ViewOptionsCard.
-- **Views (7):** LoadingScreen, LoginView, OverviewView, GlobeView, ConjunctionsView, AnalyticsView, DataView.
+- **Atoms (15):** Badge, Button, Divider, Dot, Icon, IconButton, Kbd, Label, Mono, SheetHandle, Skeleton, Spinner, Swatch, Switch, Unit.
+- **Molecules (45):** ArrowLink, AskButton, BlockHeader, Brand, Callout, ChatComposer, ChatMessage, CheckboxRow, CopyButton, CredentialRow, EmptyState, FactRow, FieldNote, FineOnly, GlobeTooltip, GlossaryTerm, Kpi, LegendItem, LoadingMark, MenuItem, NavTab, NoticeRow, NumberField, Pager, Panel, PrevNextNav, QuickReplyChips, RangeMarker, RiskBadge, SearchField, SearchResultItem, SectionHeader, SegmentedControl, SelectField, ShortcutRow, SkipLink, SortHeader, StatusField, StatusIndicator, StepDots, TextField, ThemeToggle, TleAgeChip, ToggleChip, ValueUnit.
+- **Organisms (60):** AppBar, AppMenu, ApproachPreview, AskOrcaPanel, BarList, BottomSheet, CameraCard, CatalogFilterBar, CatalogSummaryCard, CatalogTable, ChartCard, ChartLegend, ChunkErrorBoundary, ConjunctionCard, ConjunctionControls, ConjunctionMethod, ConjunctionTable, DataQuality, DataStatusCard, DataTable, DebrisBackdrop, DonutChart, EvaluatorAccess, EventTimeline, FiltersCard, GlobeCanvas, GlobeLegend, HeatmapChart, Histogram, HomeHero, HomeKpis, JobProgress, KpiRow, LoginForm, MethodNote, Modal, ObjectCard, ObjectSearch, ObjectStanding, OrbitDistribution, PageLayout, PairCard, PlaybackBar, PopoverMenu, PrimaryNav, RegimeBreakdown, ReportBuilder, ReportDocument, ResultAnswer, ResultCaveats, RiskSummaryBar, SearchPopover, ShortcutsHelp, StaleDataBanner, StatusBar, TimeScrubber, TourCard, TourOverlay, UpdateCatalogPanel, ViewOptionsCard.
+- **Views (10):** AnalyticsView, ConjunctionsView, DataView, GlobeView, HealthView, HomeView, LoadingScreen, LoginView, OverviewView, ReportsView.
 
 ### 9.3 Layer rules
 
@@ -884,7 +884,7 @@ P22 partial CI (Python tests gate deploys; frontend tests, typecheck and a live 
 
 ### Release
 - [ ] **Merge `fix/honest-conjunctions` into `main` and push** (deploys v2; backend and frontend together; needs the owner's go-ahead).
-- [ ] Decide whether the hosted site shows an evaluator login.
+- [x] Hosted site shows the evaluator login (2026-11-16).
 - [x] Update `docs/screenshots/` (2026-11-15: all six pages, after the declutter pass).
 
 ### Accuracy
@@ -894,9 +894,15 @@ P22 partial CI (Python tests gate deploys; frontend tests, typecheck and a live 
 - [ ] Starlink: compare against CelesTrak SupGP.
 - [ ] Long encounters: 3D Pc (Coppola 2012).
 
+### Final report (MD/final_report.md)
+- [x] `ORCA Final Report.docx/.pdf` built from the teammate's template by `report/generator/` (53 pages, 21 figures, 11 tables), every claim checked against the repository (2026-11-15/16).
+- [ ] Biodata: mobile numbers, addresses, photos from the team.
+- [ ] Decide whether to redraw Figure 1 (three tiers, two features the code does not have).
+- [ ] Update the deployment paragraph after `ui/design-system-v2` is merged, and rebuild.
+
 ### Paper
-- [ ] Choose the conference and adapt `main.tex` (currently 6 pages, IEEE two-column).
-- [ ] Authors' department, university, e-mails (TODO in `main.tex`); confirm author order.
+- [ ] Choose the conference and adapt `main.tex` (currently 7 pages, IEEE two-column; the LNCS version is in `ORCA_overleaf/`).
+- [ ] Authors' department, university, e-mails (TODO in `paper/main.tex`); confirm author order.
 - [ ] Check the 4 SECONDARY references in a library.
 - [ ] Archive the TLE snapshots somewhere citable and cite their sha256.
 
@@ -920,7 +926,7 @@ P22 partial CI (Python tests gate deploys; frontend tests, typecheck and a live 
 - [ ] Optional stable hostname (e.g. DuckDNS).
 
 ### Housekeeping
-- [ ] Confirm `ssa_data.db` and large assets (`demo.gif`, `pre.png`, `Video Project 1.mp4`) are handled in `.gitignore` / Git LFS.
+- [x] Large assets: `demo.gif`, `Video Project 1.mp4` and `final.png` purged from the history and git-ignored (2026-11-15). Still open: `ssa_data.db`, and `pre.png` remains.
 - [ ] Take a `pip freeze` snapshot if reproducibility over time matters (requirements have lower bounds only).
 
 ### Open questions (PRD / brief)
@@ -935,7 +941,7 @@ Default demo configuration; whether to wire up or remove the dead caches; target
 | Role | Person |
 |---|---|
 | Team | Surya Pratik (23BCE8602), Abhinav Pentani (23BCE8597), Shaik Saifuddin (23BCE7306), Aditi Sharma (23BCE8592) |
-| Faculty guide | Asish Kumar Dalai |
+| Faculty guide | Ashish Kumar Dalai |
 | Faculty ID / Department ID | 70054 / 627 (assigned by column position in a screenshot; not independently verified) |
 
 **Proposal content:** background (screening is a filter, not a risk assessment); problem (public services such as SOCRATES are one-vs-all; Stevenson et al. 2023 is the closest work but uses non-public data; nobody reports the screening quality lost with public TLEs only); objectives (reproducible TLE pipeline; coarse filters: apogee–perigee, orbit-path, time window; TCA/miss/relative velocity; simple Pc with assumed radii and covariance; distance vs Pc ranking; threshold sensitivity); bounded scope (public TLEs, SGP4, parametric uncertainty, not an operational service); six-phase 18-week timeline (literature, propagation, screening, refinement and Pc, scenario runs, paper and viva); validation plan (check propagation against published positions; confirm the filtered pipeline retains every event from a brute-force search on a reduced catalogue; check Pc against worked examples; report sensitivity to radius and covariance); six references.
@@ -1029,4 +1035,5 @@ Trust the code, then ORCA_MASTER.md. Items found while consolidating:
 | `external_research.md`, `literature_verification.md`, `references.bib` | Outside systems and sources; verification log; bibliography |
 | `research_paper_brief.md`, `paper_draft.md`, `learning_guide.md` | Research brief and every measured result; long paper draft; the story with practice questions |
 | `LEO_Conjunction_Project_Context.md` | Capstone proposal and session record (kept as a dated record) |
+| `final_report.md` | The capstone final report: build (`report/generator/`), figure and number sources, open items |
 | `ml.md`, `ml_model_integration.md`, `failmlmodel.md` | Placeholders: no ML component |

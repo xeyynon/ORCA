@@ -1,7 +1,8 @@
 # ORCA Master Reference
 
 > The master reference for the whole system. **When documents disagree, trust the code first and this file second.**
-> Last reconciled with the code: 2026-10-15, on branch `fix/honest-conjunctions` (conjunction engine v2). The hosted copy still runs the code at tag `orca-as-built-2026-10-14` until that branch is merged and pushed.
+> Last reconciled with the code: 2026-11-16, on branch `ui/design-system-v2` (design system v2, the 2026-11-15 audit and declutter pass, the API health page, Vercel Analytics). Engine v2 (2026-10-15) is merged and hosted. `main` holds everything up to pull request #7. Open and mergeable on 2026-11-16: PR #9 (`ui/design-system-v2`: the README back at the root, the purge's `.gitignore`, the smaller status bar, Vercel Analytics) and PR #8 (`fix/bug-sweep-2026-10-20`: sidereal time, epoch microseconds, one-transaction ingest, skipping bad records). PR #3 (`frontendimprovements`) is older and unreviewed.
+> All commit IDs changed on 2026-11-15 when three large binaries were purged from the history (DECISIONS.md); IDs quoted in older notes no longer resolve. The newest session notes are in [session_handover_2026-11-16.md](session_handover_2026-11-16.md).
 
 ## 1. What ORCA is
 
@@ -38,6 +39,10 @@ It is an educational and research tool. It is **not** an operational collision-w
 | [ml.md](ml.md), [ml_model_integration.md](ml_model_integration.md), [failmlmodel.md](failmlmodel.md) | Placeholders. ORCA has no ML component today. |
 | [integration_handoff.md](integration_handoff.md) | The frontend-to-API contract. |
 | [conjunction_engine_v2.md](conjunction_engine_v2.md) | The current conjunction engine: what changed on 2026-10-15, why, how it was validated, its limits. |
+| [declutter_plan_2026-11-15.md](declutter_plan_2026-11-15.md) | The per-page declutter pass: what was measured, what changed, before and after for every page. |
+| [ux_audit_2026-11-15.md](ux_audit_2026-11-15.md) | The 2026-11-15 UI/UX audit that preceded it. |
+| [session_handover_2026-11-16.md](session_handover_2026-11-16.md) | Where the last working session left off. |
+| [final_report.md](final_report.md) | The capstone final report (`ORCA Final Report.docx/.pdf`): how it is built (`report/generator/`), where every figure and number comes from, what is still open. |
 | [research_paper_brief.md](research_paper_brief.md) | The research brief (v2) and every measured result (§10). |
 | [paper_draft.md](paper_draft.md) | Long draft of the paper. The 6-page IEEE version is `paper/main.tex` / `paper/main.pdf`. |
 | [literature_verification.md](literature_verification.md), [references.bib](references.bib) | Which sources were checked at source and what each one supports. |

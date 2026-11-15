@@ -95,10 +95,10 @@ The owner wrote the brief `MD/ORCA_Homepage_Redesign_Context.md` (Space Command 
 | Spec section | Built as | Data, and how it is labelled |
 |---|---|---|
 | 01 Mission overview | `HomeHero`: 60/40, medium Earth (340 px, 400 on 1080p) on one soft glow, Explore Globe / View Conjunctions, the tour, `DATA SNAPSHOT · <last refresh> UTC` | Object count from the stored catalogue; snapshot is the API's last stored refresh |
-| 02 Orbital intelligence | `HomeKpis`: four cards (catalogued objects, close pairs, high-risk, critical), each the button to its view | Run figures always name their run: "Pairs within 10 km in the stored example run" (`lib/homeBoard.ts`, tested). Never "conjunctions" or "collisions" |
+| 02 Orbital intelligence | `HomeKpis`: three cards (close pairs, high-risk, critical), each the button to Conjunctions. The catalogued-objects card was dropped on 2026-11-15: the headline already states the count | Run figures always name their run: "Pairs within 10 km in the stored example run" (`lib/homeBoard.ts`, tested). Never "conjunctions" or "collisions" |
 | 03 Close approach intelligence | `ApproachPreview`: the run's five worst rows on the existing `DataTable` (sortable), `RiskBadge` dot + word; a row opens that pair's full analysis on Conjunctions | Real rows from the run on screen or the stored example; a provenance line under the table; skeleton, error and "found nothing" states |
 | 04 Distribution + data quality | `OrbitDistribution` (whole catalogue by regime, count and share printed) beside `DataQuality` (median TLE age with "Indicative only", newest set, source, last fetch outcome) | The median is measured over the loaded subset, and the panel says so. Data age and refresh time are kept apart |
-| 05 System status | `SystemStatus`: API connection, catalogue size, oldest TLE, last successful refresh, time now; the bottom strip is hidden on this page only | A note says a connected API does not mean fresh data |
+| 05 System status | Removed 2026-11-15 (declutter plan): it repeated the headline and Data quality. The API state is now the last row of `DataQuality` ("ORCA API: Connected"), under the data age, so a connected API is never read as fresh data | |
 | §6 Track / Screen / Understand | Moved into the tour as its first step, "How ORCA works" (home only) | |
 
 Checked: a row click lands on Conjunctions with that pair selected (breadcrumb shows it); no page overflow at 390 px (the table scrolls in its own box); light theme; contrast 156/156. Snapshots: `snapshots/11-command-centre-home-2026-11-07/`.

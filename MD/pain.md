@@ -57,7 +57,7 @@
 |---|---|---|
 | P22 | **Partial CI** | Python tests (89) gate backend deploys. Frontend tests (89), the typecheck and a live Celestrak smoke test are not in CI. |
 | P23 | **Unpinned requirements** | `requirements.txt` has lower bounds only. A future release may break a clean install. |
-| P24 | **Large binaries in git** | `demo.gif`, `pre.png` and `Video Project 1.mp4` bloat clones. |
+| P24 | **Large binaries in git** | Mostly fixed 2026-11-15: `demo.gif`, `Video Project 1.mp4` and `final.png` were purged from the whole history and are git-ignored. `pre.png` and the three large design PNGs at the root remain (owner kept them). |
 | P25 | **Document drift** | Documents were reconciled with the code on 2026-10-15. Check [ORCA_MASTER.md](ORCA_MASTER.md) §4 after any engine change. |
 
 ## Token risk (security)
