@@ -20,23 +20,24 @@ type Props = {
  */
 export function ConjunctionMethod({ method, error, open }: Props) {
   if (!method) {
-    return <FieldNote>{error ? `The method description could not be loaded: ${error}` : 'Loading the method description…'}</FieldNote>
+    return <FieldNote>{error ? `We couldn’t load the method description: ${error}` : 'Loading the method description…'}</FieldNote>
   }
   return (
     <details className="conj-method" open={open}>
-      <summary className="conj-method__summary">How this list is made, and what it cannot tell you</summary>
+      <summary className="conj-method__summary">How we make this list, and what it can’t tell you</summary>
       <p className="conj-method__plain">
-        ORCA computes every object&rsquo;s position with <GlossaryTerm term="SGP4" /> from its <GlossaryTerm term="TLE" />, finds each pair that comes
-        within {method.report_km} km, and estimates a <GlossaryTerm term="Pc" /> for it at the <GlossaryTerm term="TCA" />. Pc and the risk tiers
-        rank pairs under an assumed uncertainty; they are not a prediction that anything will collide.
+        ORCA uses <GlossaryTerm term="SGP4" /> with the <GlossaryTerm term="TLE" /> provided for each object to determine where every object is located. Then it identifies
+        all pairs of objects that come within {method.report_km} kilometers of each other. For those pairs of objects, it computes an estimated <GlossaryTerm term="Pc" /> value
+        at <GlossaryTerm term="TCA" />. The Pc values along with the risk categories rank pairs of objects using an assumed uncertainty. They are NOT predictions that any
+        two objects WILL collide.
       </p>
       <div className="conj-method__grid">
         <FactRow label="Propagation">{method.propagator}</FactRow>
         <FactRow label="Screening">{method.screening}</FactRow>
-        <FactRow label="Closest approach">{method.closest_approach}</FactRow>
-        <FactRow label="Probability of collision">{method.collision_probability}</FactRow>
-        <FactRow label="Position uncertainty">{method.uncertainty}</FactRow>
-        <FactRow label="Risk tiers">
+        <FactRow label="Closest Approach">{method.closest_approach}</FactRow>
+        <FactRow label="Probability of Collision">{method.collision_probability}</FactRow>
+        <FactRow label="Uncertainty in Object Position">{method.uncertainty}</FactRow>
+        <FactRow label="Risk Categories/Tiers">
           <ul className="conj-method__tiers">
             {riskTierLines().map((t) => <li key={t.level}><RiskBadge level={t.level} /> <span>{t.rule}</span></li>)}
           </ul>

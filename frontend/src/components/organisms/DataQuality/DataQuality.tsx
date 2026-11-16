@@ -34,8 +34,8 @@ export function DataQuality({ medianAgeDays, newestAgeDays, measuredOver, stored
   const subset = measuredOver !== null && storedTotal !== null && measuredOver < storedTotal
   return (
     <section className="home-panel data-quality" aria-labelledby="data-quality-title">
-      <BlockHeader id="data-quality-title" title="Data quality" sub="How old the orbit data is, and where it comes from."
-        action={<ArrowLink label="Data and refresh" onClick={onOpen} />} />
+      <BlockHeader id="data-quality-title" title="Quality of data" sub="How long has it been since the data relating to an orbital object's elements were measured? Where did it come from?"
+        action={<ArrowLink label="Go to the Data page" onClick={onOpen} />} />
       <dl className="data-quality__list">
         <div className="data-quality__row data-quality__row--lead">
           <dt>Median TLE age</dt>
@@ -45,29 +45,29 @@ export function DataQuality({ medianAgeDays, newestAgeDays, measuredOver, stored
                 <span className="data-quality__figure">{days(medianAgeDays)}</span>
                 {fresh ? <span className="data-quality__word"><Dot tone={fresh.tone} /> {fresh.word}</span> : null}
               </>
-            ) : catalogFailed ? <span className="data-quality__missing">Not available: the catalogue did not load</span> : <Skeleton width="8ch" />}
+            ) : catalogFailed ? <span className="data-quality__missing">Not available because the catalogue didn’t load</span> : <Skeleton width="8ch" />}
           </dd>
         </div>
-        {fresh ? <p className="home-panel__note data-quality__explain">{fresh.explain}{subset ? ` Measured over the ${integer(measuredOver)} loaded objects.` : ''}</p> : null}
+        {fresh ? <p className="home-panel__note data-quality__explain">{fresh.explain}{subset ? ` This is based on the ${integer(measuredOver)} objects that are loaded.` : ''}</p> : null}
         <div className="data-quality__row">
-          <dt>Newest element set</dt>
+          <dt>Newest orbit data</dt>
           <dd>{newestAgeDays !== null ? days(newestAgeDays) : catalogFailed ? '—' : <Skeleton width="6ch" />}</dd>
         </div>
         <div className="data-quality__row">
           <dt>Source</dt>
-          <dd>Celestrak, public TLEs</dd>
+          <dd>Celestrak (public TLEs)</dd>
         </div>
         <div className="data-quality__row">
-          <dt>Last fetch from the source</dt>
+          <dt>Last download from Celestrak</dt>
           <dd>
-            {offline ? <span className="data-quality__missing">Unknown: the API is not answering</span> : (
-              <span className="data-quality__word"><Dot tone={fetch.tone} /> {fetch.text}{lastFetch?.at ? <span className="data-quality__when"> · {formatUtc(lastFetch.at)}</span> : null}</span>
+            {offline ? <span className="data-quality__missing">Unknown, because the API isn’t responding</span> : (
+              <span className="data-quality__word"><Dot tone={fetch.tone} /> {fetch.text}{lastFetch?.at ? <span className="data-quality__when"> · Recorded on {formatUtc(lastFetch.at)}</span> : null}</span>
             )}
           </dd>
         </div>
         <div className="data-quality__row">
           <dt>ORCA API</dt>
-          <dd><span className="data-quality__word"><Dot tone={apiStatus === 'online' ? 'ok' : apiStatus === 'offline' ? 'bad' : 'warn'} /> {apiStatus === 'online' ? 'Connected' : apiStatus === 'offline' ? 'Not answering' : 'Checking'}</span></dd>
+          <dd><span className="data-quality__word"><Dot tone={apiStatus === 'online' ? 'ok' : apiStatus === 'offline' ? 'bad' : 'warn'} /> {apiStatus === 'online' ? 'Connected' : apiStatus === 'offline' ? 'Not responding' : 'Checking'}</span></dd>
         </div>
       </dl>
     </section>

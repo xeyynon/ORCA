@@ -21,7 +21,7 @@ export function ObjectStanding({ tle, ranks, now }: Props) {
   const pEcc = percentileRank(ranks.ecc, tle.eccentricity)
   const pAge = age >= 0 ? percentileRank(ranks.ageDays, age) : null
   return (
-    <Panel title="Compared with the catalog">
+    <Panel title="How it compares with the rest of the catalog">
       <RangeMarker label="Altitude" value={alt === undefined ? '—' : `${integer(alt)} km`} percent={pAlt} words={rankWords(pAlt, among)} />
       <RangeMarker label="Inclination" value={`${fixed(tle.inclination, 1)}°`} percent={pIncl} words={rankWords(pIncl, among)} />
       <RangeMarker label="Eccentricity" value={fixed(tle.eccentricity, 5)} percent={pEcc} words={rankWords(pEcc, among)} />

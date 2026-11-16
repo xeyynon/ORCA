@@ -28,7 +28,7 @@ import './AnalyticsView.css'
 
 type Props = { catalog: AsyncResult<TleRecord[]>; totalCount: number | null; now: Date }
 
-const BAND_LABEL = { LEO: 'LEO (<2,000 km)', MEO: 'MEO (2,000–35,300 km)', GEO: 'GEO (≈35,786 km)', BEYOND: 'Beyond GEO' } as const
+const BAND_LABEL = { LEO: 'LEO (<2,000 km)', MEO: 'MEO (2,000 – 35,300 km)', GEO: 'GEO (≈35,786 km)', BEYOND: 'Beyond GEO' } as const
 const AGE_ORDER: readonly TleAgeTone[] = ['ok', 'warn', 'bad']
 const AGE_LABEL: Record<TleAgeTone, string> = { ok: 'Fresh (<7 days)', warn: 'Aging (7–30 days)', bad: 'Stale (≥30 days)' }
 const ECC_ORDER = ['circular', 'elliptical', 'high'] as const
@@ -81,8 +81,8 @@ export function AnalyticsView({ catalog, totalCount, now }: Props) {
       <PageLayout>
         <SectionHeader title="Analytics" />
         {catalog.status === 'error'
-          ? <EmptyState kind="error" title="Could not load the catalog" action={<Button onClick={catalog.reload}>Retry</Button>}>{catalog.error.message}</EmptyState>
-          : <EmptyState kind="awaiting" title="Loading catalog…" />}
+          ? <EmptyState kind="error" title="We couldn’t load the catalog" action={<Button onClick={catalog.reload}>Retry</Button>}>{catalog.error.message}</EmptyState>
+          : <EmptyState kind="awaiting" title="Loading the catalog…" />}
       </PageLayout>
     )
   }
@@ -90,7 +90,7 @@ export function AnalyticsView({ catalog, totalCount, now }: Props) {
     return (
       <PageLayout>
         <SectionHeader title="Analytics" />
-        <EmptyState kind="none" title="Nothing to analyse">The catalog is empty. Load TLEs from the Data view.</EmptyState>
+        <EmptyState kind="none" title="Nothing to analyse">The catalog is empty. Load TLEs from the Data page.</EmptyState>
       </PageLayout>
     )
   }
@@ -109,52 +109,52 @@ export function AnalyticsView({ catalog, totalCount, now }: Props) {
       <SectionHeader
         title="Analytics"
         subtitle={wholeCatalog
-          ? `All ${integer(chartRows.length)} stored objects.`
+          ? `All ${integer(chartRows.length)} of our stored objects.`
           : partial
-            ? `Drawn from the first ${integer(rows.length)} of ${integer(totalCount)} objects (by name, not a random sample).`
-            : `All ${integer(rows.length)} stored objects.`}
+            ? `These charts use the first ${integer(rows.length)} of ${integer(totalCount)} objects, picked by name rather than at random.`
+            : `All ${integer(rows.length)} of our stored objects.`}
       />
 
       {wholeFailed ? (
-        <EmptyState kind="error" title="Whole-catalog charts unavailable" action={<Button onClick={whole.reload}>Retry</Button>}>
-          {whole.malformed ? 'The server sent columns that do not line up, so they were not drawn' : whole.error?.message}. The charts below use only the first {integer(rows.length)} of {integer(totalCount)} objects (by name, not a random sample).
+        <EmptyState kind="error" title="Charts for the whole catalog aren’t available" action={<Button onClick={whole.reload}>Retry</Button>}>
+          {whole.malformed ? 'The server sent columns that don’t line up, so we didn’t draw them' : whole.error?.message}. The charts below only use the first {integer(rows.length)} of {integer(totalCount)} objects, picked by name rather than at random.
         </EmptyState>
       ) : null}
 
       <div className="analytics__grid">
-        <ChartCard title="Orbit regime share" scope={regimeScope} note="Derived from perigee, apogee and eccentricity.">
+        <ChartCard title="Orbit regime share" scope={regimeScope} note="From perigee, apogee and eccentricity.">
           <RegimeBreakdown counts={regimeCounts} />
         </ChartCard>
 
-        <ChartCard title="Largest constellations" note="Grouped by the first word of the name, not by owner.">
+        <ChartCard title="Largest constellations" note="Grouped by the first word in each name (not by owner).">
           <BarList
             ariaLabel="Objects by constellation name"
             // One neutral colour: the names label the categories, and the categorical hues already mean orbit regime elsewhere
             // on this page (one colour, one meaning; audit 2026-11-15, Analytics).
-            items={model.groups.map((g) => ({ label: g.label, value: g.count, color: g.label === 'Other' || g.label === UNNAMED ? 'var(--text-tertiary)' : 'var(--chart-1)', title: g.label === UNNAMED ? 'Objects named only by their international designator, such as 2021-050D' : undefined }))}
+            items={model.groups.map((g) => ({ label: g.label === 'Other' ? 'Others' : g.label, value: g.count, color: g.label === 'Other' || g.label === UNNAMED ? 'var(--text-tertiary)' : 'var(--chart-1)', title: g.label === UNNAMED ? 'Objects named only by their international designator, such as 2021-050D' : undefined }))}
           />
         </ChartCard>
 
-        <ChartCard title="How fresh is the catalog" note="Older sets propagate less accurately.">
+        <ChartCard title="How old is the catalog?" note="Less accurate propagation for older sets.">
           {ageSentence ? <p className="analytics__verdict">{ageSentence}</p> : null}
-          <Histogram bins={model.age.bins} unit="days since TLE epoch" ariaLabel="Histogram of TLE age" colorOf={(b) => AGE_TONE_COLOR[tleAgeTone(mid(b))]} />
+          <Histogram bins={model.age.bins} unit="Days since TLE epoch" ariaLabel="Histogram of TLE age" colorOf={(b) => AGE_TONE_COLOR[tleAgeTone(mid(b))]} />
           <ChartLegend items={AGE_ORDER.map((t) => ({ label: AGE_LABEL[t], color: AGE_TONE_COLOR[t], value: integer(model.ageCounts[t]) }))} />
         </ChartCard>
 
         <ChartCard title="Altitude" note="Log axis; derived from mean motion.">
-          <Histogram bins={model.alt.bins} unit="mean altitude (km, log scale)" ariaLabel="Histogram of mean altitude on a log axis" colorOf={(b) => ALTITUDE_BAND_COLOR[altitudeBand(geoMid(b))]} />
+          <Histogram bins={model.alt.bins} unit="Mean altitude (km), log scale" ariaLabel="Histogram of mean altitude on a log axis" colorOf={(b) => ALTITUDE_BAND_COLOR[altitudeBand(geoMid(b))]} />
           <ChartLegend items={ALTITUDE_BANDS.map((b) => ({ label: BAND_LABEL[b], color: ALTITUDE_BAND_COLOR[b], value: integer(model.altCounts[b]) }))} />
         </ChartCard>
 
-        <ChartCard title="Inclination" note="The spikes are constellations: Starlink near 53°, sun-synchronous near 97°, GEO near 0°.">
-          <Histogram bins={model.incl.bins} unit="inclination (°)" ariaLabel="Histogram of inclination" colorOf={(b) => INCLINATION_COLOR[inclinationClass(mid(b))]} formatTick={(v) => `${Math.round(v)}°`} />
+        <ChartCard title="Inclination" note="The spikes represent satellite clusters: Starlink at approximately 53° and sun-synchronous at approximately 97°; GEO satellites cluster around 0°.">
+          <Histogram bins={model.incl.bins} unit="Inclination (°)" ariaLabel="Histogram of inclination" colorOf={(b) => INCLINATION_COLOR[inclinationClass(mid(b))]} formatTick={(v) => `${Math.round(v)}°`} />
           <ChartLegend items={INCLINATION_CLASSES.map((c) => ({ label: c.label, color: INCLINATION_COLOR[c.id], value: integer(model.inclCounts[c.id]) }))} />
         </ChartCard>
 
         <ChartCard
           title="Eccentricity"
          
-          note={`Log axis.${model.ecc.unplottable > 0 ? ` ${plural(model.ecc.unplottable, 'object')} with e = 0 cannot be placed.` : ''}`}
+          note={`Log scale.${model.ecc.unplottable > 0 ? ` ${plural(model.ecc.unplottable, 'object')} with e = 0 can’t be shown on it.` : ''}`}
         >
           <Histogram bins={model.ecc.bins} unit="eccentricity (log scale)" ariaLabel="Histogram of eccentricity on a log axis" colorOf={(b) => ECC_COLOR[eccClass(geoMid(b))]} formatTick={(v) => v.toExponential(0).replace('e+', 'e')} />
           <ChartLegend items={ECC_ORDER.map((c) => ({ label: ECC_LABEL[c], color: ECC_COLOR[c], value: integer(model.eccCounts[c]) }))} />
@@ -162,9 +162,9 @@ export function AnalyticsView({ catalog, totalCount, now }: Props) {
 
         <div className="analytics__wide">
           <ChartCard
-            title="Where objects live: inclination × altitude"
+            title="Where objects orbit, by inclination and altitude"
            
-            note={`Brighter means more objects per cell (log colour).${model.heat.outside + model.heat.unplottable > 0 ? ` ${integer(model.heat.total)} plotted${model.heat.outside > 0 ? `, ${integer(model.heat.outside)} outside the 100 km to 1,000,000 km range` : ''}${model.heat.unplottable > 0 ? `, ${integer(model.heat.unplottable)} not placeable` : ''}.` : ''}`}
+            note={`Brighter cells hold more objects (the colour uses a log scale).${model.heat.outside + model.heat.unplottable > 0 ? ` ${integer(model.heat.total)} plotted${model.heat.outside > 0 ? `, ${integer(model.heat.outside)} outside the 100 km to 1,000,000 km range` : ''}${model.heat.unplottable > 0 ? `, ${integer(model.heat.unplottable)} couldn’t be placed` : ''}.` : ''}`}
           >
             <HeatmapChart grid={model.heat} spec={HEAT_SPEC} xUnit="inclination (°)" yUnit="mean altitude (km, log)" ariaLabel="Density heatmap of inclination against mean altitude" />
           </ChartCard>

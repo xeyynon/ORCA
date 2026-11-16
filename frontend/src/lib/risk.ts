@@ -39,9 +39,20 @@ export function countByRisk(events: ReadonlyArray<{ risk_level: string }>): Reco
 export function riskTierLines(): Array<{ level: RiskLevel; rule: string }> {
   return RISK_THRESHOLDS.map(({ level, minPc }) => ({
     level,
-    rule: minPc != null ? `Pc above ${powerOfTen(Math.round(Math.log10(minPc)))}` : 'Pc at or below every threshold',
+    rule: minPc != null ? `Pc > ${powerOfTen(Math.round(Math.log10(minPc)))}` : 'Pc ≤ all of the above thresholds',
   }))
 }
 
+/**
+ * The tiers as one sentence for the report: "A pair is rated CRITICAL when its Pc is greater than 10⁻⁴, HIGH when it is
+ * greater than 10⁻⁵, ... Any pair at or below all of these thresholds is rated NEGLIGIBLE."
+ */
+export function riskTierSentence(): string {
+  const rated = RISK_THRESHOLDS.filter((t) => t.minPc != null)
+    .map((t, i) => `${t.level} when ${i === 0 ? 'its Pc is' : 'it is'} greater than ${powerOfTen(Math.round(Math.log10(t.minPc!)))}`)
+  const floor = RISK_THRESHOLDS.find((t) => t.minPc == null)?.level ?? 'NEGLIGIBLE'
+  return `A pair is rated ${rated.slice(0, -1).join(', ')} and ${rated[rated.length - 1]}. Any pair at or below all of these thresholds is rated ${floor}.`
+}
+
 /** NASA's guidance that the tiers are set against (conjunction_detection.py header). */
-export const RISK_TIER_SOURCE = `NASA's CA Handbook (2020) recommends mitigation above ${powerOfTen(-4)}.`
+export const RISK_TIER_SOURCE = `The NASA Conjunction Assessment Handbook (2020) recommends taking action to mitigate risks greater than ${powerOfTen(-4)}.`

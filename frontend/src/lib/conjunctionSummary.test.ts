@@ -17,19 +17,19 @@ const counts = (o: Partial<Record<'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW' | 'NEGL
 test('the answer leads with what needs attention, over every approach found', () => {
   const a = resultAnswer(counts({ HIGH: 29, MEDIUM: 916, LOW: 65851, NEGLIGIBLE: 376022 }), 442818, 1, 10)
   assert.equal(a.tone, 'watch')
-  assert.equal(a.headline, 'No critical approaches; 29 high-risk in the next 24 hours')
+  assert.equal(a.headline, 'There are no critical approaches and 29 high-risk approaches within the next 24 hours')
   assert.match(a.detail, /442,818 approaches closer than 10 km/)
-  assert.match(a.detail, /441,873 of them rank low or negligible/)
+  assert.match(a.detail, /Of these, 441,873 were rated as low or negligible/)
 })
 
 test('critical wins the tone, and an all-quiet result still names its window', () => {
-  assert.equal(resultAnswer(counts({ CRITICAL: 1, HIGH: 0 }), 5, 3, 10).headline, '1 critical and 0 high-risk approach in the next 3 days')
+  assert.equal(resultAnswer(counts({ CRITICAL: 1, HIGH: 0 }), 5, 3, 10).headline, 'There is 1 critical and 0 high-risk approach within the next 3 days')
   const calm = resultAnswer(counts({ LOW: 2 }), 2, 2, 10)
   assert.equal(calm.tone, 'calm')
-  assert.equal(calm.headline, 'No critical or high-risk approaches in the next 2 days')
+  assert.equal(calm.headline, 'There are no critical or high-risk approaches within the next 2 days')
 })
 
 test('tableLine names which approaches are listed, without repeating the total', () => {
-  assert.equal(tableLine(100, 442786), 'The 100 most probable')
-  assert.equal(tableLine(12, 12), 'All 12, most probable first')
+  assert.equal(tableLine(100, 442786), 'The 100 most likely approaches')
+  assert.equal(tableLine(12, 12), 'Showing all 12, with the most likely first')
 })

@@ -38,13 +38,13 @@ export function LoginView({ configured, notice, busy, failure, onSubmit, corner 
       <div className="login-view__card">
         <div className="login-view__brand"><Brand size="card" /></div>
         <h1 className="login-view__title">Sign in</h1>
-        <p className="login-view__sub">Space situational awareness: orbits, conjunctions and catalog health.</p>
+        <p className="login-view__sub">Space situational awareness. See orbits, close approaches and how healthy the catalog is.</p>
 
         {notice ? <Callout tone="warn" title="Signed out">{notice}</Callout> : null}
 
         {configured === false ? (
-          <Callout tone="warn" title="No operator credential is set up yet">
-            The server refuses all data until one exists. In the project folder, run <code className="login-view__code">python auth.py set-password</code> and
+          <Callout tone="warn" title="No operator login has been set up yet">
+            The server won’t share any data until one exists. In the project folder, run <code className="login-view__code">python auth.py set-password</code> and
             then reload this page.
           </Callout>
         ) : (
@@ -56,7 +56,7 @@ export function LoginView({ configured, notice, busy, failure, onSubmit, corner 
             onUse={() => setPrefill({ ...EVALUATOR })} />
         ) : null}
 
-        <FieldNote>Educational and research tool built on public TLEs. Not for operational decisions.</FieldNote>
+        <FieldNote>This is an educational and research tool built on public TLEs. It is not meant for operational decisions.</FieldNote>
       </div>
     </main>
   )

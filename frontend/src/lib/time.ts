@@ -44,7 +44,7 @@ export function formatSimTime(ms: number): string {
   const d = new Date(ms)
   if (Number.isNaN(d.getTime())) return NO_DATA
   const p = (n: number) => String(n).padStart(2, '0')
-  return `${p(d.getUTCDate())} ${MONTHS[d.getUTCMonth()]} ${d.getUTCFullYear()} · ${p(d.getUTCHours())}:${p(d.getUTCMinutes())}:${p(d.getUTCSeconds())} UTC`
+  return `On ${p(d.getUTCDate())} ${MONTHS[d.getUTCMonth()]} ${d.getUTCFullYear()} · At ${p(d.getUTCHours())}:${p(d.getUTCMinutes())}:${p(d.getUTCSeconds())} UTC`
 }
 
 /** "8 Oct 2026" (UTC): a calendar day in words, for sentences that date a figure. */
@@ -53,6 +53,18 @@ export function formatDay(iso: string | null | undefined): string {
   const d = parseUtc(iso)
   if (Number.isNaN(d.getTime())) return NO_DATA
   return `${d.getUTCDate()} ${MONTHS[d.getUTCMonth()]} ${d.getUTCFullYear()}`
+}
+
+const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+const ordinal = (n: number) => `${n}${n % 100 >= 11 && n % 100 <= 13 ? 'th' : ['th', 'st', 'nd', 'rd'][n % 10] ?? 'th'}`
+
+/** "November 6th, 2026 at 18:23" (UTC): a moment written out in words, for sentences. */
+export function formatLongUtc(iso: string | null | undefined): string {
+  if (!iso) return NO_DATA
+  const d = parseUtc(iso)
+  if (Number.isNaN(d.getTime())) return NO_DATA
+  const p = (n: number) => String(n).padStart(2, '0')
+  return `${MONTH_NAMES[d.getUTCMonth()]} ${ordinal(d.getUTCDate())}, ${d.getUTCFullYear()} at ${p(d.getUTCHours())}:${p(d.getUTCMinutes())}`
 }
 
 /** "6 to 7 Nov 2026", "30 Oct to 2 Nov 2026", "30 Dec 2026 to 2 Jan 2027": a UTC window in words. */

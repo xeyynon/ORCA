@@ -21,8 +21,8 @@ test('a report never goes out with an empty section', () => {
   assert.equal(blockedReason(none, true, []), 'Choose at least one section.')
   assert.equal(blockedReason(DEFAULT_REPORT, false, []), 'The close-approach run is still loading.')
   const pair: ReportOptions = { ...DEFAULT_REPORT, sections: { ...DEFAULT_REPORT.sections, pair: true } }
-  assert.equal(blockedReason({ ...pair, pairKey: null }, true, [ev('1')]), 'Choose the pair to analyse.')
-  assert.equal(blockedReason({ ...pair, pairKey: key('9') }, true, [ev('1')]), 'Choose the pair to analyse.')
+  assert.equal(blockedReason({ ...pair, pairKey: null }, true, [ev('1')]), 'Choose which pair to analyse.')
+  assert.equal(blockedReason({ ...pair, pairKey: key('9') }, true, [ev('1')]), 'Choose which pair to analyse.')
   assert.equal(blockedReason({ ...pair, pairKey: key('1') }, true, [ev('1')]), null)
   // Summary and quality alone do not need the run.
   assert.equal(blockedReason({ ...DEFAULT_REPORT, sections: { summary: true, approaches: false, pair: false, quality: true } }, false, []), null)

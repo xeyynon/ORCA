@@ -44,7 +44,7 @@ export function EventTimeline({ events, now, selectedKey = null, onSelect }: Pro
     return { pts, t0: t0 - pad, t1: t1 + pad, yLo, yHi: yHi === yLo ? yLo * 10 : yHi, nowMs, skipped: events.length - pts.length }
   }, [events, now])
 
-  if (!plot) return <EmptyState kind="none" title="No plottable events">Every event had a non-positive probability, which cannot be placed on a log axis.</EmptyState>
+  if (!plot) return <EmptyState kind="none" title="There are no events to plot">Every event has a probability of zero or less, and those can’t be shown on a log axis.</EmptyState>
 
   const x = linearScale(plot.t0, plot.t1, PAD.l, W - PAD.r)
   const y = logScale(plot.yLo, plot.yHi, H - PAD.b, PAD.t)
@@ -81,14 +81,14 @@ export function EventTimeline({ events, now, selectedKey = null, onSelect }: Pro
               onClick={pick}
               onKeyDown={pick ? (ev) => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); pick() } } : undefined}
             >
-              <title>{`${label}\nPc ${pc(p)} · miss ${compact(e.min_distance_km)} km\nTCA ${formatUtc(e.tca)}`}</title>
+              <title>{`${label}\nPc of ${pc(p)} · Miss distance of ${compact(e.min_distance_km)} km\nClosest approach at ${formatUtc(e.tca)}`}</title>
             </circle>
           )
         })}
         <text className="timeline__unit" x={(PAD.l + W - PAD.r) / 2} y={H - 2} textAnchor="middle">time of closest approach (UTC)</text>
         <text className="timeline__unit" x={11} y={(PAD.t + H - PAD.b) / 2} textAnchor="middle" transform={`rotate(-90 11 ${(PAD.t + H - PAD.b) / 2})`}>probability of collision</text>
       </svg>
-      {plot.skipped > 0 ? <div className="timeline__note">{plural(plot.skipped, 'event')} with a non-positive probability {plot.skipped === 1 ? 'is' : 'are'} not plotted (no log).</div> : null}
+      {plot.skipped > 0 ? <div className="timeline__note">{plural(plot.skipped, 'event')} with a probability of zero or less {plot.skipped === 1 ? 'is' : 'are'} not shown, because a log axis can’t place {plot.skipped === 1 ? 'it' : 'them'}.</div> : null}
     </div>
   )
 }

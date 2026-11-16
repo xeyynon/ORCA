@@ -9,14 +9,14 @@ const run: HookRun = { totalEvents: 442786, reportKm: 10, horizonDays: 1, highRi
 test('three figures, no object count (the headline says it); every run figure names its run, and the pair count is pairs within the distance, not conjunctions', () => {
   const k = homeKpis(run)
   assert.deepEqual(k.map((x) => x.value), ['442,786', '29', '0'])
-  assert.equal(k[0].context, 'Pairs within 10 km in the stored example run')
-  assert.equal(k[1].context, 'Flagged in the stored example run')
-  assert.equal(k[2].context, 'In the stored example run')
+  assert.equal(k[0].context, 'Pairs that came within 10 km in the sample run')
+  assert.equal(k[1].context, 'Marked high risk in the sample run')
+  assert.equal(k[2].context, 'Found in the sample run')
   assert.doesNotMatch(k.map((x) => `${x.label} ${x.context}`).join(' '), /live|real-time|collisions? found/i)
-  assert.equal(homeKpis({ ...run, saved: false })[0].context, 'Pairs within 10 km in your latest search')
+  assert.equal(homeKpis({ ...run, saved: false })[0].context, 'Pairs that came within 10 km in your latest search')
   assert.equal(runName({ saved: false }), 'your latest search')
-  assert.equal(homeKpis({ ...run, saved: false })[1].context, 'Flagged in your latest search')
-  assert.equal(runName({ saved: true }), 'the stored example run')
+  assert.equal(homeKpis({ ...run, saved: false })[1].context, 'Marked high risk in your latest search')
+  assert.equal(runName({ saved: true }), 'the sample run')
 })
 
 test('figures that are not there yet are null (a skeleton), never 0', () => {
@@ -49,24 +49,24 @@ test('the preview leads with the worst risk, then the higher Pc, then the sooner
 })
 
 test('freshness never calls a month-old median fresh', () => {
-  assert.equal(freshness(30).word, 'Indicative only')
-  assert.match(freshness(30).explain, /over 30 days old/)
-  assert.match(freshness(30).explain, /not operational/)
+  assert.equal(freshness(30).word, 'Rough guide only')
+  assert.match(freshness(30).explain, /more than 30 days old/)
+  assert.match(freshness(30).explain, /not for operational use/)
   assert.equal(freshness(3).tone, 'ok')
 })
 
 test('the last fetch outcome is said in words', () => {
-  assert.deepEqual(fetchSummary(null), { tone: 'warn', text: 'No fetch recorded yet' })
-  assert.equal(fetchSummary({ status: 'ok', http_status: 200, detail: '', at: '' }).text, 'Succeeded')
+  assert.deepEqual(fetchSummary(null), { tone: 'warn', text: 'No download recorded yet' })
+  assert.equal(fetchSummary({ status: 'ok', http_status: 200, detail: '', at: '' }).text, 'Successful')
   assert.equal(fetchSummary({ status: 'http_error', http_status: 503, detail: 'x', at: '' }).text, 'Failed (HTTP 503)')
   assert.equal(fetchSummary({ status: 'rate_limited', http_status: 403, detail: 'x', at: '' }).tone, 'warn')
 })
 
 test('a run window says when it was and, once over, how long ago (never reads as upcoming)', () => {
   const now = new Date(Date.UTC(2026, 10, 15, 15, 0))
-  assert.equal(runWindowLine(run, '2026-11-07T18:23:26', now), 'Closest approaches from 6 to 7 Nov 2026 in the stored example run. That window ended 7 days ago.')
-  assert.equal(runWindowLine({ saved: false, windowStart: '2026-11-15T10:00:00' }, '2026-11-16T10:00:00', now), 'Closest approaches from 15 to 16 Nov 2026 in your latest search.')
-  assert.equal(runWindowLine({ saved: true, windowStart: '2026-11-14T01:00:00' }, '2026-11-14T20:00:00', now), 'Closest approaches on 14 Nov 2026 in the stored example run. That window ended today.')
+  assert.equal(runWindowLine(run, '2026-11-07T18:23:26', now), 'Closest approaches during the sample run from 6 to 7 Nov 2026 (that window ended 7 days ago).')
+  assert.equal(runWindowLine({ saved: false, windowStart: '2026-11-15T10:00:00' }, '2026-11-16T10:00:00', now), 'Closest approaches during your latest search from 15 to 16 Nov 2026.')
+  assert.equal(runWindowLine({ saved: true, windowStart: '2026-11-14T01:00:00' }, '2026-11-14T20:00:00', now), 'Closest approaches during the sample run on 14 Nov 2026 (that window ended today).')
   assert.equal(isPast('2026-11-07T13:09:00', now), true)
   assert.equal(isPast('2026-11-16T13:09:00', now), false)
 })

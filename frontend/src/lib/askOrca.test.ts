@@ -124,7 +124,7 @@ test('how many in a regime: from the context, with what the count covers', () =>
   for (const n of ['23,105', '512', '1,840', '3,901', '54']) assert.ok(all.includes(n), n)
   const loadedOnly = askOrca('objects in meo', ctx({ regimes: { counts: { LEO: 4000, MEO: 100, GEO: 600, HEO: 300 }, scope: 'loaded', of: 5000 } })).text
   assert.match(loadedOnly, /MEO \(medium Earth orbit\): 100/)
-  assert.match(loadedOnly, /5,000 loaded objects only/)
+  assert.match(loadedOnly, /only covers the 5,000 loaded objects/)
 })
 
 test('counts never invented: "not loaded yet" when the context lacks them', () => {
@@ -133,7 +133,7 @@ test('counts never invented: "not loaded yet" when the context lacks them', () =
   assert.equal(numbersIn(askOrca('how many in leo', empty).text).length, 0)
   const onlyLoaded = askOrca('how many objects', ctx({ total: null })).text
   assert.match(onlyLoaded, /loaded 5,000/)
-  assert.match(onlyLoaded, /total is not loaded yet/)
+  assert.match(onlyLoaded, /total for the stored catalog has not loaded yet/)
 })
 
 test('how old is the data / is it fresh: median, range, threshold, last fetch', () => {
@@ -141,9 +141,9 @@ test('how old is the data / is it fresh: median, range, threshold, last fetch', 
     assert.equal(askOrca(q, base).intent, 'freshness', q)
   }
   const r = askOrca('how old is the data', base).text
-  assert.match(r, /median 3\.2 days/)
+  assert.match(r, /median age of 3\.2 days/)
   assert.match(r, /newest is 0\.1 days/)
-  assert.match(r, /oldest 41\.6 days/)
+  assert.match(r, /oldest is 41\.6 days/)
   assert.match(r, /5,000 loaded objects/)
   assert.match(r, /within ORCA's 7-day threshold/)
   assert.match(r, /2026-11-07 09:12 UTC/)
@@ -200,7 +200,7 @@ test('conjunctions with a result: the answer sentence, labelled saved or live', 
   assert.match(saved, /not live/)
   assert.ok(saved.includes(headline) && saved.includes(detail))
   const live = askOrca('closest approaches', ctx({ conjunction: { phase: 'done', source: 'live', headline, detail, error: null } })).text
-  assert.match(live, /From the search you ran/)
+  assert.match(live, /comes from the search you ran/)
   assert.doesNotMatch(live, /saved/)
   // Every number in the reply is one from the context.
   for (const n of numbersIn(live)) assert.ok(headline.includes(n) || detail.includes(n), n)

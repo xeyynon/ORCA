@@ -10,8 +10,8 @@ export function TleAgeChip({ ageDays }: Props) {
     <Badge
       tone={tleAgeTone(ageDays)}
       title={ahead
-        ? "This element set's epoch is later than this computer's clock. Check the system time, or the source published a forward epoch."
-        : 'Age of the TLE epoch relative to the propagation time. Older elements propagate less accurately.'}
+        ? "This orbit data is dated later than your computer's clock. Either check your system time, or the source has published a future epoch."
+        : 'How old the TLE epoch is compared with the propagation time. Older orbit data gives less accurate positions.'}
     >
       {ahead ? `TLE epoch ${days(-ageDays)} ahead` : `TLE ${days(ageDays)} old`}
     </Badge>

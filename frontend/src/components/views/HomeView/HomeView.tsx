@@ -41,9 +41,9 @@ type Props = {
 }
 
 const GO_LABEL: Record<KpiId, string> = {
-  pairs: 'Open the close approaches',
-  high: 'Open the close approaches',
-  critical: 'Open the close approaches',
+  pairs: 'See the close approaches',
+  high: 'See the close approaches',
+  critical: 'See the close approaches',
 }
 
 /**
@@ -81,7 +81,7 @@ export function HomeView({ catalog, summary, health, apiStatus, conjSearch, onCo
   }
 
   const provenance = run
-    ? `The worst five of the ${integer(events.length)} most probable approaches the run returned.`
+    ? `The top five worst of the ${integer(events.length)} most probable close approach results in this run.`
     : null
 
   const snapshot = health ? (health.database.last_update ? formatUtc(health.database.last_update) : 'not refreshed through the API') : null
@@ -93,8 +93,8 @@ export function HomeView({ catalog, summary, health, apiStatus, conjSearch, onCo
         {offline ? (
           <StaleDataBanner
             tone="bad"
-            notice={{ title: 'The API is not answering', body: 'This page shows the last data loaded; nothing updates until it is back.' }}
-            actionLabel="See the API status"
+            notice={{ title: 'The API isn’t responding', body: 'You’re seeing the last data that loaded. Nothing will update until it’s back.' }}
+            actionLabel="Check the API status"
             onGoData={() => onGo('data')}
           />
         ) : null}

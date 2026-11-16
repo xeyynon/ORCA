@@ -25,10 +25,10 @@ type Props = {
 
 export function DataView({ health, apiStatus, summary, update, onOpenHealth }: Props) {
   const tone = apiStatus === 'online' ? 'ok' : apiStatus === 'offline' ? 'bad' : 'warn'
-  const label = apiStatus === 'online' ? 'Online' : apiStatus === 'offline' ? 'Unreachable' : 'Checking…'
+  const label = apiStatus === 'online' ? 'Online' : apiStatus === 'offline' ? 'Can’t be reached' : 'Checking…'
   return (
     <PageLayout narrow>
-      <SectionHeader title="Data" subtitle="Where the catalog comes from, how old it is, and how to refresh it." />
+      <SectionHeader title="Data" subtitle="The beginning of the “Data” section describes what makes up the catalog (i.e., its origin, age, and method for updating)." />
       <div className="data-view__grid">
         <DataStatusCard
           count={health?.database.tles_count ?? summary?.count ?? null}
@@ -53,7 +53,7 @@ export function DataView({ health, apiStatus, summary, update, onOpenHealth }: P
           <FactRow label="Interactive docs"><a className="data-view__link" href={`${API_BASE}/docs`} target="_blank" rel="noreferrer">/docs (Swagger)</a></FactRow>
           <FactRow label="App build"><Mono>{__ORCA_BUILD__}</Mono></FactRow>
         </div>
-        <FieldNote>Every view reads the same stored catalog through the API. Refreshing here changes what they all show.</FieldNote>
+        <FieldNote>Each view reads the same stored catalog via the API. Updating here changes what they all show.</FieldNote>
       </details>
     </PageLayout>
   )

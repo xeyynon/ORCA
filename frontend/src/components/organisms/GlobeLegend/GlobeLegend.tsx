@@ -32,7 +32,7 @@ export function GlobeLegend({ colorBy, shown, total, showOrbit, hasConjunction, 
   return (
     <div className={cx('globe-legend', colorBy === 'constellation' ? 'globe-legend--own-key' : !marks && !capped && 'globe-legend--key-only')}>
       <div className="globe-legend__key">
-        <Label>{colorBy === 'altitude' ? 'Objects by current altitude' : colorBy === 'constellation' ? 'Objects by constellation (name)' : 'Objects by type'}</Label>
+        <Label>{colorBy === 'altitude' ? 'Objects coloured by current altitude' : colorBy === 'constellation' ? 'Objects coloured by constellation (name)' : 'Objects coloured by type'}</Label>
         <div className="globe-legend__items">
           {colorBy === 'altitude'
             ? ALTITUDE_BANDS.map((b) => <LegendItem key={b} shape="circle" color={ALTITUDE_BAND_COLOR[b]} label={ALTITUDE_BAND_LABEL[b]} />)
@@ -42,11 +42,11 @@ export function GlobeLegend({ colorBy, shown, total, showOrbit, hasConjunction, 
         </div>
       </div>
       {hasSelection ? <LegendItem shape="circle" color="var(--text-primary)" label="Selected" /> : null}
-      {showOrbit ? <LegendItem color="var(--globe-orbit)" label="Orbit of selected, one period" /> : null}
+      {showOrbit ? <LegendItem color="var(--globe-orbit)" label="One full orbit of the selected object" /> : null}
       {hasConjunction ? <LegendItem color="var(--risk-high)" label="Closest approach (dashed line)" /> : null}
       {capped ? (
         <div className="globe-legend__cap">
-          Drawing {integer(shown)}{total !== null ? <> of {integer(total)}</> : null} objects{skipped > 0 ? <> ({integer(skipped)} could not be propagated)</> : null}.
+          Showing {integer(shown)}{total !== null ? <> of {integer(total)}</> : null} objects{skipped > 0 ? <> ({integer(skipped)} couldn’t be propagated)</> : null}.
         </div>
       ) : null}
     </div>

@@ -28,7 +28,7 @@ export interface CatalogFreshness {
 }
 
 /** The spec's supporting copy. */
-export const HOME_SUB = 'Track orbital objects, identify close approaches and assess potential collision risks using publicly available orbital data.'
+export const HOME_SUB = 'Track orbital object motion, identify near misses and evaluate potential collision risk with use of existing public data on the position of orbital objects.'
 
 /**
  * The opening of the home page: the real object count as the headline (the owner kept the number as the hook,
@@ -37,9 +37,9 @@ export const HOME_SUB = 'Track orbital objects, identify close approaches and as
  */
 export function hookLines(objects: number | null, freshness: CatalogFreshness | null = null): HookLines {
   const sub = HOME_SUB
-  if (objects === null || !(objects > 0)) return { headline: 'Thousands of objects are circling Earth right now.', sub }
+  if (objects === null || !(objects > 0)) return { headline: 'Thousands of objects currently orbit around the Earth', sub }
   const n = integer(objects)
-  if (!freshness?.stale) return { headline: `${n} objects are circling Earth right now.`, sub }
-  if (freshness.asOf) return { headline: `${n} objects were circling Earth on ${formatDay(freshness.asOf)}.`, sub }
-  return { headline: `${n} objects are in the stored catalogue.`, sub }
+  if (!freshness?.stale) return { headline: `${n} objects currently orbit around the Earth`, sub }
+  if (freshness.asOf) return { headline: `${n} objects were orbiting the Earth on ${formatDay(freshness.asOf)}`, sub }
+  return { headline: `There are ${n} objects in our stored catalogue`, sub }
 }
