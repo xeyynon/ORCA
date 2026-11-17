@@ -67,14 +67,18 @@ export interface Freshness {
 
 /** How far to trust positions, from the median element-set age. Never calls old data real-time. */
 export function freshness(medianAgeDays: number): Freshness {
-  const d = Math.round(medianAgeDays)
+  // Half the sets are at most the median age, and half at least it: round up for "no more than", down for "at least",
+  // so the sentence stays true (a 2.4-day median is "no more than 3 days", never "within 2 days").
+  const upTo = Math.max(1, Math.ceil(medianAgeDays))
+  const atLeast = Math.floor(medianAgeDays)
   if (medianAgeDays <= STALE_MEDIAN_DAYS) {
-    return { tone: 'ok', word: 'Fresh', explain: `Approximately half of all of these data sets have been measured within the past ${d <= 1 ? 'twenty four hours' : `${d} days`}.` }
+    // A TLE's age counts from its epoch (the moment its numbers describe), not from when the object was observed.
+    return { tone: 'ok', word: 'Fresh', explain: `Half of these data sets are no more than ${upTo === 1 ? 'twenty four hours' : `${upTo} days`} old, counted from each one’s epoch (the moment it describes).` }
   }
   return {
     tone: 'warn',
     word: 'Rough guide only',
-    explain: `About half of the data sets are more than ${d} days old. Positions become less accurate as the data gets older, so treat the close approaches as a rough guide and not for operational use.`,
+    explain: `About half of the data sets are at least ${atLeast} days old. Positions become less accurate as the data gets older, so treat the close approaches as a rough guide and not for operational use.`,
   }
 }
 

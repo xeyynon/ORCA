@@ -50,9 +50,17 @@ test('the preview leads with the worst risk, then the higher Pc, then the sooner
 
 test('freshness never calls a month-old median fresh', () => {
   assert.equal(freshness(30).word, 'Rough guide only')
-  assert.match(freshness(30).explain, /more than 30 days old/)
+  assert.match(freshness(30).explain, /at least 30 days old/)
   assert.match(freshness(30).explain, /not for operational use/)
   assert.equal(freshness(3).tone, 'ok')
+})
+
+test('freshness wording stays true for the median it is given', () => {
+  assert.match(freshness(2.4).explain, /no more than 3 days old/) // never "within 2 days" for a 2.4-day median
+  assert.match(freshness(0.4).explain, /no more than twenty four hours old/)
+  assert.match(freshness(0.4).explain, /epoch/)
+  assert.doesNotMatch(freshness(0.4).explain, /measured/)
+  assert.match(freshness(29.6).explain, /at least 29 days old/) // never "more than 30" for a 29.6-day median
 })
 
 test('the last fetch outcome is said in words', () => {

@@ -8,6 +8,8 @@ test('the tour has the five steps in order, each with a target and short copy', 
   for (const s of TOUR_STEPS) {
     assert.ok(s.target.length > 0 && s.title.length > 0, s.id)
     assert.ok(s.body.length > 0, s.id)
+    // A first-time visitor reads each card in one glance: at most three sentences per step.
+    assert.ok((s.body.match(/[.!?](\s|$)/g) ?? []).length <= 3, `${s.id} is short`)
   }
   assert.equal(new Set(TOUR_STEPS.map((s) => s.id)).size, TOUR_STEPS.length)
 })

@@ -24,13 +24,13 @@ export const TOUR_STEPS: readonly TourStep[] = [
     id: 'how',
     target: '.home-hero',
     title: 'ORCA basics',
-    body: 'What does track do? All cataloged objects are graphically placed from public orbit data onto a 3-d representation of the Earth. What does screen do? All pairs are checked for close passes over the next days. What does understand do? Each approach will be ranked as a chance for collision in plain language.',
+    body: 'ORCA works in three steps. Track places every cataloged object on a 3-d Earth from public orbit data, and Screen checks every pair for close passes over the next days. Understand then ranks each approach by its chance of collision, in plain language.',
   },
   {
     id: 'views',
     target: '.appbar__center',
     title: 'Open six views with one row',
-    body: 'Overview lists the cataloged object list. Globe displays all listed objects in 3-d. Conjunctions finds all close approaches between two objects. Analytics displays charts of the catalog. Data provides details on where the catalog comes from. Reports converts the results into a printable document. The ORCA logo brings you back to this page. Use number keys (1-6) to open your six views. Press H to return to this page.',
+    body: 'Overview lists the catalog, Globe shows it in 3-d, Conjunctions finds close approaches, Analytics charts it, Data explains where it comes from, and Reports turns the results into a printable document. Use the number keys (1-6) to open the six views. The ORCA logo or the H key brings you back to this page.',
   },
   {
     id: 'search',
@@ -54,7 +54,7 @@ export const TOUR_STEPS: readonly TourStep[] = [
     id: 'ask',
     target: '[data-tour="ask"]',
     title: 'Ask ORCA',
-    body: 'You can Ask ORCA questions using natural language: how many objects are in the database? How old is the data I am looking at? What does a term mean? Can I open a specific view? Use dot (.) to Ask ORCA from anywhere.',
+    body: 'You can ask ORCA questions in everyday words, such as how many objects there are, how old the data is, what a term means, or to open a view. Use dot (.) to Ask ORCA from anywhere.',
   },
   {
     id: 'menu',

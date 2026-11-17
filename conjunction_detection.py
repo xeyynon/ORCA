@@ -15,8 +15,10 @@ Method:
    objects are then propagated exactly at that time, one range-rate (Newton) step corrects it, and the miss
    distance, relative velocity and states are taken from SGP4 at the corrected time (Exp 3).
 4. Collision probability: the 2D Gaussian of the relative position, integrated over the combined hard-body disc
-   in the encounter plane (Foster). Closed small-radius form when the radius is well below the uncertainty,
-   numerical quadrature otherwise. Each object's uncertainty comes from CovarianceModel (measured, see there).
+   in the encounter plane (Foster), by numerical quadrature on the covariance principal axes: 32-point
+   Gauss-Legendre, vectorised, when the radius is small against the uncertainty (radius <= 0.1 x the smaller
+   sigma), and SciPy's adaptive quad otherwise. There is no closed form in the engine (the isotropic closed form
+   lives in benchmarks/pc.py, as an exactness check). Each object's uncertainty comes from CovarianceModel (measured, see there).
 5. Risk tiers: Pc above 1e-4 / 1e-5 / 1e-6 / 1e-7. NASA's CA Handbook (NASA/SP-20205011318, 2020) recommends
    mitigation above 1e-4.
 
@@ -53,8 +55,9 @@ METHOD = {
                         "exact SGP4 state vectors and one range rate correction at that time.",
     "collision_probability": "We use the Foster 2-D method. The relative position of the two objects is treated as a Gaussian "
                              "distribution in the encounter plane, and the chance of a collision is found by adding it up over the "
-                             "combined hard-body disc of both objects. When the radius is small we use a closed-form solution, and when it is not small we use "
-                             "quadrature.",
+                             "combined hard-body disc of both objects. We add it up numerically: with a fast fixed rule "
+                             "(32-point Gauss-Legendre) when the disc is small compared with the uncertainty, and with "
+                             "adaptive quadrature when it is not.",
     "uncertainty": "Each object has its own radial, in-track and cross-track uncertainty, which is based on the age of its "
                    "TLE. These values were measured from successive public TLEs (LEO, October 14th, 2026) and are never "
                    "lower than the TLE uncertainties at epoch that ESA has published.",

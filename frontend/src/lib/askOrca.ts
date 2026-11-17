@@ -73,6 +73,17 @@ const TERM_ALIASES: Record<string, readonly string[]> = {
   Mahalanobis: ['mahalanobis', 'mahalanobis distance'],
   'hard-body radius': ['hard-body radius', 'hard body radius', 'hbr'],
   'long encounter': ['long encounter', 'long encounters', 'long-encounter', 'long-encounters'],
+  // Singular only: a bare "conjunctions" still asks for the search result, not a definition.
+  conjunction: ['conjunction', 'close approach'],
+  'report distance': ['report distance', 'reporting distance'],
+  'relative velocity': ['relative velocity', 'relative velocities', 'relative speed'],
+  'risk tier': ['risk tier', 'risk tiers', 'risk level', 'risk levels', 'risk category', 'risk categories', 'tier', 'tiers'],
+  screening: ['screening'],
+  // Not "tle age": "how old" and "tle age" questions get the live ages (freshness), not a definition.
+  epoch: ['epoch', 'epochs', 'tle epoch'],
+  'NORAD ID': ['norad', 'norad id', 'norad ids', 'norad number', 'norad catalog number', 'catalog number', 'catalogue number'],
+  CelesTrak: ['celestrak', 'celes trak'],
+  'orbit regime': ['orbit regime', 'orbit regimes', 'orbital regime', 'orbital regimes', 'regime', 'regimes'],
 }
 
 const VIEW_ALIASES: Record<ViewId, readonly string[]> = {
@@ -361,7 +372,9 @@ function match(input: string, ctx: AskContext): AskReply {
 
   const term = findTerm(t, ctx.glossary)
   const bareTerm = term !== null && [term.toLowerCase(), ...(TERM_ALIASES[term] ?? [])].includes(stripArticles(t))
-  if (term && (DEFINE_Q.test(t) || bareTerm)) return define(term, ctx)
+  // A count or data-age question that names a term ("what is the breakdown by orbit regime?", "what is the tle age?")
+  // wants the live figure, not the definition.
+  if (term && !COUNT_Q.test(t) && !FRESH.test(t) && (DEFINE_Q.test(t) || bareTerm)) return define(term, ctx)
 
   if (SAVED.test(t)) return savedExample(ctx)
   const horizon = horizonFrom(t)

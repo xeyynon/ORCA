@@ -160,12 +160,25 @@ test('what is / define <term>: the glossary text, for every term and its common 
     ['what is TCA', 'TCA'], ['explain sgp4', 'SGP4'], ["what's the miss distance", 'miss distance'], ['what is uncertainty', 'uncertainty'],
     ['what is mahalanobis distance', 'Mahalanobis'], ['what is the hard body radius', 'hard-body radius'], ['what is a long encounter', 'long encounter'],
     ['TLE?', 'TLE'], ['pc', 'Pc'], ['tell me about long encounters', 'long encounter'],
+    ['what is a conjunction', 'conjunction'], ['what is a close approach', 'conjunction'], ['what is the report distance', 'report distance'],
+    ['what is relative speed', 'relative velocity'], ['what is a risk tier', 'risk tier'], ['what do the risk levels mean', 'risk tier'],
+    ['what is screening', 'screening'], ['what is an epoch', 'epoch'], ['what is a NORAD id', 'NORAD ID'], ['what is celestrak', 'CelesTrak'],
+    ['what is an orbit regime', 'orbit regime'],
   ]
   for (const [q, term] of cases) {
     const r = askOrca(q, base)
     assert.equal(r.intent, 'define', q)
     assert.equal(r.text, `${term}: ${GLOSSARY[term]}`, q)
   }
+})
+
+test('the new basic terms do not take over questions that have live answers', () => {
+  // A bare plural still asks for the search result; count and age questions still get numbers.
+  assert.equal(askOrca('conjunctions', base).intent, 'conjunctions')
+  assert.equal(askOrca('what is the breakdown by orbit regime', base).intent, 'count')
+  assert.equal(askOrca('how many objects per regime', base).intent, 'count')
+  assert.equal(askOrca('how old is the data', base).intent, 'freshness')
+  assert.equal(askOrca('what is the tle age', base).intent, 'freshness')
 })
 
 test('findTerm prefers the longest alias', () => {
