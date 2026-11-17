@@ -25,21 +25,21 @@ export const SHORTCUT_GROUPS: readonly ShortcutGroup[] = [
       { keys: ['4'], description: 'Analytics' },
       { keys: ['5'], description: 'Data' },
       { keys: ['/'], description: 'Search objects' },
-      { keys: ['Esc'], description: 'Close, then clear selection (one step per press)' },
+      { keys: ['Esc'], description: 'Close things, then clear the selection (one step each time you press it)' },
     ],
   },
   {
     title: 'Interface',
     items: [
-      { keys: ['T'], description: 'Toggle light / dark theme' },
+      { keys: ['T'], description: 'Switch between the light and dark theme' },
       { keys: ['?'], description: 'Show this help' },
-      { keys: ['.'], description: 'Ask ORCA (find, show and explain by typing)' },
+      { keys: ['.'], description: 'Ask ORCA (type to find, show or explain things)' },
     ],
   },
   {
     title: 'Globe',
     items: [
-      { keys: ['Space'], description: 'Pause / resume auto-rotate' },
+      { keys: ['Space'], description: 'Pause or restart the automatic rotation' },
     ],
   },
 ]

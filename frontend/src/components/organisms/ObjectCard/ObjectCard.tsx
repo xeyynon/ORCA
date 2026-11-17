@@ -34,7 +34,7 @@ export function ObjectCard({ tle, position, now, onClose }: Props) {
       </div>
       <div className="object-card__badges">
         {orbit ? <Badge>{orbit.regime}</Badge> : null}
-        {position ? <Badge title="Inferred from the object name: the catalog stores no type or status">{OBJECT_TYPE_SINGULAR[position.type]}</Badge> : null}
+        {position ? <Badge title="We guess this from the object’s name, because the catalog doesn’t store a type or status">{OBJECT_TYPE_SINGULAR[position.type]}</Badge> : null}
         <TleAgeChip ageDays={ageDays(tle.epoch, now)} />
       </div>
       <div className="object-card__grid">
@@ -53,8 +53,8 @@ export function ObjectCard({ tle, position, now, onClose }: Props) {
           </>
         ) : null}
       </div>
-      {!position ? <FieldNote>No live position is shown for this object. Positions are computed on the Globe view, and an object SGP4 cannot propagate has none.</FieldNote> : null}
-      <FieldNote>Size and shape here are derived from the TLE mean motion (converted from revolutions per day to radians per second, then Kepler's third law), not read from a stored field.</FieldNote>
+      {!position ? <FieldNote>There is no live position for this object. Positions are worked out on the Globe page, and objects that SGP4 can’t propagate don’t have one.</FieldNote> : null}
+      <FieldNote>The orbit’s size and shape here come from the TLE mean motion. We convert it from revolutions per day to radians per second, then apply Kepler’s third law. They aren’t read from a stored field.</FieldNote>
     </aside>
   )
 }

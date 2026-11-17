@@ -49,7 +49,7 @@ export function PlaybackBar({ offsetH, playing, speed, simMs, tcaOffsetH, onTogg
         </div>
         <div className="playback__slider">
           <input id={sliderId} className="playback__range" type="range" min={0} max={MAX_OFFSET_H} step={0.25} value={offsetH} onChange={(e) => onScrub(Number(e.target.value))} aria-label="Simulated time, hours from now" />
-          {tcaOffsetH !== null ? <span className="playback__tca" style={{ left: `${(tcaOffsetH / MAX_OFFSET_H) * 100}%` }} title="Closest approach of the active conjunction" /> : null}
+          {tcaOffsetH !== null ? <span className="playback__tca" style={{ left: `${(tcaOffsetH / MAX_OFFSET_H) * 100}%` }} title="Closest approach of the conjunction you are viewing" /> : null}
         </div>
         <div className="playback__ticks" aria-hidden="true">{TICKS.map((t) => <span key={t}>{t}</span>)}</div>
       </div>

@@ -59,7 +59,7 @@ export function ConjunctionTable({ events, selectedKey, onSelect, compact = fals
       render: (e) => (
         <span>
           <RiskBadge level={e.risk_level} />
-          {e.long_encounter ? <> <Badge tone="warn" title="Long encounter: relative speed under 0.1 km/s. The probability can be several times too low.">Long</Badge></> : null}
+          {e.long_encounter ? <> <Badge tone="warn" title="Long encounter. The two objects pass each other at under 0.1 km/s, so the probability can be several times too low.">Long</Badge></> : null}
         </span>
       ),
     },
@@ -68,7 +68,7 @@ export function ConjunctionTable({ events, selectedKey, onSelect, compact = fals
     { id: 'miss', label: 'Miss distance', hint: GLOSSARY['miss distance'], sortable: true, align: 'right', render: (e) => <ValueUnit value={fixed(e.min_distance_km, 3)} unit="km" /> },
     {
       id: 'unc', label: 'Uncertainty (1 sigma)', hint: GLOSSARY.uncertainty, sortable: true, align: 'right',
-      render: (e) => <span title="Position uncertainty at closest approach, and the age of the older TLE"><ValueUnit value={fixed(e.uncertainty_km, 2)} unit="km" /> <Mono muted>· {fixed(e.tle_age_days, 1)} d TLE</Mono></span>,
+      render: (e) => <span title="How uncertain the positions are at closest approach, and how old the older TLE is"><ValueUnit value={fixed(e.uncertainty_km, 2)} unit="km" /> <Mono muted>· TLE is {fixed(e.tle_age_days, 1)} days old</Mono></span>,
     },
     { id: 'tca', label: 'TCA', hint: GLOSSARY.TCA, sortable: true, render: (e) => <span><Mono>{formatUtc(e.tca)}</Mono> <Mono muted>({formatRelative(e.tca)})</Mono></span> },
   ]
@@ -83,7 +83,7 @@ export function ConjunctionTable({ events, selectedKey, onSelect, compact = fals
   return (
     <>
       <DataTable
-        caption="Predicted conjunctions"
+        caption="Predicted close approaches"
         columns={shown}
         rows={view.rows}
         rowKey={pairKey}

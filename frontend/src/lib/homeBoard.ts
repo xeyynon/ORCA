@@ -13,7 +13,7 @@ import { formatDayRange, parseUtc } from './time'
 
 /** Which run a figure comes from, in words for a label, with its article ("the stored example run"). */
 export function runName(run: Pick<HookRun, 'saved'>): string {
-  return run.saved ? 'the stored example run' : 'your latest search'
+  return run.saved ? 'the sample run' : 'your latest search'
 }
 
 export type KpiId = 'pairs' | 'high' | 'critical'
@@ -42,10 +42,10 @@ export function homeKpis(run: HookRun | null): HomeKpi[] {
       id: 'pairs',
       label: 'Close pairs',
       value: run ? integer(run.totalEvents) : null,
-      context: run ? `Pairs within ${run.reportKm} km in ${where}` : 'Pairs within the report distance',
+      context: run ? `Pairs that came within ${run.reportKm} km in ${where}` : 'Pairs closer than the report distance',
     },
-    { id: 'high', label: 'High-risk approaches', value: run ? integer(run.highRisk) : null, context: where ? `Flagged in ${where}` : 'Flagged by screening', tone: run && run.highRisk > 0 ? 'high' : undefined },
-    { id: 'critical', label: 'Critical approaches', value: run ? integer(run.critical) : null, context: where ? `In ${where}` : 'Flagged by screening', tone: run && run.critical > 0 ? 'critical' : undefined },
+    { id: 'high', label: 'High-risk approaches', value: run ? integer(run.highRisk) : null, context: where ? `Marked high risk in ${where}` : 'Flagged during screening', tone: run && run.highRisk > 0 ? 'high' : undefined },
+    { id: 'critical', label: 'Critical approaches', value: run ? integer(run.critical) : null, context: where ? `Found in ${where}` : 'Flagged during screening', tone: run && run.critical > 0 ? 'critical' : undefined },
   ]
 }
 
@@ -67,27 +67,31 @@ export interface Freshness {
 
 /** How far to trust positions, from the median element-set age. Never calls old data real-time. */
 export function freshness(medianAgeDays: number): Freshness {
-  const d = Math.round(medianAgeDays)
+  // Half the sets are at most the median age, and half at least it: round up for "no more than", down for "at least",
+  // so the sentence stays true (a 2.4-day median is "no more than 3 days", never "within 2 days").
+  const upTo = Math.max(1, Math.ceil(medianAgeDays))
+  const atLeast = Math.floor(medianAgeDays)
   if (medianAgeDays <= STALE_MEDIAN_DAYS) {
-    return { tone: 'ok', word: 'Fresh', explain: `Half the element sets are under ${Math.max(1, d)} ${d === 1 ? 'day' : 'days'} old: positions are as good as public TLEs allow.` }
+    // A TLE's age counts from its epoch (the moment its numbers describe), not from when the object was observed.
+    return { tone: 'ok', word: 'Fresh', explain: `Half of these data sets are no more than ${upTo === 1 ? 'twenty four hours' : `${upTo} days`} old, counted from each one’s epoch (the moment it describes).` }
   }
   return {
     tone: 'warn',
-    word: 'Indicative only',
-    explain: `Half the element sets are over ${d} days old. Positions lose accuracy as element sets age, so treat the close approaches as indicative, not operational.`,
+    word: 'Rough guide only',
+    explain: `About half of the data sets are at least ${atLeast} days old. Positions become less accurate as the data gets older, so treat the close approaches as a rough guide and not for operational use.`,
   }
 }
 
 /** The last Celestrak fetch in words, with a tone. Null outcome: none recorded yet. */
 export function fetchSummary(f: FetchOutcome | null | undefined): { tone: 'ok' | 'warn' | 'bad'; text: string } {
-  if (!f) return { tone: 'warn', text: 'No fetch recorded yet' }
+  if (!f) return { tone: 'warn', text: 'No download recorded yet' }
   switch (f.status) {
-    case 'ok': return { tone: 'ok', text: 'Succeeded' }
-    case 'empty': return { tone: 'warn', text: 'Returned no data' }
-    case 'rate_limited': return { tone: 'warn', text: 'Refused: rate limited by Celestrak' }
-    case 'not_found': return { tone: 'bad', text: 'Refused: source not found' }
+    case 'ok': return { tone: 'ok', text: 'Successful' }
+    case 'empty': return { tone: 'warn', text: 'Came back empty' }
+    case 'rate_limited': return { tone: 'warn', text: 'Refused by Celestrak for too many requests' }
+    case 'not_found': return { tone: 'bad', text: 'Refused because Celestrak couldn’t find the source' }
     case 'http_error': return { tone: 'bad', text: `Failed${f.http_status ? ` (HTTP ${f.http_status})` : ''}` }
-    case 'network_error': return { tone: 'bad', text: 'Failed: network error' }
+    case 'network_error': return { tone: 'bad', text: 'Failed because of a network problem' }
     default: return { tone: 'warn', text: f.detail }
   }
 }
@@ -98,11 +102,11 @@ export function fetchSummary(f: FetchOutcome | null | undefined): { tone: 'ok' |
  */
 export function runWindowLine(run: Pick<HookRun, 'saved' | 'windowStart'>, windowEnd: string, now: Date): string {
   const range = formatDayRange(run.windowStart, windowEnd)
-  const base = `Closest approaches ${range.includes(' to ') ? 'from' : 'on'} ${range} in ${runName(run)}.`
+  const base = `Closest approaches during ${run.saved ? 'the sample run' : 'your latest search'} ${range.includes(' to ') ? 'from' : 'on'} ${range}`
   const endMs = parseUtc(windowEnd).getTime()
-  if (Number.isNaN(endMs) || endMs > now.getTime()) return base
+  if (Number.isNaN(endMs) || endMs > now.getTime()) return `${base}.`
   const days = Math.floor((now.getTime() - endMs) / 86_400_000)
-  return `${base} That window ended ${days >= 2 ? `${days} days ago` : days === 1 ? 'a day ago' : 'today'}.`
+  return `${base} (that window ended ${days >= 2 ? `${days} days ago` : days === 1 ? 'a day ago' : 'today'}).`
 }
 
 /** True when a closest approach is already in the past at `now`. */

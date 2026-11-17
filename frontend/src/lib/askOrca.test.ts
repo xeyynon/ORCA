@@ -124,7 +124,7 @@ test('how many in a regime: from the context, with what the count covers', () =>
   for (const n of ['23,105', '512', '1,840', '3,901', '54']) assert.ok(all.includes(n), n)
   const loadedOnly = askOrca('objects in meo', ctx({ regimes: { counts: { LEO: 4000, MEO: 100, GEO: 600, HEO: 300 }, scope: 'loaded', of: 5000 } })).text
   assert.match(loadedOnly, /MEO \(medium Earth orbit\): 100/)
-  assert.match(loadedOnly, /5,000 loaded objects only/)
+  assert.match(loadedOnly, /only covers the 5,000 loaded objects/)
 })
 
 test('counts never invented: "not loaded yet" when the context lacks them', () => {
@@ -133,7 +133,7 @@ test('counts never invented: "not loaded yet" when the context lacks them', () =
   assert.equal(numbersIn(askOrca('how many in leo', empty).text).length, 0)
   const onlyLoaded = askOrca('how many objects', ctx({ total: null })).text
   assert.match(onlyLoaded, /loaded 5,000/)
-  assert.match(onlyLoaded, /total is not loaded yet/)
+  assert.match(onlyLoaded, /total for the stored catalog has not loaded yet/)
 })
 
 test('how old is the data / is it fresh: median, range, threshold, last fetch', () => {
@@ -141,9 +141,9 @@ test('how old is the data / is it fresh: median, range, threshold, last fetch', 
     assert.equal(askOrca(q, base).intent, 'freshness', q)
   }
   const r = askOrca('how old is the data', base).text
-  assert.match(r, /median 3\.2 days/)
+  assert.match(r, /median age of 3\.2 days/)
   assert.match(r, /newest is 0\.1 days/)
-  assert.match(r, /oldest 41\.6 days/)
+  assert.match(r, /oldest is 41\.6 days/)
   assert.match(r, /5,000 loaded objects/)
   assert.match(r, /within ORCA's 7-day threshold/)
   assert.match(r, /2026-11-07 09:12 UTC/)
@@ -160,12 +160,25 @@ test('what is / define <term>: the glossary text, for every term and its common 
     ['what is TCA', 'TCA'], ['explain sgp4', 'SGP4'], ["what's the miss distance", 'miss distance'], ['what is uncertainty', 'uncertainty'],
     ['what is mahalanobis distance', 'Mahalanobis'], ['what is the hard body radius', 'hard-body radius'], ['what is a long encounter', 'long encounter'],
     ['TLE?', 'TLE'], ['pc', 'Pc'], ['tell me about long encounters', 'long encounter'],
+    ['what is a conjunction', 'conjunction'], ['what is a close approach', 'conjunction'], ['what is the report distance', 'report distance'],
+    ['what is relative speed', 'relative velocity'], ['what is a risk tier', 'risk tier'], ['what do the risk levels mean', 'risk tier'],
+    ['what is screening', 'screening'], ['what is an epoch', 'epoch'], ['what is a NORAD id', 'NORAD ID'], ['what is celestrak', 'CelesTrak'],
+    ['what is an orbit regime', 'orbit regime'],
   ]
   for (const [q, term] of cases) {
     const r = askOrca(q, base)
     assert.equal(r.intent, 'define', q)
     assert.equal(r.text, `${term}: ${GLOSSARY[term]}`, q)
   }
+})
+
+test('the new basic terms do not take over questions that have live answers', () => {
+  // A bare plural still asks for the search result; count and age questions still get numbers.
+  assert.equal(askOrca('conjunctions', base).intent, 'conjunctions')
+  assert.equal(askOrca('what is the breakdown by orbit regime', base).intent, 'count')
+  assert.equal(askOrca('how many objects per regime', base).intent, 'count')
+  assert.equal(askOrca('how old is the data', base).intent, 'freshness')
+  assert.equal(askOrca('what is the tle age', base).intent, 'freshness')
 })
 
 test('findTerm prefers the longest alias', () => {
@@ -200,7 +213,7 @@ test('conjunctions with a result: the answer sentence, labelled saved or live', 
   assert.match(saved, /not live/)
   assert.ok(saved.includes(headline) && saved.includes(detail))
   const live = askOrca('closest approaches', ctx({ conjunction: { phase: 'done', source: 'live', headline, detail, error: null } })).text
-  assert.match(live, /From the search you ran/)
+  assert.match(live, /comes from the search you ran/)
   assert.doesNotMatch(live, /saved/)
   // Every number in the reply is one from the context.
   for (const n of numbersIn(live)) assert.ok(headline.includes(n) || detail.includes(n), n)

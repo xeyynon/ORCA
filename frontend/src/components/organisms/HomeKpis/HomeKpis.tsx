@@ -21,7 +21,7 @@ const ICON: Record<KpiId, IconName> = { pairs: 'orbit', high: 'alert', critical:
 export function HomeKpis({ kpis, onOpen, goLabel }: Props) {
   return (
     <section className="home-kpis" aria-labelledby="home-kpis-title">
-      <h2 id="home-kpis-title" className="home-kpis__title">Orbital intelligence</h2>
+      <h2 id="home-kpis-title" className="home-kpis__title">At a glance</h2>
       <ul className="home-kpis__list">
         {kpis.map((k) => (
           <li key={k.id} className="home-kpis__item">

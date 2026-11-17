@@ -24,8 +24,8 @@ type Props = {
 }
 
 const REASON = {
-  past: 'Already past: the globe shows now to 7 days ahead.',
-  beyond: 'More than 7 days ahead: beyond what the globe can show.',
+  past: 'This has already happened. The globe only shows from now to 7 days ahead.',
+  beyond: 'This is more than 7 days away, which is further ahead than the globe can show.',
 } as const
 
 /** The conjunction shown on the globe: when, how close, how fast, how risky, and a way to see it happen. */
@@ -58,21 +58,21 @@ export function ConjunctionCard({ event, nowMs, onJumpToTca, onViewDetails, onCl
         <FactRow label="Probability (Pc)"><Mono>{pc(event.probability_of_collision)}</Mono></FactRow>
         <FactRow label="Relative speed">
           <ValueUnit value={fixed(event.relative_velocity_kms, event.relative_velocity_kms < 0.1 ? 4 : 2)} unit="km/s" />
-          {coMoving ? <> <Badge tone="accent" title="Relative speed under 50 m/s at closest approach">Co-moving</Badge></> : null}
+          {coMoving ? <> <Badge tone="accent" title="The two move at under 50 m/s relative to each other at closest approach">Co-moving</Badge></> : null}
         </FactRow>
-        <FactRow label="Uncertainty (1σ)"><ValueUnit value={fixed(event.uncertainty_km, 2)} unit="km" /> <Mono muted>· TLE {fixed(event.tle_age_days, 1)} d</Mono></FactRow>
+        <FactRow label="Uncertainty (1σ)"><ValueUnit value={fixed(event.uncertainty_km, 2)} unit="km" /> <Mono muted>· TLE is {fixed(event.tle_age_days, 1)} days old</Mono></FactRow>
       </div>
 
-      {coMoving ? <FieldNote>These two fly together (a formation or a shared launch): a small miss distance is expected, not a crossing.</FieldNote> : null}
-      {event.long_encounter ? <FieldNote>Long encounter (under 0.1 km/s): the probability can be several times too low.</FieldNote> : null}
-      <FieldNote>Pc is a research estimate under an assumed uncertainty (TLEs carry none), not an operational probability.</FieldNote>
+      {coMoving ? <FieldNote>These two fly together, as a formation or from a shared launch. A small miss distance is normal for them and does not mean their paths cross.</FieldNote> : null}
+      {event.long_encounter ? <FieldNote>This is a long encounter (under 0.1 km/s), so the probability can be several times too low.</FieldNote> : null}
+      <FieldNote>Pc is a research estimate based on an assumed uncertainty, because TLEs don’t include one. It is not an operational probability.</FieldNote>
 
       <div className="conjunction-card__actions">
         {/* The jump when it can happen; otherwise the reason in words, not a greyed button (playbook UI-09). */}
         {canJump
           ? <Button size="sm" onClick={onJumpToTca}>Jump to closest approach</Button>
           : <p className="conjunction-card__why">{REASON[(jump as { reason: 'past' | 'beyond' }).reason]}</p>}
-        <Button size="sm" variant="primary" onClick={onViewDetails}>View full conjunction details <Icon name="arrow-right" size={14} /></Button>
+        <Button size="sm" variant="primary" onClick={onViewDetails}>See the full details <Icon name="arrow-right" size={14} /></Button>
       </div>
     </Panel>
   )

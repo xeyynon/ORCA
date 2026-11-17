@@ -19,8 +19,8 @@ export function tleAgeTone(ageDays: number): TleAgeTone {
 export function ageVerdict(counts: Record<TleAgeTone, number>, total: number): string | null {
   if (!(total > 0)) return null
   const n = total.toLocaleString('en-US')
-  if (counts.bad === total) return `All ${n} element sets are over 30 days old.`
-  if (counts.ok === total) return `All ${n} element sets are under 7 days old.`
-  if (counts.warn === total) return `All ${n} element sets are between 7 and 30 days old, or dated ahead of this clock.`
+  if (counts.bad === total) return `All ${n} sets of orbit data are more than 30 days old.`
+  if (counts.ok === total) return `All ${n} sets of orbit data are less than 7 days old.`
+  if (counts.warn === total) return `All ${n} sets of orbit data are between 7 and 30 days old, or dated later than this computer’s clock.`
   return null
 }

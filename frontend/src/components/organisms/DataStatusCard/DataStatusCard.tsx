@@ -24,21 +24,21 @@ export function DataStatusCard({ count, lastUpdate, lastFetch, newestAgeDays, ol
     <section className="data-status">
       <Label>Catalog status</Label>
       <div className="data-status__grid">
-        <FactRow label="Objects stored"><Mono>{integer(count)}</Mono></FactRow>
-        <FactRow label="Last refresh via API">
-          {lastUpdate ? <Mono>{formatUtc(lastUpdate)}</Mono> : <Mono muted>never (seeded outside the API)</Mono>}
+        <FactRow label="Number of objects in catalog"><Mono>{integer(count)}</Mono></FactRow>
+        <FactRow label="API refresh date">
+          {lastUpdate ? <Mono>{formatUtc(lastUpdate)}</Mono> : <Mono muted>never (loaded outside the API)</Mono>}
         </FactRow>
         <FactRow label="Last Celestrak fetch">
           {lastFetch ? <span>{fetchSummary(lastFetch).text}, <Mono>{formatUtc(lastFetch.at)}</Mono></span> : <Mono muted>none recorded</Mono>}
         </FactRow>
-        <FactRow label="Newest element set">
+        <FactRow label="Newest orbit data">
           {newestAgeDays !== null ? <TleAgeChip ageDays={newestAgeDays} /> : <Mono muted>—</Mono>}
         </FactRow>
-        <FactRow label="Oldest element set">
+        <FactRow label="Oldest orbit data">
           {oldestAgeDays !== null ? <Mono>{days(oldestAgeDays)}</Mono> : <Mono muted>—</Mono>}
         </FactRow>
       </div>
-      <FieldNote>“Last refresh” is when this API last stored a Celestrak fetch. It is not the age of the orbital data, which is the TLE epoch shown beside it.</FieldNote>
+      <FieldNote>The “API refresh date” refers to when this API last retrieved data from a Celestrak fetch. This does NOT tell you how old the orbital data itself is; that is the TLE epoch listed next to it.</FieldNote>
     </section>
   )
 }

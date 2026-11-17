@@ -11,9 +11,9 @@ test('fresh or unknown data raises no notice', () => {
 test('old data raises one notice that states the median and the oldest', () => {
   const n = staleNotice(30.1, 80.6)
   assert.ok(n)
-  assert.equal(n.title, 'Element sets are a median 30 days old')
+  assert.equal(n.title, 'The orbit data has a median age of 30 days')
   assert.match(n.body, /The oldest is 81 days/)
-  assert.match(n.body, /indicative/)
+  assert.match(n.body, /rough guide/)
 })
 
 import { staleBand } from './staleness.ts'

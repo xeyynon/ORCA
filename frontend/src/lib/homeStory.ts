@@ -83,8 +83,9 @@ export function asSentence(phrase: string): string {
   return `${s[0].toUpperCase()}${s.slice(1)}${/[.!?]$/.test(s) ? '' : '.'}`
 }
 
-/** The short name at the head of a glossary definition ("Two-line element set: the ..." gives "Two-line element set"). */
+/** The short name at the head of a glossary definition ("Two-line element set. This is ..." gives "Two-line element set"). */
 export function shortMeaning(definition: string): string {
-  const i = definition.indexOf(':')
+  const ends = [definition.indexOf(':'), definition.indexOf('. ')].filter((i) => i > 0)
+  const i = ends.length ? Math.min(...ends) : -1
   return (i > 0 ? definition.slice(0, i) : definition).trim()
 }

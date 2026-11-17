@@ -35,17 +35,17 @@ const KPI_CAPTIONS = ['Objects', 'TLE age (median)', 'Median altitude'] as const
 
 /** The loaded-subset limit is said once, by the filter bar; this hint only covers classification. */
 function objectsHint(summary: CatalogSummary): string {
-  return summary.unclassified ? `${integer(summary.unclassified)} could not be classified` : 'all classified'
+  return summary.unclassified ? `${integer(summary.unclassified)} couldn’t be classified` : 'all classified'
 }
 
 /** Newest and oldest in one hint: three cards for one fact (TLE age) were two too many (declutter plan 2026-11-15). */
 function ageHint(summary: CatalogSummary): string {
   const parts = [
-    summary.newestAgeDays === null ? null : `newest ${days(summary.newestAgeDays)}`,
-    summary.oldestAgeDays === null ? null : `oldest ${days(summary.oldestAgeDays)}`,
-    summary.futureEpochs > 0 ? `${plural(summary.futureEpochs, 'future epoch')} excluded` : null,
+    summary.newestAgeDays === null ? null : `Newest is ${summary.newestAgeDays.toFixed(1)} days old`,
+    summary.oldestAgeDays === null ? null : `Oldest is ${summary.oldestAgeDays.toFixed(1)} days old`,
+    summary.futureEpochs > 0 ? `Excluded ${plural(summary.futureEpochs, 'future epoch')}` : null,
   ].filter(Boolean)
-  return parts.length ? parts.join(' · ') : 'typical element-set age'
+  return parts.length ? parts.join(' · ') : 'Typical age of the orbital data'
 }
 
 export function OverviewView({ catalog, summary, totalCount, selectedId, onSelect, onOpenGlobe, onGoData, now }: Props) {
@@ -64,19 +64,19 @@ export function OverviewView({ catalog, summary, totalCount, selectedId, onSelec
 
   let body
   if (!rows && catalog.status === 'error') {
-    body = <EmptyState kind="error" title="Could not load the catalog" action={<Button onClick={catalog.reload}>Retry</Button>}>{catalog.error.message}</EmptyState>
+    body = <EmptyState kind="error" title="We couldn’t load the catalog" action={<Button onClick={catalog.reload}>Retry</Button>}>{catalog.error.message}</EmptyState>
   } else if (!rows) {
     // The figures wait in their own places (skeletons, never 0); the labelled loader below is for the table section.
     body = (
       <>
         <KpiRow loading items={KPI_CAPTIONS.map((label) => ({ label, value: '' }))} />
-        <EmptyState kind="awaiting" title="Loading catalog…" />
+        <EmptyState kind="awaiting" title="Loading the catalog…" />
       </>
     )
   } else if (rows.length === 0) {
     body = (
       <EmptyState kind="none" title="The catalog is empty" action={<Button variant="primary" onClick={onGoData}>Go to Data</Button>}>
-        No TLEs are stored. This is what an empty database looks like, and also what a failed Celestrak fetch looks like, because the API reports both as an empty list.
+        There are no TLEs stored. An empty database looks like this, and so does a failed Celestrak fetch, because the API reports both as an empty list.
       </EmptyState>
     )
   } else {
@@ -87,7 +87,7 @@ export function OverviewView({ catalog, summary, totalCount, selectedId, onSelec
             items={[
               { label: 'Objects', value: integer(totalCount ?? summary.count), hint: objectsHint(summary) },
               { label: 'TLE age (median)', value: summary.medianAgeDays === null ? '—' : days(summary.medianAgeDays), hint: ageHint(summary) },
-              { label: 'Median altitude', value: integer(summary.medianAltKm), unit: 'km', hint: 'derived from mean motion' },
+              { label: 'Median altitude', value: integer(summary.medianAltKm), unit: 'km', hint: 'worked out from mean motion' },
             ]}
           />
         ) : null}
@@ -106,9 +106,9 @@ export function OverviewView({ catalog, summary, totalCount, selectedId, onSelec
               onClear={() => setFilter(NO_FILTER)}
             />
             {filteredRows.length === 0 ? (
-              <EmptyState kind="none" title="No loaded object matches" action={<Button onClick={() => setFilter(NO_FILTER)}>Clear filter</Button>}>
-                Nothing among the {integer(rows.length)} loaded objects has {describeFilter(filter)}.
-                {totalCount !== null && totalCount > rows.length ? ' Objects that were not loaded are not searched here.' : ''}
+              <EmptyState kind="none" title="None of the loaded objects match" action={<Button onClick={() => setFilter(NO_FILTER)}>Clear filter</Button>}>
+                None of the {integer(rows.length)} loaded objects has {describeFilter(filter)}.
+                {totalCount !== null && totalCount > rows.length ? ' Objects that weren’t loaded aren’t searched here.' : ''}
               </EmptyState>
             ) : (
               <CatalogTable rows={filteredRows} selectedId={selectedId} onSelect={onSelect} now={now} />
@@ -130,7 +130,7 @@ export function OverviewView({ catalog, summary, totalCount, selectedId, onSelec
 
   return (
     <PageLayout>
-      <SectionHeader title="Catalog overview" subtitle="Orbital element sets stored by the API, with their age." />
+      <SectionHeader title="Catalog overview" subtitle="All the orbit data stored by the API, and how old it is." />
       {body}
     </PageLayout>
   )

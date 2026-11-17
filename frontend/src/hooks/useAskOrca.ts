@@ -198,7 +198,7 @@ export function useAskOrca({ open, view, theme, health, summary, loaded, conjSea
     const ctx = ctxRef.current
     const facts = askFacts(ctx)
     const model = statusRef.current?.model
-    const id = add({ role: 'orca', text: `Asking AI${model ? ` · ${model}` : ''}`, pending: true })
+    const id = add({ role: 'orca', text: `Asking the AI${model ? ` · Using ${model}` : ''}`, pending: true })
     const { signal, done } = track()
     askAssistant({ question, context: { view: ctx.view, facts } }, { signal }).then(
       (a) => { done(); patch(id, { pending: false, text: a.answer, ai: { model: a.model, label: a.label, facts } }) },
@@ -225,7 +225,7 @@ export function useAskOrca({ open, view, theme, health, summary, loaded, conjSea
   const pick = useCallback((chip: QuickReply) => send(chip.say ?? chip.label), [send])
 
   const footnote = status?.enabled
-    ? `Answers come from ORCA's data. Questions it cannot place go to AI · ${status.model ?? 'unknown model'}, and are labelled.`
+    ? `Answers come from ORCA's data · Questions it can't place are sent to the AI (${status.model ?? 'unknown model'}) · Those answers are labelled`
     : `Answers come from ORCA's data. AI is off${status?.reason ? `: ${status.reason}` : ''}.`
 
   return { messages, send, pick, footnote, busy: messages.some((m) => m.pending) }

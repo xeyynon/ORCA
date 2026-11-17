@@ -23,7 +23,7 @@ export function EvaluatorAccess({ credential, lastCopy, onCopy, onUse }: Props) 
   const titleId = useId()
   const status = lastCopy == null ? '' : lastCopy.ok
     ? `${lastCopy.key === 'username' ? 'Username' : 'Password'} copied.`
-    : 'Copying is blocked here. Select the text and copy it instead.'
+    : 'Copying is blocked here, so select the text and copy it yourself.'
 
   return (
     <section className="evaluator" aria-labelledby={titleId}>

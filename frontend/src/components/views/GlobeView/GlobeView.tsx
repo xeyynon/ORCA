@@ -256,17 +256,17 @@ export function GlobeView({ catalog, totalCount, selection, focus, conjunction, 
         {inSheet ? null : details}
 
         {positions.status === 'error' && !positions.data ? (
-          <EmptyState kind="error" title="Could not load positions" action={<Button onClick={positions.reload}>Retry</Button>}>{positions.error.message}</EmptyState>
+          <EmptyState kind="error" title="We couldn’t load the positions" action={<Button onClick={positions.reload}>Retry</Button>}>{positions.error.message}</EmptyState>
         ) : null}
         {waiting ? (
           <EmptyState kind="awaiting" title={waitNote.title} action={waitNote.canRetry ? <Button onClick={positions.reload}>Try again</Button> : undefined}>
             {waitNote.body}
           </EmptyState>
         ) : null}
-        {positions.status === 'error' && positions.data ? <FieldNote>Position refresh failed ({positions.error.message}). Showing the last good snapshot; it is extrapolated for at most two minutes.</FieldNote> : null}
-        {positions.data && positions.data.objects.length === 0 ? <EmptyState kind="none" title="No positions returned">The catalog is empty or no element set could be propagated.</EmptyState> : null}
-        {notDrawn.length > 0 ? <FieldNote>{notDrawn.map(nameOf).join(', ')} could not be drawn: it is not in the catalog, or SGP4 cannot propagate it (decayed or invalid elements).</FieldNote> : null}
-        {failed.length > 0 ? <FieldNote>Orbit path unavailable for {failed.map(nameOf).join(', ')}.</FieldNote> : null}
+        {positions.status === 'error' && positions.data ? <FieldNote>We couldn’t refresh the positions ({positions.error.message}). You’re seeing the last good snapshot, which is projected forward for up to two minutes.</FieldNote> : null}
+        {positions.data && positions.data.objects.length === 0 ? <EmptyState kind="none" title="No positions came back">Either the catalog is empty or none of the orbit data could be propagated.</EmptyState> : null}
+        {notDrawn.length > 0 ? <FieldNote>{notDrawn.map(nameOf).join(', ')} couldn’t be drawn. Either it isn’t in the catalog, or SGP4 can’t propagate it because its orbit has decayed or its elements are invalid.</FieldNote> : null}
+        {failed.length > 0 ? <FieldNote>We couldn’t draw the orbit path for {failed.map(nameOf).join(', ')}.</FieldNote> : null}
 
       </aside>
     </main>

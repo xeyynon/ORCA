@@ -30,17 +30,17 @@ export function HomeHero({ lines, snapshot, onExploreGlobe, onViewConjunctions, 
         <h1 id="home-hero-title" className="home-hero__title">{lines.headline}</h1>
         <p className="home-hero__sub">{lines.sub}</p>
         <div className="home-hero__actions">
-          <Button variant="primary" size="lg" onClick={onExploreGlobe}>Explore Globe <Icon name="arrow-right" /></Button>
-          <Button size="lg" onClick={onViewConjunctions} disabled={conjunctionsBusy}>{conjunctionsBusy ? 'Opening…' : 'View Conjunctions'}</Button>
+          <Button variant="primary" size="lg" onClick={onExploreGlobe}>Explore the Globe <Icon name="arrow-right" /></Button>
+          <Button size="lg" onClick={onViewConjunctions} disabled={conjunctionsBusy}>{conjunctionsBusy ? 'Opening…' : 'See Conjunctions'}</Button>
         </div>
         <div className="home-hero__meta">
           {onStartTour ? (
             <button type="button" className="home-hero__tour" onClick={onStartTour}>
               <span className="home-hero__tour-icon" aria-hidden="true"><Icon name="play" size={10} /></span>
-              New here? Take the one-minute tour
+              First time visiting this site? Take the one minute tour
             </button>
           ) : null}
-          {snapshot ? <p className="home-hero__snapshot">Data snapshot: <Mono>{snapshot}</Mono></p> : null}
+          {snapshot ? <p className="home-hero__snapshot">Snapshot of data: <Mono>{snapshot}</Mono></p> : null}
         </div>
       </div>
       <div className="home-hero__visual" aria-hidden="true">

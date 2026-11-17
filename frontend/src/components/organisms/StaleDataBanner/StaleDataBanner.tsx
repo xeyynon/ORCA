@@ -28,7 +28,7 @@ export function StaleDataBanner({ notice, onGoData, onDismiss, actionLabel = 'Re
       </p>
       <div className="stale-banner__actions">
         <Button size="sm" variant="ghost" onClick={onGoData}>{actionLabel}</Button>
-        {onDismiss ? <IconButton label="Dismiss until the data ages another week" onClick={onDismiss}><Icon name="close" size={14} /></IconButton> : null}
+        {onDismiss ? <IconButton label="Hide this until the data is another week older" onClick={onDismiss}><Icon name="close" size={14} /></IconButton> : null}
       </div>
     </div>
   )

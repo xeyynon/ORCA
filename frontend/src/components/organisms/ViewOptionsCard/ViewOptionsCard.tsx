@@ -15,8 +15,8 @@ type Props = {
 export function ViewOptionsCard({ prefs, onChange, conjunctionActive }: Props) {
   return (
     <Panel title="View options">
-      <Switch label="Show satellites" checked={prefs.showSatellites} onChange={(v) => onChange({ showSatellites: v })} title="Draw the catalog objects. Selected objects are always drawn." />
-      <Switch label="Show orbital paths" checked={prefs.showOrbits} onChange={(v) => onChange({ showOrbits: v })} title="One full orbit for each selected object" />
+      <Switch label="Show satellites" checked={prefs.showSatellites} onChange={(v) => onChange({ showSatellites: v })} title="Draws the objects in the catalog. Objects you have selected are always shown." />
+      <Switch label="Show orbital paths" checked={prefs.showOrbits} onChange={(v) => onChange({ showOrbits: v })} title="Draws one full orbit for each object you have selected" />
       {/* Only while a conjunction is on the globe: a control that cannot apply, and the note explaining why, crowded the
           panel the rest of the time (owner, 2026-11-15: "too congested"). */}
       {conjunctionActive ? <Switch label="Show conjunction" checked={prefs.showConjunction} onChange={(v) => onChange({ showConjunction: v })} /> : null}

@@ -36,7 +36,7 @@ export function AppMenu({ username, theme, notices, onGo, onShortcuts, onTour, o
           <div className="app-menu__sep" role="separator" />
           <div className="app-menu__heading" role="presentation">Notifications</div>
           {notices.length === 0
-            ? <p className="app-menu__empty" role="presentation">Nothing needs your attention.</p>
+            ? <p className="app-menu__empty" role="presentation">There’s nothing that needs your attention.</p>
             : notices.map((n) => <NoticeRow key={n.id} notice={n} onSelect={() => { close(false); if (n.go) onGo(n.go) }} />)}
 
           <div className="app-menu__sep" role="separator" />

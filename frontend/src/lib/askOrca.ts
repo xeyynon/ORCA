@@ -73,6 +73,17 @@ const TERM_ALIASES: Record<string, readonly string[]> = {
   Mahalanobis: ['mahalanobis', 'mahalanobis distance'],
   'hard-body radius': ['hard-body radius', 'hard body radius', 'hbr'],
   'long encounter': ['long encounter', 'long encounters', 'long-encounter', 'long-encounters'],
+  // Singular only: a bare "conjunctions" still asks for the search result, not a definition.
+  conjunction: ['conjunction', 'close approach'],
+  'report distance': ['report distance', 'reporting distance'],
+  'relative velocity': ['relative velocity', 'relative velocities', 'relative speed'],
+  'risk tier': ['risk tier', 'risk tiers', 'risk level', 'risk levels', 'risk category', 'risk categories', 'tier', 'tiers'],
+  screening: ['screening'],
+  // Not "tle age": "how old" and "tle age" questions get the live ages (freshness), not a definition.
+  epoch: ['epoch', 'epochs', 'tle epoch'],
+  'NORAD ID': ['norad', 'norad id', 'norad ids', 'norad number', 'norad catalog number', 'catalog number', 'catalogue number'],
+  CelesTrak: ['celestrak', 'celes trak'],
+  'orbit regime': ['orbit regime', 'orbit regimes', 'orbital regime', 'orbital regimes', 'regime', 'regimes'],
 }
 
 const VIEW_ALIASES: Record<ViewId, readonly string[]> = {
@@ -169,15 +180,15 @@ export function horizonFrom(t: string): number | null {
 // Replies
 
 const CAPABILITIES =
-  'I answer from what ORCA has loaded, with no AI needed. I can find an object and show it on the globe ("find ISS", "show 25544"), ' +
-  'open a view ("open analytics"), count objects ("how many in LEO?"), say how old the data is, explain a term ("what is Pc?"), ' +
-  'report the conjunction result, run a search or open the saved example, switch the theme, start the tour, and list the keyboard shortcuts.'
+  'I answer using only what ORCA has loaded, so no AI is needed. I can find an object and show it on the globe ("find ISS", "show 25544"). ' +
+  'I can also open a page ("open analytics"), count objects ("how many in LEO?"), tell you how old the data is and explain a term ("what is Pc?"). ' +
+  'On top of that, I can report the conjunction result, run a search or open the saved example, switch the theme, start the tour and list the keyboard shortcuts.'
 
 /** The first-open greeting, with four starters for the view the user is on. */
 export function greeting(view: ViewId): AskReply {
   return {
     intent: 'help',
-    text: `Ask about what ORCA has loaded: objects, data age, terms and close approaches. Answers come from the app's own data. You are on ${VIEW_LABEL[view]}.`,
+    text: `You can ask me about what ORCA has loaded, such as objects, the age of the data, terms and close approaches. All of my answers come from the app's own data. You are currently on ${VIEW_LABEL[view]}.`,
     chips: chips(STARTERS[view]),
   }
 }
@@ -187,7 +198,7 @@ function help(ctx: AskContext): AskReply {
 }
 
 /** What the engine says when it cannot place a question. Also the fallback when the AI is off or fails. */
-export function unknownReply(prefix = "I can't answer that from ORCA's data."): AskReply {
+export function unknownReply(prefix = "I can't answer that using ORCA's data."): AskReply {
   return { intent: 'unknown', text: `${prefix} ${CAPABILITIES}`, chips: chips(UNKNOWN_CHIPS) }
 }
 
@@ -205,45 +216,45 @@ function define(term: string, ctx: AskContext): AskReply {
 function count(ctx: AskContext, asked: RegimeKey[], byRegime: boolean): AskReply {
   const analytics = { label: 'Open Analytics' }
   if (!byRegime && asked.length === 0) {
-    if (ctx.total === null && ctx.loaded === null) return { intent: 'count', text: 'The object count is not loaded yet.' }
-    if (ctx.total === null) return { intent: 'count', text: `The app has loaded ${integer(ctx.loaded)} objects. The stored catalog's total is not loaded yet.`, chips: [analytics] }
-    const part = ctx.loaded !== null && ctx.loaded < ctx.total ? ` The views that draw every object have loaded ${integer(ctx.loaded)} of them.` : ''
-    return { intent: 'count', text: `The stored catalog holds ${integer(ctx.total)} objects.${part}`, chips: [{ label: 'How many objects by orbit?' }, analytics] }
+    if (ctx.total === null && ctx.loaded === null) return { intent: 'count', text: 'The object count has not loaded yet.' }
+    if (ctx.total === null) return { intent: 'count', text: `The app has loaded ${integer(ctx.loaded)} objects. The total for the stored catalog has not loaded yet.`, chips: [analytics] }
+    const part = ctx.loaded !== null && ctx.loaded < ctx.total ? ` The pages that draw every object have loaded ${integer(ctx.loaded)} of them.` : ''
+    return { intent: 'count', text: `There are ${integer(ctx.total)} objects in our stored catalog.${part}`, chips: [{ label: 'How many objects by orbit?' }, analytics] }
   }
   const r = ctx.regimes
-  if (!r) return { intent: 'count', text: 'Counts by orbit are not loaded yet.' }
+  if (!r) return { intent: 'count', text: 'The counts by orbit have not loaded yet.' }
   const keys = asked.length ? asked : REGIME_KEYS
   const lines = keys.map((k) => `${k} (${REGIME_NAME[k]}): ${integer(r.counts[k] ?? 0)}`)
   const scope = r.scope === 'catalog'
-    ? `Across the whole stored catalog${r.of !== null ? ` of ${integer(r.of)} objects` : ''}.`
-    : `Across the ${r.of !== null ? `${integer(r.of)} ` : ''}loaded objects only; the whole-catalog counts are not loaded yet.`
-  const unclassified = r.unclassified ? ` ${integer(r.unclassified)} could not be classified.` : ''
+    ? `This covers the whole stored catalog${r.of !== null ? ` of ${integer(r.of)} objects` : ''}.`
+    : `This only covers the ${r.of !== null ? `${integer(r.of)} ` : ''}loaded objects, because the counts for the whole catalog have not loaded yet.`
+  const unclassified = r.unclassified ? ` ${integer(r.unclassified)} couldn't be classified.` : ''
   return { intent: 'count', text: `${lines.join('. ')}. ${scope}${unclassified}`, chips: [analytics, { label: 'Open the globe' }] }
 }
 
 function freshness(ctx: AskContext): AskReply {
   const a = ctx.ages
-  const refresh = a.lastRefreshUtc ? ` The API last stored a Celestrak fetch at ${a.lastRefreshUtc}.` : ''
+  const refresh = a.lastRefreshUtc ? ` The API last saved a Celestrak fetch at ${a.lastRefreshUtc}.` : ''
   const replyChips = [{ label: 'Open Data' }, { label: 'What is a TLE?' }]
-  if (a.medianDays === null) return { intent: 'freshness', text: `The data's age is not loaded yet.${refresh}`, chips: replyChips }
-  const over = ctx.loaded !== null ? `, over the ${integer(ctx.loaded)} loaded objects` : ''
-  const range = a.newestDays !== null && a.oldestDays !== null ? `; the newest is ${days1(a.newestDays)} old and the oldest ${days1(a.oldestDays)}` : ''
+  if (a.medianDays === null) return { intent: 'freshness', text: `The age of the data has not loaded yet.${refresh}`, chips: replyChips }
+  const over = ctx.loaded !== null ? `, measured over the ${integer(ctx.loaded)} loaded objects` : ''
+  const range = a.newestDays !== null && a.oldestDays !== null ? ` The newest is ${days1(a.newestDays)} old and the oldest is ${days1(a.oldestDays)} old.` : ''
   const verdict = a.medianDays > STALE_MEDIAN_DAYS
-    ? `That is past ORCA's ${STALE_MEDIAN_DAYS}-day threshold, so treat every figure as indicative.`
-    : `That is within ORCA's ${STALE_MEDIAN_DAYS}-day threshold. Accuracy still falls within days, so figures are indicative.`
-  return { intent: 'freshness', text: `Element sets (TLEs) are a median ${days1(a.medianDays)} old${range}${over}. ${verdict}${refresh}`, chips: replyChips }
+    ? `That is past ORCA's ${STALE_MEDIAN_DAYS}-day threshold, so please treat every figure as a rough guide.`
+    : `That is within ORCA's ${STALE_MEDIAN_DAYS}-day threshold. Accuracy still drops within days, so the figures should only be treated as a rough guide.`
+  return { intent: 'freshness', text: `The orbital data (TLEs) has a median age of ${days1(a.medianDays)}${over}.${range} ${verdict}${refresh}`, chips: replyChips }
 }
 
 function conjunctions(ctx: AskContext): AskReply {
   const c = ctx.conjunction
   const offer = chips(['Run a search', 'Explore the saved example'])
   if (c.phase === 'running') {
-    return { intent: 'conjunctions', text: 'A conjunction search is running. It continues while you use other views; I will have its answer when it finishes.', chips: chips(['Open Conjunctions']) }
+    return { intent: 'conjunctions', text: 'A conjunction search is running right now. It will keep going while you use other pages, and I will have the answer once it finishes.', chips: chips(['Open Conjunctions']) }
   }
   if (c.phase === 'done' && c.headline) {
-    const from = c.source === 'saved' ? 'From the saved example run, which is stored with the app and is not live' : 'From the search you ran'
+    const from = c.source === 'saved' ? 'This comes from the saved example run, which is stored with the app and is not live' : 'This comes from the search you ran'
     const extra = c.source === 'saved' ? chips(['Open Conjunctions', 'Run a search']) : chips(['Open Conjunctions', 'What is Pc?'])
-    return { intent: 'conjunctions', text: `${from}: ${c.headline}.${c.detail ? ` ${c.detail}` : ''} Pc ranks pairs; it is not a forecast.`, chips: extra }
+    return { intent: 'conjunctions', text: `${from}. ${c.headline}.${c.detail ? ` ${c.detail}` : ''} Pc is used to rank pairs. It is NOT a forecast.`, chips: extra }
   }
   if (c.phase === 'failed') {
     return { intent: 'conjunctions', text: `The last conjunction search failed${c.error ? `: ${c.error}` : ''}. There is no result to report.`, chips: offer }
@@ -253,27 +264,27 @@ function conjunctions(ctx: AskContext): AskReply {
 
 function runSearch(ctx: AskContext, requested: number | null): AskReply {
   if (ctx.conjunction.phase === 'running') {
-    return { intent: 'runSearch', text: 'A conjunction search is already running. Starting another would cancel it.', chips: chips(['Open Conjunctions']) }
+    return { intent: 'runSearch', text: 'A conjunction search is already running. Starting another one would cancel it.', chips: chips(['Open Conjunctions']) }
   }
   const n = requested ?? 1
   if (!Number.isInteger(n) || n < 1 || n > 7) {
-    return { intent: 'runSearch', text: `A search covers 1 to 7 days; ${requested} is outside that.`, chips: chips(['Run a 1-day search', 'Run a 7-day search']) }
+    return { intent: 'runSearch', text: `A search can cover anywhere from 1 to 7 days, and ${requested} is outside of that.`, chips: chips(['Run a 1-day search', 'Run a 7-day search']) }
   }
-  const est = ctx.total !== null ? ` For ${integer(ctx.total)} objects expect roughly ${integer(Math.max(1, expectedRuntimeMinutes(ctx.total, n)))} min (a laptop estimate).` : ''
+  const est = ctx.total !== null ? ` For ${integer(ctx.total)} objects expect roughly ${integer(Math.max(1, expectedRuntimeMinutes(ctx.total, n)))} min, based on a laptop estimate.` : ''
   return {
     intent: 'runSearch',
-    text: `Starting a ${n}-day conjunction search over the stored catalog.${est} It keeps running while you use other views; ask "any close approaches?" when it finishes.`,
+    text: `Starting a ${n}-day conjunction search over the stored catalog.${est} It will keep running while you use other pages. Ask "any close approaches?" once it finishes.`,
     action: { kind: 'runSearch', horizonDays: n },
   }
 }
 
 function savedExample(ctx: AskContext): AskReply {
   if (ctx.conjunction.phase === 'running') {
-    return { intent: 'savedExample', text: 'A live search is running, and the example would not replace it. Open Conjunctions to watch it.', chips: chips(['Open Conjunctions']) }
+    return { intent: 'savedExample', text: 'A live search is already running, and the example would not replace it. Open Conjunctions to keep an eye on it.', chips: chips(['Open Conjunctions']) }
   }
   return {
     intent: 'savedExample',
-    text: 'Opening the saved example run: a real search stored with the app, not live. It is labelled as an example on every screen.',
+    text: 'Opening the saved example run. This is a real search that is stored with the app and is not live. It is labelled as an example on every screen.',
     action: { kind: 'openSavedExample' },
   }
 }
@@ -340,28 +351,30 @@ function match(input: string, ctx: AskContext): AskReply {
   const raw = input.trim()
   const t = normalize(raw)
   if (!t) return help(ctx)
-  if (GREETING.test(t)) return { ...help(ctx), text: `Hello. ${CAPABILITIES}` }
-  if (THANKS.test(t)) return { intent: 'thanks', text: 'You are welcome.' }
+  if (GREETING.test(t)) return { ...help(ctx), text: `Hello! ${CAPABILITIES}` }
+  if (THANKS.test(t)) return { intent: 'thanks', text: 'You are welcome!' }
   if (CAPABILITY_Q.test(t) || HELP_WORD.test(t)) return help(ctx)
 
-  if (SHORTCUTS.test(t)) return { intent: 'shortcuts', text: 'Opening the keyboard shortcuts. The key "." opens this panel and Esc closes it.', action: { kind: 'showShortcuts' } }
+  if (SHORTCUTS.test(t)) return { intent: 'shortcuts', text: 'Opening the keyboard shortcuts. Pressing "." opens this panel, and Esc closes it.', action: { kind: 'showShortcuts' } }
 
   const themeWord = /\b(dark|light)\b/.exec(t)?.[1] as 'dark' | 'light' | undefined
   const themeAsked = /\b(theme|mode|colou?rs?)\b/.test(t) || /^(go|switch( to)?|use|turn( on)?|make it|set)\s+(dark|light)$/.test(t) || /^(dark|light)$/.test(t)
   if (themeAsked && (themeWord || /\b(toggle|switch|change|flip|other)\b/.test(t))) {
     const target = themeWord ?? (ctx.theme === 'dark' ? 'light' : 'dark')
     if (target === ctx.theme) return { intent: 'theme', text: `The theme is already ${target}.` }
-    return { intent: 'theme', text: `Switching to the ${target} theme. The key T does the same.`, action: { kind: 'setTheme', theme: target } }
+    return { intent: 'theme', text: `Switching to the ${target} theme. Pressing T does the same thing.`, action: { kind: 'setTheme', theme: target } }
   }
 
   // Explanations before keyword intents: a "why" question containing "approach" is not asking for the conjunction summary.
-  if (OPEN_Q.test(t)) return unknownReply("I can't answer that from ORCA's data: it needs an explanation, and AI answers are off.")
+  if (OPEN_Q.test(t)) return unknownReply("I can't answer that using ORCA's data, because it needs an explanation and AI answers are turned off.")
 
-  if (TOUR.test(t)) return { intent: 'tour', text: 'Starting the tour. You can leave it at any step and replay it from the menu.', action: { kind: 'startTour' } }
+  if (TOUR.test(t)) return { intent: 'tour', text: 'Starting the tour. You can leave at any step and replay it later from the menu.', action: { kind: 'startTour' } }
 
   const term = findTerm(t, ctx.glossary)
   const bareTerm = term !== null && [term.toLowerCase(), ...(TERM_ALIASES[term] ?? [])].includes(stripArticles(t))
-  if (term && (DEFINE_Q.test(t) || bareTerm)) return define(term, ctx)
+  // A count or data-age question that names a term ("what is the breakdown by orbit regime?", "what is the tle age?")
+  // wants the live figure, not the definition.
+  if (term && !COUNT_Q.test(t) && !FRESH.test(t) && (DEFINE_Q.test(t) || bareTerm)) return define(term, ctx)
 
   if (SAVED.test(t)) return savedExample(ctx)
   const horizon = horizonFrom(t)
@@ -378,7 +391,7 @@ function match(input: string, ctx: AskContext): AskReply {
   // "find GEO-KOMPSAT" names an object, not a regime: an explicit find/show wins unless it is also a count question.
   const q = objectQuery(raw)
   if (q !== null && !COUNT_Q.test(t)) {
-    if (!q) return { intent: 'showObject', text: 'Which object? Give a name or a NORAD catalog number.' }
+    if (!q) return { intent: 'showObject', text: 'Which object? Please give me a name or a NORAD catalog number.' }
     return { intent: 'showObject', text: `Looking for "${q}" in the stored catalog.`, action: { kind: 'showObject', query: q } }
   }
 
@@ -388,7 +401,7 @@ function match(input: string, ctx: AskContext): AskReply {
   if (term) return define(term, ctx)
   if (DEFINE_Q.test(t)) {
     const known = Object.keys(ctx.glossary).join(', ')
-    return { intent: 'unknown', text: `That is not in ORCA's glossary or its data. Terms I can explain: ${known}.`, chips: chips(['What is a TLE?', 'What is Pc?', 'What is TCA?', 'What can you do?']) }
+    return { intent: 'unknown', text: `That is not in ORCA's glossary or its data. These are the terms I can explain: ${known}.`, chips: chips(['What is a TLE?', 'What is Pc?', 'What is TCA?', 'What can you do?']) }
   }
   return unknownReply()
 }

@@ -20,7 +20,7 @@ type Props = {
 const TITLE: Record<LoginFailure['kind'], string> = {
   rejected: 'Sign-in failed',
   locked: 'Too many attempts',
-  unconfigured: 'Sign-in is not set up',
+  unconfigured: 'Sign-in hasn’t been set up',
   unreachable: 'Server unreachable',
   error: 'Sign-in failed',
 }
