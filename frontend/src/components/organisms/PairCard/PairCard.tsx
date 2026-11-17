@@ -46,9 +46,9 @@ export function PairCard({ event, assessment, assessing, assessError, saved = fa
         <div>
           <RiskBadge level={event.risk_level} />
           <h3 className="pair-card__title">{event.sat1_name} <Mono muted>×</Mono> {event.sat2_name}</h3>
-          <Mono muted>{event.sat1_id} · {event.sat2_id}</Mono>
+          <Mono muted>NORAD {event.sat1_id} · NORAD {event.sat2_id}</Mono>
         </div>
-        <IconButton label="Close detail (Esc)" onClick={onClose}><Icon name="close" /></IconButton>
+        <IconButton label="Close details (Esc)" onClick={onClose}><Icon name="close" /></IconButton>
       </div>
 
       <div className="pair-card__grid">
@@ -56,7 +56,7 @@ export function PairCard({ event, assessment, assessing, assessError, saved = fa
         <FactRow label="Miss distance"><ValueUnit value={fixed(event.min_distance_km, 3)} unit="km" /></FactRow>
         <FactRow label="Position uncertainty (1 sigma)"><ValueUnit value={fixed(event.uncertainty_km, 2)} unit="km" /></FactRow>
         <FactRow label="Relative velocity"><ValueUnit value={fixed(event.relative_velocity_kms, event.relative_velocity_kms < 0.1 ? 4 : 2)} unit="km/s" /></FactRow>
-        <FactRow label="Older TLE's age at closest approach"><ValueUnit value={fixed(event.tle_age_days, 1)} unit="days" /></FactRow>
+        <FactRow label="Age of the older TLE at closest approach"><ValueUnit value={fixed(event.tle_age_days, 1)} unit="days" /></FactRow>
         <FactRow label="Time of closest approach">
           <Mono>{formatUtc(event.tca)}</Mono> <Mono muted>({formatRelative(event.tca)})</Mono>
         </FactRow>
@@ -65,10 +65,10 @@ export function PairCard({ event, assessment, assessing, assessError, saved = fa
         {full ? <FactRow label="Combined hard-body radius"><ValueUnit value={fixed(full.combined_hbr_km * 1000, 1)} unit="m" /></FactRow> : null}
       </div>
 
-      {saved ? <FieldNote>Stored values from the saved run; a live search adds the Mahalanobis distance and hard-body radius.</FieldNote> : null}
-      {assessing ? <div className="pair-card__state"><Spinner /> <span>Re-assessing this pair…</span></div> : null}
-      {assessError ? <FieldNote>Pair re-assessment failed: {assessError.message}. The values above are from the search result.</FieldNote> : null}
-      {noRisk ? <FieldNote>Pair re-assessment: {noRisk.message}.</FieldNote> : null}
+      {saved ? <FieldNote>These values come from the saved run. A live search also shows the Mahalanobis distance and the hard-body radius.</FieldNote> : null}
+      {assessing ? <div className="pair-card__state"><Spinner /> <span>Checking this pair again…</span></div> : null}
+      {assessError ? <FieldNote>We couldn’t re-check this pair: {assessError.message}. The values above come from the search result.</FieldNote> : null}
+      {noRisk ? <FieldNote>Re-check of this pair: {noRisk.message}.</FieldNote> : null}
       {full && full.tca !== event.tca ? (
         <FieldNote>
           Over the next 7 days this pair comes closest on a different pass: <Mono>{fixed(full.min_distance_km, 3)}</Mono> km
@@ -76,11 +76,11 @@ export function PairCard({ event, assessment, assessing, assessError, saved = fa
         </FieldNote>
       ) : null}
       {event.long_encounter ? (
-        <FieldNote>Long encounter: slower than 0.1 km/s, so the probability can be several times too low.</FieldNote>
+        <FieldNote>This is a long encounter. The objects pass each other slower than 0.1 km/s, so the probability can be several times too low.</FieldNote>
       ) : null}
 
       {/* The long form of this caveat is in the page's "things to know"; here it is one line (declutter plan 2026-11-15). */}
-      <FieldNote>A research estimate from an assumed uncertainty; not for manoeuvre decisions.</FieldNote>
+      <FieldNote>This is a research estimate based on an assumed uncertainty. Don’t use it to decide on a manoeuvre.</FieldNote>
 
       <Button variant="primary" onClick={onShowOnGlobe}>Show both objects on the globe</Button>
     </aside>

@@ -10,7 +10,7 @@ test('nothing is invented: a calm state has no notices and no badge', () => {
 })
 
 test('real conditions are listed worst first, each with a place to act', () => {
-  const n = buildNotices({ apiStatus: 'offline', stale: { title: 'Element sets are a median 30 days old' }, searchPhase: 'running', searchSource: 'live' })
+  const n = buildNotices({ apiStatus: 'offline', stale: { title: 'The orbit data has a median age of 30 days' }, searchPhase: 'running', searchSource: 'live' })
   assert.deepEqual(n.map((x) => x.id), ['api', 'stale', 'search-running'])
   assert.deepEqual(n.map((x) => x.tone), ['bad', 'warn', 'ok'])
   assert.ok(n.every((x) => x.go))

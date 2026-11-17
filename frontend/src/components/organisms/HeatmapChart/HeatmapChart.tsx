@@ -39,7 +39,7 @@ export function HeatmapChart({ grid, spec, xUnit, yUnit, ariaLabel }: Props) {
             height={ch + 0.4}
             style={{ fill: heatColor(count, grid.max) }}
           >
-            <title>{`${integer(count)} objects · ${xAt(c).toFixed(0)}–${xAt(c + 1).toFixed(0)} ${xUnit}, ${compact(yEdge(spec, r))}–${compact(yEdge(spec, r + 1))} ${yUnit}`}</title>
+            <title>{`Contains ${integer(count)} objects · Ranges from ${xAt(c).toFixed(0)} to ${xAt(c + 1).toFixed(0)} in ${xUnit} · Ranges from ${compact(yEdge(spec, r))} to ${compact(yEdge(spec, r + 1))} in ${yUnit}`}</title>
           </rect>
         ) : null))}
         {Array.from({ length: X_TICKS + 1 }, (_, k) => {

@@ -10,10 +10,10 @@ export interface StaleNotice { title: string; body: string }
 export function staleNotice(medianAgeDays: number | null, oldestAgeDays: number | null): StaleNotice | null {
   if (medianAgeDays === null || medianAgeDays <= STALE_MEDIAN_DAYS) return null
   const med = Math.round(medianAgeDays)
-  const oldest = oldestAgeDays === null ? '' : `The oldest is ${Math.round(oldestAgeDays)} days. `
+  const oldest = oldestAgeDays === null ? '' : `The oldest is ${Math.round(oldestAgeDays)} days old. `
   return {
-    title: `Element sets are a median ${med} days old`,
-    body: `${oldest}Accuracy falls quickly with age, so treat every figure as indicative.`,
+    title: `The orbit data has a median age of ${med} days`,
+    body: `${oldest}Accuracy drops quickly as data gets older, so treat every figure as a rough guide.`,
   }
 }
 

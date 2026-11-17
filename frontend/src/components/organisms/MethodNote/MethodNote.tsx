@@ -9,9 +9,9 @@ type Props = { propagator: string | null; oldestTleAgeDays: number | null }
 export function MethodNote({ propagator, oldestTleAgeDays }: Props) {
   return (
     <FieldNote>
-      Positions use {propagator ?? '—'}, propagated from public TLEs
-      {oldestTleAgeDays !== null ? ` (oldest element set in the catalog is ${oldestTleAgeDays.toFixed(0)} days old)` : ''}.
-      Accuracy falls with TLE age. Educational demonstration only, not for operational decisions.
+      Positions are calculated with {propagator ?? '—'} from public TLEs
+      {oldestTleAgeDays !== null ? ` (the oldest orbit data in the catalog is ${oldestTleAgeDays.toFixed(0)} days old)` : ''}.
+      Accuracy drops as TLEs get older. This is an educational demonstration and is not meant for operational decisions.
     </FieldNote>
   )
 }

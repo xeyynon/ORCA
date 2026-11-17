@@ -38,7 +38,7 @@ export function ObjectSearch({ inputRef, query, onQueryChange, results, loading,
       <SearchField
         inputRef={inputRef}
         value={query}
-        placeholder="Search name or NORAD id"
+        placeholder="Search by name or NORAD id"
         ariaLabel="Search objects"
         hint="/"
         bare={bare}
@@ -52,9 +52,9 @@ export function ObjectSearch({ inputRef, query, onQueryChange, results, loading,
             <SearchResultItem key={r.norad_cat_id} name={r.object_name} id={r.norad_cat_id} active={i === active} onPick={() => pick(r)} onHover={() => setActive(i)} />
           ))}
           {results.length === 0 ? (
-            <li className="object-search__note">{loading ? 'Searching…' : `No object matches “${q}”${degraded ? ' in the loaded subset' : ''}`}</li>
+            <li className="object-search__note">{loading ? 'Searching…' : `Nothing matches “${q}”${degraded ? ' in the loaded objects' : ''}`}</li>
           ) : null}
-          {degraded ? <li className="object-search__note">Server search is unavailable: showing matches from the loaded subset only.</li> : null}
+          {degraded ? <li className="object-search__note">Server search isn’t available right now, so we’re only showing matches from the loaded objects.</li> : null}
         </ul>
       ) : null}
     </div>

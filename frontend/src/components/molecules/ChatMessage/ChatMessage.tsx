@@ -20,7 +20,7 @@ export function ChatMessage({ role, text, pending, ai }: Props) {
     <div className={cx('chat-msg', `chat-msg--${role}`)}>
       <div className="chat-msg__bubble">
         <span className="chat-msg__who">{role === 'user' ? 'You:' : 'ORCA:'}</span>
-        {ai ? <span className="chat-msg__ai" title={ai.label}>AI · {ai.model}</span> : null}
+        {ai ? <span className="chat-msg__ai" title={ai.label}>Answered by AI · Using {ai.model}</span> : null}
         <p className="chat-msg__text">
           {text}
           {pending ? <span className="chat-msg__wait"><Spinner size={11} label="Working" /></span> : null}

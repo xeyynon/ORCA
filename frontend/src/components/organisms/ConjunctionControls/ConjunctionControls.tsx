@@ -25,8 +25,8 @@ export function ConjunctionControls({ query, catalogSize, running, onChange, onR
   return (
     <div className="conj-controls">
       <div className="conj-controls__fields">
-        <NumberField label="Horizon (days)" value={query.horizonDays} min={1} max={7} step={1} onChange={(v) => onChange({ ...query, horizonDays: v })} />
-        <NumberField label="Rows to show" value={query.limit} min={1} max={1000} step={10} onChange={(v) => onChange({ ...query, limit: v })} />
+        <NumberField label="Days to look ahead" value={query.horizonDays} min={1} max={7} step={1} onChange={(v) => onChange({ ...query, horizonDays: v })} />
+        <NumberField label="Number of rows to show" value={query.limit} min={1} max={1000} step={10} onChange={(v) => onChange({ ...query, limit: v })} />
         <div className="conj-controls__run">
           <Button variant="primary" disabled={running || tooSmall || catalogSize === null} onClick={onRun}>
             {running ? 'Searching…' : 'Run search'}
@@ -34,11 +34,11 @@ export function ConjunctionControls({ query, catalogSize, running, onChange, onR
         </div>
       </div>
       {tooSmall ? (
-        <FieldNote>A search needs at least 2 objects and the catalog has {integer(catalogSize)}. Load TLEs from the Data view first.</FieldNote>
+        <FieldNote>A search needs at least 2 objects, but the catalog only has {integer(catalogSize)}. Load TLEs from the Data page first.</FieldNote>
       ) : minutes !== null ? (
         // One line: how long it takes. How the search works is in "How this list is made" below (declutter plan 2026-11-15).
         <FieldNote>
-          Takes about {minutes < 1 ? 'a minute or less' : `${Math.round(minutes)} min`} for {integer(catalogSize)} objects over {plural(query.horizonDays, 'day')}; you can leave the page while it runs.
+          This will take about {minutes < 1 ? 'a minute or less' : `${Math.round(minutes)} min`} for {integer(catalogSize)} objects over {plural(query.horizonDays, 'day')}. You can leave the page while it runs.
         </FieldNote>
       ) : null}
     </div>

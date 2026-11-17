@@ -26,19 +26,19 @@ export interface NoticeInput {
 export function buildNotices({ apiStatus, stale, searchPhase, searchSource }: NoticeInput): Notice[] {
   const out: Notice[] = []
   if (apiStatus === 'offline') {
-    out.push({ id: 'api', tone: 'bad', title: 'The API is not answering', detail: 'Figures cannot refresh until it is back.', go: 'data' })
+    out.push({ id: 'api', tone: 'bad', title: 'The API isn’t responding', detail: 'The figures can’t update until it’s back.', go: 'data' })
   }
   if (searchPhase === 'failed') {
-    out.push({ id: 'search-failed', tone: 'bad', title: 'The conjunction search failed', detail: 'Open Conjunctions to see why and retry.', go: 'conjunctions' })
+    out.push({ id: 'search-failed', tone: 'bad', title: 'The conjunction search didn’t work', detail: 'Open Conjunctions to see why and try again.', go: 'conjunctions' })
   }
   if (stale) {
-    out.push({ id: 'stale', tone: 'warn', title: stale.title, detail: 'Treat positions and risks as indicative, or refresh the catalog.', go: 'data' })
+    out.push({ id: 'stale', tone: 'warn', title: stale.title, detail: 'Treat positions and risks as a rough guide, or refresh the catalog.', go: 'data' })
   }
   if (searchPhase === 'running') {
-    out.push({ id: 'search-running', tone: 'ok', title: 'A conjunction search is running', detail: 'It keeps going while you use other views.', go: 'conjunctions' })
+    out.push({ id: 'search-running', tone: 'ok', title: 'A conjunction search is running', detail: 'It will keep going while you use other pages.', go: 'conjunctions' })
   }
   if (searchPhase === 'done' && searchSource === 'live') {
-    out.push({ id: 'search-done', tone: 'ok', title: 'Your conjunction search finished', detail: 'The result is on the Conjunctions page.', go: 'conjunctions' })
+    out.push({ id: 'search-done', tone: 'ok', title: 'Your conjunction search is done', detail: 'You can see the result on the Conjunctions page.', go: 'conjunctions' })
   }
   return out
 }

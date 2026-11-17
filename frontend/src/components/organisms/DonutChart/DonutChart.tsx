@@ -37,7 +37,7 @@ export function DonutChart({ slices, centerLabel, ariaLabel }: Props) {
         <div className="donut__label">{centerLabel}</div>
       </div>
       <div className="donut__legend">
-        <ChartLegend layout="stack" items={slices.map((s) => ({ label: s.label, color: s.color, value: `${integer(s.value)} · ${((s.value / total) * 100).toFixed(1)}%` }))} />
+        <ChartLegend layout="stack" items={slices.map((s) => ({ label: s.label, color: s.color, value: `${integer(s.value)} objects · ${((s.value / total) * 100).toFixed(1)}% of the total` }))} />
       </div>
     </div>
   )

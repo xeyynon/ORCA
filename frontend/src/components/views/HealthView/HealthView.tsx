@@ -43,7 +43,7 @@ export function HealthView({ health, apiStatus, check, onRecheck, onBack, now }:
       <div className="health-view__back">
         <Button size="sm" variant="ghost" onClick={onBack}><Icon name="arrow-left" size={14} /> Data</Button>
       </div>
-      <SectionHeader title="API health" subtitle="Whether the ORCA API answers, and what it reports about its catalogue." />
+      <SectionHeader title="API health" subtitle="Shows whether the ORCA API is responding, and what it says about its catalogue." />
 
       <section className="health-view__answer" aria-live="polite">
         <div className="health-view__answer-title"><Dot tone={head.tone} /> {head.title}</div>
@@ -67,8 +67,8 @@ export function HealthView({ health, apiStatus, check, onRecheck, onBack, now }:
       <section className="health-view__card">
         <h2 className="health-view__h2">Catalogue database</h2>
         <div className="health-view__grid">
-          <FactRow label="Objects stored">{health ? <Mono>{integer(health.database.tles_count)}</Mono> : <Mono muted>—</Mono>}</FactRow>
-          <FactRow label="Last refresh via API">{health?.database.last_update ? <Mono>{formatUtc(health.database.last_update)}</Mono> : <Mono muted>never (seeded outside the API)</Mono>}</FactRow>
+          <FactRow label="Number of objects in catalog">{health ? <Mono>{integer(health.database.tles_count)}</Mono> : <Mono muted>—</Mono>}</FactRow>
+          <FactRow label="API refresh date">{health?.database.last_update ? <Mono>{formatUtc(health.database.last_update)}</Mono> : <Mono muted>never (loaded outside the API)</Mono>}</FactRow>
           <FactRow label="Last Celestrak fetch"><StatusIndicator tone={fetchWords.tone} label={fetchWords.text} /></FactRow>
           <FactRow label="Fetched at">{fetch ? <Mono>{formatUtc(fetch.at)}</Mono> : <Mono muted>—</Mono>}</FactRow>
         </div>
@@ -78,7 +78,7 @@ export function HealthView({ health, apiStatus, check, onRecheck, onBack, now }:
       <details className="health-view__json">
         <summary className="health-view__json-summary">
           <span className="health-view__h2">Raw response (JSON)</span>
-          <span className="health-view__json-hint">What <Mono>GET /health</Mono> returned last</span>
+          <span className="health-view__json-hint">The last thing <Mono>GET /health</Mono> returned</span>
           <span className="health-view__chevron"><Icon name="chevron-down" size={16} /></span>
         </summary>
         <div className="health-view__json-actions">
@@ -86,7 +86,7 @@ export function HealthView({ health, apiStatus, check, onRecheck, onBack, now }:
           <a className="health-view__link" href={`${API_BASE}/health`} target="_blank" rel="noreferrer">Open /health</a>
           <a className="health-view__link" href={`${API_BASE}/docs`} target="_blank" rel="noreferrer">API docs (Swagger)</a>
         </div>
-        {json ? <pre className="health-view__pre" tabIndex={0} aria-label="Raw health response">{json}</pre> : <p className="health-view__detail">No response received yet.</p>}
+        {json ? <pre className="health-view__pre" tabIndex={0} aria-label="Raw health response">{json}</pre> : <p className="health-view__detail">Nothing has been received yet.</p>}
       </details>
     </PageLayout>
   )

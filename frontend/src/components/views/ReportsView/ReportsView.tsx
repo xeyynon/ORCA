@@ -65,7 +65,7 @@ export function ReportsView({ summary, health, conjSearch, selectedConjKey, user
   // it speaks only while the run is loading or when it failed.
   const source = ready
     ? null
-    : home.status === 'failed' ? 'The close-approach run could not be loaded.' : 'Loading the close-approach run…'
+    : home.status === 'failed' ? 'We couldn’t load the close-approach run.' : 'Loading the close-approach run…'
 
   // The same document twice: the on-screen preview (its title an h2 under the page's h1) and the print-only copy (h1).
   const report = (preview: boolean) => (
@@ -95,7 +95,7 @@ export function ReportsView({ summary, health, conjSearch, selectedConjKey, user
 
   return (
     <PageLayout>
-      <SectionHeader title="Reports" subtitle="Choose what goes in, check the preview, and save it as a PDF." />
+      <SectionHeader title="Reports" subtitle="Pick what to include, check the preview, and then save it as a PDF." />
       <div className="reports">
         <div className="reports__builder">
           <ReportBuilder options={options} onChange={setOptions} pairs={ranked} source={source} blocked={blocked} onGenerate={generate} />

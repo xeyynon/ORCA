@@ -69,7 +69,7 @@ export function ReportBuilder({ options, onChange, pairs, source, blocked, onGen
           <Icon name="printer" /> Generate PDF
         </Button>
         <p className="report-builder__hint" role="status">
-          {blocked ?? 'Opens the print dialog: choose “Save as PDF” as the destination.'}
+          {blocked ?? 'This opens the print dialog. Choose “Save as PDF” as the destination.'}
         </p>
       </div>
     </aside>

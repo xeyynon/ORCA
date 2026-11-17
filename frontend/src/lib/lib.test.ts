@@ -1,8 +1,20 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { parseUtc, formatUtc, formatRelative, formatSimTime, NO_DATA } from './time.ts'
+import { parseUtc, formatUtc, formatLongUtc, formatRelative, formatSimTime, NO_DATA } from './time.ts'
+
+test('formatLongUtc writes a moment out in words, with the right ordinal', () => {
+  assert.equal(formatLongUtc('2026-11-06T18:23:26'), 'November 6th, 2026 at 18:23')
+  assert.equal(formatLongUtc('2026-01-01T00:05:00Z'), 'January 1st, 2026 at 00:05')
+  assert.equal(formatLongUtc('2026-03-22T09:00:00'), 'March 22nd, 2026 at 09:00')
+  assert.equal(formatLongUtc('2026-05-13T12:00:00'), 'May 13th, 2026 at 12:00')
+  assert.equal(formatLongUtc(null), NO_DATA)
+})
 import { pc, fixed, integer, formatLat, formatLon } from './format.ts'
-import { riskRank, countByRisk, RISK_ORDER } from './risk.ts'
+import { riskRank, countByRisk, riskTierSentence, RISK_ORDER } from './risk.ts'
+
+test('riskTierSentence states every threshold in one plain sentence', () => {
+  assert.equal(riskTierSentence(), 'A pair is rated CRITICAL when its Pc is greater than 10⁻⁴, HIGH when it is greater than 10⁻⁵, MEDIUM when it is greater than 10⁻⁶ and LOW when it is greater than 10⁻⁷. Any pair at or below all of these thresholds is rated NEGLIGIBLE.')
+})
 import { deriveOrbit, classifyRegime } from './orbit.ts'
 import { toCsv } from './csv.ts'
 
@@ -77,8 +89,8 @@ test('latitude and longitude always carry their hemisphere letter', () => {
 })
 
 test('formatSimTime is UTC, zero-padded, and includes the seconds', () => {
-  assert.equal(formatSimTime(Date.UTC(2026, 9, 3, 12, 0, 0)), '03 Oct 2026 · 12:00:00 UTC')
-  assert.equal(formatSimTime(Date.UTC(2026, 0, 5, 7, 8, 9)), '05 Jan 2026 · 07:08:09 UTC')
+  assert.equal(formatSimTime(Date.UTC(2026, 9, 3, 12, 0, 0)), 'On 03 Oct 2026 · At 12:00:00 UTC')
+  assert.equal(formatSimTime(Date.UTC(2026, 0, 5, 7, 8, 9)), 'On 05 Jan 2026 · At 07:08:09 UTC')
   assert.equal(formatSimTime(NaN), NO_DATA)
 })
 

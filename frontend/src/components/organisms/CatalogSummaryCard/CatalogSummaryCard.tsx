@@ -29,9 +29,9 @@ export function CatalogSummaryCard({ summary, error, onRetry }: Props) {
           </div>
         </>
       ) : error ? (
-        <EmptyState kind="error" title="Could not count the catalog" action={<Button size="sm" onClick={onRetry}>Retry</Button>}>{error}</EmptyState>
+        <EmptyState kind="error" title="We couldn’t count the catalog" action={<Button size="sm" onClick={onRetry}>Retry</Button>}>{error}</EmptyState>
       ) : (
-        <EmptyState kind="awaiting" title="Counting catalog…" />
+        <EmptyState kind="awaiting" title="Counting the catalog…" />
       )}
     </Panel>
   )

@@ -11,15 +11,15 @@ import { RISK_ORDER } from './risk'
  * The report's handling marking: centred capitals at the head of the report and, in print, of every page. Keep it in
  * step with the @top-center content in components/views/ReportsView/ReportsView.css (CSS cannot import it).
  */
-export const REPORT_MARKING = 'Educational use only · Not for operational decisions'
+export const REPORT_MARKING = 'For Educational Use Only · NOT for Operational Decisions'
 
 export type ReportSectionId = 'summary' | 'approaches' | 'pair' | 'quality'
 
 export const REPORT_SECTIONS: ReadonlyArray<{ id: ReportSectionId; title: string; about: string }> = [
-  { id: 'summary', title: 'Situation summary', about: 'Catalogue size, where objects orbit, and the headline figures of the run.' },
-  { id: 'approaches', title: 'Close approaches', about: 'Risk tier counts and the top approaches: pair, TCA, miss distance, Pc, risk.' },
-  { id: 'pair', title: 'Single pair analysis', about: 'One approach in depth: geometry, probability, uncertainty, data age and caveats.' },
-  { id: 'quality', title: 'Data quality and method', about: 'How old the data is, where it comes from, how screening and Pc work, and the limits.' },
+  { id: 'summary', title: 'Summary of the Situation', about: 'How big the catalogue is, where objects orbit, and the main figures from the run.' },
+  { id: 'approaches', title: 'Close Approaches', about: 'How many approaches fall in each risk tier, plus the top approaches with their pair, TCA, miss distance, Pc and risk.' },
+  { id: 'pair', title: 'Analysis of a Single Pair', about: 'A closer look at one approach, including its geometry, probability, uncertainty, data age and caveats.' },
+  { id: 'quality', title: 'Quality of Data and Methodology', about: 'How old the data is, where it comes from, how screening and Pc work, and what the limits are.' },
 ]
 
 export const TOP_N_OPTIONS = [10, 25, 50, 100] as const
@@ -47,7 +47,7 @@ export function blockedReason(o: ReportOptions, haveRun: boolean, events: readon
   const ids = includedSections(o)
   if (ids.length === 0) return 'Choose at least one section.'
   if ((o.sections.approaches || o.sections.pair) && !haveRun) return 'The close-approach run is still loading.'
-  if (o.sections.pair && (o.pairKey === null || !events.some((e) => pairKey(e) === o.pairKey))) return 'Choose the pair to analyse.'
+  if (o.sections.pair && (o.pairKey === null || !events.some((e) => pairKey(e) === o.pairKey))) return 'Choose which pair to analyse.'
   return null
 }
 

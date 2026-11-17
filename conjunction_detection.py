@@ -15,8 +15,10 @@ Method:
    objects are then propagated exactly at that time, one range-rate (Newton) step corrects it, and the miss
    distance, relative velocity and states are taken from SGP4 at the corrected time (Exp 3).
 4. Collision probability: the 2D Gaussian of the relative position, integrated over the combined hard-body disc
-   in the encounter plane (Foster). Closed small-radius form when the radius is well below the uncertainty,
-   numerical quadrature otherwise. Each object's uncertainty comes from CovarianceModel (measured, see there).
+   in the encounter plane (Foster), by numerical quadrature on the covariance principal axes: 32-point
+   Gauss-Legendre, vectorised, when the radius is small against the uncertainty (radius <= 0.1 x the smaller
+   sigma), and SciPy's adaptive quad otherwise. There is no closed form in the engine (the isotropic closed form
+   lives in benchmarks/pc.py, as an exactness check). Each object's uncertainty comes from CovarianceModel (measured, see there).
 5. Risk tiers: Pc above 1e-4 / 1e-5 / 1e-6 / 1e-7. NASA's CA Handbook (NASA/SP-20205011318, 2020) recommends
    mitigation above 1e-4.
 
@@ -46,22 +48,29 @@ _CHUNK = 120                  # grid steps propagated per batch (memory: objects
 _ESTIMATE_MARGIN_KM = 5.0     # the parabola locates TCA well but its minimum value is approximate: cut late
 
 METHOD = {
-    "propagator": "SGP4 (sgp4 package, reference code of Vallado et al. 2006), TEME frame",
-    "screening": "KD-tree on every object every {step:g} s; screening radius = report distance + v_max × step / 2, "
-                 "so no approach closer than the report distance falls between samples",
-    "closest_approach": "parabola through d² at the three grid samples around each local minimum, then exact "
-                        "SGP4 states and one range-rate correction at that time",
-    "collision_probability": "Foster 2D: Gaussian relative position over the combined hard-body disc in the "
-                             "encounter plane (closed small-radius form; quadrature when the radius is not small)",
-    "uncertainty": "per object, radial / in-track / cross-track, by TLE age: measured from successive public TLEs "
-                   "(LEO, 2026-10-14) and floored at ESA's published at-epoch TLE uncertainties",
+    "propagator": "SGP4 (sgp4 package, Vallado et al. 2006, reference code); TEME coordinate system",
+    "screening": "KD tree on every object every {step:g} seconds; Screening Radius = Report Distance + v_max * Step / 2, "
+                 "therefore there will be NO approaches closer than the Report Distance that fall between sampling periods.",
+    "closest_approach": "Parabolic equation through d² at the 3 nearest grid points surrounding each local minimum, followed by "
+                        "exact SGP4 state vectors and one range rate correction at that time.",
+    "collision_probability": "We use the Foster 2-D method. The relative position of the two objects is treated as a Gaussian "
+                             "distribution in the encounter plane, and the chance of a collision is found by adding it up over the "
+                             "combined hard-body disc of both objects. We add it up numerically: with a fast fixed rule "
+                             "(32-point Gauss-Legendre) when the disc is small compared with the uncertainty, and with "
+                             "adaptive quadrature when it is not.",
+    "uncertainty": "Each object has its own radial, in-track and cross-track uncertainty, which is based on the age of its "
+                   "TLE. These values were measured from successive public TLEs (LEO, October 14th, 2026) and are never "
+                   "lower than the TLE uncertainties at epoch that ESA has published.",
     "risk_tiers": "CRITICAL > 1e-4, HIGH > 1e-5, MEDIUM > 1e-6, LOW > 1e-7, else NEGLIGIBLE "
                   "(NASA CA Handbook 2020 recommends mitigation above 1e-4)",
     "limits": [
-        "TLEs carry no covariance: every Pc and tier depends on the assumed uncertainty above.",
-        "NASA does not recommend TLE-based conjunction assessment for operational decisions.",
-        "Encounters slower than {long:g} km/s are long encounters; their 2D Pc is unreliable and they are flagged.",
-        "Public Starlink TLEs are about 15 times less accurate in-track than other LEO TLEs of the same age.",
+        "There are no covariances included in the TLEs. All Pc values as well as all risk levels depend upon the assumed "
+        "uncertainty described above.",
+        "NASA has advised against using TLE-based conjunction assessments for making operational decisions.",
+        "Any encounter where the two objects pass each other slower than {long:g} km/sec is treated as a long encounter. "
+        "The 2-D Pc for these encounters is not reliable, so we flag them in the results.",
+        "Starlink TLEs available in the public domain are approximately 15 times less accurate in-track than other LEO TLEs "
+        "of equal age.",
     ],
 }
 

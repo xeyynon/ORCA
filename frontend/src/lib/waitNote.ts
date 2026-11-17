@@ -14,21 +14,21 @@ export function positionsWaitNote(elapsedMs: number): WaitNote {
   const s = Math.max(0, Math.floor(elapsedMs / 1000))
   if (elapsedMs < SLOW_AFTER_MS) {
     return {
-      title: 'Computing positions…',
-      body: 'Every object’s position is calculated from its element set with SGP4, in one pass. This usually takes a few seconds; the first load after the server starts can take up to a minute. The points appear together when it finishes.',
+      title: 'Working out positions…',
+      body: 'We calculate every object’s position from its orbit data with SGP4, all in one go. This usually takes a few seconds. The first load after the server starts can take up to a minute. All the points appear together once it’s done.',
       canRetry: false,
     }
   }
   if (elapsedMs < STALLED_AFTER_MS) {
     return {
-      title: `Still computing positions (${s} s)`,
-      body: 'The whole catalog is propagated in one pass, so the points appear all at once, not one by one. The counts on the left stay blank until then.',
+      title: `Still working out positions (${s} s)`,
+      body: 'The whole catalog is worked out in one go, so the points show up all at once rather than one by one. The counts on the left stay empty until then.',
       canRetry: false,
     }
   }
   return {
     title: `Taking longer than expected (${s} s)`,
-    body: 'This is longer than the first load has taken before. The server may be busy or unreachable. You can keep waiting or try again.',
+    body: 'This is taking longer than the first load usually does. The server might be busy or unreachable. You can keep waiting or try again.',
     canRetry: true,
   }
 }

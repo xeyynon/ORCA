@@ -26,20 +26,20 @@ export function OrbitDistribution({ counts, unclassified, total, failed, onOpen 
   const items = counts && total
     ? [
         ...REGIMES.map((r) => ({ label: r, title: REGIME_NAME[r], value: counts[r] ?? 0, color: REGIME_COLOR[r], share: sharePercent(counts[r] ?? 0, total) ?? undefined })),
-        ...(unclassified > 0 ? [{ label: 'Other', title: 'Not classified: the orbit data is not physical', value: unclassified, color: 'var(--risk-negligible)', share: sharePercent(unclassified, total) ?? undefined }] : []),
+        ...(unclassified > 0 ? [{ label: 'Other', title: 'This couldn’t be sorted because its orbit data doesn’t make physical sense', value: unclassified, color: 'var(--risk-negligible)', share: sharePercent(unclassified, total) ?? undefined }] : []),
       ]
     : null
   return (
     <section className="home-panel orbit-dist" aria-labelledby="orbit-dist-title">
-      <BlockHeader id="orbit-dist-title" title="Where are objects orbiting?" sub="The whole catalogue, by orbit regime."
+      <BlockHeader id="orbit-dist-title" title="Where are objects orbiting?" sub="Every object in the catalogue, grouped by type of orbit."
         action={<ArrowLink label="See the charts" onClick={onOpen} />} />
       {items ? (
         <>
           <BarList items={items} ariaLabel="Catalogued objects by orbit regime" />
-          <p className="home-panel__note">LEO low Earth · MEO medium Earth · GEO geostationary · HEO highly elliptical. Classified from each TLE's orbit.</p>
+          <p className="home-panel__note">LEO means low Earth orbit, MEO medium Earth orbit, GEO geostationary orbit and HEO highly elliptical orbit. Each object is sorted using its own TLE.</p>
         </>
       ) : failed ? (
-        <EmptyState kind="error" title="Not available">The catalogue summary could not be loaded.</EmptyState>
+        <EmptyState kind="error" title="Not available right now">We couldn’t load the catalogue summary.</EmptyState>
       ) : (
         <div className="orbit-dist__loading" aria-busy="true" aria-label="Loading the orbit regimes">
           {[0, 1, 2, 3].map((i) => <Skeleton key={i} width="100%" height="12px" />)}

@@ -24,8 +24,8 @@ export class ChunkErrorBoundary extends Component<Props, State> {
   render() {
     if (!this.state.failed) return this.props.children
     return (
-      <EmptyState kind="error" title="This screen did not load" action={<Button onClick={() => window.location.reload()}>Reload</Button>}>
-        The app may have been updated since this tab was opened. Reloading fetches the latest version.
+      <EmptyState kind="error" title="This screen didn’t load" action={<Button onClick={() => window.location.reload()}>Reload</Button>}>
+        The app may have been updated since you opened this tab. Reloading will get the latest version.
       </EmptyState>
     )
   }

@@ -66,24 +66,24 @@ export function ApproachPreview({ status, events, provenance, reportKm, windowLi
     <section className="approach" aria-labelledby="approach-title">
       <BlockHeader
         id="approach-title"
-        title="Close approach intelligence"
-        sub={windowLine ?? 'Potential encounters identified through orbital screening.'}
-        action={<ArrowLink label="View all conjunctions" onClick={onViewAll} />}
+        title="Close approaches intelligence"
+        sub={windowLine ?? 'Possible close passes found by screening the catalog.'}
+        action={<ArrowLink label="See all close approaches" onClick={onViewAll} />}
       />
       {status === 'loading' ? (
         <div className="approach__loading" aria-busy="true" aria-label="Loading the close approaches">
           {[0, 1, 2, 3, 4].map((i) => <Skeleton key={i} width="100%" height="18px" />)}
         </div>
       ) : status === 'failed' ? (
-        <EmptyState kind="error" title="The close approaches could not be loaded">Open Conjunctions to run a search.</EmptyState>
+        <EmptyState kind="error" title="We couldn’t load the close approaches">Go to Conjunctions to run a search.</EmptyState>
       ) : events.length === 0 ? (
-        <EmptyState kind="none" title="No close approaches in this run">{reportKm !== null ? `No pair came within ${reportKm} km.` : null}</EmptyState>
+        <EmptyState kind="none" title="Nothing came close in this run">{reportKm !== null ? `No two objects got within ${reportKm} km of each other.` : null}</EmptyState>
       ) : (
         <div className="approach__table">
           <DataTable caption="The five worst close approaches in this run" columns={columns} rows={rows} rowKey={pairKey} onSelect={onOpen} sortId={sortId} sortDir={sortDir} onSort={onSort} />
         </div>
       )}
-      {provenance ? <p className="approach__provenance">{provenance} Select a row for the full analysis.</p> : null}
+      {provenance ? <p className="approach__provenance">{provenance} Select a row for full analysis.</p> : null}
     </section>
   )
 }

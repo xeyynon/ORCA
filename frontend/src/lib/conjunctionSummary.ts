@@ -14,8 +14,8 @@ export function tierCounts(result: Pick<ConjunctionSearchResult, 'tier_counts'>)
  * (declutter plan 2026-11-15: one home per figure).
  */
 export function tableLine(shown: number, total: number): string {
-  if (shown >= total) return `All ${integer(shown)}, most probable first`
-  return `The ${integer(shown)} most probable`
+  if (shown >= total) return `Showing all ${integer(shown)}, with the most likely first`
+  return `The ${integer(shown)} most likely approaches`
 }
 
 /** Runtime estimate shown before a search: measured ~1.5-2 min per day of horizon for ~16,000 objects on a laptop. */
@@ -38,8 +38,8 @@ export function resultAnswer(counts: Record<RiskLevel, number>, total: number, h
   const h = counts.HIGH
   const w = window(horizonDays)
   const minor = counts.LOW + counts.NEGLIGIBLE
-  const detail = `${integer(total)} ${total === 1 ? 'approach' : 'approaches'} closer than ${reportKm} km found in all; ${integer(minor)} of them rank low or negligible.`
-  if (c > 0) return { tone: 'alert', headline: `${integer(c)} critical and ${integer(h)} high-risk ${c + h === 1 ? 'approach' : 'approaches'} in ${w}`, detail }
-  if (h > 0) return { tone: 'watch', headline: `No critical approaches; ${integer(h)} high-risk in ${w}`, detail }
-  return { tone: 'calm', headline: `No critical or high-risk approaches in ${w}`, detail }
+  const detail = `A total of ${integer(total)} ${total === 1 ? 'approach' : 'approaches'} closer than ${reportKm} km ${total === 1 ? 'was' : 'were'} found. Of these, ${integer(minor)} ${minor === 1 ? 'was' : 'were'} rated as low or negligible.`
+  if (c > 0) return { tone: 'alert', headline: `There ${c + h === 1 ? 'is' : 'are'} ${integer(c)} critical and ${integer(h)} high-risk ${c + h === 1 ? 'approach' : 'approaches'} within ${w}`, detail }
+  if (h > 0) return { tone: 'watch', headline: `There are no critical approaches and ${integer(h)} high-risk ${h === 1 ? 'approach' : 'approaches'} within ${w}`, detail }
+  return { tone: 'calm', headline: `There are no critical or high-risk approaches within ${w}`, detail }
 }

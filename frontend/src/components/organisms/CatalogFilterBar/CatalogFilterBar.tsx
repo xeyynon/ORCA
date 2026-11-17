@@ -48,7 +48,7 @@ export function CatalogFilterBar({ query, regimes, counts, active, matchCount, l
       {active || partial ? (
         <div className="filter-bar__status" role="status">
           {active ? `${integer(matchCount)} of ${integer(loadedCount)} loaded objects match.` : ''}
-          {partial ? `${active ? ' ' : ''}The filter searches the ${integer(loadedCount)} loaded objects; ${integer(totalCount)} are stored, and the search at the top covers them all.` : ''}
+          {partial ? `${active ? ' ' : ''}This filter only looks through the ${integer(loadedCount)} loaded objects. There are ${integer(totalCount)} stored in total, and the search box at the top covers all of them.` : ''}
         </div>
       ) : null}
     </div>
