@@ -12,6 +12,9 @@ export type TourStep = {
   target: string
   title: string
   body: string
+  /** The words for a touch screen, where there are no number keys, "/" or "." and nothing is clicked (audit 2026-11-18,
+      P2 #21). Left out when `body` already reads right on a phone. */
+  touchBody?: string
 }
 
 /**
@@ -31,18 +34,21 @@ export const TOUR_STEPS: readonly TourStep[] = [
     target: '.appbar__center',
     title: 'Open six views with one row',
     body: 'Overview lists the catalog, Globe shows it in 3-d, Conjunctions finds close approaches, Analytics charts it, Data explains where it comes from, and Reports turns the results into a printable document. Use the number keys (1-6) to open the six views. The ORCA logo or the H key brings you back to this page.',
+    touchBody: 'Overview lists the catalog, Globe shows it in 3-d, Conjunctions finds close approaches, Analytics charts it, Data explains where it comes from, and Reports turns the results into a printable document. Tap an icon in this row to open its view. Tap the ORCA logo to come back to this page.',
   },
   {
     id: 'search',
     target: '[data-tour="search"]',
     title: 'Search for any object',
     body: 'Enter the name of an object or its NORAD id and click on a result to display it on the Globe. Use forward slash (/) to jump here from any view.',
+    touchBody: 'Tap here and enter the name of an object or its NORAD id. Tap a result to show it on the Globe.',
   },
   {
     id: 'globe',
     target: '.appbar__center .nav-tab[title^="Globe "]',
     title: 'Catalog in 3-d',
     body: 'Globe creates a graphic representation of all loaded objects around the Earth. Clicking on an object draws its orbital path. Using the playback bar allows moving time forward.',
+    touchBody: 'Globe creates a graphic representation of all loaded objects around the Earth. Tapping an object draws its orbital path. Using the playback bar allows moving time forward.',
   },
   {
     id: 'conjunctions',
@@ -55,14 +61,22 @@ export const TOUR_STEPS: readonly TourStep[] = [
     target: '[data-tour="ask"]',
     title: 'Ask ORCA',
     body: 'You can ask ORCA questions in everyday words, such as how many objects there are, how old the data is, what a term means, or to open a view. Use dot (.) to Ask ORCA from anywhere.',
+    touchBody: 'You can ask ORCA questions in everyday words, such as how many objects there are, how old the data is, what a term means, or to open a view. Tap this button to ask from any page.',
   },
   {
     id: 'menu',
     target: '[data-tour="menu"]',
     title: 'Your menu',
     body: 'All remaining options live here including notifications, keyboard shortcuts, theme selection and signing out. If you want to see all these steps again, choose "Take the tour" within this menu.',
+    // The menu hides "Keyboard shortcuts" on a touch screen (FineOnly), so the card does not name it.
+    touchBody: 'All remaining options live here including notifications, theme selection and signing out. If you want to see all these steps again, choose "Take the tour" within this menu.',
   },
 ]
+
+/** A step as a touch screen shows it: its touch words when it has them. */
+export function forPointer(step: TourStep, touch: boolean): TourStep {
+  return touch && step.touchBody ? { ...step, body: step.touchBody } : step
+}
 
 /** The steps whose target is on screen now, in tour order. */
 export function availableSteps(steps: readonly TourStep[], isPresent: (step: TourStep) => boolean): TourStep[] {
