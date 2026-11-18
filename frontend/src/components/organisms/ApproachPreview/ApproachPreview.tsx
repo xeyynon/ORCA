@@ -40,6 +40,9 @@ const SORT_KEYS: Record<string, (e: ConjunctionEvent) => number | string> = {
   tca: (e) => Date.parse(e.tca),
 }
 
+/** On a phone (under 600 px) the table keeps the pair, its Pc and its risk; Conjunctions has the rest (audit 2026-11-18 #8). */
+const NARROW_HIDDEN: Record<string, number> = { tca: 600, miss: 600 }
+
 /**
  * "Close approaches": the run's five worst approaches, each row opening the full analysis on Conjunctions (Section 03 of
  * the homepage spec). Never sample data: while the run loads the rows are skeletons, if it cannot load that is said, and
@@ -63,6 +66,8 @@ export function ApproachPreview({ status, events, provenance, reportKm, windowLi
     { id: 'pc', label: 'Chance of collision', hint: GLOSSARY.Pc, sortable: true, align: 'right', render: (e) => <Mono>{pc(e.probability_of_collision)}</Mono> },
     { id: 'risk', label: 'Risk', sortable: true, render: (e) => <RiskBadge level={e.risk_level} /> },
   ]
+
+  for (const c of columns) c.hideBelow = NARROW_HIDDEN[c.id]
 
   return (
     <section className="approach" aria-labelledby="approach-title">
