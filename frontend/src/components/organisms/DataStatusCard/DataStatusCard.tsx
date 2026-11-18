@@ -5,32 +5,37 @@ import { Label } from '../../atoms/Label/Label'
 import { fetchSummary } from '@/lib/homeBoard'
 import { FactRow } from '../../molecules/FactRow/FactRow'
 import { FieldNote } from '../../molecules/FieldNote/FieldNote'
+import { StatusIndicator } from '../../molecules/StatusIndicator/StatusIndicator'
 import { Mono } from '../../atoms/Mono/Mono'
 import { TleAgeChip } from '../../molecules/TleAgeChip/TleAgeChip'
 import './DataStatusCard.css'
 
 type Props = {
   count: number | null
-  /** From the API's own cache table; null = the catalog was never refreshed through the API. */
+  /** When the stored catalog was last updated from CelesTrak (the API's last_update); null = never through ORCA. */
   lastUpdate: string | null
-  /** The API's most recent Celestrak fetch outcome; null if none is recorded yet. */
+  /** The most recent download attempt; shown only when it failed (a success is the update time above). */
   lastFetch: FetchOutcome | null
   newestAgeDays: number | null
   oldestAgeDays: number | null
 }
 
 export function DataStatusCard({ count, lastUpdate, lastFetch, newestAgeDays, oldestAgeDays }: Props) {
+  const failedFetch = lastFetch && lastFetch.status !== 'ok' ? fetchSummary(lastFetch) : null
   return (
     <section className="data-status">
       <Label>Catalog status</Label>
       <div className="data-status__grid">
         <FactRow label="Number of objects in catalog"><Mono>{integer(count)}</Mono></FactRow>
-        <FactRow label="API refresh date">
-          {lastUpdate ? <Mono>{formatUtc(lastUpdate)}</Mono> : <Mono muted>never (loaded outside the API)</Mono>}
+        {/* One time and one wording for a refresh, as on Home (audit 2026-11-18 #18). */}
+        <FactRow label="Last updated from CelesTrak">
+          {lastUpdate ? <Mono>{formatUtc(lastUpdate)}</Mono> : <Mono muted>not recorded (the catalog was loaded another way)</Mono>}
         </FactRow>
-        <FactRow label="Last Celestrak fetch">
-          {lastFetch ? <span>{fetchSummary(lastFetch).text}, <Mono>{formatUtc(lastFetch.at)}</Mono></span> : <Mono muted>none recorded</Mono>}
-        </FactRow>
+        {failedFetch && lastFetch ? (
+          <FactRow label="Last download attempt">
+            <StatusIndicator tone={failedFetch.tone} label={failedFetch.text} /> <Mono>{formatUtc(lastFetch.at)}</Mono>
+          </FactRow>
+        ) : null}
         <FactRow label="Newest orbit data">
           {newestAgeDays !== null ? <TleAgeChip ageDays={newestAgeDays} /> : <Mono muted>—</Mono>}
         </FactRow>
@@ -38,7 +43,7 @@ export function DataStatusCard({ count, lastUpdate, lastFetch, newestAgeDays, ol
           {oldestAgeDays !== null ? <Mono>{days(oldestAgeDays)}</Mono> : <Mono muted>—</Mono>}
         </FactRow>
       </div>
-      <FieldNote>The “API refresh date” refers to when this API last retrieved data from a Celestrak fetch. This does NOT tell you how old the orbital data itself is; that is the TLE epoch listed next to it.</FieldNote>
+      <FieldNote>“Last updated from CelesTrak” is when ORCA last downloaded the catalog. It is not how old the orbit data is: each object’s data was measured earlier, and the newest and oldest ages above show how long ago.</FieldNote>
     </section>
   )
 }

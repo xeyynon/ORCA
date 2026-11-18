@@ -1,4 +1,4 @@
-import { API_BASE, API_ORIGIN } from '@/api/client'
+import { API_BASE, API_ORIGIN, API_ROUTE_NOTE } from '@/api/client'
 import type { Health } from '@/api/types'
 import { useClipboard } from '@/hooks/useClipboard'
 import type { ApiStatus, HealthCheck } from '@/hooks/useHealth'
@@ -43,7 +43,7 @@ export function HealthView({ health, apiStatus, check, onRecheck, onBack, now }:
       <div className="health-view__back">
         <Button size="sm" variant="ghost" onClick={onBack}><Icon name="arrow-left" size={14} /> Data</Button>
       </div>
-      <SectionHeader title="API health" subtitle="Shows whether the ORCA API is responding, and what it says about its catalogue." />
+      <SectionHeader title="API health" subtitle="Shows whether the ORCA API is responding, and what it says about its catalog." />
 
       <section className="health-view__answer" aria-live="polite">
         <div className="health-view__answer-title"><Dot tone={head.tone} /> {head.title}</div>
@@ -60,17 +60,17 @@ export function HealthView({ health, apiStatus, check, onRecheck, onBack, now }:
           <FactRow label="Reported status">{health ? <StatusIndicator tone={health.status === 'healthy' ? 'ok' : 'warn'} label={health.status === 'healthy' ? 'Healthy' : health.status} /> : <Mono muted>no response yet</Mono>}</FactRow>
           <FactRow label="Server time (UTC)">{health ? <Mono>{formatUtc(health.timestamp)}</Mono> : <Mono muted>—</Mono>}</FactRow>
           <FactRow label="Response time">{check.latencyMs !== null ? <Mono>{check.latencyMs} ms</Mono> : <Mono muted>—</Mono>}</FactRow>
-          <FactRow label="Address"><Mono>{API_ORIGIN}</Mono></FactRow>
+          <FactRow label="Address"><Mono>{API_ORIGIN}</Mono>{API_ROUTE_NOTE ? <span className="health-view__route">{API_ROUTE_NOTE}</span> : null}</FactRow>
         </div>
       </section>
 
       <section className="health-view__card">
-        <h2 className="health-view__h2">Catalogue database</h2>
+        <h2 className="health-view__h2">Catalog database</h2>
         <div className="health-view__grid">
           <FactRow label="Number of objects in catalog">{health ? <Mono>{integer(health.database.tles_count)}</Mono> : <Mono muted>—</Mono>}</FactRow>
-          <FactRow label="API refresh date">{health?.database.last_update ? <Mono>{formatUtc(health.database.last_update)}</Mono> : <Mono muted>never (loaded outside the API)</Mono>}</FactRow>
-          <FactRow label="Last Celestrak fetch"><StatusIndicator tone={fetchWords.tone} label={fetchWords.text} /></FactRow>
-          <FactRow label="Fetched at">{fetch ? <Mono>{formatUtc(fetch.at)}</Mono> : <Mono muted>—</Mono>}</FactRow>
+          <FactRow label="Last updated from CelesTrak">{health?.database.last_update ? <Mono>{formatUtc(health.database.last_update)}</Mono> : <Mono muted>not recorded (the catalog was loaded another way)</Mono>}</FactRow>
+          <FactRow label="Last download attempt"><StatusIndicator tone={fetchWords.tone} label={fetchWords.text} /></FactRow>
+          <FactRow label="Attempted at">{fetch ? <Mono>{formatUtc(fetch.at)}</Mono> : <Mono muted>none yet</Mono>}</FactRow>
         </div>
         {fetch && fetch.status !== 'ok' && fetch.detail ? <p className="health-view__detail">{fetch.detail}</p> : null}
       </section>
