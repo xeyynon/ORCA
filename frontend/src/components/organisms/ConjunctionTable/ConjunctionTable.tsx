@@ -59,7 +59,7 @@ export function ConjunctionTable({ events, selectedKey, onSelect, compact = fals
       render: (e) => (
         <span>
           <RiskBadge level={e.risk_level} />
-          {e.long_encounter ? <> <Badge tone="warn" title="Long encounter. The two objects pass each other at under 0.1 km/s, so the probability can be several times too low.">Long</Badge></> : null}
+          {e.long_encounter ? <> <Badge tone="warn" title="Long encounter. The two objects pass each other at under 0.1 km/s. For these slow pairs the probability is not reliable: it may be too high or too low.">Long</Badge></> : null}
         </span>
       ),
     },
