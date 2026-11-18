@@ -4,19 +4,21 @@ import { fetchAuthStatus, fetchMe, loginRequest } from '@/api/auth'
 import { clearToken, getToken, onSessionEnd, setToken } from '@/api/session'
 import { describeLoginFailure } from '@/lib/authErrors'
 import type { LoginFailure } from '@/lib/authErrors'
+import { SESSION_ENDED, sessionCheckOutcome } from '@/lib/sessionCheck'
 
 export type SessionState =
   | { status: 'checking' }
   | { status: 'signedOut'; notice: string | null }
   | { status: 'signedIn'; username: string }
+  /** A saved sign-in could not be checked because the server is unreachable or erred. The token is kept. */
+  | { status: 'unreachable'; message: string }
 
 export type SignInResult = { ok: true } | { ok: false; failure: LoginFailure }
 
-const EXPIRED = 'Your session ended. Please sign in again.'
-
 /**
  * Owns the whole sign-in lifecycle:
- *  - on load, a stored token is VALIDATED against the server (never trusted just because it exists)
+ *  - on load, a stored token is VALIDATED against the server (never trusted just because it exists);
+ *    only a 401 forgets it. If the server cannot be reached or errs, the token is kept and the person gets Try again
  *  - a 401 anywhere later (expired token, rotated password) returns to the login screen with a notice
  *  - signOut forgets the token and unmounts the workspace, which drops every piece of loaded data
  */
@@ -32,15 +34,19 @@ export function useSession() {
       (me) => { if (!ctl.signal.aborted) setState({ status: 'signedIn', username: me.username }) },
       (err: unknown) => {
         if (ctl.signal.aborted) return
-        clearToken(false)
-        const unreachable = err instanceof ApiError && err.kind === 'network'
-        setState({ status: 'signedOut', notice: unreachable ? null : EXPIRED })
+        const outcome = sessionCheckOutcome(err)
+        if (outcome.action === 'signOut') {
+          clearToken(false)
+          setState({ status: 'signedOut', notice: outcome.notice })
+        } else {
+          setState({ status: 'unreachable', message: outcome.message })
+        }
       },
     )
     return () => ctl.abort()
   }, [state.status])
 
-  useEffect(() => onSessionEnd(() => setState({ status: 'signedOut', notice: EXPIRED })), [])
+  useEffect(() => onSessionEnd(() => setState({ status: 'signedOut', notice: SESSION_ENDED })), [])
 
   useEffect(() => {
     if (state.status !== 'signedOut') return
@@ -64,10 +70,15 @@ export function useSession() {
     }
   }, [])
 
+  /** Run the session check again (Try again on the "can't reach ORCA" screen). */
+  const retry = useCallback(() => {
+    setState(getToken() ? { status: 'checking' } : { status: 'signedOut', notice: null })
+  }, [])
+
   const signOut = useCallback(() => {
     clearToken(false)
     setState({ status: 'signedOut', notice: null })
   }, [])
 
-  return { state, configured, signIn, signOut }
+  return { state, configured, signIn, signOut, retry }
 }

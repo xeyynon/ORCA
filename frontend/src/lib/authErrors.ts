@@ -7,7 +7,7 @@ export interface LoginFailure { kind: LoginFailureKind; message: string }
  * not there" must read differently, because the remedy differs. The backend URL is never shown.
  */
 export function describeLoginFailure(err: { kind: 'http' | 'network' | 'aborted'; status: number | null; message: string }): LoginFailure {
-  if (err.kind === 'network') return { kind: 'unreachable', message: 'Cannot reach the server right now. Check that the API is running, then try again.' }
+  if (err.kind === 'network') return { kind: 'unreachable', message: "Can't reach ORCA's server right now. Try again in a minute." }
   switch (err.status) {
     case 401: return { kind: 'rejected', message: 'Incorrect username or password.' }
     case 429: return { kind: 'locked', message: err.message }

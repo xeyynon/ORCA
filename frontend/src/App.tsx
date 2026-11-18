@@ -5,6 +5,7 @@ import type { LoginFailure } from '@/lib/authErrors'
 import { ThemeToggle } from '@/components/molecules/ThemeToggle/ThemeToggle'
 import { LoadingScreen } from '@/components/views/LoadingScreen/LoadingScreen'
 import { LoginView } from '@/components/views/LoginView/LoginView'
+import { ServerUnreachable } from '@/components/views/ServerUnreachable/ServerUnreachable'
 import { Workspace } from './Workspace'
 
 /**
@@ -14,7 +15,7 @@ import { Workspace } from './Workspace'
  */
 export function App() {
   const { theme, toggle } = useTheme()
-  const { state, configured, signIn, signOut } = useSession()
+  const { state, configured, signIn, signOut, retry } = useSession()
   const [busy, setBusy] = useState(false)
   const [failure, setFailure] = useState<LoginFailure | null>(null)
 
@@ -27,6 +28,12 @@ export function App() {
 
   // While a stored token is being checked, say so, rather than flash a login form that is about to vanish.
   if (state.status === 'checking') return <LoadingScreen message="Checking your session" />
+
+  // The server could not check a saved sign-in (down, or it erred). Keep the sign-in and offer Try again;
+  // only a 401 from the server means the session really ended.
+  if (state.status === 'unreachable') {
+    return <ServerUnreachable message={state.message} onRetry={retry} onSignOut={signOut} corner={<ThemeToggle theme={theme} onToggle={toggle} />} />
+  }
 
   const submit = async (username: string, password: string) => {
     setBusy(true)

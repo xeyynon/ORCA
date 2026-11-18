@@ -40,7 +40,7 @@ export function HomeHero({ lines, snapshot, onExploreGlobe, onViewConjunctions, 
               First time visiting this site? Take the one minute tour
             </button>
           ) : null}
-          {snapshot ? <p className="home-hero__snapshot">Snapshot of data: <Mono>{snapshot}</Mono></p> : null}
+          {snapshot ? <p className="home-hero__snapshot">Last updated from CelesTrak: <Mono>{snapshot}</Mono></p> : null}
         </div>
       </div>
       <div className="home-hero__visual" aria-hidden="true">

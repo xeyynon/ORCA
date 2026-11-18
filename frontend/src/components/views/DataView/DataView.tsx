@@ -1,4 +1,4 @@
-import { API_BASE, API_ORIGIN } from '@/api/client'
+import { API_BASE, API_ORIGIN, API_ROUTE_NOTE } from '@/api/client'
 import type { Health } from '@/api/types'
 import type { UpdatePhase } from '@/hooks/useCatalogUpdate'
 import type { ApiStatus } from '@/hooks/useHealth'
@@ -28,7 +28,7 @@ export function DataView({ health, apiStatus, summary, update, onOpenHealth }: P
   const label = apiStatus === 'online' ? 'Online' : apiStatus === 'offline' ? 'Can’t be reached' : 'Checking…'
   return (
     <PageLayout narrow>
-      <SectionHeader title="Data" subtitle="The beginning of the “Data” section describes what makes up the catalog (i.e., its origin, age, and method for updating)." />
+      <SectionHeader title="Data" subtitle="Where the catalog comes from, how old it is, and how to update it" />
       <div className="data-view__grid">
         <DataStatusCard
           count={health?.database.tles_count ?? summary?.count ?? null}
@@ -48,7 +48,7 @@ export function DataView({ health, apiStatus, summary, update, onOpenHealth }: P
           <span className="data-view__api-chevron"><Icon name="chevron-down" size={16} /></span>
         </summary>
         <div className="data-view__api-grid">
-          <FactRow label="Base URL"><Mono>{API_ORIGIN}</Mono></FactRow>
+          <FactRow label="Address"><Mono>{API_ORIGIN}</Mono>{API_ROUTE_NOTE ? <span className="data-view__route">{API_ROUTE_NOTE}</span> : null}</FactRow>
           <FactRow label="Health check"><button type="button" className="data-view__link data-view__link--button" onClick={onOpenHealth}>API health page</button></FactRow>
           <FactRow label="Interactive docs"><a className="data-view__link" href={`${API_BASE}/docs`} target="_blank" rel="noreferrer">/docs (Swagger)</a></FactRow>
           <FactRow label="App build"><Mono>{__ORCA_BUILD__}</Mono></FactRow>
