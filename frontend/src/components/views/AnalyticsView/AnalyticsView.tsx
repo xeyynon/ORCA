@@ -96,7 +96,7 @@ export function AnalyticsView({ catalog, totalCount, now }: Props) {
 
   const partial = totalCount !== null && totalCount > rows.length
   // The scope is the page's, said once in the subtitle (declutter plan 2026-11-15: it was on every chart). A chart shows
-  // its own scope only when it covers a different set: the regime donut counts the whole catalogue on the server while
+  // its own scope only when it covers a different set: the regime donut counts the whole catalog on the server while
   // the other charts are drawn from the first loaded rows.
   const wholeFailed = partial && !wholeCatalog && (whole.status === 'error' || whole.malformed)
   const regimeCounts = server.data ? server.data.by_regime : model.summary.regimes

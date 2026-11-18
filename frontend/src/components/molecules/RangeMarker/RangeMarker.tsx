@@ -13,7 +13,7 @@ type Props = {
 }
 
 /**
- * Where one object sits among the catalogue: a hairline from lowest to highest with a short tick, and the same fact in
+ * Where one object sits among the catalog: a hairline from lowest to highest with a short tick, and the same fact in
  * words. Read-only, so it must not look like a slider (owner, 2026-11-15): no knob, no groove, no accent fill.
  */
 export function RangeMarker({ label, value, percent, words }: Props) {

@@ -8,7 +8,7 @@ export type UpdatePhase = 'idle' | 'starting' | 'waiting' | 'changed' | 'unchang
 /**
  * POST /api/update-tles returns immediately ("update started"); ingestion continues in a server
  * background task with no completion event. So: start it, then poll /health for the count or
- * last_update to move. The API also records the outcome of each Celestrak fetch (health.last_fetch), so a
+ * last_update to move. The API also records the outcome of each CelesTrak fetch (health.last_fetch), so a
  * refused or failed fetch is reported as such ("refused"). "unchanged" is left for when nothing at all moved.
  */
 export function useCatalogUpdate() {
