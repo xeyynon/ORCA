@@ -38,6 +38,13 @@ class RegimeTests(unittest.TestCase):
         self.assertEqual(classify_regime(2.0, 0.001), "MEO")
         self.assertEqual(classify_regime(2.0, 0.7), "HEO")
 
+    def test_geo_by_mean_altitude_and_nothing_above_geo_is_meo(self):
+        # Same cases as frontend/src/lib/lib.test.ts (audit 2026-11-18 #10).
+        self.assertEqual(classify_regime(1.0027, 0.0205), "GEO")    # at GEO height, a little stretched (MUOS-5): was MEO
+        self.assertEqual(classify_regime(0.972253, 0.0001), "HEO")  # circular at 36,670 km, above GEO
+        self.assertEqual(classify_regime(1.031713, 0.001), "MEO")   # circular at 35,000 km, just below GEO height
+        self.assertEqual(classify_regime(1.0027, 0.15), "HEO")      # GEO height but too stretched to call GEO
+
     def test_non_physical_mean_motion_is_unclassified_not_a_guess(self):
         self.assertIsNone(classify_regime(0, 0.001))
         self.assertIsNone(classify_regime(float("nan"), 0.001))

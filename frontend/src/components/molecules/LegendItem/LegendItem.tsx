@@ -10,7 +10,7 @@ export function LegendItem({ color, label, value, shape }: Props) {
     <div className="legend-item">
       <Swatch color={color} shape={shape} />
       <span className="legend-item__label">{label}</span>
-      {value !== undefined ? <Mono muted>{value}</Mono> : null}
+      {value !== undefined ? <span className="legend-item__value"><Mono muted>{value}</Mono></span> : null}
     </div>
   )
 }

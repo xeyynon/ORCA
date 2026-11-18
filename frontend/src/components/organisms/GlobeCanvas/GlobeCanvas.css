@@ -1,4 +1,6 @@
 .globe-canvas { position: relative; width: 100%; height: 100%; min-height: 0; overflow: hidden; background: var(--bg-abyss); }
 .globe-canvas__error { position: absolute; inset: 0; display: grid; place-items: center; padding: 24px; text-align: center; color: var(--bad-ink); }
+/* Holds the conjunction's one "A × B" card: the padding lifts the card clear of the ring drawn round the midpoint. */
+.globe-label-anchor { padding-bottom: 76px; }
 /* a name card pinned to an object */
 .globe-label { padding: 4px 10px; border: 1px solid var(--border); border-radius: 6px; font: 600 12px var(--font-mono, monospace); letter-spacing: .02em; color: var(--text-primary); background: color-mix(in srgb, var(--bg-panel) 92%, transparent); box-shadow: var(--shadow); white-space: nowrap; }

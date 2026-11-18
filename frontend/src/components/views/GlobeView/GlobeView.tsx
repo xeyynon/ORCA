@@ -231,7 +231,7 @@ export function GlobeView({ catalog, totalCount, selection, focus, conjunction, 
               skipped={positions.data?.skipped ?? 0}
             />
           </div>
-          {inSheet ? <div className="globe-view__sheet"><BottomSheet title={sheetTitle}>{details}</BottomSheet></div> : null}
+          {inSheet ? <div className="globe-view__sheet"><BottomSheet title={sheetTitle} onClose={() => { onClearConjunction(); onSelect([]) }}>{details}</BottomSheet></div> : null}
           <div className="globe-view__bar">
             <PlaybackBar
               offsetH={playback.offsetH}

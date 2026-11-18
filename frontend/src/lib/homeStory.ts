@@ -7,7 +7,7 @@ export const REGIME_NAME: Record<Regime, string> = {
   LEO: 'low Earth orbit',
   MEO: 'medium Earth orbit',
   GEO: 'geostationary orbit',
-  HEO: 'highly elliptical orbits',
+  HEO: 'high or highly elliptical orbits',
 }
 
 /**
