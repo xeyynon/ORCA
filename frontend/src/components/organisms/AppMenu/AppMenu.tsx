@@ -15,6 +15,9 @@ type Props = {
   notices: readonly Notice[]
   onGo: (view: ViewId) => void
   onShortcuts: () => void
+  /** Opens What's new; `build` is the number of the newest build, shown beside it. */
+  onWhatsNew: () => void
+  build: number
   onTour: () => void
   onToggleTheme: () => void
   onSignOut: () => void
@@ -22,10 +25,10 @@ type Props = {
 
 /**
  * The one hamburger menu (owner, 2026-11-07: "a proper hamburger with all of the things there"): who is signed in, the
- * notifications, help (keyboard shortcuts, the tour), the theme and Sign out, in that order. The button
+ * notifications, help (What's new with the build number, keyboard shortcuts, the tour), the theme and Sign out, in that order. The button
  * carries a count when a notice needs action. Behaviour (keys, focus, outside click) is PopoverMenu's.
  */
-export function AppMenu({ username, theme, notices, onGo, onShortcuts, onTour, onToggleTheme, onSignOut }: Props) {
+export function AppMenu({ username, theme, notices, onGo, onShortcuts, onWhatsNew, build, onTour, onToggleTheme, onSignOut }: Props) {
   const nextTheme = theme === 'dark' ? 'light' : 'dark'
   return (
     <PopoverMenu label="Menu" icon={<Icon name="menu" />} menuLabel="Menu" badge={badgeCount(notices)} tourId="menu">
@@ -41,6 +44,7 @@ export function AppMenu({ username, theme, notices, onGo, onShortcuts, onTour, o
 
           <div className="app-menu__sep" role="separator" />
           <div className="app-menu__heading" role="presentation">Help</div>
+          <MenuItem label="What's new" hint={`Build ${build}`} icon={<Icon name="list" />} onSelect={() => { close(false); onWhatsNew() }} />
           <FineOnly><MenuItem label="Keyboard shortcuts" hint="?" icon={<Icon name="keyboard" />} onSelect={() => { close(false); onShortcuts() }} /></FineOnly>
           {/* Focus goes back to the menu button first, so the tour returns it there when it closes. */}
           <MenuItem label="Take the tour" icon={<Icon name="play" />} onSelect={() => { close(true); onTour() }} />
