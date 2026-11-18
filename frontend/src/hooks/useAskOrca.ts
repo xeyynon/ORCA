@@ -5,7 +5,7 @@ import type { AssistantStatus } from '@/api/assistant'
 import { ApiError } from '@/api/client'
 import { getCatalogSummary, searchTles } from '@/api/endpoints'
 import type { Health, TleRecord } from '@/api/types'
-import { askFacts, askOrca, assistantFailure, greeting } from '@/lib/askOrca'
+import { answerSource, askFacts, askOrca, assistantFailure, greeting } from '@/lib/askOrca'
 import type { AskAction, AskContext, AskReply, QuickReply } from '@/lib/askOrca'
 import type { CatalogSummary } from '@/lib/catalog'
 import { resultAnswer, tierCounts } from '@/lib/conjunctionSummary'
@@ -100,8 +100,9 @@ export function useAskOrca({ open, view, theme, health, summary, loaded, conjSea
       },
       views: VIEWS,
       glossary: GLOSSARY,
+      ai: status?.enabled === true,
     }
-  }, [view, theme, whole, stored, summary, health, conjSearch.result, conjSearch.query, conjSearch.phase, conjSearch.source, conjSearch.error])
+  }, [view, theme, whole, stored, summary, health, conjSearch.result, conjSearch.query, conjSearch.phase, conjSearch.source, conjSearch.error, status])
 
   // Callbacks below read these through refs, so a reply always uses the latest data and handlers.
   const ctxRef = useRef(context)
@@ -130,14 +131,16 @@ export function useAskOrca({ open, view, theme, health, summary, loaded, conjSea
     window.requestAnimationFrame(() => inputRef.current?.focus({ preventScroll: true }))
   }, [inputRef])
 
-  // First open: the greeting, and one check of whether the AI is on (a 404 or 503 simply means off).
+  // First open: one check of whether the AI is on (a 404 or 503 simply means off), then the greeting, which says where
+  // the answers come from and so must know (audit 2026-11-18, P1 #4). Its place is kept at the top while the check runs.
+  // Not aborted on unmount: it never throws, and an aborted check would leave the greeting waiting for good.
   useEffect(() => {
     if (!open || greeted.current) return
     greeted.current = true
-    add({ role: 'orca', ...greetingEntry(greeting(ctxRef.current.view)) })
-    const { signal, done } = track()
-    getAssistantStatus({ signal }).then((s) => { done(); setStatus(s) }, () => done())
-  }, [open, add])
+    const id = add({ role: 'orca', text: 'Getting ready', pending: true })
+    const greet = (ai: boolean) => patch(id, { pending: false, ...greetingEntry(greeting(ctxRef.current.view, ai)) })
+    getAssistantStatus().then((s) => { setStatus(s); greet(s.enabled) }, () => greet(false))
+  }, [open, add, patch])
 
   useEffect(() => () => { for (const c of inflight.current) c.abort() }, [])
 
@@ -197,8 +200,7 @@ export function useAskOrca({ open, view, theme, health, summary, loaded, conjSea
   const askAi = useCallback((question: string, fallback: AskReply) => {
     const ctx = ctxRef.current
     const facts = askFacts(ctx)
-    const model = statusRef.current?.model
-    const id = add({ role: 'orca', text: `Asking the AI${model ? ` · Using ${model}` : ''}`, pending: true })
+    const id = add({ role: 'orca', text: 'Asking the AI model', pending: true })
     const { signal, done } = track()
     askAssistant({ question, context: { view: ctx.view, facts } }, { signal }).then(
       (a) => { done(); patch(id, { pending: false, text: a.answer, ai: { model: a.model, label: a.label, facts } }) },
@@ -224,9 +226,12 @@ export function useAskOrca({ open, view, theme, health, summary, loaded, conjSea
 
   const pick = useCallback((chip: QuickReply) => send(chip.say ?? chip.label), [send])
 
-  const footnote = status?.enabled
-    ? `Answers come from ORCA's data · Questions it can't place are sent to the AI (${status.model ?? 'unknown model'}) · Those answers are labelled`
-    : `Answers come from ORCA's data. AI is off${status?.reason ? `: ${status.reason}` : ''}.`
+  // Plain sentences, no model id (audit 2026-11-18, P3): each AI answer already carries its own label.
+  const footnote = status === null
+    ? "Answers come from ORCA's data."
+    : status.enabled
+      ? answerSource(true)
+      : `All answers come from ORCA's data. The AI is off${status.reason ? `: ${status.reason}` : ''}.`
 
   return { messages, send, pick, footnote, busy: messages.some((m) => m.pending) }
 }

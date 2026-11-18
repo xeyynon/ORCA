@@ -20,7 +20,7 @@ export interface HookLines {
   sub: string
 }
 
-/** How current the catalogue is: stale when its median element set is older than the staleness limit. */
+/** How current the catalog is: stale when its median element set is older than the staleness limit. */
 export interface CatalogFreshness {
   stale: boolean
   /** When the API last stored a fetch (naive UTC), or null if never through the API. */
@@ -32,14 +32,16 @@ export const HOME_SUB = 'Track orbital object motion, identify near misses and e
 
 /**
  * The opening of the home page: the real object count as the headline (the owner kept the number as the hook,
- * 2026-11-07), and what ORCA does. "Right now" only while the data is fresh: on a stale catalogue the headline is in the
- * past tense and dated (audit 2026-11-15, P0 #1), because a month-old catalogue is not "now".
+ * 2026-11-07), and what ORCA does. The catalog is CelesTrak's list of ACTIVE satellites, so the headline says
+ * "active satellites", never "objects orbiting the Earth" (that would include debris the list does not hold; audit
+ * 2026-11-18, P0 #1). "Follows" only while the data is fresh: on a stale catalog the headline is in the past tense and
+ * dated (audit 2026-11-15, P0 #1), because a month-old catalog is not "now".
  */
 export function hookLines(objects: number | null, freshness: CatalogFreshness | null = null): HookLines {
   const sub = HOME_SUB
-  if (objects === null || !(objects > 0)) return { headline: 'Thousands of objects currently orbit around the Earth', sub }
+  if (objects === null || !(objects > 0)) return { headline: 'ORCA follows thousands of active satellites', sub }
   const n = integer(objects)
-  if (!freshness?.stale) return { headline: `${n} objects currently orbit around the Earth`, sub }
-  if (freshness.asOf) return { headline: `${n} objects were orbiting the Earth on ${formatDay(freshness.asOf)}`, sub }
-  return { headline: `There are ${n} objects in our stored catalogue`, sub }
+  if (!freshness?.stale) return { headline: `ORCA follows ${n} active satellites`, sub }
+  if (freshness.asOf) return { headline: `ORCA was following ${n} active satellites on ${formatDay(freshness.asOf)}`, sub }
+  return { headline: `There are ${n} active satellites in our stored catalog`, sub }
 }
