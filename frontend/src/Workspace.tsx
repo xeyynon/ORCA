@@ -35,6 +35,8 @@ import { SkipLink } from '@/components/molecules/SkipLink/SkipLink'
 import { ChunkErrorBoundary } from '@/components/organisms/ChunkErrorBoundary/ChunkErrorBoundary'
 import { StaleDataBanner } from '@/components/organisms/StaleDataBanner/StaleDataBanner'
 import { ShortcutsHelp } from '@/components/organisms/ShortcutsHelp/ShortcutsHelp'
+import { WhatsNew } from '@/components/organisms/WhatsNew/WhatsNew'
+import { BUILDS, LATEST_BUILD } from '@/lib/builds'
 import { StatusBar } from '@/components/organisms/StatusBar/StatusBar'
 import { TourOverlay } from '@/components/organisms/TourOverlay/TourOverlay'
 import type { StatusItem } from '@/components/organisms/StatusBar/StatusBar'
@@ -75,6 +77,7 @@ export function Workspace({ username, onSignOut, theme, onToggleTheme: toggleThe
   const [conjunction, setConjunction] = useState<ConjunctionEvent | null>(null)
   const [camera, setCamera] = useState<CameraGeo | null>(null)
   const [helpOpen, setHelpOpen] = useState(false)
+  const [whatsNewOpen, setWhatsNewOpen] = useState(false)
   // A conjunction search takes minutes, so it lives here with its form and selected row: leaving the Conjunctions view
   // (to look at the globe, say) must not abort it or drop its result. All of it goes when the workspace does (sign-out).
   const conjSearch = useConjunctionSearch()
@@ -140,7 +143,7 @@ export function Workspace({ username, onSignOut, theme, onToggleTheme: toggleThe
     '/': () => setSearchOpen(true),
     '.': () => { if (askOpen) askInputRef.current?.focus(); else setAskOpen(true) },
     Escape: () => setSelection((s) => (s.length ? [] : s)),
-  }, !helpOpen)
+  }, !helpOpen && !whatsNewOpen)
 
 
   // The bell lists only real, current conditions (lib/notices.ts).
@@ -185,7 +188,7 @@ export function Workspace({ username, onSignOut, theme, onToggleTheme: toggleThe
             <ObjectSearch bare inputRef={searchRef} query={query} onQueryChange={setQuery} results={search.results} loading={search.loading} degraded={search.degraded} onPick={(id) => { closeSearch(); showOnGlobe([id]) }} />
           </SearchPopover>
           <span ref={askButtonRef}><AskButton open={askOpen} onToggle={() => (askOpen ? closeAsk() : setAskOpen(true))} /></span>
-          <AppMenu username={username} theme={theme} notices={notices} onGo={go} onShortcuts={() => setHelpOpen(true)} onTour={tour.start} onToggleTheme={toggleTheme} onSignOut={onSignOut} />
+          <AppMenu username={username} theme={theme} notices={notices} onGo={go} onShortcuts={() => setHelpOpen(true)} onWhatsNew={() => setWhatsNewOpen(true)} build={LATEST_BUILD.build} onTour={tour.start} onToggleTheme={toggleTheme} onSignOut={onSignOut} />
         </>}
       />
 
@@ -249,6 +252,7 @@ export function Workspace({ username, onSignOut, theme, onToggleTheme: toggleThe
       {view !== 'home' ? <StatusBar items={status} context={statusContext} onOpenData={view === 'data' ? undefined : () => go('data')} floating={view === 'globe'} /> : null}
       {askOpen ? <AskOrcaPanel messages={ask.messages} onSend={ask.send} onPick={ask.pick} onClose={closeAsk} inputRef={askInputRef} footnote={ask.footnote} /> : null}
       {helpOpen ? <ShortcutsHelp onClose={() => setHelpOpen(false)} /> : null}
+      {whatsNewOpen ? <WhatsNew builds={BUILDS} onClose={() => setWhatsNewOpen(false)} /> : null}
       {tour.view ? <TourOverlay {...tour.view} /> : null}
     </div>
   )

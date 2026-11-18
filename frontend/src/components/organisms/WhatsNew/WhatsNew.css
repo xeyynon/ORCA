@@ -1,0 +1,10 @@
+/* One build per block, a hairline between; the newest on top. Plain text, no badges or tints. */
+.whats-new { display: flex; flex-direction: column; margin: 0; padding: 0; list-style: none; }
+.whats-new__build { padding: var(--gap-3) 0; }
+.whats-new__build:first-child { padding-top: 0; }
+.whats-new__build + .whats-new__build { border-top: 1px solid var(--border); }
+.whats-new__head { display: flex; flex-direction: column; gap: 2px; }
+.whats-new__title { margin: 0; font-size: 14px; font-weight: 600; color: var(--text-primary); }
+.whats-new__meta { color: var(--text-tertiary); font-size: 12px; }
+.whats-new__changes { margin: var(--gap-2) 0 0; padding-left: var(--gap-4); color: var(--text-secondary); line-height: 1.5; }
+.whats-new__changes li + li { margin-top: 2px; }
