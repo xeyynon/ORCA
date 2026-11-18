@@ -45,12 +45,16 @@ def classify_object_type(name: str) -> str:
 _MU_KM3_S2 = 398600.4418
 _RE_KM = 6371.0
 _GEO_ALT_KM = 35786.0
+_GEO_BAND_KM = 500.0  # a mean altitude within this many km of _GEO_ALT_KM counts as GEO height
+_GEO_MAX_E = 0.1  # below this, an orbit at GEO height is near-circular enough to call GEO
 REGIMES = ("LEO", "MEO", "GEO", "HEO")
 
 
 def classify_regime(mean_motion_rev_per_day: float, eccentricity: float) -> Optional[str]:
     """
     LEO / MEO / GEO / HEO from mean motion (rev/day) and eccentricity, or None if mean motion is not physical.
+    HEO: strongly stretched (e > 0.25), or at or above GEO height without being GEO, so nothing above GEO is MEO.
+    GEO: mean altitude within 500 km of 35,786 km and e < 0.1. LEO: apogee below 2,000 km. MEO: the rest.
     Mirrors frontend/src/lib/orbit.ts (deriveOrbit + classifyRegime); tests/test_catalog.py pins the shared cases.
     TLE mean motion is rev/day: convert to rad/s before Kepler's third law (ARCHITECTURE.md section 7).
     """
@@ -60,10 +64,13 @@ def classify_regime(mean_motion_rev_per_day: float, eccentricity: float) -> Opti
     a = (_MU_KM3_S2 / (n_rad_s ** 2)) ** (1.0 / 3.0)
     perigee = a * (1.0 - eccentricity) - _RE_KM
     apogee = a * (1.0 + eccentricity) - _RE_KM
+    mean_alt = (perigee + apogee) / 2.0
     if eccentricity > 0.25:
         return "HEO"
-    if perigee >= _GEO_ALT_KM - 400 and apogee <= _GEO_ALT_KM + 400:
+    if abs(mean_alt - _GEO_ALT_KM) <= _GEO_BAND_KM and eccentricity < _GEO_MAX_E:
         return "GEO"
+    if mean_alt >= _GEO_ALT_KM - _GEO_BAND_KM:
+        return "HEO"
     if apogee < 2000:
         return "LEO"
     return "MEO"

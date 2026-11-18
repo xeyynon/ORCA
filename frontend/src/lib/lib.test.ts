@@ -77,6 +77,15 @@ test('regimes: GEO, MEO, HEO', () => {
   assert.equal(classifyRegime(500, 39000, 0.7), 'HEO')
 })
 
+// The same cases as tests/test_catalog.py (RegimeTests), so the TypeScript and Python rules cannot drift.
+test('regimes: GEO by mean altitude, and nothing above GEO is MEO (audit 2026-11-18 #10)', () => {
+  const regime = (meanMotion: number, e: number) => deriveOrbit({ mean_motion: meanMotion, eccentricity: e })!.regime
+  assert.equal(regime(1.0027, 0.0205), 'GEO') // at GEO height, a little stretched (MUOS-5): was MEO
+  assert.equal(regime(0.972253, 0.0001), 'HEO') // circular at 36,670 km, above GEO
+  assert.equal(regime(1.031713, 0.001), 'MEO') // circular at 35,000 km, just below GEO height
+  assert.equal(regime(1.0027, 0.15), 'HEO') // GEO height but too stretched to call GEO
+})
+
 test('toCsv quotes commas, quotes and newlines', () => {
   const out = toCsv(['a', 'b'], [['x,y', 'say "hi"'], [1, 'line\nbreak']])
   assert.equal(out, 'a,b\r\n"x,y","say ""hi"""\r\n1,"line\nbreak"\r\n')

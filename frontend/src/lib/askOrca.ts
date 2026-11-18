@@ -15,7 +15,7 @@ const REGIME_NAME: Record<RegimeKey, string> = {
   LEO: 'low Earth orbit',
   MEO: 'medium Earth orbit',
   GEO: 'geosynchronous orbit',
-  HEO: 'highly elliptical orbit',
+  HEO: 'high or highly elliptical orbit',
 }
 
 /** A quick reply: a real button that sends `say` (or its label) as if typed, so every chip goes through the same engine. */
@@ -160,7 +160,7 @@ function regimesNamed(t: string): RegimeKey[] {
   if (/\bleo\b|\blow earth\b|\blow orbit\b/.test(t)) out.push('LEO')
   if (/\bmeo\b|\bmedium earth\b|\bmid(dle)? earth\b/.test(t)) out.push('MEO')
   if (/\bgeo\b|\bgeostationary\b|\bgeosynchronous\b/.test(t)) out.push('GEO')
-  if (/\bheo\b|\bhighly elliptical\b|\belliptical\b/.test(t)) out.push('HEO')
+  if (/\bheo\b|\bhigh earth\b|\bhighly elliptical\b|\belliptical\b/.test(t)) out.push('HEO')
   return out
 }
 

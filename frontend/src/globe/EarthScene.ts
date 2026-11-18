@@ -108,6 +108,9 @@ export class EarthScene {
   private readonly conjMarker: THREE.Points
   private readonly conjZone: THREE.Points
   private readonly conjLineBuf = new Float32Array(6)
+  /** One name card for the pair, "A × B", above the ring (the two objects' own cards would share one spot). */
+  private readonly pairLabel: CSS2DObject
+  private readonly pairLabelEl: HTMLDivElement
   private readonly resizeObs: ResizeObserver
   private readonly reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
   private readonly tmp = new THREE.Vector3()
@@ -188,7 +191,8 @@ export class EarthScene {
     this.scene.add(this.selectedPoints)
     this.scene.add(this.orbitGroup)
 
-    // the closest-approach overlay: a dashed line between the two objects and a ring where they meet
+    // the conjunction overlay: a dashed line between the two objects WHERE THEY ARE AT THE TIME SHOWN and a ring at its
+    // middle. It shows the closest approach only when playback is at that time (audit 2026-11-18 #12; GlobeLegend says so).
     const lineGeo = new THREE.BufferGeometry()
     lineGeo.setAttribute('position', new THREE.BufferAttribute(this.conjLineBuf, 3).setUsage(THREE.DynamicDrawUsage))
     this.conjLine = new THREE.Line(lineGeo, new THREE.LineDashedMaterial({ color: 0xf97316, dashSize: 0.14, gapSize: 0.1, transparent: true, opacity: 0.95 }))
@@ -209,6 +213,15 @@ export class EarthScene {
     this.conjZone.renderOrder = 9
     this.conjZone.visible = false
     this.scene.add(this.conjZone)
+    const anchor = document.createElement('div')
+    anchor.className = 'globe-label-anchor'
+    anchor.style.visibility = 'hidden'
+    this.pairLabelEl = document.createElement('div')
+    this.pairLabelEl.className = 'globe-label'
+    anchor.appendChild(this.pairLabelEl)
+    this.pairLabel = new CSS2DObject(anchor)
+    this.pairLabel.center.set(0.5, 1) // the anchor's bottom centre sits on the midpoint; its padding lifts the card above the ring
+    this.scene.add(this.pairLabel)
 
     this.resizeObs = new ResizeObserver(() => this.resize())
     this.resizeObs.observe(container)
@@ -248,7 +261,7 @@ export class EarthScene {
 
   setConjunction(c: ConjunctionOverlay | null): void {
     this.conj = c
-    if (!c) { this.conjLine.visible = false; this.conjMarker.visible = false; this.conjZone.visible = false; return }
+    if (!c) { this.conjLine.visible = false; this.conjMarker.visible = false; this.conjZone.visible = false; this.pairLabel.element.style.visibility = 'hidden'; return }
     const color = new THREE.Color(readColorRef(c.color, '#f97316'))
     ;(this.conjLine.material as THREE.LineDashedMaterial).color.copy(color)
     ;(this.conjMarker.material as THREE.PointsMaterial).color.copy(color)
@@ -369,7 +382,7 @@ export class EarthScene {
     return new THREE.CanvasTexture(c)
   }
 
-  /** A four-pointed star marking the point of closest approach. */
+  /** A four-pointed star marking the midpoint between the two objects of a conjunction. */
   private starTexture(): THREE.Texture {
     const c = document.createElement('canvas')
     c.width = c.height = 64
@@ -536,6 +549,12 @@ export class EarthScene {
     ;(this.points.geometry.attributes.position as THREE.BufferAttribute).needsUpdate = true
   }
 
+  /** The name the snapshot carries for an object, or its id. */
+  private nameAt(id: string): string {
+    const i = this.indexById.get(id)
+    return (i !== undefined ? this.snapshot?.objects[i]?.name : undefined) ?? id
+  }
+
   private positionOf(id: string): [number, number, number] | null {
     const i = this.indexById.get(id)
     const pos = this.posBuf
@@ -554,10 +573,12 @@ export class EarthScene {
     this.selectedPoints.geometry.setDrawRange(0, count)
     ;(this.selectedPoints.geometry.attributes.position as THREE.BufferAttribute).needsUpdate = true
 
-    // the conjunction: dashed line between the pair, ring at their midpoint
+    // the conjunction: dashed line between the pair at the time shown, ring and one "A × B" card at its middle
+    const cam = this.camera.position
     const pa = this.conj ? this.positionOf(this.conj.a) : null
     const pb = this.conj ? this.positionOf(this.conj.b) : null
-    if (pa && pb) {
+    const pairShown = pa !== null && pb !== null
+    if (pa && pb && this.conj) {
       this.conjLineBuf.set([pa[0], pa[1], pa[2], pb[0], pb[1], pb[2]])
       this.conjLine.geometry.attributes.position.needsUpdate = true
       this.conjLine.computeLineDistances()
@@ -567,6 +588,11 @@ export class EarthScene {
       const z = this.conjZone.geometry.attributes.position as THREE.BufferAttribute
       z.setXYZ(0, (pa[0] + pb[0]) / 2, (pa[1] + pb[1]) / 2, (pa[2] + pb[2]) / 2)
       z.needsUpdate = true
+      const mid: [number, number, number] = [(pa[0] + pb[0]) / 2, (pa[1] + pb[1]) / 2, (pa[2] + pb[2]) / 2]
+      this.pairLabel.position.set(mid[0], mid[1], mid[2])
+      const text = `${this.nameAt(this.conj.a)} × ${this.nameAt(this.conj.b)}`
+      if (this.pairLabelEl.textContent !== text) this.pairLabelEl.textContent = text
+      this.pairLabel.element.style.visibility = occludedXYZ(cam.x, cam.y, cam.z, mid[0], mid[1], mid[2], R_SCENE) ? 'hidden' : 'visible'
       this.conjLine.visible = true
       this.conjMarker.visible = true
       this.conjZone.visible = true
@@ -574,13 +600,13 @@ export class EarthScene {
       this.conjLine.visible = false
       this.conjMarker.visible = false
       this.conjZone.visible = false
+      this.pairLabel.element.style.visibility = 'hidden'
     }
 
-    // labels follow their objects and hide behind the planet
-    const cam = this.camera.position
+    // labels follow their objects and hide behind the planet; the pair's own two give way to the one "A × B" card
     for (const [id, l] of this.labels) {
       const p = this.positionOf(id)
-      if (!p) { l.el.style.visibility = 'hidden'; continue }
+      if (!p || (pairShown && (id === this.conj?.a || id === this.conj?.b))) { l.el.style.visibility = 'hidden'; continue }
       l.obj.position.set(p[0], p[1], p[2])
       l.el.style.visibility = occludedXYZ(cam.x, cam.y, cam.z, p[0], p[1], p[2], R_SCENE) ? 'hidden' : 'visible'
     }

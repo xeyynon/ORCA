@@ -42,7 +42,8 @@
   .globe-view { overflow-y: auto; display: flex; flex-direction: column; }
   .globe-view__center { position: relative; inset: auto; height: 68dvh; min-height: 360px; flex: none; order: 0; }
   .globe-view__foot { top: var(--gap-2); left: var(--gap-2); right: var(--gap-2); bottom: var(--gap-2); width: auto; justify-content: flex-end; gap: var(--gap-2); }
-  .globe-view__sheet { position: relative; flex: 1; min-height: 0; overflow: hidden; border-radius: var(--radius-lg); }
+  /* Above the legend (z-index 1), which otherwise paints over the expanded sheet's title and buttons (audit 2026-11-18 #11). */
+  .globe-view__sheet { position: relative; z-index: 2; flex: 1; min-height: 0; overflow: hidden; border-radius: var(--radius-lg); }
   .globe-view__legend { position: absolute; z-index: 1; left: 0; top: 0; margin: 0; max-width: 100%; }
   .globe-view__side { position: static; width: auto; max-height: none; overflow: visible; padding: var(--gap-3); }
   .globe-view__side--right { order: 1; }

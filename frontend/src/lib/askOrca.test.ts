@@ -119,7 +119,7 @@ test('how many in a regime: from the context, with what the count covers', () =>
   assert.match(leo.text, /whole stored catalog of 29,412/)
   const two = askOrca('how many satellites in geo and heo', base).text
   assert.match(two, /GEO \(geosynchronous orbit\): 1,840/)
-  assert.match(two, /HEO \(highly elliptical orbit\): 3,901/)
+  assert.match(two, /HEO \(high or highly elliptical orbit\): 3,901/)
   const all = askOrca('how many objects by orbit?', base).text
   for (const n of ['23,105', '512', '1,840', '3,901', '54']) assert.ok(all.includes(n), n)
   const loadedOnly = askOrca('objects in meo', ctx({ regimes: { counts: { LEO: 4000, MEO: 100, GEO: 600, HEO: 300 }, scope: 'loaded', of: 5000 } })).text
