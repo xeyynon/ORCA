@@ -15,7 +15,7 @@ type Props = {
 export function ResultCaveats({ items, action }: Props) {
   if (items.length === 0) return null
   return (
-    <Callout tone="warn" title={`${items.length} ${items.length === 1 ? 'Thing' : 'Things'} to Consider Before Using This Result`}>
+    <Callout tone="warn" title={`${items.length} ${items.length === 1 ? 'thing' : 'things'} to know before you use this result`}>
       <ul className="result-caveats">{items.map((t) => <li key={t}>{t}</li>)}</ul>
       {action ? <div className="result-caveats__action">{action}</div> : null}
     </Callout>

@@ -75,7 +75,7 @@ export function useAskOrca({ open, view, theme, health, summary, loaded, conjSea
   const context = useMemo<AskContext>(() => {
     const result = conjSearch.result
     const answer = result && conjSearch.query
-      ? resultAnswer(tierCounts(result), result.total_events, conjSearch.query.horizonDays, result.report_km)
+      ? resultAnswer(tierCounts(result), result.total_events, { start: result.window_start, end: result.window_end }, result.report_km)
       : null
     return {
       view,

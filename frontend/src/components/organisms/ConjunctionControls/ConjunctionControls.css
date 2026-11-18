@@ -1,4 +1,8 @@
 .conj-controls { display: flex; flex-direction: column; gap: var(--gap-3); padding: var(--gap-4); border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg-card); }
-.conj-controls__fields { display: grid; grid-template-columns: repeat(3, minmax(90px, 140px)) auto; gap: var(--gap-3); align-items: end; }
+/* Two fields and the button: one column each (there used to be a fourth, empty column), the button level with the inputs. */
+.conj-controls__fields { display: grid; grid-template-columns: repeat(2, minmax(110px, 150px)) auto; gap: var(--gap-3); align-items: end; justify-content: start; }
 .conj-controls__run { display: flex; }
-@media (max-width: 640px) { .conj-controls__fields { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 640px) {
+  .conj-controls__fields { grid-template-columns: 1fr 1fr; }
+  .conj-controls__run { grid-column: 1 / -1; }
+}

@@ -1,4 +1,5 @@
-.risk-summary { display: flex; flex-direction: column; gap: var(--gap-3); padding: var(--gap-3) var(--gap-4); border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg-card); }
+/* It sits inside a chart card, so no box of its own (audit 2026-11-18, P3). */
+.risk-summary { display: flex; flex-direction: column; gap: var(--gap-3); }
 .risk-summary__bar { display: flex; height: 10px; gap: 2px; overflow: hidden; border-radius: 3px; background: var(--bg-input); }
 .risk-summary__seg { flex-basis: 0; min-width: 4px; }
 .risk-summary__seg--critical   { background: var(--risk-critical); }
@@ -6,4 +7,7 @@
 .risk-summary__seg--medium     { background: var(--risk-medium); }
 .risk-summary__seg--low        { background: var(--risk-low); }
 .risk-summary__seg--negligible { background: var(--risk-negligible); }
-.risk-summary__legend { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 6px var(--gap-5); }
+/* Each count right after its label, not pushed to the far edge of a wide column. */
+.risk-summary__legend { display: flex; flex-wrap: wrap; gap: 6px var(--gap-6); }
+.risk-summary__legend > .legend-item { flex: 0 0 auto; }
+.risk-summary__legend .legend-item__label { flex: 0 0 auto; }

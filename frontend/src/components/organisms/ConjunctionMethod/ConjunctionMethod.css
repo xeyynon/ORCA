@@ -1,5 +1,6 @@
 .conj-method { border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--bg-panel); padding: var(--gap-3) var(--gap-4); }
-.conj-method__summary { cursor: pointer; color: var(--text-primary); font-weight: 600; }
+/* 6 px above and below: the toggle was 19 px tall, now over the 24 px floor for a pointer target. */
+.conj-method__summary { padding: 6px 0; cursor: pointer; color: var(--text-primary); font-weight: 600; }
 .conj-method__plain { margin: var(--gap-3) 0 0; max-width: 90ch; color: var(--text-primary); line-height: 1.6; }
 /* Two readable columns, not five dense ones (audit 2026-11-15, Conjunctions); one on a narrow screen. */
 .conj-method__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--gap-3) var(--gap-5); margin-top: var(--gap-3); color: var(--text-secondary); }
