@@ -34,6 +34,9 @@ const SORT_KEYS: Record<string, (e: ConjunctionEvent) => number | string> = {
   tca: (e) => Date.parse(e.tca),
 }
 
+/** On a phone (under 600 px) the table keeps Risk, Pair and Pc; the detail card has the rest (audit 2026-11-18 #8). */
+const NARROW_HIDDEN: Record<string, number> = { miss: 600, unc: 600, tca: 600 }
+
 /** Default order is Pc descending, which is how the backend returns it. */
 export function ConjunctionTable({ events, selectedKey, onSelect, compact = false, pageSize = 25 }: Props) {
   const [sortId, setSortId] = useState('pc')
@@ -59,7 +62,7 @@ export function ConjunctionTable({ events, selectedKey, onSelect, compact = fals
       render: (e) => (
         <span>
           <RiskBadge level={e.risk_level} />
-          {e.long_encounter ? <> <Badge tone="warn" title="Long encounter. The two objects pass each other at under 0.1 km/s, so the probability can be several times too low.">Long</Badge></> : null}
+          {e.long_encounter ? <> <Badge tone="warn" title="Long encounter. The two objects pass each other at under 0.1 km/s. For these slow pairs the probability is not reliable: it may be too high or too low.">Long</Badge></> : null}
         </span>
       ),
     },
@@ -73,7 +76,7 @@ export function ConjunctionTable({ events, selectedKey, onSelect, compact = fals
     { id: 'tca', label: 'TCA', hint: GLOSSARY.TCA, sortable: true, render: (e) => <span><Mono>{formatUtc(e.tca)}</Mono> <Mono muted>({formatRelative(e.tca)})</Mono></span> },
   ]
 
-  const shown = compact ? columns.filter((c) => c.id !== 'unc') : columns
+  const shown = (compact ? columns.filter((c) => c.id !== 'unc') : columns).map((c) => ({ ...c, hideBelow: NARROW_HIDDEN[c.id] }))
 
   const onSort = (id: string) => {
     if (id === sortId) setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))

@@ -11,7 +11,7 @@ import { topGroups, UNNAMED } from '@/lib/groups'
 import { binGrid } from '@/lib/heatmap'
 import type { GridSpec } from '@/lib/heatmap'
 import { binLinear, binLog } from '@/lib/histogram'
-import { ALTITUDE_BANDS, altitudeBand, INCLINATION_CLASSES, inclinationClass } from '@/lib/orbit'
+import { ALTITUDE_BAND_LABEL, ALTITUDE_BANDS, altitudeBand, INCLINATION_CLASSES, inclinationClass } from '@/lib/orbit'
 import { ageVerdict, tleAgeTone } from '@/lib/tleAge'
 import type { TleAgeTone } from '@/lib/tleAge'
 import { Button } from '../../atoms/Button/Button'
@@ -28,7 +28,6 @@ import './AnalyticsView.css'
 
 type Props = { catalog: AsyncResult<TleRecord[]>; totalCount: number | null; now: Date }
 
-const BAND_LABEL = { LEO: 'LEO (<2,000 km)', MEO: 'MEO (2,000 – 35,300 km)', GEO: 'GEO (≈35,786 km)', BEYOND: 'Beyond GEO' } as const
 const AGE_ORDER: readonly TleAgeTone[] = ['ok', 'warn', 'bad']
 const AGE_LABEL: Record<TleAgeTone, string> = { ok: 'Fresh (<7 days)', warn: 'Aging (7–30 days)', bad: 'Stale (≥30 days)' }
 const ECC_ORDER = ['circular', 'elliptical', 'high'] as const
@@ -97,7 +96,7 @@ export function AnalyticsView({ catalog, totalCount, now }: Props) {
 
   const partial = totalCount !== null && totalCount > rows.length
   // The scope is the page's, said once in the subtitle (declutter plan 2026-11-15: it was on every chart). A chart shows
-  // its own scope only when it covers a different set: the regime donut counts the whole catalogue on the server while
+  // its own scope only when it covers a different set: the regime donut counts the whole catalog on the server while
   // the other charts are drawn from the first loaded rows.
   const wholeFailed = partial && !wholeCatalog && (whole.status === 'error' || whole.malformed)
   const regimeCounts = server.data ? server.data.by_regime : model.summary.regimes
@@ -122,7 +121,7 @@ export function AnalyticsView({ catalog, totalCount, now }: Props) {
       ) : null}
 
       <div className="analytics__grid">
-        <ChartCard title="Orbit regime share" scope={regimeScope} note="From perigee, apogee and eccentricity.">
+        <ChartCard title="Orbit regime share" scope={regimeScope} note="Each orbit sorted by its height and how stretched it is, so these counts differ from the altitude chart.">
           <RegimeBreakdown counts={regimeCounts} />
         </ChartCard>
 
@@ -141,9 +140,9 @@ export function AnalyticsView({ catalog, totalCount, now }: Props) {
           <ChartLegend items={AGE_ORDER.map((t) => ({ label: AGE_LABEL[t], color: AGE_TONE_COLOR[t], value: integer(model.ageCounts[t]) }))} />
         </ChartCard>
 
-        <ChartCard title="Altitude" note="Log axis; derived from mean motion.">
+        <ChartCard title="Altitude" note="Mean altitude only, from mean motion, on a log axis. Bands are named by height, not by regime.">
           <Histogram bins={model.alt.bins} unit="Mean altitude (km), log scale" ariaLabel="Histogram of mean altitude on a log axis" colorOf={(b) => ALTITUDE_BAND_COLOR[altitudeBand(geoMid(b))]} />
-          <ChartLegend items={ALTITUDE_BANDS.map((b) => ({ label: BAND_LABEL[b], color: ALTITUDE_BAND_COLOR[b], value: integer(model.altCounts[b]) }))} />
+          <ChartLegend items={ALTITUDE_BANDS.map((b) => ({ label: ALTITUDE_BAND_LABEL[b], color: ALTITUDE_BAND_COLOR[b], value: integer(model.altCounts[b]) }))} />
         </ChartCard>
 
         <ChartCard title="Inclination" note="The spikes represent satellite clusters: Starlink at approximately 53° and sun-synchronous at approximately 97°; GEO satellites cluster around 0°.">
@@ -164,7 +163,7 @@ export function AnalyticsView({ catalog, totalCount, now }: Props) {
           <ChartCard
             title="Where objects orbit, by inclination and altitude"
            
-            note={`Brighter cells hold more objects (the colour uses a log scale).${model.heat.outside + model.heat.unplottable > 0 ? ` ${integer(model.heat.total)} plotted${model.heat.outside > 0 ? `, ${integer(model.heat.outside)} outside the 100 km to 1,000,000 km range` : ''}${model.heat.unplottable > 0 ? `, ${integer(model.heat.unplottable)} couldn’t be placed` : ''}.` : ''}`}
+            note={`Cells with more objects use the colour at the right end of the key (the colour uses a log scale).${model.heat.outside + model.heat.unplottable > 0 ? ` ${integer(model.heat.total)} plotted${model.heat.outside > 0 ? `, ${integer(model.heat.outside)} outside the 100 km to 1,000,000 km range` : ''}${model.heat.unplottable > 0 ? `, ${integer(model.heat.unplottable)} couldn’t be placed` : ''}.` : ''}`}
           >
             <HeatmapChart grid={model.heat} spec={HEAT_SPEC} xUnit="inclination (°)" yUnit="mean altitude (km, log)" ariaLabel="Density heatmap of inclination against mean altitude" />
           </ChartCard>

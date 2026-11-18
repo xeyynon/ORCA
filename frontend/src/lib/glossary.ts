@@ -8,7 +8,7 @@ export const GLOSSARY = {
   uncertainty: 'How far the true position might be from the calculated one (1 sigma). TLEs don’t publish this, so ORCA measures it from successive TLEs.',
   Mahalanobis: 'The miss distance measured in units of the combined uncertainty. A small value means the objects could really touch.',
   'hard-body radius': 'The combined physical size of the two objects. This is the target that the miss distance is compared with.',
-  'long encounter': 'A slow pass, under 0.1 km/s. The two objects stay close for a long time, and Pc can be several times too low.',
+  'long encounter': 'A slow pass, under 0.1 km/s. The two objects stay close for a long time, and Pc is not reliable: it may be too high or too low.',
   // The basics a first-time visitor meets on the other pages, so Ask ORCA can explain them too.
   conjunction: 'Two objects passing close to each other. ORCA lists every pass that comes closer than the report distance during the time you search.',
   'report distance': 'The distance that counts as a close approach. Every pass closer than this is listed, and the value is shown with every result.',
@@ -18,7 +18,7 @@ export const GLOSSARY = {
   epoch: 'The moment a TLE describes. Positions are most accurate close to that moment, and a TLE’s age is the time since its epoch.',
   'NORAD ID': 'The catalog number every tracked object is given, for example 25544 for the ISS. It stays the same even when an object’s name changes.',
   CelesTrak: 'The free public website that republishes the US Space Force’s TLEs. ORCA downloads its catalog from there.',
-  'orbit regime': 'The kind of orbit an object is in. LEO stays below 2,000 km, GEO circles at about 35,786 km once a day, HEO is strongly stretched, and MEO covers the rest.',
+  'orbit regime': 'The kind of orbit an object is in. LEO stays below 2,000 km, GEO circles at about 35,786 km once a day, HEO is strongly stretched or sits higher than GEO, and MEO covers the rest.',
 } as const
 
 export type GlossaryTermKey = keyof typeof GLOSSARY

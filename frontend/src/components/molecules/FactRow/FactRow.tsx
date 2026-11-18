@@ -2,7 +2,8 @@ import type { ReactNode } from 'react'
 import { Label } from '../../atoms/Label/Label'
 import './FactRow.css'
 
-type Props = { label: string; children: ReactNode }
+/** `label` may hold a GlossaryTerm (its tooltip resets the uppercase). */
+type Props = { label: ReactNode; children: ReactNode }
 
 /** Label above value, stacked: side-by-side runs together in narrow cards ("COORDINATES14.2°N"). */
 export function FactRow({ label, children }: Props) {

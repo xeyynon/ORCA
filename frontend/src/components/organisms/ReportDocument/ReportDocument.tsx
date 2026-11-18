@@ -67,6 +67,11 @@ export function ReportDocument(p: Props) {
   const numberOf = (id: ReportSectionId) => ids.indexOf(id) + 1
   const titleOf = (id: ReportSectionId) => REPORT_SECTIONS.find((s) => s.id === id)?.title ?? id
   const pair = p.options.pairKey ? p.events.find((e) => pairKey(e) === p.options.pairKey) ?? null : null
+  // The ages come from the objects loaded in the app, which can be fewer than the catalog holds: say which (audit
+  // 2026-11-18 #13), so "15,977 objects" above and "5,000" here do not read as two answers to one question.
+  const measured = p.quality.measuredOver
+  const partial = measured !== null && p.objects !== null && measured < p.objects
+  const agesOver = partial ? `over the first ${integer(measured)} of ${integer(p.objects)} objects` : null
   const runLine = p.run
     ? `In ${runName(p.run)}, ${integer(p.run.totalEvents)} pairs of objects came within ${p.run.reportKm} km of each other over a period of ${p.run.horizonDays === 1 ? '1 day' : `${p.run.horizonDays} days`}, ${p.windowEnd ? `between ${formatUtc(p.run.windowStart)} and ${formatUtc(p.windowEnd)}` : `starting at ${formatUtc(p.run.windowStart)}`}.`
     : null
@@ -100,7 +105,7 @@ export function ReportDocument(p: Props) {
         <section className="report__section">
           <H2 className="report__h">{numberOf('summary')}. {titleOf('summary')}</H2>
           <p className="report__lead">
-            {p.objects !== null ? `Our tracked catalogue contains ${integer(p.objects)} objects.` : 'We were unable to obtain the size of the catalogue.'}
+            {p.objects !== null ? `Our tracked catalog contains ${integer(p.objects)} objects.` : 'We were unable to obtain the size of the catalog.'}
             {p.regimes ? (sharePercent(p.regimes.counts.LEO, p.regimes.total) ? ` Approximately ${sharePercent(p.regimes.counts.LEO, p.regimes.total)} of these objects are located in low Earth orbit.` : ' Most of these objects are located in low Earth orbit.') : ''}
           </p>
           <table className="report__table">
@@ -113,7 +118,7 @@ export function ReportDocument(p: Props) {
             </tbody>
           </table>
           <table className="report__table">
-            <caption>Where Objects Orbit (Entire Catalogue)</caption>
+            <caption>Where Objects Orbit (Entire Catalog)</caption>
             <thead><tr><th>Orbit Regime</th><th className="num">Number of Objects</th><th className="num">Share</th></tr></thead>
             <tbody>
               {p.regimes ? (
@@ -123,7 +128,7 @@ export function ReportDocument(p: Props) {
                   ))}
                   {p.regimes.unclassified > 0 ? <tr><td>Could Not Be Classified</td><td className="num">{integer(p.regimes.unclassified)}</td><td className="num">{sharePercent(p.regimes.unclassified, p.regimes.total)}</td></tr> : null}
                 </>
-              ) : <tr><td colSpan={3}>{NA}: we were unable to load the catalogue summary.</td></tr>}
+              ) : <tr><td colSpan={3}>{NA}: we were unable to load the catalog summary.</td></tr>}
             </tbody>
           </table>
         </section>
@@ -185,7 +190,7 @@ export function ReportDocument(p: Props) {
                   <tr><th scope="row">Relative Velocity</th><td>{fixed(pair.relative_velocity_kms, 3)} km/s</td></tr>
                   <tr><th scope="row">Position Uncertainty (1 sigma)</th><td>{fixed(pair.uncertainty_km, 2)} km</td></tr>
                   <tr><th scope="row">Age of the Older TLE at TCA</th><td>{fixed(pair.tle_age_days, 1)} days</td></tr>
-                  <tr><th scope="row">Long Encounter</th><td>{pair.long_encounter ? 'Yes. These objects move slowly relative to one another, so the 2-D probability may be several times lower than actual.' : 'No'}</td></tr>
+                  <tr><th scope="row">Long Encounter</th><td>{pair.long_encounter ? 'Yes. These objects pass each other slowly, so the probability is not reliable: it may be too high or too low.' : 'No'}</td></tr>
                 </tbody>
               </table>
             </>
@@ -201,14 +206,14 @@ export function ReportDocument(p: Props) {
             <tbody>
               <tr>
                 <th scope="row">Median TLE Age</th>
-                <td>{p.quality.medianAgeDays !== null ? <>{days(p.quality.medianAgeDays)}: {freshness(p.quality.medianAgeDays).word}. <span className="report__muted">{freshness(p.quality.medianAgeDays).explain}</span></> : NA}</td>
+                <td>{p.quality.medianAgeDays !== null ? <>{days(p.quality.medianAgeDays)}{agesOver ? <span className="report__muted"> ({agesOver})</span> : null}: {freshness(p.quality.medianAgeDays).word}. <span className="report__muted">{freshness(p.quality.medianAgeDays).explain}</span></> : NA}</td>
               </tr>
-              <tr><th scope="row">Newest Orbital Data</th><td>{p.quality.newestAgeDays !== null ? days(p.quality.newestAgeDays) : NA}</td></tr>
-              <tr><th scope="row">Oldest Orbital Data</th><td>{p.quality.oldestAgeDays !== null ? days(p.quality.oldestAgeDays) : NA}</td></tr>
-              <tr><th scope="row">Number of Objects Measured</th><td>{p.quality.measuredOver !== null ? `${integer(p.quality.measuredOver)} loaded objects` : NA}</td></tr>
+              <tr><th scope="row">Newest Orbital Data</th><td>{p.quality.newestAgeDays !== null ? <>{days(p.quality.newestAgeDays)}{agesOver ? <span className="report__muted"> ({agesOver})</span> : null}</> : NA}</td></tr>
+              <tr><th scope="row">Oldest Orbital Data</th><td>{p.quality.oldestAgeDays !== null ? <>{days(p.quality.oldestAgeDays)}{agesOver ? <span className="report__muted"> ({agesOver})</span> : null}</> : NA}</td></tr>
+              <tr><th scope="row">Number of Objects Measured</th><td>{measured === null ? NA : partial ? `The first ${integer(measured)} of ${integer(p.objects)} objects (the ones loaded in the app)` : `All ${integer(measured)} objects`}</td></tr>
               <tr><th scope="row">Last Successful Refresh</th><td>{p.quality.lastUpdate ? formatUtc(p.quality.lastUpdate) : 'Has never been refreshed through the API'} <span className="report__muted">(this is when the data was retrieved, NOT how old the data is)</span></td></tr>
-              <tr><th scope="row">Last Celestrak Fetch</th><td>{fetchSummary(p.quality.lastFetch).text}{p.quality.lastFetch?.at ? `, ${formatUtc(p.quality.lastFetch.at)}` : ''}</td></tr>
-              <tr><th scope="row">Source</th><td>Celestrak, public two-line element sets (TLEs)</td></tr>
+              <tr><th scope="row">Last CelesTrak Fetch</th><td>{fetchSummary(p.quality.lastFetch).text}{p.quality.lastFetch?.at ? `, ${formatUtc(p.quality.lastFetch.at)}` : ''}</td></tr>
+              <tr><th scope="row">Source</th><td>CelesTrak, public two-line element sets (TLEs)</td></tr>
             </tbody>
           </table>
           {p.method ? (

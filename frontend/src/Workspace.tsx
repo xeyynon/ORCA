@@ -153,8 +153,8 @@ export function Workspace({ username, onSignOut, theme, onToggleTheme: toggleThe
   const medianAge = summary?.medianAgeDays ?? null
   const status: StatusItem[] = [
     { label: 'API', value: apiStatus === 'online' ? 'online' : apiStatus === 'offline' ? 'unreachable' : 'checking', tone: apiStatus === 'online' ? 'ok' : apiStatus === 'offline' ? 'bad' : 'warn', dotOnly: apiStatus === 'online' },
-    // No object count: every view that shows the catalogue already states it (owner, 2026-11-15: "this is repeating").
-    // The median, not the oldest: one leftover 90-day-old set made a catalogue refreshed today read as stale.
+    // No object count: every view that shows the catalog already states it (owner, 2026-11-15: "this is repeating").
+    // The median, not the oldest: one leftover 90-day-old set made a catalog refreshed today read as stale.
     {
       label: 'Data age',
       value: medianAge !== null ? `${days(medianAge)} median` : null,
@@ -164,7 +164,7 @@ export function Workspace({ username, onSignOut, theme, onToggleTheme: toggleThe
     {
       label: 'Refreshed',
       value: health?.database.last_update ? formatRelative(health.database.last_update, now) : health ? 'never via the API' : null,
-      title: health?.database.last_update ? `The API last stored a Celestrak fetch at ${formatUtc(health.database.last_update)}` : undefined,
+      title: health?.database.last_update ? `The API last stored a CelesTrak fetch at ${formatUtc(health.database.last_update)}` : undefined,
     },
     ...(conjSearch.phase === 'running' ? [{ label: 'Search', value: 'running', tone: 'warn' as const, title: 'A conjunction search is running. It continues while you look at other views.' }]
       : conjSearch.phase === 'done' && conjSearch.source === 'live' && view !== 'conjunctions' ? [{ label: 'Search', value: 'result ready', tone: 'ok' as const, title: 'A conjunction search result is waiting on the Conjunctions view.' }] : []),
@@ -240,6 +240,7 @@ export function Workspace({ username, onSignOut, theme, onToggleTheme: toggleThe
           selectedKey={conjKey}
           onSelectKey={setConjKey}
           medianTleAgeDays={summary?.medianAgeDays ?? null}
+          apiOnline={apiStatus !== 'offline'}
           onShowOnGlobe={showOnGlobe}
         />
       ) : null}

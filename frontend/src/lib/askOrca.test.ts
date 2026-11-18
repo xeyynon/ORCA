@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { askFacts, askOrca, assistantFailure, findTerm, greeting, horizonFrom, normalize, objectQuery, unknownReply } from './askOrca.ts'
+import { askFacts, askOrca, assistantFailure, capabilities, findTerm, greeting, horizonFrom, normalize, objectQuery, pageName, unknownReply } from './askOrca.ts'
 import type { AskContext } from './askOrca.ts'
 import { GLOSSARY } from './glossary.ts'
 import { VIEWS } from './views.ts'
@@ -46,6 +46,31 @@ test('the greeting offers four starters that fit the current view, and each star
   }
   assert.ok(greeting('conjunctions').chips!.some((c) => /saved example/i.test(c.label)))
   assert.ok(greeting('globe').chips!.some((c) => /find/i.test(c.label)))
+})
+
+test('the greeting and the help never say "no AI" while the AI is on (audit 2026-11-18 #4)', () => {
+  const on = "Most answers come from ORCA's data; questions it can't place go to an AI model, and those answers are labelled."
+  assert.ok(greeting('home', true).text.includes(on))
+  assert.ok(capabilities(true).startsWith(on))
+  assert.ok(askOrca('what can you do', ctx({ ai: true })).text.startsWith(on))
+  assert.ok(askOrca('hi', ctx({ ai: true })).text.includes(on))
+  for (const t of [greeting('home', true).text, capabilities(true), askOrca('help', ctx({ ai: true })).text, askOrca('xyzzy', ctx({ ai: true })).text]) {
+    assert.doesNotMatch(t, /no AI|All of my answers/i)
+  }
+  // With the AI off, saying so is the truth.
+  assert.match(greeting('home').text, /All of my answers come from ORCA's data\. No AI is used\./)
+  assert.match(askOrca('help', base).text, /No AI is used/)
+  assert.match(askOrca('why do satellites fall', base).text, /AI answers are turned off/)
+  assert.doesNotMatch(askOrca('why do satellites fall', ctx({ ai: true })).text, /turned off/)
+})
+
+test('the greeting names the page as the user sees it, never "Mission control"', () => {
+  assert.match(greeting('home').text, /You are on the home page\.$/)
+  assert.match(greeting('globe').text, /You are on the Globe page\.$/)
+  for (const v of VIEWS) assert.doesNotMatch(greeting(v).text, /Mission control|currently/)
+  assert.equal(pageName('home'), 'the home page')
+  assert.equal(askOrca('go home', ctx({ view: 'home' })).text, 'You are already on the home page.')
+  assert.equal(askOrca('go home', ctx({ view: 'globe' })).text, 'Opening the home page.')
 })
 
 test('every chip any reply offers is itself understood (no dead ends)', () => {
@@ -100,7 +125,7 @@ test('opening the view you are on says so and does nothing', () => {
   const r = askOrca('open the globe', ctx({ view: 'globe' }))
   assert.equal(r.intent, 'go')
   assert.equal(r.action, undefined)
-  assert.match(r.text, /already on Globe/)
+  assert.match(r.text, /already on the Globe page/)
 })
 
 test('how many objects: the stored total, and the loaded subset when it is smaller', () => {
@@ -119,7 +144,7 @@ test('how many in a regime: from the context, with what the count covers', () =>
   assert.match(leo.text, /whole stored catalog of 29,412/)
   const two = askOrca('how many satellites in geo and heo', base).text
   assert.match(two, /GEO \(geosynchronous orbit\): 1,840/)
-  assert.match(two, /HEO \(highly elliptical orbit\): 3,901/)
+  assert.match(two, /HEO \(high or highly elliptical orbit\): 3,901/)
   const all = askOrca('how many objects by orbit?', base).text
   for (const n of ['23,105', '512', '1,840', '3,901', '54']) assert.ok(all.includes(n), n)
   const loadedOnly = askOrca('objects in meo', ctx({ regimes: { counts: { LEO: 4000, MEO: 100, GEO: 600, HEO: 300 }, scope: 'loaded', of: 5000 } })).text
@@ -147,6 +172,9 @@ test('how old is the data / is it fresh: median, range, threshold, last fetch', 
   assert.match(r, /5,000 loaded objects/)
   assert.match(r, /within ORCA's 7-day threshold/)
   assert.match(r, /2026-11-07 09:12 UTC/)
+  // The verdict sits right after the median it judges, before the range (audit 2026-11-18 #30).
+  assert.ok(r.indexOf('threshold') < r.indexOf('newest'), 'verdict before the range')
+  assert.ok(r.indexOf('median age') < r.indexOf('threshold'), 'median before the verdict')
   const stale = askOrca('is the data stale', ctx({ ages: { ...base.ages, medianDays: 12.4 } })).text
   assert.match(stale, /past ORCA's 7-day threshold/)
   const none = askOrca('how old is the data', empty).text
@@ -168,8 +196,12 @@ test('what is / define <term>: the glossary text, for every term and its common 
   for (const [q, term] of cases) {
     const r = askOrca(q, base)
     assert.equal(r.intent, 'define', q)
-    assert.equal(r.text, `${term}: ${GLOSSARY[term]}`, q)
+    assert.equal(r.text, `${term.charAt(0).toUpperCase()}${term.slice(1)}: ${GLOSSARY[term]}`, q)
+    assert.match(r.text, /^[A-Z]/, q)
   }
+  assert.ok(askOrca('what is a conjunction', base).text.startsWith('Conjunction: '))
+  assert.ok(askOrca('what is pc', base).text.startsWith('Pc: '))
+  assert.ok(askOrca('what is a tle', base).text.startsWith('TLE: '))
 })
 
 test('the new basic terms do not take over questions that have live answers', () => {
@@ -301,7 +333,7 @@ test('unknown: says plainly what it can do and offers 3 to 4 chips, no action', 
     assert.match(r.text, /can't answer that/)
     assert.ok(r.chips && r.chips.length >= 3 && r.chips.length <= 4)
   }
-  assert.match(unknownReply('The AI assistant was unavailable.').text, /^The AI assistant was unavailable\. I answer/)
+  assert.match(unknownReply('The AI assistant was unavailable.').text, /^The AI assistant was unavailable\. All of my answers/)
 })
 
 test('horizonFrom reads numbers, words, weeks and hours', () => {

@@ -28,7 +28,7 @@ export function topGroups(names: readonly string[], top: number): GroupCount[] {
 }
 
 /**
- * The Globe's "Constellation" colouring (owner, 2026-11-15): the four largest broadband constellations in the catalogue,
+ * The Globe's "Constellation" colouring (owner, 2026-11-15): the four largest broadband constellations in the catalog,
  * by the same naming rule as the Analytics chart, and everything else as Other. A naming heuristic, not an ownership record.
  */
 export const GLOBE_CONSTELLATIONS = ['STARLINK', 'ONEWEB', 'KUIPER', 'QIANFAN', 'OTHER'] as const

@@ -167,3 +167,10 @@ test('no "word(s)" plurals in components: count with plural() (audit 2026-11-15)
   // A whole lowercase word before "(s)": "object(s)", not code such as String(s) or map((s) => …).
   assert.deepEqual(offenders(inComponents(/\.tsx$/), /\b[a-z]+\(s\)/), [])
 })
+
+test('one spelling for the catalog and for CelesTrak in app code (audit 2026-11-18, P3)', () => {
+  // Ask ORCA still ACCEPTS "catalogue" as typed input: those alias lines name it in quotes on purpose.
+  const files = walk(SRC).filter((p) => /\.(ts|tsx)$/.test(p) && !/\.test\.ts$/.test(p))
+  const bad = offenders(files, /\bcatalogue\b|\bCatalogue\b|Celestrak/).filter((o) => !/lib\/askOrca\.ts:\d+\s+('NORAD ID'|overview):/.test(o))
+  assert.deepEqual(bad, [])
+})

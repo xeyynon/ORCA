@@ -7,7 +7,7 @@ import './HomeHero.css'
 
 type Props = {
   lines: HookLines
-  /** When the catalogue was last refreshed ("2026-10-08 05:26 UTC"), for the data-snapshot line; null hides the line
+  /** When the catalog was last refreshed ("2026-10-08 05:26 UTC"), for the data-snapshot line; null hides the line
       (not known yet). */
   snapshot: string | null
   onExploreGlobe: () => void
@@ -31,16 +31,16 @@ export function HomeHero({ lines, snapshot, onExploreGlobe, onViewConjunctions, 
         <p className="home-hero__sub">{lines.sub}</p>
         <div className="home-hero__actions">
           <Button variant="primary" size="lg" onClick={onExploreGlobe}>Explore the Globe <Icon name="arrow-right" /></Button>
-          <Button size="lg" onClick={onViewConjunctions} disabled={conjunctionsBusy}>{conjunctionsBusy ? 'Opening…' : 'See Conjunctions'}</Button>
+          <Button size="lg" onClick={onViewConjunctions} disabled={conjunctionsBusy}>{conjunctionsBusy ? 'Opening…' : 'See close approaches'}</Button>
         </div>
         <div className="home-hero__meta">
           {onStartTour ? (
             <button type="button" className="home-hero__tour" onClick={onStartTour}>
               <span className="home-hero__tour-icon" aria-hidden="true"><Icon name="play" size={10} /></span>
-              First time visiting this site? Take the one minute tour
+              First time visiting this site? Take the one-minute tour
             </button>
           ) : null}
-          {snapshot ? <p className="home-hero__snapshot">Snapshot of data: <Mono>{snapshot}</Mono></p> : null}
+          {snapshot ? <p className="home-hero__snapshot">Last updated from CelesTrak: <Mono>{snapshot}</Mono></p> : null}
         </div>
       </div>
       <div className="home-hero__visual" aria-hidden="true">

@@ -8,7 +8,7 @@ export interface Health {
   database: { tles_count: number; last_update: string | null; last_fetch?: FetchOutcome | null }
 }
 
-/** Outcome of the API's most recent Celestrak fetch. Absent or null until a fetch has run since the field existed. */
+/** Outcome of the API's most recent CelesTrak fetch. Absent or null until a fetch has run since the field existed. */
 export type FetchStatus = 'ok' | 'empty' | 'rate_limited' | 'not_found' | 'http_error' | 'network_error'
 export interface FetchOutcome { status: FetchStatus; http_status: number | null; detail: string; at: string }
 

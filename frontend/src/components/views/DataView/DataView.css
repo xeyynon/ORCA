@@ -13,3 +13,4 @@
 .data-view__api-chevron { display: inline-flex; margin-left: auto; color: var(--text-tertiary); transition: transform var(--dur-fast, 120ms) ease; }
 .data-view__api[open] .data-view__api-chevron { transform: rotate(180deg); }
 .data-view__link--button { padding: 0; border: 0; background: none; font: inherit; text-decoration: underline; cursor: pointer; }
+.data-view__route { display: block; margin-top: var(--gap-1); color: var(--text-tertiary); font-size: var(--text-sm); }

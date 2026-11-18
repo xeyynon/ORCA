@@ -55,16 +55,16 @@ export function ConjunctionCard({ event, nowMs, onJumpToTca, onViewDetails, onCl
       <div className="conjunction-card__grid">
         <FactRow label="Time of closest approach"><Mono>{formatUtc(event.tca)}</Mono> <Mono muted>({formatRelative(event.tca, new Date(nowMs))})</Mono></FactRow>
         <FactRow label="Miss distance"><ValueUnit value={fixed(event.min_distance_km, 2)} unit="km" /></FactRow>
-        <FactRow label="Probability (Pc)"><Mono>{pc(event.probability_of_collision)}</Mono></FactRow>
+        <FactRow label={<>Probability (<span className="label__as-is">Pc</span>)</>}><Mono>{pc(event.probability_of_collision)}</Mono></FactRow>
         <FactRow label="Relative speed">
           <ValueUnit value={fixed(event.relative_velocity_kms, event.relative_velocity_kms < 0.1 ? 4 : 2)} unit="km/s" />
           {coMoving ? <> <Badge tone="accent" title="The two move at under 50 m/s relative to each other at closest approach">Co-moving</Badge></> : null}
         </FactRow>
-        <FactRow label="Uncertainty (1σ)"><ValueUnit value={fixed(event.uncertainty_km, 2)} unit="km" /> <Mono muted>· TLE is {fixed(event.tle_age_days, 1)} days old</Mono></FactRow>
+        <FactRow label={<>Uncertainty (<span className="label__as-is">1σ</span>)</>}><ValueUnit value={fixed(event.uncertainty_km, 2)} unit="km" /> <Mono muted>· TLE is {fixed(event.tle_age_days, 1)} days old</Mono></FactRow>
       </div>
 
       {coMoving ? <FieldNote>These two fly together, as a formation or from a shared launch. A small miss distance is normal for them and does not mean their paths cross.</FieldNote> : null}
-      {event.long_encounter ? <FieldNote>This is a long encounter (under 0.1 km/s), so the probability can be several times too low.</FieldNote> : null}
+      {event.long_encounter ? <FieldNote>This is a long encounter (under 0.1 km/s). For these slow pairs the probability is not reliable: it may be too high or too low.</FieldNote> : null}
       <FieldNote>Pc is a research estimate based on an assumed uncertainty, because TLEs don’t include one. It is not an operational probability.</FieldNote>
 
       <div className="conjunction-card__actions">

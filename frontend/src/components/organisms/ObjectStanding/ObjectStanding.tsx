@@ -9,10 +9,16 @@ import { Panel } from '../../molecules/Panel/Panel'
 /** The loaded catalog's values, each sorted ascending once per catalog change. */
 export interface CatalogRanks { altKm: readonly number[]; inclDeg: readonly number[]; ecc: readonly number[]; ageDays: readonly number[] }
 
-type Props = { tle: TleRecord; ranks: CatalogRanks; now: Date }
+type Props = {
+  tle: TleRecord
+  ranks: CatalogRanks
+  /** How many objects are loaded, for the heading: the ranks are among these, not the whole stored catalog. */
+  loadedCount: number
+  now: Date
+}
 
 /** Where the selected object sits among the loaded catalog on four measures. Unlike the catalog-wide charts, this changes with every object. */
-export function ObjectStanding({ tle, ranks, now }: Props) {
+export function ObjectStanding({ tle, ranks, loadedCount, now }: Props) {
   const alt = deriveOrbit(tle)?.meanAltKm
   const age = ageDays(tle.epoch, now)
   const among = 'loaded objects'
@@ -21,7 +27,7 @@ export function ObjectStanding({ tle, ranks, now }: Props) {
   const pEcc = percentileRank(ranks.ecc, tle.eccentricity)
   const pAge = age >= 0 ? percentileRank(ranks.ageDays, age) : null
   return (
-    <Panel title="How it compares with the rest of the catalog">
+    <Panel title={`How it compares with the ${integer(loadedCount)} loaded objects`}>
       <RangeMarker label="Altitude" value={alt === undefined ? '—' : `${integer(alt)} km`} percent={pAlt} words={rankWords(pAlt, among)} />
       <RangeMarker label="Inclination" value={`${fixed(tle.inclination, 1)}°`} percent={pIncl} words={rankWords(pIncl, among)} />
       <RangeMarker label="Eccentricity" value={fixed(tle.eccentricity, 5)} percent={pEcc} words={rankWords(pEcc, among)} />

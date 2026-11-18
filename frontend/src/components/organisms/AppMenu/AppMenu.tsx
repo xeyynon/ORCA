@@ -44,7 +44,7 @@ export function AppMenu({ username, theme, notices, onGo, onShortcuts, onWhatsNe
 
           <div className="app-menu__sep" role="separator" />
           <div className="app-menu__heading" role="presentation">Help</div>
-          <MenuItem label="What's new" hint={`Build ${build}`} icon={<Icon name="list" />} onSelect={() => { close(false); onWhatsNew() }} />
+          <MenuItem label="What's new" hint={`Build ${build}`} hintKind="text" icon={<Icon name="list" />} onSelect={() => { close(false); onWhatsNew() }} />
           <FineOnly><MenuItem label="Keyboard shortcuts" hint="?" icon={<Icon name="keyboard" />} onSelect={() => { close(false); onShortcuts() }} /></FineOnly>
           {/* Focus goes back to the menu button first, so the tour returns it there when it closes. */}
           <MenuItem label="Take the tour" icon={<Icon name="play" />} onSelect={() => { close(true); onTour() }} />

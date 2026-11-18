@@ -56,9 +56,9 @@ export function CatalogTable({ rows, selectedId, onSelect, now, pageSize = 50 }:
     { id: 'id', label: 'NORAD', sortable: true, align: 'right', render: (t) => <Mono>{t.norad_cat_id}</Mono> },
     { id: 'regime', label: 'Regime', render: (t) => { const o = deriveOrbit(t); return o ? <Badge>{o.regime}</Badge> : <Mono muted>—</Mono> } },
     { id: 'alt', label: 'Mean alt', sortable: true, align: 'right', render: (t) => <ValueUnit value={integer(deriveOrbit(t)?.meanAltKm)} unit="km" /> },
-    { id: 'incl', label: 'Incl.', sortable: true, align: 'right', render: (t) => <ValueUnit value={fixed(t.inclination, 2)} unit="°" /> },
-    { id: 'ecc', label: 'Ecc.', sortable: true, align: 'right', render: (t) => <Mono>{fixed(t.eccentricity, 5)}</Mono> },
-    { id: 'epoch', label: 'TLE epoch', render: (t) => <Mono muted>{formatUtc(t.epoch)}</Mono> },
+    { id: 'incl', label: 'Incl.', hideBelow: 520, sortable: true, align: 'right', render: (t) => <ValueUnit value={fixed(t.inclination, 2)} unit="°" /> },
+    { id: 'ecc', label: 'Ecc.', hideBelow: 520, sortable: true, align: 'right', render: (t) => <Mono>{fixed(t.eccentricity, 5)}</Mono> },
+    { id: 'epoch', label: 'TLE epoch', hideBelow: 520, render: (t) => <Mono muted>{formatUtc(t.epoch)}</Mono> },
     // A neutral number, not a coloured chip: on an aged catalog every row would carry the same alarm, and the tone flips
     // between 29.8 and 30.1 days for effectively the same data. The catalog-wide notice and the object card carry the warning.
     { id: 'age', label: 'TLE age', sortable: true, align: 'right', render: (t) => <ValueUnit value={fixed(ageDays(t.epoch, now), 1)} unit="d" /> },

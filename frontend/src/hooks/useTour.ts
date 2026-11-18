@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useState } from 'react'
-import { TOUR_STEPS, TOUR_STORAGE_KEY, availableSteps, moveStep, reconcileStep } from '@/lib/tour'
+import { TOUR_STEPS, TOUR_STORAGE_KEY, availableSteps, forPointer, moveStep, reconcileStep } from '@/lib/tour'
 import type { TourStep } from '@/lib/tour'
 import type { Rect, Size } from '@/lib/tourPlacement'
 
@@ -25,6 +25,8 @@ function findTarget(step: TourStep): HTMLElement | null {
   return r.width > 0 && r.height > 0 ? el : null
 }
 const onScreen = () => availableSteps(TOUR_STEPS, (s) => findTarget(s) !== null)
+/** A touch-first screen (no keys to name, nothing to click): the tour then uses each step's touch words. */
+const isCoarse = () => typeof window.matchMedia === 'function' && window.matchMedia('(pointer: coarse)').matches
 const viewportNow = (): Size => ({ width: window.innerWidth, height: window.innerHeight })
 
 export type TourView = {
@@ -49,12 +51,14 @@ export function useTour(): { start: () => void; view: TourView | null } {
   const [index, setIndex] = useState(0)
   const [target, setTarget] = useState<Rect | null>(null)
   const [viewport, setViewport] = useState<Size>({ width: 0, height: 0 })
+  const [touch, setTouch] = useState(false)
 
   const start = useCallback(() => {
     const shown = onScreen()
     if (shown.length === 0) return
     shownThisLoad = true
     markSeen()
+    setTouch(isCoarse())
     setIndex(0)
     setTarget(null) // measured afresh before the overlay first paints, never the last run's box
     setSteps(shown)
@@ -107,7 +111,7 @@ export function useTour(): { start: () => void; view: TourView | null } {
   const onBack = useCallback(() => go('back'), [go])
 
   const view = step && steps && target
-    ? { step, index, total: steps.length, target, viewport, onBack, onNext, onClose: close }
+    ? { step: forPointer(step, touch), index, total: steps.length, target, viewport, onBack, onNext, onClose: close }
     : null
   return { start, view }
 }

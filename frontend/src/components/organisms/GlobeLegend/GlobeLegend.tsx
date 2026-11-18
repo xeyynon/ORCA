@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { GLOBE_CONSTELLATION_LABEL, GLOBE_CONSTELLATIONS } from '@/lib/groups'
 import { cx } from '@/lib/cx'
 import { ALTITUDE_BAND_COLOR, CONSTELLATION_COLOR, OBJECT_TYPE_COLOR } from '@/lib/chartColors'
@@ -5,6 +6,7 @@ import { integer } from '@/lib/format'
 import type { ColorBy } from '@/lib/globePrefs'
 import { OBJECT_TYPES, OBJECT_TYPE_LABEL } from '@/lib/objectTypes'
 import { ALTITUDE_BANDS, ALTITUDE_BAND_LABEL } from '@/lib/orbit'
+import { Icon } from '../../atoms/Icon/Icon'
 import { Label } from '../../atoms/Label/Label'
 import { LegendItem } from '../../molecules/LegendItem/LegendItem'
 import './GlobeLegend.css'
@@ -24,13 +26,20 @@ type Props = {
  * Names every colour on the globe. Altitude means CURRENT altitude (a position snapshot carries no eccentricity).
  * On wide screens the side panels already key the colours (Filters: altitude bands; Catalog: object types), so the
  * colour list shows only on narrow screens, where those panels are below the fold (one home per fact, audit
- * 2026-11-15). The selection, orbit and closest-approach marks are keyed only here, so they always show.
+ * 2026-11-15). The selection, orbit and conjunction marks are keyed only here, so they always show.
+ * On narrow screens it starts as one line ("Show the key") that expands, so it does not cover the top of the globe
+ * (audit 2026-11-18 #32); the button is hidden on wide screens, where everything shows.
  */
 export function GlobeLegend({ colorBy, shown, total, showOrbit, hasConjunction, hasSelection, skipped = 0 }: Props) {
   const capped = (total !== null && total > shown) || skipped > 0
   const marks = hasSelection || showOrbit || hasConjunction
+  const [open, setOpen] = useState(false)
   return (
-    <div className={cx('globe-legend', colorBy === 'constellation' ? 'globe-legend--own-key' : !marks && !capped && 'globe-legend--key-only')}>
+    <div className={cx('globe-legend', colorBy === 'constellation' ? 'globe-legend--own-key' : !marks && !capped && 'globe-legend--key-only', open && 'globe-legend--open')}>
+      <button type="button" className="globe-legend__toggle" aria-expanded={open} onClick={() => setOpen((v) => !v)}>
+        {open ? 'Hide the key' : 'Show the key'}
+        <Icon name={open ? 'chevron-up' : 'chevron-down'} size={14} />
+      </button>
       <div className="globe-legend__key">
         <Label>{colorBy === 'altitude' ? 'Objects coloured by current altitude' : colorBy === 'constellation' ? 'Objects coloured by constellation (name)' : 'Objects coloured by type'}</Label>
         <div className="globe-legend__items">
@@ -43,7 +52,8 @@ export function GlobeLegend({ colorBy, shown, total, showOrbit, hasConjunction, 
       </div>
       {hasSelection ? <LegendItem shape="circle" color="var(--text-primary)" label="Selected" /> : null}
       {showOrbit ? <LegendItem color="var(--globe-orbit)" label="One full orbit of the selected object" /> : null}
-      {hasConjunction ? <LegendItem color="var(--risk-high)" label="Closest approach (dashed line)" /> : null}
+      {/* Drawn between where the two are at the time shown, not at closest approach (audit 2026-11-18 #12). */}
+      {hasConjunction ? <LegendItem color="var(--risk-high)" label="Dashed line: the two objects at the time shown, with a ring midway between them" /> : null}
       {capped ? (
         <div className="globe-legend__cap">
           Showing {integer(shown)}{total !== null ? <> of {integer(total)}</> : null} objects{skipped > 0 ? <> ({integer(skipped)} couldn’t be propagated)</> : null}.
