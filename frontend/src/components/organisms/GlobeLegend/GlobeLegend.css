@@ -31,3 +31,26 @@
    bar leave the selection card room above them (owner, 2026-11-15: no scrolling). */
 .globe-legend__items { flex-direction: row; flex-wrap: wrap; gap: 2px 12px; }
 .globe-legend__key, .globe-legend__cap { flex-basis: 100%; }
+
+/* Narrow: one line that expands. The legend's wrapper lets clicks through to the globe, so the button takes them back. */
+.globe-legend__toggle {
+  display: none;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 0 4px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-primary);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  pointer-events: auto;
+}
+.globe-legend__toggle:hover { background: var(--state-hover); }
+@media (max-width: 1000px) {
+  .globe-legend__toggle { display: inline-flex; }
+  .globe-legend:not(.globe-legend--open) > :not(.globe-legend__toggle) { display: none; }
+  .globe-legend--open .globe-legend__toggle { flex-basis: 100%; justify-content: space-between; }
+}

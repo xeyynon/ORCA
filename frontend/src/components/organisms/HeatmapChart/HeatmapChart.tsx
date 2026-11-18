@@ -1,3 +1,5 @@
+import { useRef } from 'react'
+import { useElementWidth } from '@/hooks/useElementWidth'
 import { compact, integer } from '@/lib/format'
 import { heatColor } from '@/lib/heatColor'
 import { yEdge } from '@/lib/heatmap'
@@ -8,8 +10,8 @@ import './HeatmapChart.css'
 
 type Props = { grid: Grid; spec: GridSpec; xUnit: string; yUnit: string; ariaLabel: string }
 
-const W = 460
-const H = 250
+/** Drawing width before the box is measured (and on a wide card it is about this). */
+const FALLBACK_W = 460
 const PAD = { l: 46, r: 8, t: 8, b: 34 }
 const X_TICKS = 4
 const Y_TICKS = 4
@@ -20,14 +22,21 @@ const Y_TICKS = 4
  * object still shows next to a cluster of thousands; empty cells are left unfilled.
  */
 export function HeatmapChart({ grid, spec, xUnit, yUnit, ariaLabel }: Props) {
-  if (grid.total === 0) return <EmptyState kind="none" title="No points to plot" />
+  // The drawing is as wide as its box in CSS pixels, so the 11 px labels are drawn at 11 px on a phone too, not
+  // scaled down with a fixed viewBox (audit 2026-11-18 #14). Height follows the width within readable limits.
+  const boxRef = useRef<HTMLDivElement>(null)
+  const measured = useElementWidth(boxRef)
+  const W = Math.round(measured > 0 ? measured : FALLBACK_W)
+  const H = Math.min(340, Math.max(220, Math.round(W * 0.54)))
+  // Same box as the chart, so it is measured even when the first data is empty.
+  if (grid.total === 0) return <div className="heatmap" ref={boxRef}><EmptyState kind="none" title="No points to plot" /></div>
 
   const cw = (W - PAD.l - PAD.r) / spec.xBins
   const ch = (H - PAD.t - PAD.b) / spec.yBins
   const xAt = (c: number) => spec.xMin + (c / spec.xBins) * (spec.xMax - spec.xMin)
 
   return (
-    <div className="heatmap">
+    <div className="heatmap" ref={boxRef}>
       <svg className="heatmap__svg" viewBox={`0 0 ${W} ${H}`} role="img" aria-label={ariaLabel}>
         <rect className="heatmap__plot" x={PAD.l} y={PAD.t} width={W - PAD.l - PAD.r} height={H - PAD.t - PAD.b} />
         {grid.cells.map((row, r) => row.map((count, c) => count > 0 ? (

@@ -7,3 +7,5 @@
   text-transform: uppercase;
 }
 .label--inline { display: inline; }
+/* A symbol or unit inside a label keeps its case: uppercase turned "1σ" into "1Σ" and "Pc" into "PC" (audit 2026-11-18 #22). */
+.label__as-is { text-transform: none; }

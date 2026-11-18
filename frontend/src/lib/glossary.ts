@@ -18,7 +18,7 @@ export const GLOSSARY = {
   epoch: 'The moment a TLE describes. Positions are most accurate close to that moment, and a TLE’s age is the time since its epoch.',
   'NORAD ID': 'The catalog number every tracked object is given, for example 25544 for the ISS. It stays the same even when an object’s name changes.',
   CelesTrak: 'The free public website that republishes the US Space Force’s TLEs. ORCA downloads its catalog from there.',
-  'orbit regime': 'The kind of orbit an object is in. LEO stays below 2,000 km, GEO circles at about 35,786 km once a day, HEO is strongly stretched, and MEO covers the rest.',
+  'orbit regime': 'The kind of orbit an object is in. LEO stays below 2,000 km, GEO circles at about 35,786 km once a day, HEO is strongly stretched or sits higher than GEO, and MEO covers the rest.',
 } as const
 
 export type GlossaryTermKey = keyof typeof GLOSSARY

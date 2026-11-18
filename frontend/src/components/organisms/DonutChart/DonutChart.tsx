@@ -18,26 +18,29 @@ export function DonutChart({ slices, centerLabel, ariaLabel }: Props) {
   let offset = 0
   return (
     <div className="donut">
-      <svg className="donut__svg" viewBox="0 0 120 120" role="img" aria-label={ariaLabel}>
-        <g transform="rotate(-90 60 60)">
-          {slices.filter((s) => s.value > 0).map((s) => {
-            const len = (s.value / total) * C
-            const el = (
-              <circle key={s.label} cx="60" cy="60" r={R} fill="none" strokeWidth="16" style={{ stroke: s.color }} strokeDasharray={`${len} ${C - len}`} strokeDashoffset={-offset}>
-                <title>{`${s.label}: ${integer(s.value)} (${((s.value / total) * 100).toFixed(1)}%)`}</title>
-              </circle>
-            )
-            offset += len
-            return el
-          })}
-        </g>
-      </svg>
-      <div className="donut__center">
-        <div className="donut__total"><Mono>{integer(total)}</Mono></div>
-        <div className="donut__label">{centerLabel}</div>
+      {/* The ring and its centre text share one box, so the text stays inside the ring at every width. */}
+      <div className="donut__ring">
+        <svg className="donut__svg" viewBox="0 0 120 120" role="img" aria-label={ariaLabel}>
+          <g transform="rotate(-90 60 60)">
+            {slices.filter((s) => s.value > 0).map((s) => {
+              const len = (s.value / total) * C
+              const el = (
+                <circle key={s.label} cx="60" cy="60" r={R} fill="none" strokeWidth="16" style={{ stroke: s.color }} strokeDasharray={`${len} ${C - len}`} strokeDashoffset={-offset}>
+                  <title>{`${s.label}: ${integer(s.value)} (${((s.value / total) * 100).toFixed(1)}%)`}</title>
+                </circle>
+              )
+              offset += len
+              return el
+            })}
+          </g>
+        </svg>
+        <div className="donut__center">
+          <div className="donut__total"><Mono>{integer(total)}</Mono></div>
+          <div className="donut__label">{centerLabel}</div>
+        </div>
       </div>
       <div className="donut__legend">
-        <ChartLegend layout="stack" items={slices.map((s) => ({ label: s.label, color: s.color, value: `${integer(s.value)} objects · ${((s.value / total) * 100).toFixed(1)}% of the total` }))} />
+        <ChartLegend layout="stack" items={slices.map((s) => ({ label: s.label, color: s.color, value: `${integer(s.value)} · ${((s.value / total) * 100).toFixed(1)}%` }))} />
       </div>
     </div>
   )

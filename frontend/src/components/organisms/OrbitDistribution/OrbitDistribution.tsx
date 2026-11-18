@@ -36,7 +36,7 @@ export function OrbitDistribution({ counts, unclassified, total, failed, onOpen 
       {items ? (
         <>
           <BarList items={items} ariaLabel="Catalogued objects by orbit regime" />
-          <p className="home-panel__note">LEO means low Earth orbit, MEO medium Earth orbit, GEO geostationary orbit and HEO highly elliptical orbit. Each object is sorted using its own TLE.</p>
+          <p className="home-panel__note">LEO means low Earth orbit, MEO medium Earth orbit, GEO geostationary orbit and HEO high or highly elliptical orbit. Each object is sorted using its own TLE.</p>
         </>
       ) : failed ? (
         <EmptyState kind="error" title="Not available right now">We couldn’t load the catalogue summary.</EmptyState>
