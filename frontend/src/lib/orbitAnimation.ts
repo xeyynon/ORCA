@@ -74,8 +74,7 @@ function drawSatellites(ctx: CanvasRenderingContext2D, t: number, near: boolean,
 interface Earth { canvas: HTMLCanvasElement; ctx: CanvasRenderingContext2D; img: ImageData }
 
 /** Draws one frame at time `t` seconds into a unit-square space centred on (0, 0). */
-function drawFrame(ctx: CanvasRenderingContext2D, earth: Earth, tex: EarthTextures | null, texMix: number, t: number, pal: Palette): void {
-  const u = loopTime(t)
+function drawFrame(ctx: CanvasRenderingContext2D, earth: Earth, tex: EarthTextures | null, texMix: number, t: number, pal: Palette, u: number = loopTime(t)): void {
 
   // faint blue atmospheric haze around the planet
   const haze = ctx.createRadialGradient(0, 0, GLOBE_R * 0.95, 0, 0, GLOBE_R * 1.7)
@@ -182,15 +181,17 @@ export function startOrbitAnimation(canvas: HTMLCanvasElement, opts: { size: num
   let texAt = 0
   let stopped = false
   let still = false
-  let stillT = 0.2
+  const stillT = 0.2
   let raf = 0
 
-  const render = (t: number, now: number) => {
+  // `u`: the collision's own clock. Normally it follows `t`; after a `once` scene it is held at the resting moment while
+  // `t` keeps the planet, the ring and the dust moving.
+  const render = (t: number, now: number, u?: number) => {
     const texMix = tex ? Math.min(1, (now - texAt) / 900) : 0
     ctx.setTransform(1, 0, 0, 1, 0, 0)
     ctx.clearRect(0, 0, canvas.width, canvas.height)
     ctx.setTransform(canvas.width, 0, 0, canvas.height, canvas.width / 2, canvas.height / 2) // unit square, origin at the centre
-    drawFrame(ctx, earth, tex, texMix, t, pal)
+    drawFrame(ctx, earth, tex, texMix, t, pal, u)
   }
 
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -206,16 +207,22 @@ export function startOrbitAnimation(canvas: HTMLCanvasElement, opts: { size: num
     return () => { stopped = true }
   }
 
-  // `once`: play the approach and collision a single time, then rest on the frame where the fragments have faded into
-  // the dust (no perpetual motion where the scene is decoration, playbook UI-19; the loading screen keeps looping).
+  // `once`: play the approach and collision a single time; after that the planet keeps turning and the satellites keep
+  // circling, but the collision does not repeat (owner, 2026-11-18: a scene that froze after a few turns looked stuck).
+  // The calm part is drawn at about 30 frames a second; the loading screen keeps the full loop.
   const restAt = T_IMPACT + FRAGMENT_LIFE
+  const restU = loopTime(restAt)
   const start = performance.now()
+  let lastDraw = 0
   const frame = (now: number) => {
     if (stopped || still || !canvas.isConnected) return
     if (now - palAt > 800) { pal = readPalette(); palAt = now } // follow a theme change without re-reading every frame
     const t = (now - start) / 1000 + T_IMPACT * 0.35 // begin part-way through, so something is moving at once
-    if (opts.once && t >= restAt) { still = true; stillT = restAt; render(restAt, now); return }
-    render(t, now)
+    if (opts.once && t >= restAt) {
+      if (now - lastDraw >= 33) { render(t, now, restU); lastDraw = now }
+    } else {
+      render(t, now)
+    }
     raf = requestAnimationFrame(frame)
   }
   raf = requestAnimationFrame(frame)
