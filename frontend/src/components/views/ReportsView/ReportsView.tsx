@@ -100,8 +100,12 @@ export function ReportsView({ summary, health, conjSearch, selectedConjKey, user
         <div className="reports__builder">
           <ReportBuilder options={options} onChange={setOptions} pairs={ranked} source={source} blocked={blocked} onGenerate={generate} />
         </div>
-        <div className="reports__preview" aria-label="Preview">
-          {report(true)}
+        <div className="reports__desk">
+          {/* Shown only on a narrow screen, where the A4 page is wider than the frame (ReportsView.css). */}
+          <p className="reports__scroll-hint">Scroll sideways to see the whole page.</p>
+          <div className="reports__preview" role="region" aria-label="Preview" tabIndex={0}>
+            {report(true)}
+          </div>
         </div>
       </div>
       {createPortal(<div className="report-print">{report(false)}</div>, document.body)}

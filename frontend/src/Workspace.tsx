@@ -240,6 +240,7 @@ export function Workspace({ username, onSignOut, theme, onToggleTheme: toggleThe
           selectedKey={conjKey}
           onSelectKey={setConjKey}
           medianTleAgeDays={summary?.medianAgeDays ?? null}
+          apiOnline={apiStatus !== 'offline'}
           onShowOnGlobe={showOnGlobe}
         />
       ) : null}

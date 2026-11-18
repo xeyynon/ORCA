@@ -64,7 +64,7 @@ export function ConjunctionCard({ event, nowMs, onJumpToTca, onViewDetails, onCl
       </div>
 
       {coMoving ? <FieldNote>These two fly together, as a formation or from a shared launch. A small miss distance is normal for them and does not mean their paths cross.</FieldNote> : null}
-      {event.long_encounter ? <FieldNote>This is a long encounter (under 0.1 km/s), so the probability can be several times too low.</FieldNote> : null}
+      {event.long_encounter ? <FieldNote>This is a long encounter (under 0.1 km/s). For these slow pairs the probability is not reliable: it may be too high or too low.</FieldNote> : null}
       <FieldNote>Pc is a research estimate based on an assumed uncertainty, because TLEs don’t include one. It is not an operational probability.</FieldNote>
 
       <div className="conjunction-card__actions">
