@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useRef } from 'react'
 import { getConjunctionMethod } from '@/api/endpoints'
 import type { ConjunctionQuery } from '@/api/endpoints'
 import { loadSavedRun, SAVED_RUN_QUERY } from '@/api/savedRun'
@@ -8,6 +8,7 @@ import type { ConjunctionSearch } from '@/hooks/useConjunctionSearch'
 import { useElapsed } from '@/hooks/useElapsed'
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { usePairAssessment } from '@/hooks/usePairAssessment'
+import { useRevealOnSelect } from '@/hooks/useRevealOnSelect'
 import { resultAnswer, tableLine, tierCounts } from '@/lib/conjunctionSummary'
 import { downloadConjunctionsCsv, downloadConjunctionsJson } from '@/lib/exportConjunctions'
 import { integer } from '@/lib/format'
@@ -77,6 +78,9 @@ export function ConjunctionsView({ catalogSize, now, search, query, onQueryChang
 
   // Esc closes the detail first (the app-wide Esc skips events a child already handled).
   useKeyboardShortcuts({ Escape: () => onSelectKey(null) }, selected !== null)
+  // One column below 1100 px (ConjunctionsView.css) puts the pair card under the table: bring it into view on a new selection.
+  const gridRef = useRef<HTMLDivElement>(null)
+  useRevealOnSelect(gridRef, selected ? selectedKey : null, '(max-width: 1100px)', '.pair-card')
 
   const run = () => { onSelectKey(null); search.run(query) }
   const showSaved = () => {
@@ -156,7 +160,7 @@ export function ConjunctionsView({ catalogSize, now, search, query, onQueryChang
             <Button size="sm" onClick={() => downloadConjunctionsJson(search.events)}><Icon name="download" size={14} /> JSON</Button>
           </div>
         </div>
-        <div className={selected ? 'conj-view__grid conj-view__grid--split' : 'conj-view__grid'}>
+        <div className={selected ? 'conj-view__grid conj-view__grid--split' : 'conj-view__grid'} ref={gridRef}>
           <div className="conj-view__table"><ConjunctionTable events={search.events} selectedKey={selectedKey} compact={selected !== null} onSelect={(e) => onSelectKey(pairKey(e))} /></div>
           {selected ? (
             <PairCard

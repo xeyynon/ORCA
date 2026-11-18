@@ -17,11 +17,13 @@ type Props = {
   tle: TleRecord
   /** Current position, when this object is in the loaded globe subset; null otherwise. */
   position: PositionedObject | null
+  /** Said in place of the default note when there is no position, e.g. on Overview, which never works one out. */
+  noPositionNote?: string
   now: Date
   onClose: () => void
 }
 
-export function ObjectCard({ tle, position, now, onClose }: Props) {
+export function ObjectCard({ tle, position, noPositionNote, now, onClose }: Props) {
   const orbit = deriveOrbit(tle)
   return (
     <aside className="object-card" aria-label="Object detail">
@@ -53,7 +55,7 @@ export function ObjectCard({ tle, position, now, onClose }: Props) {
           </>
         ) : null}
       </div>
-      {!position ? <FieldNote>There is no live position for this object. Positions are worked out on the Globe page, and objects that SGP4 can’t propagate don’t have one.</FieldNote> : null}
+      {!position ? <FieldNote>{noPositionNote ?? 'There is no live position for this object. Positions are worked out on the Globe page, and objects that SGP4 can’t propagate don’t have one.'}</FieldNote> : null}
       <FieldNote>The orbit’s size and shape here come from the TLE mean motion. We convert it from revolutions per day to radians per second, then apply Kepler’s third law. They aren’t read from a stored field.</FieldNote>
     </aside>
   )
