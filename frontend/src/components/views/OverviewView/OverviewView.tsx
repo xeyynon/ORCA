@@ -82,7 +82,7 @@ export function OverviewView({ catalog, summary, totalCount, selectedId, onSelec
   } else if (rows.length === 0) {
     body = (
       <EmptyState kind="none" title="The catalog is empty" action={<Button variant="primary" onClick={onGoData}>Go to Data</Button>}>
-        There are no TLEs stored. An empty database looks like this, and so does a failed Celestrak fetch, because the API reports both as an empty list.
+        There are no TLEs stored. An empty database looks like this, and so does a failed CelesTrak fetch, because the API reports both as an empty list.
       </EmptyState>
     )
   } else {

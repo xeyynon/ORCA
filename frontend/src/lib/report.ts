@@ -16,7 +16,7 @@ export const REPORT_MARKING = 'For Educational Use Only · NOT for Operational D
 export type ReportSectionId = 'summary' | 'approaches' | 'pair' | 'quality'
 
 export const REPORT_SECTIONS: ReadonlyArray<{ id: ReportSectionId; title: string; about: string }> = [
-  { id: 'summary', title: 'Summary of the Situation', about: 'How big the catalogue is, where objects orbit, and the main figures from the run.' },
+  { id: 'summary', title: 'Summary of the Situation', about: 'How big the catalog is, where objects orbit, and the main figures from the run.' },
   { id: 'approaches', title: 'Close Approaches', about: 'How many approaches fall in each risk tier, plus the top approaches with their pair, TCA, miss distance, Pc and risk.' },
   { id: 'pair', title: 'Analysis of a Single Pair', about: 'A closer look at one approach, including its geometry, probability, uncertainty, data age and caveats.' },
   { id: 'quality', title: 'Quality of Data and Methodology', about: 'How old the data is, where it comes from, how screening and Pc work, and what the limits are.' },
