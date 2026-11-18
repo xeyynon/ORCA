@@ -5,3 +5,7 @@
   .kpi-row .kpi { padding: 10px 12px; }
   .kpi-row .kpi__value { font-size: 20px; }
 }
+/* An odd last card takes the whole row, so three cards in two columns leave no gap (audit 2026-11-18). */
+@media (max-width: 520px) {
+  .kpi-row > :last-child:nth-child(odd) { grid-column: 1 / -1; }
+}

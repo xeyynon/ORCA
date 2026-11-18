@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react'
+import { useWidthBand } from '@/hooks/useWidthBand'
 import { cx } from '@/lib/cx'
+import { columnBreakpoints, visibleColumns } from '@/lib/tableColumns'
 import { SortHeader } from '../../molecules/SortHeader/SortHeader'
 import type { SortDir } from '../../molecules/SortHeader/SortHeader'
 import './DataTable.css'
@@ -11,6 +13,9 @@ export interface Column<T> {
   hint?: string
   align?: 'left' | 'right'
   sortable?: boolean
+  /** Hide this column when the window is narrower than this many px, so a phone shows the columns that matter
+      instead of a table cut off at the edge. Leave it out on the columns that must always show. */
+  hideBelow?: number
   render: (row: T) => ReactNode
 }
 
@@ -27,7 +32,8 @@ type Props<T> = {
 }
 
 /** Generic sortable table. Rows are keyboard-reachable buttons-in-effect when onSelect is given. */
-export function DataTable<T>({ caption, columns, rows, rowKey, selectedKey, onSelect, sortId, sortDir, onSort }: Props<T>) {
+export function DataTable<T>({ caption, columns: allColumns, rows, rowKey, selectedKey, onSelect, sortId, sortDir, onSort }: Props<T>) {
+  const columns = visibleColumns(allColumns, useWidthBand(columnBreakpoints(allColumns)))
   return (
     <div className="data-table__scroll">
       {/* A selectable table is a grid: that is what makes aria-selected valid on its rows. */}
