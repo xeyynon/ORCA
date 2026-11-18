@@ -181,7 +181,7 @@ export function GlobeView({ catalog, totalCount, selection, focus, conjunction, 
         <div className="globe-view__hide-panel">
           <IconButton label="Hide panel" onClick={() => setPrefs({ panelOpen: false })}><Icon name="chevron-left" size={14} /></IconButton>
         </div>
-        <CatalogSummaryCard summary={summary.data} error={summary.status === 'error' ? summary.error.message : null} onRetry={summary.reload} />
+        <CatalogSummaryCard summary={summary.data} error={summary.status === 'error' ? summary.error.message : null} onRetry={summary.reload} typeColours={prefs.colorBy === 'type'} />
         <ViewOptionsCard prefs={prefs} onChange={setPrefs} conjunctionActive={conjunction !== null} />
         <FiltersCard prefs={prefs} onChange={setPrefs} summary={summary.data} bandCounts={bandCounts} countsReady={loaded !== undefined} conjunctionActive={conjunction !== null} />
       </aside>

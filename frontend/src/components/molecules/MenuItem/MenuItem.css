@@ -36,4 +36,5 @@
 .menu-item__icon { display: inline-flex; color: var(--text-secondary); }
 .menu-item__label { flex: 1; min-width: 0; }
 .menu-item__hint { display: inline-flex; }
+.menu-item__hint--text { color: var(--text-tertiary); font-size: var(--text-sm); }
 @media (pointer: coarse) { .menu-item { min-height: 44px; } }

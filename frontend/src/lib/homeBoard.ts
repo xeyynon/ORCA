@@ -32,15 +32,16 @@ export interface HomeKpi {
 
 /**
  * The three headline figures (the object count was a fourth; the headline above already says it in large type, so it
- * was dropped: declutter plan 2026-11-15). The pair count is pairs that came within the report distance, not conjunctions or
- * collisions, and its label says so; the risk tiers keep the run's name attached.
+ * was dropped: declutter plan 2026-11-15). The first counts pairs that came within the report distance, never collisions;
+ * it is labelled "Close approaches", the one name Home uses for that idea (audit 2026-11-18, P2 #23). The risk tiers keep
+ * the run's name attached.
  */
 export function homeKpis(run: HookRun | null): HomeKpi[] {
   const where = run ? runName(run) : null
   return [
     {
       id: 'pairs',
-      label: 'Close pairs',
+      label: 'Close approaches',
       value: run ? integer(run.totalEvents) : null,
       context: run ? `Pairs that came within ${run.reportKm} km in ${where}` : 'Pairs closer than the report distance',
     },
@@ -67,29 +68,28 @@ export interface Freshness {
 
 /** How far to trust positions, from the median element-set age. Never calls old data real-time. */
 export function freshness(medianAgeDays: number): Freshness {
-  // Half the sets are at most the median age, and half at least it: round up for "no more than", down for "at least",
-  // so the sentence stays true (a 2.4-day median is "no more than 3 days", never "within 2 days").
-  const upTo = Math.max(1, Math.ceil(medianAgeDays))
-  const atLeast = Math.floor(medianAgeDays)
+  // One figure: the median as it is shown beside this sentence (days(): one decimal), so "1.4 d" is not followed by
+  // "no more than 2 days" for the same fact (audit 2026-11-18, P3). Half the sets are at most the median, half at least.
+  const median = `${medianAgeDays.toFixed(1)} days`
   if (medianAgeDays <= STALE_MEDIAN_DAYS) {
     // A TLE's age counts from its epoch (the moment its numbers describe), not from when the object was observed.
-    return { tone: 'ok', word: 'Fresh', explain: `Half of these data sets are no more than ${upTo === 1 ? 'twenty four hours' : `${upTo} days`} old, counted from each one’s epoch (the moment it describes).` }
+    return { tone: 'ok', word: 'Fresh', explain: `Half of these data sets are ${median} old or less, counted from each one’s epoch (the moment it describes).` }
   }
   return {
     tone: 'warn',
     word: 'Rough guide only',
-    explain: `About half of the data sets are at least ${atLeast} days old. Positions become less accurate as the data gets older, so treat the close approaches as a rough guide and not for operational use.`,
+    explain: `Half of the data sets are ${median} old or more. Positions become less accurate as the data gets older, so treat the close approaches as a rough guide and not for operational use.`,
   }
 }
 
-/** The last Celestrak fetch in words, with a tone. Null outcome: none recorded yet. */
+/** The last CelesTrak fetch in words, with a tone. Null outcome: none recorded yet. */
 export function fetchSummary(f: FetchOutcome | null | undefined): { tone: 'ok' | 'warn' | 'bad'; text: string } {
   if (!f) return { tone: 'warn', text: 'No download recorded yet' }
   switch (f.status) {
     case 'ok': return { tone: 'ok', text: 'Successful' }
     case 'empty': return { tone: 'warn', text: 'Came back empty' }
-    case 'rate_limited': return { tone: 'warn', text: 'Refused by Celestrak for too many requests' }
-    case 'not_found': return { tone: 'bad', text: 'Refused because Celestrak couldn’t find the source' }
+    case 'rate_limited': return { tone: 'warn', text: 'Refused by CelesTrak for too many requests' }
+    case 'not_found': return { tone: 'bad', text: 'Refused because CelesTrak couldn’t find the source' }
     case 'http_error': return { tone: 'bad', text: `Failed${f.http_status ? ` (HTTP ${f.http_status})` : ''}` }
     case 'network_error': return { tone: 'bad', text: 'Failed because of a network problem' }
     default: return { tone: 'warn', text: f.detail }
