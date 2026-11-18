@@ -84,18 +84,21 @@ export function HomeView({ catalog, summary, health, apiStatus, conjSearch, onCo
     ? `The top five worst of the ${integer(events.length)} most probable close approach results in this run.`
     : null
 
-  const snapshot = health ? (health.database.last_update ? formatUtc(health.database.last_update) : 'not refreshed through the API') : null
+  // One refresh time, one wording, on Home and Data (audit 2026-11-18 #18): the API's last_update, the moment the
+  // stored catalog was last replaced by a successful CelesTrak download.
+  const snapshot = health ? (health.database.last_update ? formatUtc(health.database.last_update) : 'not recorded') : null
 
   return (
     <PageLayout>
       <div className="home">
-        {/* The first screen says when the API stops answering (audit 2026-11-15 §10): the page keeps the last data. */}
+        {/* The first screen says when the API stops answering (audit 2026-11-15 §10): the page keeps the last data.
+            This banner is the one place Home says so; its action opens the API health page (audit 2026-11-18 #19). */}
         {offline ? (
           <StaleDataBanner
             tone="bad"
-            notice={{ title: 'The API isn’t responding', body: 'You’re seeing the last data that loaded. Nothing will update until it’s back.' }}
-            actionLabel="Check the API status"
-            onGoData={() => onGo('data')}
+            notice={{ title: 'ORCA’s server isn’t answering', body: 'You’re seeing the last data that loaded. Nothing will update until it’s back.' }}
+            actionLabel="See the server status"
+            onGoData={() => onGo('health')}
           />
         ) : null}
         <HomeHero
@@ -126,7 +129,8 @@ export function HomeView({ catalog, summary, health, apiStatus, conjSearch, onCo
             counts={whole?.by_regime ?? null}
             unclassified={whole?.regime_unclassified ?? 0}
             total={whole?.total ?? null}
-            failed={wholeQuery.status === 'error' || (offline && !whole)}
+            failed={wholeQuery.status === 'error'}
+            onRetry={wholeQuery.reload}
             onOpen={() => onGo('analytics')}
           />
           <DataQuality
@@ -134,7 +138,9 @@ export function HomeView({ catalog, summary, health, apiStatus, conjSearch, onCo
             newestAgeDays={summary?.newestAgeDays ?? null}
             measuredOver={summary?.count ?? null}
             storedTotal={total}
+            lastUpdate={health?.database.last_update ?? null}
             lastFetch={health?.database.last_fetch ?? null}
+            known={health !== null}
             offline={offline}
             catalogFailed={catalog.status === 'error' && !summary}
             apiStatus={apiStatus}

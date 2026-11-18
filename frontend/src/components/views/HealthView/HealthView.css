@@ -19,3 +19,4 @@
 .health-view__json-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--gap-2) var(--gap-4); }
 .health-view__link { display: inline-flex; align-items: center; min-height: 24px; color: var(--accent-ink); }
 .health-view__pre { margin: 0; padding: var(--gap-3); overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius-sm, 6px); background: var(--bg-canvas); color: var(--text-primary); font-family: var(--font-mono); font-size: 12px; line-height: 1.55; }
+.health-view__route { display: block; margin-top: var(--gap-1); color: var(--text-tertiary); font-size: var(--text-sm); }
