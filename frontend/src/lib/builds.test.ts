@@ -25,6 +25,8 @@ test('builds are newest first, each says what changed, and the latest is the fir
   for (const b of BUILDS) {
     assert.ok(b.title.trim() && b.changes.length > 0, `build ${b.build} has a title and changes`)
     for (const c of b.changes) assert.doesNotMatch(c, /—/, `build ${b.build}: no em dashes`)
+    // User words, not engine words (audit 2026-11-18, P2 #35), and one spelling of each name.
+    for (const c of b.changes) assert.doesNotMatch(c, /sidereal|precision of orbit epochs|API health|timing out|catalogue|Celestrak/, `build ${b.build}: ${c}`)
   }
   assert.equal(LATEST_BUILD, BUILDS[0])
 })

@@ -36,10 +36,10 @@ export const BUILDS: readonly BuildNote[] = [
     date: '2026-11-16',
     title: 'Bug sweep and a floating status bar',
     changes: [
-      'Fixes to sidereal time and to the precision of orbit epochs, so positions on the globe are more accurate.',
-      'The catalogue is stored in one step, and objects with unusable data are skipped instead of breaking a page.',
+      'Objects on the globe are drawn in more accurate places, after two small errors in how ORCA counts time were fixed.',
+      'The catalog is stored in one step, and objects with unusable data are skipped instead of breaking a page.',
       'The status bar floats over the page as two small capsules, so pages use the full height.',
-      'A full catalogue refresh waits up to 120 seconds for CelesTrak instead of timing out after 10.',
+      'Downloading the whole catalog from CelesTrak can now take up to 2 minutes, instead of giving up after 10 seconds.',
     ],
   },
   {
@@ -49,7 +49,7 @@ export const BUILDS: readonly BuildNote[] = [
     changes: [
       'Every page was trimmed: each figure is said once, long tables show a page at a time and notes are one line.',
       'The Globe can colour objects by constellation (Starlink, OneWeb, Kuiper, Qianfan).',
-      'An API health page shows whether the service answers, in plain words.',
+      "A new page, opened from Data, says in plain words whether ORCA's server is answering.",
     ],
   },
   {
@@ -69,7 +69,7 @@ export const BUILDS: readonly BuildNote[] = [
     changes: [
       'A conjunction search keeps its result when you move to another page.',
       'Results start with the answer, and a saved example run can be explored without waiting.',
-      'Better phone layout, a menu in the header, and Analytics over the whole catalogue.',
+      'Better phone layout, a menu in the header, and Analytics over the whole catalog.',
     ],
   },
   {

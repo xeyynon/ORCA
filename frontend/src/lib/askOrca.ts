@@ -45,7 +45,7 @@ export interface AskContext {
   loaded: number | null
   /** Counts by orbit regime, and what they cover: the whole stored catalog, or only the loaded rows. */
   regimes: { counts: Record<RegimeKey, number>; scope: 'catalog' | 'loaded'; of: number | null; unclassified?: number | null } | null
-  /** Element-set ages over the loaded rows, in days, and when the API last stored a Celestrak fetch (formatted UTC). */
+  /** Element-set ages over the loaded rows, in days, and when the API last stored a CelesTrak fetch (formatted UTC). */
   ages: { medianDays: number | null; newestDays: number | null; oldestDays: number | null; lastRefreshUtc: string | null }
   /** The conjunction search held by the workspace: its answer sentence when there is a result, and where it came from. */
   conjunction: {
@@ -57,6 +57,8 @@ export interface AskContext {
   }
   views: readonly ViewId[]
   glossary: Readonly<Record<string, string>>
+  /** True when the server says the optional AI is on: questions the engine cannot place then go to it. */
+  ai?: boolean
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -179,28 +181,48 @@ export function horizonFrom(t: string): number | null {
 // ---------------------------------------------------------------------------------------------------------------------
 // Replies
 
-const CAPABILITIES =
-  'I answer using only what ORCA has loaded, so no AI is needed. I can find an object and show it on the globe ("find ISS", "show 25544"). ' +
-  'I can also open a page ("open analytics"), count objects ("how many in LEO?"), tell you how old the data is and explain a term ("what is Pc?"). ' +
-  'On top of that, I can report the conjunction result, run a search or open the saved example, switch the theme, start the tour and list the keyboard shortcuts.'
+/**
+ * Where the answers come from, said truthfully for both cases (audit 2026-11-18, P1 #4): with the AI off every answer
+ * comes from ORCA's data; with it on, a question the engine can't place goes to an AI model, and that answer is labelled.
+ */
+export function answerSource(ai: boolean): string {
+  return ai
+    ? "Most answers come from ORCA's data; questions it can't place go to an AI model, and those answers are labelled."
+    : "All of my answers come from ORCA's data. No AI is used."
+}
 
-/** The first-open greeting, with four starters for the view the user is on. */
-export function greeting(view: ViewId): AskReply {
+/** What the panel can do, with where its answers come from first. */
+export function capabilities(ai: boolean): string {
+  return `${answerSource(ai)} I can find an object and show it on the globe ("find ISS", "show 25544"). ` +
+    'I can also open a page ("open analytics"), count objects ("how many in LEO?"), tell you how old the data is and explain a term ("what is Pc?"). ' +
+    'On top of that, I can report the conjunction result, run a search or open the saved example, switch the theme, start the tour and list the keyboard shortcuts.'
+}
+
+/** A page by the name the user sees on screen: the home page has no visible title, so it is "the home page". */
+export function pageName(view: ViewId): string {
+  return view === 'home' ? 'the home page' : `the ${VIEW_LABEL[view]} page`
+}
+
+/** The first-open greeting, with four starters for the view the user is on. `ai`: whether the optional AI is on. */
+export function greeting(view: ViewId, ai = false): AskReply {
   return {
     intent: 'help',
-    text: `You can ask me about what ORCA has loaded, such as objects, the age of the data, terms and close approaches. All of my answers come from the app's own data. You are currently on ${VIEW_LABEL[view]}.`,
+    text: `You can ask me about what ORCA has loaded, such as objects, the age of the data, terms and close approaches. ${answerSource(ai)} You are on ${pageName(view)}.`,
     chips: chips(STARTERS[view]),
   }
 }
 
 function help(ctx: AskContext): AskReply {
-  return { intent: 'help', text: CAPABILITIES, chips: chips(STARTERS[ctx.view]) }
+  return { intent: 'help', text: capabilities(ctx.ai === true), chips: chips(STARTERS[ctx.view]) }
 }
 
 /** What the engine says when it cannot place a question. Also the fallback when the AI is off or fails. */
-export function unknownReply(prefix = "I can't answer that using ORCA's data."): AskReply {
-  return { intent: 'unknown', text: `${prefix} ${CAPABILITIES}`, chips: chips(UNKNOWN_CHIPS) }
+export function unknownReply(prefix = "I can't answer that using ORCA's data.", ai = false): AskReply {
+  return { intent: 'unknown', text: `${prefix} ${capabilities(ai)}`, chips: chips(UNKNOWN_CHIPS) }
 }
+
+/** A term with its first letter in capitals, so a definition starts a sentence ("Miss distance: ..."); TLE and Pc stay as written. */
+const capitalised = (term: string) => term.charAt(0).toUpperCase() + term.slice(1)
 
 function define(term: string, ctx: AskContext): AskReply {
   const terms = Object.keys(ctx.glossary)
@@ -208,7 +230,7 @@ function define(term: string, ctx: AskContext): AskReply {
   const others = [terms[(i + 1) % terms.length], terms[(i + 2) % terms.length]].filter((x) => x && x !== term)
   return {
     intent: 'define',
-    text: `${term}: ${ctx.glossary[term]}`,
+    text: `${capitalised(term)}: ${ctx.glossary[term]}`,
     chips: [...others.map((o) => ({ label: `What is ${o}?` })), { label: 'Any close approaches?' }],
   }
 }
@@ -234,15 +256,17 @@ function count(ctx: AskContext, asked: RegimeKey[], byRegime: boolean): AskReply
 
 function freshness(ctx: AskContext): AskReply {
   const a = ctx.ages
-  const refresh = a.lastRefreshUtc ? ` The API last saved a Celestrak fetch at ${a.lastRefreshUtc}.` : ''
+  const refresh = a.lastRefreshUtc ? ` ORCA last downloaded the catalog from CelesTrak at ${a.lastRefreshUtc}.` : ''
   const replyChips = [{ label: 'Open Data' }, { label: 'What is a TLE?' }]
   if (a.medianDays === null) return { intent: 'freshness', text: `The age of the data has not loaded yet.${refresh}`, chips: replyChips }
   const over = ctx.loaded !== null ? `, measured over the ${integer(ctx.loaded)} loaded objects` : ''
-  const range = a.newestDays !== null && a.oldestDays !== null ? ` The newest is ${days1(a.newestDays)} old and the oldest is ${days1(a.oldestDays)} old.` : ''
+  // The verdict straight after the median it judges, then the range: after the range, "that is within 7 days" read as if
+  // the oldest set were within it (audit 2026-11-18, P2 #30).
   const verdict = a.medianDays > STALE_MEDIAN_DAYS
-    ? `That is past ORCA's ${STALE_MEDIAN_DAYS}-day threshold, so please treat every figure as a rough guide.`
-    : `That is within ORCA's ${STALE_MEDIAN_DAYS}-day threshold. Accuracy still drops within days, so the figures should only be treated as a rough guide.`
-  return { intent: 'freshness', text: `The orbital data (TLEs) has a median age of ${days1(a.medianDays)}${over}.${range} ${verdict}${refresh}`, chips: replyChips }
+    ? `That median is past ORCA's ${STALE_MEDIAN_DAYS}-day threshold, so please treat every figure as a rough guide.`
+    : `That median is within ORCA's ${STALE_MEDIAN_DAYS}-day threshold. Accuracy still drops within days, so the figures should only be treated as a rough guide.`
+  const range = a.newestDays !== null && a.oldestDays !== null ? ` Across all of them, the newest is ${days1(a.newestDays)} old and the oldest is ${days1(a.oldestDays)} old.` : ''
+  return { intent: 'freshness', text: `The orbital data (TLEs) has a median age of ${days1(a.medianDays)}${over}. ${verdict}${range}${refresh}`, chips: replyChips }
 }
 
 function conjunctions(ctx: AskContext): AskReply {
@@ -290,9 +314,9 @@ function savedExample(ctx: AskContext): AskReply {
 }
 
 function go(view: ViewId, ctx: AskContext): AskReply {
-  if (!ctx.views.includes(view)) return unknownReply()
-  if (view === ctx.view) return { intent: 'go', text: `You are already on ${VIEW_LABEL[view]}.` }
-  return { intent: 'go', text: `Opening ${VIEW_LABEL[view]}.`, action: { kind: 'go', view } }
+  if (!ctx.views.includes(view)) return unknownReply(undefined, ctx.ai === true)
+  if (view === ctx.view) return { intent: 'go', text: `You are already on ${pageName(view)}.` }
+  return { intent: 'go', text: `Opening ${pageName(view)}.`, action: { kind: 'go', view } }
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -351,7 +375,7 @@ function match(input: string, ctx: AskContext): AskReply {
   const raw = input.trim()
   const t = normalize(raw)
   if (!t) return help(ctx)
-  if (GREETING.test(t)) return { ...help(ctx), text: `Hello! ${CAPABILITIES}` }
+  if (GREETING.test(t)) return { ...help(ctx), text: `Hello! ${capabilities(ctx.ai === true)}` }
   if (THANKS.test(t)) return { intent: 'thanks', text: 'You are welcome!' }
   if (CAPABILITY_Q.test(t) || HELP_WORD.test(t)) return help(ctx)
 
@@ -366,7 +390,11 @@ function match(input: string, ctx: AskContext): AskReply {
   }
 
   // Explanations before keyword intents: a "why" question containing "approach" is not asking for the conjunction summary.
-  if (OPEN_Q.test(t)) return unknownReply("I can't answer that using ORCA's data, because it needs an explanation and AI answers are turned off.")
+  if (OPEN_Q.test(t)) {
+    return unknownReply(ctx.ai
+      ? "I can't answer that using ORCA's data, because it needs an explanation."
+      : "I can't answer that using ORCA's data, because it needs an explanation and AI answers are turned off.", ctx.ai === true)
+  }
 
   if (TOUR.test(t)) return { intent: 'tour', text: 'Starting the tour. You can leave at any step and replay it later from the menu.', action: { kind: 'startTour' } }
 
@@ -403,7 +431,7 @@ function match(input: string, ctx: AskContext): AskReply {
     const known = Object.keys(ctx.glossary).join(', ')
     return { intent: 'unknown', text: `That is not in ORCA's glossary or its data. These are the terms I can explain: ${known}.`, chips: chips(['What is a TLE?', 'What is Pc?', 'What is TCA?', 'What can you do?']) }
   }
-  return unknownReply()
+  return unknownReply(undefined, ctx.ai === true)
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -422,7 +450,7 @@ export function askFacts(ctx: AskContext): string[] {
   facts.push(a.medianDays !== null
     ? `Element-set (TLE) age over the loaded objects: median ${days1(a.medianDays)}, newest ${days1(a.newestDays)}, oldest ${days1(a.oldestDays)}; ORCA warns above a ${STALE_MEDIAN_DAYS}-day median`
     : 'Element-set (TLE) age: not loaded yet')
-  if (a.lastRefreshUtc) facts.push(`The API last stored a Celestrak fetch at ${a.lastRefreshUtc}`)
+  if (a.lastRefreshUtc) facts.push(`The API last stored a CelesTrak fetch at ${a.lastRefreshUtc}`)
   const c = ctx.conjunction
   if (c.phase === 'running') facts.push('A conjunction search is running; no result yet')
   else if (c.phase === 'done' && c.headline) facts.push(`Conjunction result (${c.source === 'saved' ? 'saved example run, not live' : 'live search this session'}): ${c.headline}.${c.detail ? ` ${c.detail}` : ''}`)

@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { TOUR_STEPS, TOUR_STORAGE_KEY, availableSteps, moveStep, reconcileStep, stepLabel } from './tour.ts'
+import { TOUR_STEPS, TOUR_STORAGE_KEY, availableSteps, forPointer, moveStep, reconcileStep, stepLabel } from './tour.ts'
 import { placeCard, spotlightRect, SHEET_BELOW_PX } from './tourPlacement.ts'
 
 test('the tour has the five steps in order, each with a target and short copy', () => {
@@ -10,6 +10,7 @@ test('the tour has the five steps in order, each with a target and short copy', 
     assert.ok(s.body.length > 0, s.id)
     // A first-time visitor reads each card in one glance: at most three sentences per step.
     assert.ok((s.body.match(/[.!?](\s|$)/g) ?? []).length <= 3, `${s.id} is short`)
+    if (s.touchBody) assert.ok((s.touchBody.match(/[.!?](\s|$)/g) ?? []).length <= 3, `${s.id} touch words are short`)
   }
   assert.equal(new Set(TOUR_STEPS.map((s) => s.id)).size, TOUR_STEPS.length)
 })
@@ -26,6 +27,18 @@ test('the copy names the keys the app really binds', () => {
   assert.match(TOUR_STEPS.find((s) => s.id === 'search')!.body, /\(\/\)/)
   assert.match(TOUR_STEPS.find((s) => s.id === 'conjunctions')!.body, /example run has been saved/)
   assert.match(TOUR_STEPS.find((s) => s.id === 'menu')!.body, /Take the tour/)
+})
+
+test('on a touch screen no step names a key or a click (audit 2026-11-18 #21)', () => {
+  for (const s of TOUR_STEPS) {
+    const body = forPointer(s, true).body
+    assert.doesNotMatch(body, /number keys|key|\(\/\)|\(\.\)|forward slash|dot|click|keyboard/i, s.id)
+  }
+  assert.match(forPointer(TOUR_STEPS.find((s) => s.id === 'views')!, true).body, /Tap an icon/)
+  assert.match(forPointer(TOUR_STEPS.find((s) => s.id === 'menu')!, true).body, /Take the tour/)
+  // With a mouse and keyboard the keys stay.
+  assert.equal(forPointer(TOUR_STEPS[1], false), TOUR_STEPS[1])
+  assert.match(forPointer(TOUR_STEPS.find((s) => s.id === 'views')!, false).body, /1-6/)
 })
 
 test('a step whose target is missing is skipped, never pointed at nothing', () => {

@@ -41,19 +41,18 @@
 /* Narrow: tabs keep their natural width and the row scrolls sideways. */
 @media (max-width: 1100px) { .nav-tab { flex: none; } .nav-tab::after { bottom: -4px; } }
 @media (pointer: coarse) { .nav-tab { height: 44px; } }
-/* Phones: six labelled tabs do not fit, and a sideways-scrolling row hid Data and Reports with no cue (audit
-   2026-11-15). Inactive tabs show their icon only (the label stays for screen readers, and the tooltip names it); the
-   active tab keeps its label, so you always read where you are. 44 px wide targets. */
+/* Phones: six labels beside their icons do not fit, and a sideways-scrolling row hid Data and Reports with no cue (audit
+   2026-11-15). Each tab stacks a small label under its icon, so the row names every view without scrolling and the
+   tour can say "Globe" about a tab you can read (audit 2026-11-18, P2 #21). 44 px tall targets. */
 @media (max-width: 520px) {
-  .nav-tab { justify-content: center; min-width: 44px; padding: 0 10px; }
-  .nav-tab:not(.nav-tab--active) .nav-tab__label {
-    position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
-  }
+  .nav-tab { flex-direction: column; justify-content: center; gap: 2px; min-width: 44px; height: auto; min-height: 44px; padding: 4px 4px; }
+  .nav-tab__label { font-size: 11px; line-height: 14px; }
+  .nav-tab::after { left: 8px; right: 8px; bottom: -2px; }
 }
-/* 320 px (WCAG reflow width): even one label overflows the row, so every tab is icon-only; the underline marks the
-   active one and the page title below says where you are (measured: 40 px overflow at 320 before this). */
+/* 320 px (WCAG reflow width): six labels overflow the row, so every tab is icon-only; the underline marks the active
+   one and the page title below says where you are (measured: 40 px overflow at 320 before this). */
 @media (max-width: 359px) {
-  .nav-tab--active .nav-tab__label {
+  .nav-tab__label {
     position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
   }
   .nav-tab { padding: 0 8px; }

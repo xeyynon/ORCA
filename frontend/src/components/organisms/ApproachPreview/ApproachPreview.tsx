@@ -41,9 +41,11 @@ const SORT_KEYS: Record<string, (e: ConjunctionEvent) => number | string> = {
 }
 
 /**
- * "Close approach intelligence": the run's five worst approaches, each row opening the full analysis on Conjunctions
- * (Section 03 of the homepage spec). Never sample data: while the run loads the rows are skeletons, if it cannot load
- * that is said, and a run that found nothing is a result.
+ * "Close approaches": the run's five worst approaches, each row opening the full analysis on Conjunctions (Section 03 of
+ * the homepage spec). Never sample data: while the run loads the rows are skeletons, if it cannot load that is said, and
+ * a run that found nothing is a result. One name for one idea on Home: "close approaches", glossed here once as
+ * "conjunctions" (the name of the page they open; audit 2026-11-18, P2 #23). Headers are plain words, not TCA and Pc
+ * (#22): a header is a sort button, so a GlossaryTerm cannot sit inside it, and the meaning stays in its hint.
  */
 export function ApproachPreview({ status, events, provenance, reportKm, windowLine, now, onOpen, onViewAll }: Props) {
   const [sortId, setSortId] = useState('risk')
@@ -56,9 +58,9 @@ export function ApproachPreview({ status, events, provenance, reportKm, windowLi
 
   const columns: Column<ConjunctionEvent>[] = [
     { id: 'pair', label: 'Object pair', render: (e) => <span className="approach__pair">{e.sat1_name} <Mono muted>×</Mono> {e.sat2_name}</span> },
-    { id: 'tca', label: 'TCA', hint: GLOSSARY.TCA, sortable: true, render: (e) => <span><Mono>{formatUtc(e.tca)}</Mono>{isPast(e.tca, now) ? <> <Mono muted>(past)</Mono></> : null}</span> },
+    { id: 'tca', label: 'Closest approach', hint: GLOSSARY.TCA, sortable: true, render: (e) => <span><Mono>{formatUtc(e.tca)}</Mono>{isPast(e.tca, now) ? <> <Mono muted>(past)</Mono></> : null}</span> },
     { id: 'miss', label: 'Miss distance', hint: GLOSSARY['miss distance'], sortable: true, align: 'right', render: (e) => <ValueUnit value={fixed(e.min_distance_km, 3)} unit="km" /> },
-    { id: 'pc', label: 'Pc', hint: GLOSSARY.Pc, sortable: true, align: 'right', render: (e) => <Mono>{pc(e.probability_of_collision)}</Mono> },
+    { id: 'pc', label: 'Chance of collision', hint: GLOSSARY.Pc, sortable: true, align: 'right', render: (e) => <Mono>{pc(e.probability_of_collision)}</Mono> },
     { id: 'risk', label: 'Risk', sortable: true, render: (e) => <RiskBadge level={e.risk_level} /> },
   ]
 
@@ -66,8 +68,8 @@ export function ApproachPreview({ status, events, provenance, reportKm, windowLi
     <section className="approach" aria-labelledby="approach-title">
       <BlockHeader
         id="approach-title"
-        title="Close approaches intelligence"
-        sub={windowLine ?? 'Possible close passes found by screening the catalog.'}
+        title="Close approaches (conjunctions)"
+        sub={windowLine ?? 'Pairs of objects that pass close to each other, found by searching the catalog.'}
         action={<ArrowLink label="See all close approaches" onClick={onViewAll} />}
       />
       {status === 'loading' ? (

@@ -38,7 +38,7 @@ export function LoginView({ configured, notice, busy, failure, onSubmit, corner 
       <div className="login-view__card">
         <div className="login-view__brand"><Brand size="card" /></div>
         <h1 className="login-view__title">Sign in</h1>
-        <p className="login-view__sub">Space situational awareness. See orbits, close approaches and how healthy the catalog is.</p>
+        <p className="login-view__sub">Follow satellites in orbit, see which ones pass close to each other, and check how up to date the data is.</p>
 
         {notice ? <Callout tone="warn" title="Signed out">{notice}</Callout> : null}
 
@@ -56,7 +56,7 @@ export function LoginView({ configured, notice, busy, failure, onSubmit, corner 
             onUse={() => setPrefill({ ...EVALUATOR })} />
         ) : null}
 
-        <FieldNote>This is an educational and research tool built on public TLEs. It is not meant for operational decisions.</FieldNote>
+        <FieldNote>This is a tool for learning and research, built on free public orbit data. Do not use it to make decisions about real spacecraft.</FieldNote>
       </div>
     </main>
   )
