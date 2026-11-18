@@ -1,8 +1,8 @@
-/* Capped so the chart text (set in viewBox units) never scales far past the UI's own 13 px. */
-.timeline__svg { display: block; width: 100%; max-width: 1000px; height: auto; margin: 0 auto; }
-.timeline__dot--pick { cursor: pointer; }
+/* The drawing is sized from its container (EventTimeline.tsx), so one viewBox unit is one CSS pixel: no scaling cap needed. */
+.timeline__svg { display: block; width: 100%; height: auto; }
+.timeline__point { cursor: pointer; outline: none; }
+.timeline__hit { fill: transparent; cursor: pointer; }
 .timeline__dot--selected { stroke: var(--text-primary); stroke-width: 2; fill-opacity: 1; }
-.timeline__dot:focus-visible { outline: none; stroke: var(--focus-ring); stroke-width: 2.5; }
 .timeline__plot { fill: var(--bg-input); stroke: var(--border-strong); stroke-width: 1; }
 .timeline__grid { stroke: var(--chart-grid); stroke-width: 1; }
 .timeline__tick { fill: var(--text-tertiary); font: 11px var(--font-mono); }
@@ -10,7 +10,9 @@
 .timeline__now { stroke: var(--text-secondary); stroke-width: 1; stroke-dasharray: 4 3; }
 .timeline__now-label { fill: var(--text-secondary); font: 11px var(--font-ui); }
 .timeline__dot { stroke: var(--bg-input); stroke-width: 1; fill-opacity: 0.9; }
-.timeline__dot:hover { stroke: var(--text-primary); stroke-width: 1.5; }
+.timeline__point:hover .timeline__dot { stroke: var(--text-primary); stroke-width: 1.5; }
+/* The focus ring on the dot itself (the point group holds the tab stop); wider than hover so it reads as focus. */
+.timeline__point:focus-visible .timeline__dot { stroke: var(--focus-ring); stroke-width: 3; }
 .timeline__dot--critical   { fill: var(--risk-critical); }
 .timeline__dot--high       { fill: var(--risk-high); }
 .timeline__dot--medium     { fill: var(--risk-medium); }

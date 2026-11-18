@@ -8,13 +8,13 @@ import type { ConjunctionSearch } from '@/hooks/useConjunctionSearch'
 import { useElapsed } from '@/hooks/useElapsed'
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { usePairAssessment } from '@/hooks/usePairAssessment'
-import { resultAnswer, tableLine, tierCounts } from '@/lib/conjunctionSummary'
+import { durationText, resultAnswer, tableLine, tierCounts, windowText } from '@/lib/conjunctionSummary'
 import { downloadConjunctionsCsv, downloadConjunctionsJson } from '@/lib/exportConjunctions'
 import { integer } from '@/lib/format'
 import { countPast, pairKey } from '@/lib/pair'
 import { sortBy } from '@/lib/sort'
 import { stepIndex } from '@/lib/swipe'
-import { formatLongUtc, formatUtc } from '@/lib/time'
+import { formatDay, formatLongUtc } from '@/lib/time'
 import { Button } from '../../atoms/Button/Button'
 import { Icon } from '../../atoms/Icon/Icon'
 import { EmptyState } from '../../molecules/EmptyState/EmptyState'
@@ -45,14 +45,12 @@ type Props = {
   onSelectKey: (key: string | null) => void
   /** Median TLE age of the catalog, for the one caveat about forecast quality. Null when unknown. */
   medianTleAgeDays: number | null
+  /** False when the API health check says the server is unreachable: a search can't start then. */
+  apiOnline: boolean
   onShowOnGlobe: (ids: string[], event: ConjunctionEvent) => void
 }
 
-const NUMBER_WORD: Record<number, string> = { 1: 'one', 2: 'two', 3: 'three', 4: 'four', 5: 'five', 6: 'six', 7: 'seven' }
-/** "one (1) day", "three (3) days": the search horizon written out. */
-const dayWords = (n: number) => `${NUMBER_WORD[n] ? `${NUMBER_WORD[n]} (${n})` : n} ${n === 1 ? 'day' : 'days'}`
-
-export function ConjunctionsView({ catalogSize, now, search, query, onQueryChange, selectedKey, onSelectKey, medianTleAgeDays, onShowOnGlobe }: Props) {
+export function ConjunctionsView({ catalogSize, now, search, query, onQueryChange, selectedKey, onSelectKey, medianTleAgeDays, apiOnline, onShowOnGlobe }: Props) {
   const method = useAsync((signal) => getConjunctionMethod({ signal }), [])
   const running = search.phase === 'running'
   const elapsed = useElapsed(running, search.startedAt)
@@ -115,37 +113,35 @@ export function ConjunctionsView({ catalogSize, now, search, query, onQueryChang
       </EmptyState>
     )
   } else {
-    const horizonDays = search.query?.horizonDays ?? query.horizonDays
-    const answer = resultAnswer(counts ?? tierCounts(result), result.total_events, horizonDays, result.report_km)
+    const span = windowText(result.window_start, result.window_end)
+    const answer = resultAnswer(counts ?? tierCounts(result), result.total_events, { start: result.window_start, end: result.window_end }, result.report_km)
     const headline = tableLine(result.events.length, result.total_events)
-    const ranAt = search.finishedAt ? formatUtc(search.finishedAt.toISOString()) : '—'
 
-    // Every caveat that used to be its own box, in order of importance. Nothing is dropped; they now share one.
+    // Every caveat that applies, in order of importance, in one box. Short sentences in plain words (audit 2026-11-18 #24).
     const caveats: string[] = []
     if (saved) {
-      // The saved-run notice and the "in the past" caveat said one thing twice; now it is the first point (declutter plan).
-      caveats.push(`This is an example run that was saved from a time when the UTC time was ${formatLongUtc(result.window_start)}. The saved runs allow us to have something for users to explore while they wait for results from their searches. The times listed with the results are now historical and the orbital elements used to create them have changed over time.`)
+      caveats.push(`This is a saved example run from ${formatDay(result.window_start)}, so you can explore a result while you wait for your own search. Its times are now in the past, and the orbits have changed since then.`)
     } else if (pastCount > 0) {
-      caveats.push(`${pastCount === search.events.length ? 'All of the events listed below have' : `${pastCount} of the ${search.events.length} events listed below ${pastCount === 1 ? 'has' : 'have'}`} already taken place. The search window began at the time the search was run (${formatLongUtc(result.window_start)}), so any approaches that occurred between then and now are no longer a forecast. Please run the search again to obtain a new forecast.`)
+      caveats.push(`${pastCount === search.events.length ? 'All of the approaches listed below are' : `${pastCount} of the ${search.events.length} approaches listed below ${pastCount === 1 ? 'is' : 'are'}`} already in the past. The search window began when the search ran (${formatLongUtc(result.window_start)} UTC), so ${pastCount === 1 ? 'that one is' : 'those are'} no longer a forecast. Run the search again for a new forecast.`)
     }
-    caveats.push('The Risk Tier values will vary depending upon what uncertainty value is assumed for each position as there is no uncertainty associated with the positional information included in TLEs. An alternate uncertainty may increase or decrease a pair’s probability by orders of magnitude. Please see the method section below for additional details regarding the risk tiers.')
+    caveats.push('TLEs don’t say how uncertain each position is, so ORCA assumes an uncertainty. A different assumption could make a pair’s probability much higher or lower and change its risk tier. The method section below explains how the tiers are set.')
     if (result.long_encounters > 0) {
       const one = result.long_encounters === 1
-      caveats.push(`There ${one ? 'is' : 'are'} ${integer(result.long_encounters)} long encounter ${one ? 'pair. This pair' : 'pairs. All of these pairs'} will pass one another less quickly than ${method.data?.long_encounter_kms ?? 0.1} km/sec. Because the likelihood calculation assumes a fast, direct path through space (a straight line), this likelihood may be several times lower than actual for ${one ? 'this long encounter pair' : 'these long encounter pairs'}. Long encounters are denoted by "Long" in the Results Table.`)
+      caveats.push(`${integer(result.long_encounters)} ${one ? 'pair is a long encounter: its two objects pass' : 'pairs are long encounters: their two objects pass'} each other slower than ${method.data?.long_encounter_kms ?? 0.1} km/s. The probability assumes a fast, straight-line pass, so for these slow pairs it is not reliable: it may be too high or too low. They are marked “Long” in the table.`)
     }
     if (medianTleAgeDays !== null && medianTleAgeDays > 7) {
-      caveats.push(`The orbital data used to create this forecast has a median age of ${Math.round(medianTleAgeDays)} days, and its accuracy decreases quickly as the data ages.`)
+      caveats.push(`The orbital data behind this forecast has a median age of ${Math.round(medianTleAgeDays)} days. Forecasts get less accurate quickly as the data gets older.`)
     }
 
     results = (
       <>
-        <ResultAnswer answer={answer} context={`Looked ${dayWords(horizonDays)} into the future · Identified ${integer(result.objects)} objects · Ran on ${ranAt} · Took approximately ${integer(Math.round(result.runtime_s))} seconds`} />
+        <ResultAnswer answer={answer} context={`Searched ${integer(result.objects)} objects from ${span}, took ${durationText(result.runtime_s)}`} />
         {counts ? (
           <ChartCard title="All approaches found, grouped by risk tier">
             <RiskSummaryBar counts={counts} />
           </ChartCard>
         ) : null}
-        <ResultCaveats items={caveats} action={saved ? <Button size="sm" disabled={running} onClick={run}>Run a fresh search</Button> : undefined} />
+        <ResultCaveats items={caveats} action={saved ? <Button size="sm" disabled={running || !apiOnline} onClick={run}>Run a fresh search</Button> : undefined} />
         <ChartCard title="When each approach happens, and how risky it is" note="This chart shows the rows from the table. The y axis uses a log scale, and the dashed line marks now. Select a point to open that pair.">
           <EventTimeline events={search.events} now={now} selectedKey={selectedKey} onSelect={(e) => onSelectKey(pairKey(e))} />
         </ChartCard>
@@ -184,7 +180,7 @@ export function ConjunctionsView({ catalogSize, now, search, query, onQueryChang
   return (
     <PageLayout>
       <SectionHeader title="Conjunction screening" subtitle="This page looks for close approaches between objects in the catalog, forecast from public TLEs. It is for education and research only." />
-      <ConjunctionControls query={query} catalogSize={catalogSize} running={running} onChange={onQueryChange} onRun={run} />
+      <ConjunctionControls query={query} catalogSize={catalogSize} running={running} apiOnline={apiOnline} onChange={onQueryChange} onRun={run} />
       {results}
       <ConjunctionMethod method={method.data} error={method.status === 'error' ? method.error.message : null} open={search.phase === 'idle'} />
     </PageLayout>

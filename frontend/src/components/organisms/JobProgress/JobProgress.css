@@ -1,4 +1,12 @@
 .job-progress { display: flex; align-items: center; gap: var(--gap-3); padding: var(--gap-3) var(--gap-4); border: 1px solid var(--border-strong); border-radius: var(--radius); background: var(--bg-card); }
+.job-progress__spinner { display: inline-flex; flex-shrink: 0; }
 .job-progress__text { flex: 1; min-width: 0; }
 .job-progress__title { font-weight: 600; }
 .job-progress__detail { color: var(--text-tertiary); font-size: 12px; }
+.job-progress__side { display: flex; align-items: center; gap: var(--gap-3); flex-shrink: 0; }
+/* A phone: the message takes the full width, the timer and Cancel go on their own line below it (audit 2026-11-18 #26). */
+@media (max-width: 640px) {
+  .job-progress { flex-wrap: wrap; align-items: flex-start; }
+  .job-progress__text { flex-basis: calc(100% - 18px - var(--gap-3)); }
+  .job-progress__side { width: 100%; justify-content: space-between; }
+}

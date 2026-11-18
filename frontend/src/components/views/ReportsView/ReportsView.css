@@ -1,12 +1,16 @@
 /* Layout: the builder on the left (stays in view while the preview scrolls), the paper on a recessed desk on the right. */
 .reports { display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: var(--gap-5); align-items: start; }
 .reports__builder { position: sticky; top: 0; }
+.reports__desk { min-width: 0; }
 .reports__preview { min-width: 0; padding: var(--gap-6) var(--gap-5); border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--bg-abyss); }
 @media (max-width: 1000px) {
   .reports { grid-template-columns: 1fr; }
   .reports__builder { position: static; }
   .reports__preview { padding: var(--gap-3); overflow-x: auto; }
 }
+/* Below 720 px the page keeps its paper width (ReportDocument.css) and scrolls inside its frame: say so (audit 2026-11-18 #27). */
+.reports__scroll-hint { display: none; margin: 0 0 var(--gap-2); color: var(--text-secondary); font-size: var(--text-sm); }
+@media (max-width: 720px) { .reports__scroll-hint { display: block; } }
 
 /* The print-only copy lives at the end of <body>; on screen it is not there. In print it is the only thing there:
    the app (bar, nav, builder, preview) is hidden, so long reports flow over as many pages as they need. */
