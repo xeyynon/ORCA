@@ -1,6 +1,7 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import type { TleRecord } from '@/api/types'
 import type { AsyncResult } from '@/hooks/useAsync'
+import { useRevealOnSelect } from '@/hooks/useRevealOnSelect'
 import { deriveSeries } from '@/lib/catalog'
 import { describeFilter, filterCatalog, isFilterActive, NO_FILTER, regimeCounts, toggleRegime } from '@/lib/catalogFilter'
 import type { CatalogFilter } from '@/lib/catalogFilter'
@@ -33,9 +34,11 @@ type Props = {
 /** The KPI captions, shown with skeletons while the catalog loads. Same order and words as the loaded row below. */
 const KPI_CAPTIONS = ['Objects', 'TLE age (median)', 'Median altitude'] as const
 
-/** The loaded-subset limit is said once, by the filter bar; this hint only covers classification. */
+/** Classification is checked on the loaded objects only, so the hint names them: the value above can be the stored total. */
 function objectsHint(summary: CatalogSummary): string {
-  return summary.unclassified ? `${integer(summary.unclassified)} couldn’t be classified` : 'all classified'
+  return summary.unclassified
+    ? `${integer(summary.unclassified)} of the ${integer(summary.count)} loaded couldn’t be classified`
+    : `all ${integer(summary.count)} loaded classified`
 }
 
 /** Newest and oldest in one hint: three cards for one fact (TLE age) were two too many (declutter plan 2026-11-15). */
@@ -43,7 +46,7 @@ function ageHint(summary: CatalogSummary): string {
   const parts = [
     summary.newestAgeDays === null ? null : `Newest is ${summary.newestAgeDays.toFixed(1)} days old`,
     summary.oldestAgeDays === null ? null : `Oldest is ${summary.oldestAgeDays.toFixed(1)} days old`,
-    summary.futureEpochs > 0 ? `Excluded ${plural(summary.futureEpochs, 'future epoch')}` : null,
+    summary.futureEpochs > 0 ? `${plural(summary.futureEpochs, 'set')} dated in the future ${summary.futureEpochs === 1 ? 'was' : 'were'} left out` : null,
   ].filter(Boolean)
   return parts.length ? parts.join(' · ') : 'Typical age of the orbital data'
 }
@@ -55,6 +58,9 @@ export function OverviewView({ catalog, summary, totalCount, selectedId, onSelec
   const filteredRows = useMemo(() => (rows ? filterCatalog(rows, filter) : []), [rows, filter])
   const counts = useMemo(() => regimeCounts(rows ?? [], filter.query), [rows, filter.query])
   const selected = rows?.find((t) => t.norad_cat_id === selectedId) ?? null
+  // One column below 1000 px (OverviewView.css) puts the card under the table: bring it into view on a new selection.
+  const sideRef = useRef<HTMLDivElement>(null)
+  useRevealOnSelect(sideRef, selected ? selected.norad_cat_id : null, '(max-width: 1000px)')
   const ranks = useMemo<CatalogRanks | null>(() => {
     if (!rows || rows.length === 0) return null
     const s = deriveSeries(rows, now)
@@ -117,10 +123,10 @@ export function OverviewView({ catalog, summary, totalCount, selectedId, onSelec
           {/* The object card only. The regime donut that sat here repeated the regime chips' counts above the table, and
               stretched across the page when nothing was selected (owner, 2026-11-15); Analytics keeps the regime chart. */}
           {selected ? (
-            <div className="overview__side">
-              <ObjectCard tle={selected} position={null} now={now} onClose={() => onSelect(null)} />
+            <div className="overview__side" ref={sideRef}>
+              <ObjectCard tle={selected} position={null} noPositionNote="See where it is now on the Globe." now={now} onClose={() => onSelect(null)} />
               <Button variant="primary" onClick={() => onOpenGlobe(selected.norad_cat_id)}>Show on globe</Button>
-              {ranks ? <ObjectStanding tle={selected} ranks={ranks} now={now} /> : null}
+              {ranks ? <ObjectStanding tle={selected} ranks={ranks} loadedCount={rows.length} now={now} /> : null}
             </div>
           ) : null}
         </div>
