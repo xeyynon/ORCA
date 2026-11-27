@@ -260,7 +260,7 @@ class SGP4Propagator:
     Vallado et al. 2006, "Revisiting Spacetrack Report #3"). Output is in the TEME frame, km and km/s.
 
     Until 2026-10 this class was two-body motion plus an exponential drag term (kept below as
-    TwoBodyDragPropagator). Measured against SGP4 that drifted ~300 km in a day; see MD/research_paper_brief.md.
+    TwoBodyDragPropagator). Measured against SGP4 that drifted ~300 km in a day.
     """
 
     def __init__(self, oe: OrbitalElement):

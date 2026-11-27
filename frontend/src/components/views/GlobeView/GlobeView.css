@@ -10,7 +10,7 @@
 .globe-view__foot { position: absolute; z-index: 2; right: var(--gap-3); bottom: var(--gap-3); width: 340px; display: flex; flex-direction: column; pointer-events: none; }
 
 /*
- * Glass (MD/design_system_v2.md, Glassmorphism): only the chrome over the globe, never a data panel. The alpha in
+ * Glass (Glassmorphism): only the chrome over the globe, never a data panel. The alpha in
  * --glass-bg is measured so its text keeps 4.5:1 over the brightest / darkest globe pixel (lib/glassContrast.test.ts).
  * Opaque where backdrop-filter is missing or the user asks for less transparency (also set here, not only through the
  * token: the theme blocks in tokens.css out-rank base.css's :root override).

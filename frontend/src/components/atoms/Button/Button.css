@@ -1,5 +1,5 @@
 /*
- * Interaction layer (MD/design_system_v2.md, Material row): hover, focus and pressed are a translucent state layer
+ * Interaction layer (Material row): hover, focus and pressed are a translucent state layer
  * (::before, under the label) instead of a swapped background, so every button variant reacts the same way and the
  * fill keeps its meaning. Neutral buttons use the --state-* tokens; the filled primary uses a layer of the
  * ink that contrasts with its label, at the same strengths. The focus ring from base.css stays.

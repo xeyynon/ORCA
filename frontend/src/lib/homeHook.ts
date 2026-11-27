@@ -16,7 +16,7 @@ export interface HookRun {
 
 export interface HookLines {
   headline: string
-  /** The supporting line: what ORCA does (MD/ORCA_Homepage_Redesign_Context.md, Section 01). */
+  /** The supporting line: what ORCA does. */
   sub: string
 }
 

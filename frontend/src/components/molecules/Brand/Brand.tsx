@@ -16,7 +16,7 @@ const BASE = import.meta.env.BASE_URL
  * The ORCA logo, transparent in both themes. There are two files made from the same artwork: silver lettering for dark
  * surfaces and dark navy lettering for light ones. Both are in the DOM and tokens.css decides which one shows
  * (--logo-on-dark-display / --logo-on-light-display); the hidden one is display:none, so a screen reader meets it once.
- * Pre-sized copies (320 and 640 px wide) are used instead of the multi-megabyte source in frontend/branding/.
+ * Pre-sized copies (320 and 640 px wide) are used instead of the multi-megabyte originals.
  */
 export function Brand({ size = 'bar', href, onNavigate }: Props) {
   const file = size === 'card' ? 'logo-640' : 'logo-320'

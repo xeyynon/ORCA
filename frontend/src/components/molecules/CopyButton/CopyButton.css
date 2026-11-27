@@ -1,5 +1,5 @@
 /*
- * Microinteraction (MD/design_system_v2.md): on a successful copy the "Copy" face lifts out and the "Copied" face
+ * Microinteraction: on a successful copy the "Copy" face lifts out and the "Copied" face
  * settles in (opacity + 4px translate, --dur-2, --ease-standard). Both faces share one grid cell, so the button never
  * changes width. Under prefers-reduced-motion base.css cuts the transition and the faces simply swap. The motion
  * carries nothing the words do not: the face says "Copied" and the status region announces it.

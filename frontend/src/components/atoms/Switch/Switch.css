@@ -1,5 +1,5 @@
 /*
- * Microinteraction (MD/design_system_v2.md): the thumb slides to its side (transform only, --dur-2, --ease-standard).
+ * Microinteraction: the thumb slides to its side (transform only, --dur-2, --ease-standard).
  * Under prefers-reduced-motion base.css cuts the transition, so it jumps; the state is still the thumb's side plus the
  * track fill and the switch's "on/off" role, never the motion. Hover and focus add a --state-* layer around the thumb
  * (Material row); keyboard focus also rings the track, since the real input is visually hidden.

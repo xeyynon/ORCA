@@ -1,5 +1,5 @@
 /*
- * Tactile control (MD/design_system_v2.md, Neumorphism row): each segment is a small raised key on the --neu-surface;
+ * Tactile control (Neumorphism row): each segment is a small raised key on the --neu-surface;
  * the chosen one (aria-pressed) sits inset AND shows accent text with a firmer border, so the choice never rests on
  * shadow alone. Every segment keeps a 1px border and the base.css focus ring.
  * Interaction layer (Material row): hover, focus and pressed are a translucent --state-* layer under the label;

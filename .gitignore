@@ -74,17 +74,32 @@ frontend/*.tsbuildinfo
 # Operator credential (hash + signing secret): never commit
 auth.json
 
-# Benchmark TLE snapshots are live data; their .json manifests are committed
-benchmarks/data/*.tle
-# Per-encounter TCA rows (~7 MB per run); regenerate with benchmarks/tca_estimation.py
-benchmarks/results/tca_*/local.csv
-# Per-object propagation errors (~5 MB per run); regenerate with benchmarks/propagation_accuracy.py
-benchmarks/results/propagation_*/errors.csv
 
 # Playwright MCP scratch output
 .playwright-mcp/
 
-# Purged from history on 2026-11-15 (MD/DECISIONS.md); kept outside the repo in ../ORCA-removed-files/
+# Large media kept out of the repository
 /final.png
 /demo.gif
 /Video Project 1.mp4
+
+# Internal working notes, research material and report files: kept locally, never published
+/MD/
+/snapshots/
+/paper/
+/benchmarks/
+/ORCA_overleaf/
+/report/
+/humanise report/
+/.claude/
+/frontend/branding/
+/deploy/ORACLE.md
+/ORCA_COMPLETE_MASTER.md
+/AGENTS.md
+/CLAUDE.md
+*.docx
+*.pptx
+/ORCA Final Report.pdf
+/ORCA Certificate.pdf
+/signed certificate page .jpeg
+/biodata page.png

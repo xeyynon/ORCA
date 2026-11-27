@@ -1,5 +1,5 @@
 /**
- * The first-run tour: its steps and the pure step logic (MD/design_system_v2.md, "Empty states & onboarding").
+ * The first-run tour: its steps and the pure step logic ("Empty states & onboarding").
  * The DOM work (finding targets, measuring them, storage) lives in hooks/useTour.ts; placement maths in tourPlacement.ts.
  */
 

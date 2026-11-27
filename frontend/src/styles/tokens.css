@@ -115,7 +115,7 @@
   --glass-input-edge: rgba(255, 255, 255, 0.16);
   --shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
 
-  /* v2 (MD/design_system_v2.md): Material-style elevation. On near-black a shadow barely shows, so higher levels are
+  /* v2: Material-style elevation. On near-black a shadow barely shows, so higher levels are
      also lighter surfaces. Level 0 page, 1 card, 2 floating panel, 3 menu/popover, 4 dialog. */
   --surface-0: var(--bg-canvas);
   --surface-1: var(--bg-card);

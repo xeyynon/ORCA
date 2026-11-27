@@ -1,5 +1,5 @@
 /**
- * "Ask ORCA": the deterministic intent engine behind the conversational panel (MD/design_system_v2.md, Conversational UI).
+ * "Ask ORCA": the deterministic intent engine behind the conversational panel (Conversational UI).
  * Pure: text in, a reply out, from a read-only context. Every number in a reply comes from that context; a value it does
  * not hold is said to be "not loaded yet", never estimated. Only an `unknown` reply may be passed on to the optional AI.
  */

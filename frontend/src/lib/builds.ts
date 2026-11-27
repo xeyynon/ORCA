@@ -1,7 +1,6 @@
 /**
  * What's new: every build, newest first, in plain words for the people using ORCA. Each entry is one `build-N` tag
- * in MD/builds/README.md (the source of truth); lib/builds.test.ts fails if a build is missing here or its date
- * differs. Internal changes (InBul tags: docs, scripts, tests) are not listed, because nothing on screen changed.
+ * of the repository. Internal changes (InBul tags: docs, scripts, tests) are not listed, because nothing on screen changed.
  */
 export interface BuildNote {
   build: number

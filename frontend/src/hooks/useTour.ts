@@ -41,7 +41,7 @@ export type TourView = {
 }
 
 /**
- * The first-run tour (MD/design_system_v2.md, "Empty states & onboarding"). It starts by itself once, on the first
+ * The first-run tour ("Empty states & onboarding"). It starts by itself once, on the first
  * signed-in visit in this browser (key `orca:tour:v1`), and `start` replays it (the menu and the home offer it).
  * Steps whose target is not on this layout are skipped; the list is re-checked on resize.
  * Returns `view`, the props for TourOverlay, or null when the tour is closed.

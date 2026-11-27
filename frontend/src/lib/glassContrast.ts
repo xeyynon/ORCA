@@ -1,5 +1,5 @@
 /**
- * Text on glass (MD/design_system_v2.md, Glassmorphism): the glass is translucent, so its text must reach 4.5:1 against
+ * Text on glass (Glassmorphism): the glass is translucent, so its text must reach 4.5:1 against
  * the WORST thing that can sit behind it, composited through the glass. This measures that from tokens.css. Pure.
  *
  * Worst cases are the extremes the globe can draw behind the playback bar and legend, read from the shader in

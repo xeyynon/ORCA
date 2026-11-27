@@ -2,7 +2,7 @@
 
 React + TypeScript + Vite + three.js. It is the only front end (the Streamlit dashboard was removed) and talks to the FastAPI backend.
 
-Read [../MD/rules.md](../MD/rules.md) before adding UI: every piece of the interface is its own component, from atom to view.
+Every piece of the interface is its own component, from atom to view.
 
 ## Run
 
@@ -48,7 +48,7 @@ src/
 ## What the UI is honest about
 
 - TLE age is shown wherever a position or object is: old element sets propagate poorly.
-- Everything uses SGP4, including the conjunction search (engine v2, see MD/conjunction_engine_v2.md). The method and its limits are shown above the results, read from `/api/conjunctions/method`.
+- Everything uses SGP4, including the conjunction search (engine v2). The method and its limits are shown above the results, read from `/api/conjunctions/method`.
 - The conjunction search starts at the current time and finds every approach under 10 km in the window. Events whose closest approach has passed since the search ran are flagged, because they are not forecasts.
 - The table shows the top N by Pc; the tier counts cover all M approaches found.
 - Pc depends on an uncertainty model measured from public TLEs (shown per event, with TLE age). It is not an operational collision probability. Slow "long" encounters are badged, because the 2D Pc may understate them.

@@ -1,7 +1,7 @@
 """
 Optional AI backend for the "Ask ORCA" assistant, using Groq. OFF by default.
 
-ORCA's core never needs a paid key (MD/intent.md, principle 1). This module adds an extra that a server operator
+ORCA's core never needs a paid key. This module adds an extra that a server operator
 switches on by setting GROQ_API_KEY (in the environment or in the git-ignored .env file next to api_server.py).
 Without it, /api/assistant/status says why the feature is off and /api/assistant/ask answers 503, and the frontend
 keeps its deterministic answers.

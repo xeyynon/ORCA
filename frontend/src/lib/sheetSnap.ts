@@ -1,5 +1,5 @@
 /**
- * Bottom-sheet drag and snap (MD/design_system_v2.md, Gesture-based UI). Pure: no DOM.
+ * Bottom-sheet drag and snap (Gesture-based UI). Pure: no DOM.
  *
  * The sheet has two resting places. Its position is an OFFSET in px, how far it is pushed down from fully open:
  * 0 is expanded, `max` is collapsed (only the handle shows). A drag moves the offset with the finger; on release a fast

@@ -23,7 +23,7 @@
 }
 .term__tip[data-align='right'] { left: auto; right: 0; }
 .term__tip[data-open='true'] { display: block; animation: term-pop var(--dur-2) var(--ease-standard); }
-/* Microinteraction (MD/design_system_v2.md): the definition settles in when it appears (opacity + 4px rise,
+/* Microinteraction: the definition settles in when it appears (opacity + 4px rise,
    transform/opacity only). The animation restarts each time display leaves none. base.css turns it off under
    prefers-reduced-motion; hiding stays instant. */
 @keyframes term-pop { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }

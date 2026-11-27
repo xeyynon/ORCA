@@ -10,7 +10,7 @@ type Props = {
   popup?: 'menu'
   expanded?: boolean
   disabled?: boolean
-  /** `tactile` is the raised, physical look. Only for the Globe playback transport (MD/design_system_v2.md, Neumorphism). */
+  /** `tactile` is the raised, physical look. Only for the Globe playback transport (Neumorphism). */
   variant?: 'plain' | 'tactile'
   onClick: () => void
   children: ReactNode

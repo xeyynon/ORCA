@@ -50,7 +50,7 @@ logger = logging.getLogger(__name__)
 PUBLIC_PATHS = {"/", "/health", "/api/auth/login", "/api/auth/status"}
 _login_throttle = auth.LoginThrottle()
 FETCH_COOLDOWN_S = int(os.environ.get("ORCA_FETCH_COOLDOWN_S", "300"))
-# Celestrak group fetched on refresh. A hosted box may want a smaller one than "active" (see MD/deployment.md).
+# Celestrak group fetched on refresh. A hosted box may want a smaller one than "active".
 TLE_GROUP = os.environ.get("ORCA_TLE_GROUP", "active")
 # A built frontend (frontend/dist) to serve from this same origin. Unset in development, where Vite serves it.
 STATIC_DIR = os.environ.get("ORCA_STATIC_DIR")

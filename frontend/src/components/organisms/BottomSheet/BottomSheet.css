@@ -1,5 +1,5 @@
 /*
- * A data surface, so solid (MD/design_system_v2.md: data panels never sit on glass). Floating level 3 over the globe.
+ * A data surface, so solid (data panels never sit on glass). Floating level 3 over the globe.
  * Collapsed it is pushed down until only the handle (--sheet-peek) is left inside the box its parent clips.
  */
 .bottom-sheet {

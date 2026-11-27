@@ -19,7 +19,7 @@ type Props = {
 }
 
 /**
- * Mission overview (Section 01 of MD/ORCA_Homepage_Redesign_Context.md): about 60% text, 40% ORCA's own orbit animation
+ * Mission overview (Section 01): about 60% text, 40% ORCA's own orbit animation
  * at a medium size. The headline keeps the real object count (owner, 2026-11-07: the number is the hook); the
  * supporting line says what ORCA does. It sits on the page itself, not in a card.
  */

@@ -16,7 +16,7 @@ const ICON: Record<KpiId, IconName> = { pairs: 'orbit', high: 'alert', critical:
 
 /**
  * "Orbital intelligence": the four headline figures as aligned cards, each a big tabular number, a label, and the run it
- * comes from (MD/ORCA_Homepage_Redesign_Context.md §5, Section 02). A figure still on its way is a skeleton, never 0.
+ * comes from. A figure still on its way is a skeleton, never 0.
  */
 export function HomeKpis({ kpis, onOpen, goLabel }: Props) {
   return (

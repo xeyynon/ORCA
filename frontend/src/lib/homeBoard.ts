@@ -6,7 +6,7 @@ import { STALE_MEDIAN_DAYS } from './staleness'
 import { formatDayRange, parseUtc } from './time'
 
 /**
- * The home page's command-centre figures (MD/ORCA_Homepage_Redesign_Context.md). Pure, so every label can be tested:
+ * The home page's command-centre figures. Pure, so every label can be tested:
  * the rule is that a figure from a run always says which run (the stored example, or your search), and that none is
  * ever presented as live monitoring.
  */

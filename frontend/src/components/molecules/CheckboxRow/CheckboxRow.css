@@ -1,5 +1,5 @@
 /*
- * Interaction layer (MD/design_system_v2.md, Material row): a round --state-* layer behind the box itself, as Material
+ * Interaction layer (Material row): a round --state-* layer behind the box itself, as Material
  * does for a checkbox, rather than tinting the whole row: hover anywhere on the row, keyboard focus on the box, and
  * pressing deepen it. The native box keeps its own focus ring.
  */

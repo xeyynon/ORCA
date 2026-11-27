@@ -47,7 +47,7 @@ const GO_LABEL: Record<KpiId, string> = {
 }
 
 /**
- * The home page as a space-monitoring command centre (MD/ORCA_Homepage_Redesign_Context.md), in this order:
+ * The home page as a space-monitoring command centre, in this order:
  * 1) mission overview: the headline with the real object count, what ORCA does, two actions, a medium Earth;
  * 2) orbital intelligence: three figures, each naming the run it comes from;
  * 3) close approach intelligence: the run's five worst approaches, each opening its full analysis;

@@ -1,6 +1,6 @@
-// The standing rules (MD/rules.md) as checks, so a decided rule cannot quietly stop being true.
+// The standing rules as checks, so a decided rule cannot quietly stop being true.
 // Each check reads source files. A rule test that has never failed has not been shown to test anything:
-// when you add one, put the bug back once and watch it fail (see MD/rules.md section 10).
+// when you add one, put the bug back once and watch it fail.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { readdirSync, readFileSync, statSync } from 'node:fs'

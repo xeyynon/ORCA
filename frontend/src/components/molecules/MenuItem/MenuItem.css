@@ -1,5 +1,5 @@
 /*
- * Interaction layer (MD/design_system_v2.md, Material row): hover and keyboard focus are a translucent --state-* layer
+ * Interaction layer (Material row): hover and keyboard focus are a translucent --state-* layer
  * (::before, under the row's content) on the menu's own surface, and pressing deepens it. Rows fill the menu's width,
  * so there is no shrink on press. Keyboard focus keeps its inset ring as well as the layer.
  */

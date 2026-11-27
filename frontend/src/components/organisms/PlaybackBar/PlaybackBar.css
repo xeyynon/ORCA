@@ -1,5 +1,5 @@
 /*
- * Tactile transport (MD/design_system_v2.md, Neumorphism row): play/pause and the two step buttons are IconButton's
+ * Tactile transport (Neumorphism row): play/pause and the two step buttons are IconButton's
  * `tactile` variant (raised; inset plus accent icon when playing), set by prop so this file never restyles the atom.
  * The camera and fullscreen tools stay plain: they are not transport. Nothing else on the Globe is neumorphic.
  */

@@ -26,7 +26,7 @@ Screenshots from 2026-11-15 (1440 px, dark theme, a live 1-day search over 15,97
 4. **Rank** events by probability of collision (Pc, Foster's 2D method with a measured TLE uncertainty) into five risk tiers, and say next to every number what the tier depends on.
 5. **Show** it: a 3D globe, sortable tables, charts, pair detail and CSV/JSON export.
 
-The conjunction engine was rebuilt on 2026-10-15 after a benchmark study measured the original one: see [conjunction_engine_v2.md](MD/conjunction_engine_v2.md). The original is preserved at the git tag `orca-as-built-2026-10-14`.
+The conjunction engine was rebuilt on 2026-10-15 (engine v2) after the original one was measured and found to miss most close approaches.
 
 Screening is not risk assessment. A pair that passes screening is a hypothesis; only the analysis stage says how dangerous it is.
 
@@ -73,13 +73,11 @@ Celestrak TLEs ──► parser_pipeline.py ──► orbit_mech_engine.py ─�
 | `parser_pipeline.py` | TLE parsing (including BSTAR notation), Celestrak client, SQLite storage |
 | `orbit_mech_engine.py` | Foundation layer: orbital elements, Kepler solver, SGP4 propagator (`SGP4Propagator`), ECI/ECEF/geographic transforms. Imports no other project module |
 | `conjunction_detection.py` | Gap-free screening, exact TCA, Foster Pc with a measured uncertainty model, risk tiers, and the method description served to the UI |
-| `benchmarks/` | The research benchmarks behind the engine (results in `benchmarks/results/`, figures in `benchmarks/figures/`) |
-| `paper/` | The conference paper (`main.tex`, compiled `main.pdf`); `paper/figures_named/` has titled copies of the figures and the tables as images |
 | `Analytics.py` | Catalog statistics, Plotly figures, export helpers |
 | `api_server.py` | REST API |
 | `frontend/` | React + TypeScript + Vite + three.js app, one component per UI piece ([frontend/README.md](frontend/README.md)) |
 
-The frontend reads the SQLite file only through the API. More detail is in [ARCHITECTURE.md](MD/ARCHITECTURE.md).
+The frontend reads the SQLite file only through the API.
 
 ## The frontend
 
@@ -93,7 +91,7 @@ The frontend reads the SQLite file only through the API. More detail is in [ARCH
 
 `/` focuses search, `T` toggles light and dark, `?` lists every shortcut, `Esc` steps back once per press.
 
-The UI shows TLE age next to every object, names the propagator it is using (read from the API response), and distinguishes "not loaded yet", "ran and found nothing" and "request failed". The rules are in [rules.md](MD/rules.md).
+The UI shows TLE age next to every object, names the propagator it is using (read from the API response), and distinguishes "not loaded yet", "ran and found nothing" and "request failed".
 
 ## API
 
@@ -121,7 +119,7 @@ CORS defaults to the Vite dev origins. Set `ORCA_CORS_ORIGINS="https://a.example
 
 ### Ask ORCA assistant (optional AI answers, off by default)
 
-"Ask ORCA" answers from the loaded data and a fixed set of intents with no key and no network call. A server operator can also let free-text questions it does not recognise go to **Groq** (an OpenAI-compatible API). ORCA never needs this: it is an opt-in extra, in line with "no paid keys for core function" ([intent.md](MD/intent.md)). No extra package is needed: the call uses `requests`.
+"Ask ORCA" answers from the loaded data and a fixed set of intents with no key and no network call. A server operator can also let free-text questions it does not recognise go to **Groq** (an OpenAI-compatible API). ORCA never needs this: it is an opt-in extra, in line with "no paid keys for core function". No extra package is needed: the call uses `requests`.
 
 To turn it on, put the key in the git-ignored **`.env`** file next to `api_server.py` (a template is in `.env.example`), then restart the API. Never put it in `frontend/.env*`: anything there is baked into the public bundle.
 
@@ -137,11 +135,11 @@ GROQ_API_KEY=gsk_...                          # enables the feature; empty = off
 - **The key** stays on the server. It is never returned by the API and never logged; the log line per question has only the provider, model, an outcome code and the latency.
 - **In the UI** every AI answer is labelled "AI · <model>", with a note that it may be wrong and the facts it was given. The system prompt tells the model to answer only from those facts and general orbital mechanics, to say when the facts do not hold the answer, and never to invent catalog numbers, positions or collision probabilities. It is not for operational decisions.
 
-**Hosted copy:** https://orca-vitap.vercel.app (frontend on Vercel, API on an Oracle Cloud Always Free VM). Every push to `main` redeploys it. See [deployment.md](MD/deployment.md). As of 2026-10-15 the hosted copy still runs the original engine: the v2 work is on the branch `fix/honest-conjunctions`, not yet merged or pushed.
+**Hosted copy:** https://orca-vitap.vercel.app (frontend on Vercel, API on an Oracle Cloud Always Free VM). Every push to `main` redeploys it. As of 2026-10-15 the hosted copy still runs the original engine: the v2 work is on the branch `fix/honest-conjunctions`, not yet merged or pushed.
 
 ## How the risk model works
 
-The method is also served by `GET /api/conjunctions/method` and shown on the Conjunctions page. Details and validation are in [conjunction_engine_v2.md](MD/conjunction_engine_v2.md).
+The method is also served by `GET /api/conjunctions/method` and shown on the Conjunctions page.
 
 **Propagation.** SGP4, the model TLEs are fitted for (the `sgp4` package, which wraps the reference code of Vallado et al. 2006).
 
@@ -165,7 +163,7 @@ NASA's Conjunction Assessment handbook (NASA/SP-20205011318, 2020) recommends mi
 
 Hard-body radius is looked up by name keyword: Starlink 5.65 m, OneWeb 4.0 m, Iridium 3.9 m, CubeSat 0.5 m, debris 0.1 m, anything else 3.0 m.
 
-**Units** (a past bug source): `OrbitalElement.n` is rad/s, `OrbitalElement.i` is radians, `TLE.inclination` is degrees, positions are km and velocities km/s in the ECI frame. The full contract is in [ARCHITECTURE.md](MD/ARCHITECTURE.md#7-units-contract).
+**Units** (a past bug source): `OrbitalElement.n` is rad/s, `OrbitalElement.i` is radians, `TLE.inclination` is degrees, positions are km and velocities km/s in the ECI frame.
 
 ## Limitations
 
@@ -178,21 +176,6 @@ These are real, current behaviours, not boilerplate:
 - **Cancel stops waiting, not computing.** Cancelling a search stops the browser waiting; the server finishes the search anyway.
 - **Single operator and a single SQLite file.** One login, no per-user accounts. Suitable for local or trusted-network use.
 - **CI covers the backend only.** GitHub Actions runs the Python tests (`python -m unittest discover -s tests`, 89 tests) before every backend deploy. The frontend unit tests (`cd frontend && npm test`, 89 tests) and typecheck are run by hand.
-
-## Project documents
-
-| Question | File |
-|---|---|
-| How do I work in this repo? (conventions, how to verify a change) | [AGENTS.md](MD/AGENTS.md) |
-| How do the pieces fit together? | [ARCHITECTURE.md](MD/ARCHITECTURE.md) |
-| Why was it built this way? What broke before? | [DECISIONS.md](MD/DECISIONS.md) |
-| What is it for, and for whom? | [PRD.md](MD/PRD.md) |
-| What is left to do? | [TASKS.md](MD/TASKS.md) |
-| How must UI be built? | [rules.md](MD/rules.md) |
-| How does the conjunction engine work, and how was it checked? | [conjunction_engine_v2.md](MD/conjunction_engine_v2.md) |
-| What did the research measure? | [research_paper_brief.md](MD/research_paper_brief.md) (§10), the paper in [../paper/](paper/) and its long draft [paper_draft.md](MD/paper_draft.md) |
-| Which sources were checked, and what do they say? | [literature_verification.md](MD/literature_verification.md), [references.bib](MD/references.bib) |
-| I want to learn the whole story | [learning_guide.md](MD/learning_guide.md) |
 
 ## Contact
 

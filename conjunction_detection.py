@@ -1,9 +1,9 @@
 """
 Conjunction screening and collision probability for ORCA.
 
-Rebuilt in 2026-10 from the benchmark results in MD/research_paper_brief.md. ORCA as built before that (1 h
+Rebuilt in 2026-10 after measuring the original engine. ORCA as built before that (1 h
 snapshot screening, a two-body propagator, a single +-6 h Brent refinement, a 2D Pc formula off by 1/alpha^2)
-is frozen in benchmarks/legacy/ and tagged orca-as-built-2026-10-14.
+is kept in the git history.
 
 Method:
 1. Propagation: SGP4 (sgp4 package) for every object on a fixed grid of STEP_S seconds.
@@ -18,7 +18,7 @@ Method:
    in the encounter plane (Foster), by numerical quadrature on the covariance principal axes: 32-point
    Gauss-Legendre, vectorised, when the radius is small against the uncertainty (radius <= 0.1 x the smaller
    sigma), and SciPy's adaptive quad otherwise. There is no closed form in the engine (the isotropic closed form
-   lives in benchmarks/pc.py, as an exactness check). Each object's uncertainty comes from CovarianceModel (measured, see there).
+   was used as an exactness check). Each object's uncertainty comes from CovarianceModel (measured, see there).
 5. Risk tiers: Pc above 1e-4 / 1e-5 / 1e-6 / 1e-7. NASA's CA Handbook (NASA/SP-20205011318, 2020) recommends
    mitigation above 1e-4.
 
@@ -150,12 +150,11 @@ class CovarianceModel:
     Per-object 1-sigma position uncertainty (km) along radial, in-track and cross-track, by TLE age.
 
     Measured: robust spread of SGP4 TLE-to-TLE errors for LEO objects across three CelesTrak snapshots taken on
-    2026-10-14 (benchmarks/results/propagation_20261014T064759Z_to_20261014T174434Z_3snap). Values are interpolated
+    2026-10-14 (three catalogue snapshots). Values are interpolated
     in log-log space between horizon bins, held at the ends, and made non-decreasing with age.
     Floored at ESA's at-epoch LEO TLE uncertainties (Flohrer et al. 2009, ESA SP-672: 0.102 / 0.471 / 0.126 km),
     because TLE-to-TLE comparison underestimates error near epoch (Kelso 2007, AAS 07-127).
     Starlink and other objects differ ~15x in-track and are kept apart. Only LEO was measured; other regimes reuse it.
-    To update: rerun benchmarks/refresh_measured.ps1 and copy the bins from its covariance_model.json.
     """
     # (age_days, radial, in-track, cross-track)
     MEASURED = {

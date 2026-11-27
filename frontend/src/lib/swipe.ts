@@ -1,5 +1,5 @@
 /**
- * Horizontal swipe between items (MD/design_system_v2.md, Gesture-based UI: swipe between conjunction pairs). Pure.
+ * Horizontal swipe between items (Gesture-based UI: swipe between conjunction pairs). Pure.
  * A swipe is mostly sideways and either long enough or a quick flick. Finger moving left shows the NEXT item, as on a
  * phone's photo viewer; finger moving right shows the previous one. The Previous/Next buttons do the same.
  */

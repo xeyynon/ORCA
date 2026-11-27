@@ -1,5 +1,5 @@
 /*
- * Interaction layer (MD/design_system_v2.md, Material row): hover, focus and pressed are a translucent --state-* layer
+ * Interaction layer (Material row): hover, focus and pressed are a translucent --state-* layer
  * (::before, under the label) over the chip's fill, so an "on" chip keeps its accent fill under the pointer. The
  * border still firms up on hover as the affordance. Pressed shrinks it by 2% (--dur-1), dropped under reduced motion.
  * On/off is aria-pressed plus fill and text colour, never the layer alone.

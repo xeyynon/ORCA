@@ -1,5 +1,5 @@
 /*
- * Interaction layer (MD/design_system_v2.md, Material row): hover, focus and pressed are a translucent --state-* layer
+ * Interaction layer (Material row): hover, focus and pressed are a translucent --state-* layer
  * (::before, under the icon), laid over whatever fill the button has, so the "on" fill stays readable while hovered.
  * Pressed shrinks it by 2% (--dur-1), dropped under prefers-reduced-motion. The base.css focus ring stays.
  *
