@@ -179,7 +179,7 @@ These are real, current behaviours, not boilerplate:
 
 ## Contact
 
-Suggestions and feedback are welcome: **suryapratik12@gmail.com**
+Suggestions and feedback are welcome: **pratiksurya1207@gmail.com**
 
 ## License
 
